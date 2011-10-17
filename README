@@ -1,1 +1,4 @@
-This repo will contain some useful code someday
+
+CloudSim examples are based on those at http://www.cloudbus.org/cloudsim/
+
+You need to add cloudsim-2.1.1.jar and junit to your classpath to run this code.
