@@ -1,0 +1,18 @@
+# Ignore lines with comments
+FILE in1.txt 100
+FILE in2.txt 100
+FILE out1.txt 10
+FILE out2.txt 10
+
+TASK ID000 preprocess 10.0
+TASK ID001 process 10.0
+TASK ID002 process 10.0
+TASK ID003  	 postprocess 1.0
+
+EDGE ID000 ID001
+EDGE ID000 ID002
+EDGE ID001 ID003
+EDGE ID002   ID003
+
+INPUTS ID000 in1.txt in2.txt
+OUTPUTS ID000 out1.txt out2.txt

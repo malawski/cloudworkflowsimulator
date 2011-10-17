@@ -21,4 +21,10 @@ public class TestDAGParser {
         assertEquals(t.inputs.size(), 3);
         assertEquals(t.outputs.size(), 2);
     }
+    
+    @Test
+    public void testTiny() {
+        DAG dag = DAGParser.parseDAG(new File("dags/test.dag"));
+        assertEquals(4, dag.numTasks());
+    }
 }
