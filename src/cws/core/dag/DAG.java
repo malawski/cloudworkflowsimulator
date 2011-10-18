@@ -67,4 +67,8 @@ public class DAG {
     public String[] getFiles() {
         return files.keySet().toArray(new String[0]);
     }
+    
+    public String[] getTasks() {
+        return tasks.keySet().toArray(new String[0]);
+    }
 }

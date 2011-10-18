@@ -1,11 +1,14 @@
 package cws.core.dag;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
 import org.cloudbus.cloudsim.Cloudlet;
+import org.cloudbus.cloudsim.UtilizationModel;
+import org.cloudbus.cloudsim.UtilizationModelFull;
 
 public class Job {
 
@@ -16,6 +19,8 @@ public class Job {
 	private Node fanInNode;
 	private Node fanOutNode;
 	private Random random = new Random();
+
+	private HashMap<Task, Cloudlet> tasksMap;
 
 	
 	public List<Cloudlet> getCloudlets() {
@@ -81,5 +86,36 @@ public class Job {
 		node.setDone(true);
 		node.updateChildren();
 	}
+	
+	public void readDag(int brokerId, String fileName) {
+        DAG dag = DAGParser.parseDAG(new File(fileName));
+        cloudlets = new ArrayList<Cloudlet>();
+        nodesMap = new HashMap<Cloudlet, Node>();
+        tasksMap = new HashMap<Task, Cloudlet>();
+        String[] tasks = dag.getTasks();
+    	UtilizationModel utilizationModel = new UtilizationModelFull();
+    	
+        for (int i=0;i<tasks.length;i++) {
+        	Task task = dag.getTask(tasks[i]);
+        	Cloudlet cloudlet = new Cloudlet(i, (long) task.size, 1, 100, 100, utilizationModel, utilizationModel, utilizationModel);
+    		cloudlet.setUserId(brokerId);
+        	cloudlets.add(cloudlet);
+        	tasksMap.put(task, cloudlet);
+        	Node node = new Node();
+        	node.setId(cloudlet.getCloudletId());
+        	nodesMap.put(cloudlet, node);
+        }
+        
+        for (int i=0;i<tasks.length;i++) {
+        	Task task = dag.getTask(tasks[i]);
+        	Node node = nodesMap.get(tasksMap.get(task));
+        	List<Task> parents = task.parents;
+        	for (Task parent : parents) {
+        		node.addParent(nodesMap.get(tasksMap.get(parent)));
+        	}
+        	if (task.parents.isEmpty()) node.setEligible(true); 
+        }
+	}
+	
 	
 }
