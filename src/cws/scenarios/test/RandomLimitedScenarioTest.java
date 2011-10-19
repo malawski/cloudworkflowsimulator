@@ -34,7 +34,7 @@ public class RandomLimitedScenarioTest {
 		datacenter1 = PublicDatacenterFactory.create("PublicDatacenter_1",0.2/3600,1);
 		scenario.setDatacenter0(datacenter0);
 		scenario.setDatacenter1(datacenter1);
-		broker	 = BrokerFactory.createBrokerRandomLimited();
+		broker	 = BrokerFactory.createBrokerRandomLimited(5);
 		scenario.setBroker(broker);
 		scenario.setCloudletList(CloudletListGenerator.generateCloudlets(12, 1, 600000, 300, 300, broker.getId())); 
 		scenario.setVmlist(VmListGenerator.generateVmList(2, broker.getId()));
@@ -49,7 +49,7 @@ public class RandomLimitedScenarioTest {
 		datacenter1 = PublicDatacenterFactory.create("PublicDatacenter_1",0.2/3600,1);
 		scenario.setDatacenter0(datacenter0);
 		scenario.setDatacenter1(datacenter1);
-		broker	 = BrokerFactory.createBrokerRandomLimited();
+		broker	 = BrokerFactory.createBrokerRandomLimited(1);
 		scenario.setBroker(broker);
 		scenario.setCloudletList(CloudletListGenerator.generateCloudlets(24, 1, 600000, 300, 300, broker.getId())); 
 		scenario.setVmlist(VmListGenerator.generateVmList(2, broker.getId()));
@@ -64,7 +64,7 @@ public class RandomLimitedScenarioTest {
 		datacenter1 = PublicDatacenterFactory.create("PublicDatacenter_1",0.2/3600,1);
 		scenario.setDatacenter0(datacenter0);
 		scenario.setDatacenter1(datacenter1);
-		broker	 = BrokerFactory.createBrokerRandomLimited();
+		broker	 = BrokerFactory.createBrokerRandomLimited(5);
 		scenario.setBroker(broker);
 		scenario.setCloudletList(CloudletListGenerator.generateCloudlets(120, 1, 600000, 300, 300, broker.getId())); 
 		scenario.setVmlist(VmListGenerator.generateVmList(2, broker.getId()));
@@ -72,6 +72,19 @@ public class RandomLimitedScenarioTest {
 		assertEquals(1.0, scenario.simulate(),0.2);
 	}
 	
+	@Test
+	public void testSimulate4() {
+		scenario.init("randomlim4");
+		datacenter0 = PublicDatacenterFactory.create("PublicDatacenter_0",0.1/3600,10);
+		datacenter1 = PublicDatacenterFactory.create("PublicDatacenter_1",0.2/3600,10);
+		scenario.setDatacenter0(datacenter0);
+		scenario.setDatacenter1(datacenter1);
+		broker	 = BrokerFactory.createBrokerRandomLimited(5);
+		scenario.setBroker(broker);
+		scenario.setCloudletList(CloudletListGenerator.generateCloudlets(120, 1, 600000, 300, 300, broker.getId())); 
+		scenario.setVmlist(VmListGenerator.generateVmList(20, broker.getId()));
 
+		assertEquals(4.5, scenario.simulate(),1.0);
+	}
 
 }

@@ -92,7 +92,8 @@ public class DatacenterBrokerRandomDAG extends DatacenterBroker {
 			clearDatacenters();
 			finishExecution();
 		} else { //some cloudlets haven't finished yet
-			Log.printLine(CloudSim.clock()+": "+getName()+ ": Submitting again...");
+			Log.printLine(CloudSim.clock()+": "+getName()+ ": Submitting again, cloudlets submitted: " + cloudletsSubmitted);
+			Log.printLine(CloudSim.clock()+": "+getName()+ ": Number of finished cloudlets: " + getCloudletReceivedList().size());
 			submitCloudlets();
 			
 			if (getCloudletList().size()>0 && cloudletsSubmitted==0) {

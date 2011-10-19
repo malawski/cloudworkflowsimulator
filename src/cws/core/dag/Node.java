@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Node {
 
-	private int id;
+	private int cloudletId;
 	
 	private List<Node> parents;
 	private List<Node> children;
@@ -19,12 +19,12 @@ public class Node {
 		
 	}
 	
-	public int getId() {
-		return id;
+	public int getCloudletId() {
+		return cloudletId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setCloudletId(int id) {
+		this.cloudletId = id;
 	}
 
 	public boolean isDone() {
@@ -67,7 +67,7 @@ public class Node {
 	}
 	
 	public void print(String indent) {
-		System.out.println(indent + "L " + id);
+		System.out.println(indent + "L " + cloudletId);
 		for (Node node : children) {
 			node.print(indent+ "   ");
 		}
@@ -85,7 +85,7 @@ public class Node {
 	
 	private void printDot(StringBuffer s) {
 		for (Node node : children) {
-			s.append("\t" + getId() + " -> " + node.getId() + ";");
+			s.append("\t" + getCloudletId() + " -> " + node.getCloudletId() + ";");
 			node.printDot(s);
 		}
 	}

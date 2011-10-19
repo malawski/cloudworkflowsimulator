@@ -34,7 +34,7 @@ public class RandomLimitedExponentialScenarioTest {
 		datacenter1 = PublicDatacenterFactory.create("PublicDatacenter_1",0.2/3600,1);
 		scenario.setDatacenter0(datacenter0);
 		scenario.setDatacenter1(datacenter1);
-		broker	 = BrokerFactory.createBrokerRandomLimited();
+		broker	 = BrokerFactory.createBrokerRandomLimited(5);
 		scenario.setBroker(broker);
 		scenario.setCloudletList(CloudletListGenerator.generateCloudletsFromDistribution(12, 1, 600000, 300, 300, broker.getId())); 
 		scenario.setVmlist(VmListGenerator.generateVmList(2, broker.getId()));
@@ -49,7 +49,7 @@ public class RandomLimitedExponentialScenarioTest {
 		datacenter1 = PublicDatacenterFactory.create("PublicDatacenter_1",0.2/3600,1);
 		scenario.setDatacenter0(datacenter0);
 		scenario.setDatacenter1(datacenter1);
-		broker	 = BrokerFactory.createBrokerRandomLimited();
+		broker	 = BrokerFactory.createBrokerRandomLimited(5);
 		scenario.setBroker(broker);
 		scenario.setCloudletList(CloudletListGenerator.generateCloudletsFromDistribution(24, 1, 600000, 300, 300, broker.getId())); 
 		scenario.setVmlist(VmListGenerator.generateVmList(2, broker.getId()));
@@ -64,7 +64,7 @@ public class RandomLimitedExponentialScenarioTest {
 		datacenter1 = PublicDatacenterFactory.create("PublicDatacenter_1",0.2/3600,1);
 		scenario.setDatacenter0(datacenter0);
 		scenario.setDatacenter1(datacenter1);
-		broker	 = BrokerFactory.createBrokerRandomLimited();
+		broker	 = BrokerFactory.createBrokerRandomLimited(5);
 		scenario.setBroker(broker);
 		scenario.setCloudletList(CloudletListGenerator.generateCloudletsFromDistribution(120, 1, 600000, 300, 300, broker.getId())); 
 		scenario.setVmlist(VmListGenerator.generateVmList(2, broker.getId()));
@@ -79,7 +79,7 @@ public class RandomLimitedExponentialScenarioTest {
 		datacenter1 = PublicDatacenterFactory.create("PublicDatacenter_1",0.2/3600,2);
 		scenario.setDatacenter0(datacenter0);
 		scenario.setDatacenter1(datacenter1);
-		broker	 = BrokerFactory.createBrokerRandomLimited();
+		broker	 = BrokerFactory.createBrokerRandomLimited(5);
 		scenario.setBroker(broker);
 		scenario.setCloudletList(CloudletListGenerator.generateCloudletsFromDistribution(120, 1, 600000, 300, 300, broker.getId())); 
 		scenario.setVmlist(VmListGenerator.generateVmList(4, broker.getId()));

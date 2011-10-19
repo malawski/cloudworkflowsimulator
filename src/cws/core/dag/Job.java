@@ -51,14 +51,14 @@ public class Job {
 		remaining.addAll(cloudlets);
 		fanInNode = new Node();
 		Cloudlet cloudlet0 = remaining.remove(0);
-		fanInNode.setId(cloudlet0.getCloudletId());
+		fanInNode.setCloudletId(cloudlet0.getCloudletId());
 		added.add(fanInNode);
 		nodesMap.put(cloudlet0, fanInNode);
 		fanInNode.setEligible(true);
 		
 		for (Cloudlet cloudlet : remaining) {
 			Node node = new Node();
-			node.setId(cloudlet.getCloudletId());
+			node.setCloudletId(cloudlet.getCloudletId());
 			Node parent = added.get(random.nextInt(added.size()));
 			node.addParent(parent);
 			added.add(node);
@@ -97,23 +97,24 @@ public class Job {
     	
         for (int i=0;i<tasks.length;i++) {
         	Task task = dag.getTask(tasks[i]);
-        	Cloudlet cloudlet = new Cloudlet(i, (long) task.size, 1, 100, 100, utilizationModel, utilizationModel, utilizationModel);
+        	long mi = (long) task.size * 1000; // we assume that the execution times in seconds are measured on 1000 MIPS processors 
+        	Cloudlet cloudlet = new Cloudlet(i, mi , 1, 100, 100, utilizationModel, utilizationModel, utilizationModel);
     		cloudlet.setUserId(brokerId);
         	cloudlets.add(cloudlet);
         	tasksMap.put(task, cloudlet);
         	Node node = new Node();
-        	node.setId(cloudlet.getCloudletId());
+        	node.setCloudletId(cloudlet.getCloudletId());
         	nodesMap.put(cloudlet, node);
         }
         
         for (int i=0;i<tasks.length;i++) {
         	Task task = dag.getTask(tasks[i]);
         	Node node = nodesMap.get(tasksMap.get(task));
-        	List<Task> parents = task.parents;
+        	List<Task> parents = task.children; //we have to agree on parenthood
         	for (Task parent : parents) {
         		node.addParent(nodesMap.get(tasksMap.get(parent)));
         	}
-        	if (task.parents.isEmpty()) node.setEligible(true); 
+        	if (task.children.isEmpty()) node.setEligible(true); 
         }
 	}
 	
