@@ -84,9 +84,9 @@ public class PublicDatacenter extends Datacenter {
 					if (getDebts().containsKey(vm.getUserId())) {
 						amount = getDebts().get(vm.getUserId());
 					}
-					Log.printLine("Cost per mi" + indent + getCharacteristics().getCostPerMi()
-							+ indent + "mips of pe" + indent + getCharacteristics().getMipsOfOnePe()
-							+ indent + "time diff" + indent + timeDiff);
+//					Log.printLine("Cost per mi" + indent + getCharacteristics().getCostPerMi()
+//							+ indent + "mips of pe" + indent + getCharacteristics().getMipsOfOnePe()
+//							+ indent + "time diff" + indent + timeDiff);
 
 					amount += getCharacteristics().getCostPerMi() * getCharacteristics().getMipsOfOnePe() * timeDiff;
 					getDebts().put(vm.getUserId(), amount);
@@ -98,6 +98,7 @@ public class PublicDatacenter extends Datacenter {
 			//schedules an event to the next time, if valid
 			//if (smallerTime > CloudSim.clock() + 0.01 && smallerTime != Double.MAX_VALUE && smallerTime < getSchedulingInterval()) {
 			if (smallerTime > CloudSim.clock() + 0.01 && smallerTime != Double.MAX_VALUE) {
+				CloudSim.cancelAll(getId(), CloudSim.SIM_ANY);
 				schedule(getId(), (smallerTime - CloudSim.clock()), CloudSimTags.VM_DATACENTER_EVENT);
 			}
 			setLastProcessTime(CloudSim.clock());

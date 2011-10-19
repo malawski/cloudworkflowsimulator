@@ -3,6 +3,7 @@ package cws.core.broker;
 
 import java.util.Random;
 
+
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.Log;
@@ -12,22 +13,32 @@ import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.lists.VmList;
 
-public class DatacenterBrokerRandomLimited extends DatacenterBroker {
+import cws.core.dag.Job;
+
+public class DatacenterBrokerRandomLimitedDAG extends DatacenterBroker {
 
 	private int cloudletsSubmitted;
 	private Random random;
+	private Job job;
 	private int maxInStage;
-	private int stage;
 
-	public DatacenterBrokerRandomLimited(String name, int maxInStage) throws Exception {
+	public DatacenterBrokerRandomLimitedDAG(String name, int maxInStage) throws Exception {
 		super(name);
 		cloudletsSubmitted=0;
-		stage = 0;
 		this.maxInStage = maxInStage;
 		random = new Random();
 	}
 	
-    /**
+    public Job getJob() {
+		return job;
+	}
+
+	public void setJob(Job job) {
+		this.job = job;
+	}
+
+
+	/**
      * Submit cloudlets to the created VMs.
      *
      * @pre $none
@@ -35,9 +46,9 @@ public class DatacenterBrokerRandomLimited extends DatacenterBroker {
      */
 	protected void submitCloudlets() {
 		int vmIndex = 0;
-		for (Cloudlet cloudlet : getCloudletList()) {
+		for (Cloudlet cloudlet : job.getEligibleCloudlets()) {
 			
-			if (getCloudletSubmittedList().size()>=maxInStage) continue;
+			if (getCloudletSubmittedList().size()>=maxInStage) break;
 			
 			vmIndex = random.nextInt(getVmsCreatedList().size());
 			Vm vm;
@@ -56,6 +67,7 @@ public class DatacenterBrokerRandomLimited extends DatacenterBroker {
 			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
 			cloudletsSubmitted++;
 			getCloudletSubmittedList().add(cloudlet);
+			job.setUneligible(cloudlet);
 		}
 
 		// remove submitted cloudlets from waiting list
@@ -78,12 +90,14 @@ public class DatacenterBrokerRandomLimited extends DatacenterBroker {
 		getCloudletSubmittedList().remove(cloudlet);
 		Log.printLine(CloudSim.clock()+": "+getName()+ ": Cloudlet "+cloudlet.getCloudletId()+" received");
 		cloudletsSubmitted--;
+		job.processCloudletReturn(cloudlet);
 		if (getCloudletList().size()==0&&cloudletsSubmitted==0) { //all cloudlets executed
 			Log.printLine(CloudSim.clock()+": "+getName()+ ": All Cloudlets executed. Finishing...");
 			clearDatacenters();
 			finishExecution();
 		} else { //some cloudlets haven't finished yet
-			Log.printLine(CloudSim.clock()+": "+getName()+ ": Submitting again...");
+			Log.printLine(CloudSim.clock()+": "+getName()+ ": Submitting again, cloudlets submitted: " + cloudletsSubmitted);
+			Log.printLine(CloudSim.clock()+": "+getName()+ ": Number of finished cloudlets: " + getCloudletReceivedList().size());
 			submitCloudlets();
 			
 			if (getCloudletList().size()>0 && cloudletsSubmitted==0) {

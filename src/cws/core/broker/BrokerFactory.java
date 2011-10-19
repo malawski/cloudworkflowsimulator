@@ -35,10 +35,10 @@ public class BrokerFactory {
 		return broker;
 	}
 
-	public static DatacenterBroker createBrokerRandomLimited() {
+	public static DatacenterBroker createBrokerRandomLimited(int maxInStage) {
 		DatacenterBroker broker = null;
 		try {
-			broker = new DatacenterBrokerRandomLimited("Broker");
+			broker = new DatacenterBrokerRandomLimited("Broker", maxInStage);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -50,6 +50,17 @@ public class BrokerFactory {
 		DatacenterBrokerRandomDAG broker = null;
 		try {
 			broker = new DatacenterBrokerRandomDAG("Broker");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		return broker;
+	}
+	
+	public static DatacenterBrokerRandomLimitedDAG createBrokerRandomLimitedDAG(int maxInStage) {
+		DatacenterBrokerRandomLimitedDAG broker = null;
+		try {
+			broker = new DatacenterBrokerRandomLimitedDAG("Broker", maxInStage);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
