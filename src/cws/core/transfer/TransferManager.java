@@ -12,6 +12,38 @@ import org.cloudbus.cloudsim.core.SimEvent;
 
 import cws.core.WorkflowEvent;
 
+/**
+ * This entity simulates data transfers between potentially shared network 
+ * ports over potentially shared network links.
+ * 
+ * Each transfer has a source port, a destination port, and a link.
+ * 
+ * Ports have fixed bandwidth that is shared between all the transfers that
+ * are occurring simultaneously on the port.
+ * 
+ * Links have fixed bandwidth that is shared by all transfers making use of the
+ * link. In addition, links have latency and a fixed MTU.
+ * 
+ * Transfers follow a simple model where the time taken to complete a transfer
+ * depends on the bandwidth assigned to the transfer, the size of the transfer,
+ * the amount of transfer overhead (the excess data transferred because of 
+ * packet headers), and the round trip time of the link. The formula is,
+ * roughly:
+ *  
+ *     transferTime = ((totalSize + overhead)/bandwidth) + (2 * RTT)
+ * 
+ * The 2*RTT comes from one RTT for the initial handshake, and one for the 
+ * final ACKnowledgement.
+ * 
+ * Because transfers share ports and links, and transfers may start and stop at 
+ * different times, the bandwidth assigned to each transfer may change. Each
+ * time a new transfer is started, or an existing transfer completes, we 
+ * recompute the bandwidth assigned to every transfer in the simulation. The
+ * algorithm used to compute the bandwidth ensures max-min fairness between
+ * streams sharing constrained ports and links.
+ * 
+ * @author Gideon Juve <juve@usc.edu>
+ */
 public class TransferManager extends SimEntity implements WorkflowEvent {
     /** Conversion constant for milliseconds to seconds */
     public static final double MSEC_TO_SEC = 1.0 / 1000.0;
@@ -30,7 +62,7 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
     
     @Override
     public void startEntity() {
-        System.out.printf("Starting %s...\n", this);
+        /* Do nothing */
     }
     
     @Override
@@ -55,7 +87,7 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
     
     @Override
     public void shutdownEntity() {
-        System.out.printf("Stopping %s...\n", this);
+        /* Do nothing */
     }
     
     /** Called when a new transfer is initiated */
@@ -155,6 +187,8 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
             links.put(link, link.getBandwidth());
         }
         
+        // We keep iterating over the transfers until there is no more
+        // available bandwidth to allocate
         boolean change;
         do {
             change = false;
@@ -164,7 +198,10 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
                 Port dest = t.getDestinationPort();
                 Link link = t.getLink();
                 
+                // Allocated bandwidth
                 double tBW = allocations.get(t);
+                
+                // Available bandwidth
                 double srcBW = ports.get(src);
                 double destBW = ports.get(dest);
                 double linkBW = links.get(link);
