@@ -1,10 +1,9 @@
 package cws.core.transfer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
@@ -47,9 +46,6 @@ import cws.core.WorkflowEvent;
 public class TransferManager extends SimEntity implements WorkflowEvent {
     /** Conversion constant for milliseconds to seconds */
     public static final double MSEC_TO_SEC = 1.0 / 1000.0;
-    
-    /** Smallest unit of bandwidth in Mbps */
-    public static final double DELTA_BW = 1.0;
     
     /** All the incomplete transfers */
     private HashSet<Transfer> activeTransfers;
@@ -145,12 +141,13 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
         if (activeTransfers.size() > 0) {
         
             // Recompute bandwidth for remaining transfers
-            Map<Transfer, Double> allocations = 
-                    TransferManager.allocateBandwidth(activeTransfers);
+            Transfer[] transfers = activeTransfers.toArray(new Transfer[0]);
+            double[] allocations = 
+                    TransferManager.allocateBandwidth(transfers);
             
             // Update bandwidth
-            for (Transfer t: activeTransfers) {
-                t.updateBandwidth(allocations.get(t));
+            for (int i=0; i<transfers.length; i++) {
+                transfers[i].updateBandwidth(allocations[i]);
             }
             
             // Compute the next completion time and send an update
@@ -162,68 +159,123 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
         }
     }
     
+    /** A node is a network element with a bandwidth capacity */
+    private static class Node {
+        public HashSet<Flow> flows = new HashSet<Flow>();
+        public double capacity = 0.0;
+    }
+    
+    /** A flow is the bandwidth allocated to a transfer */
+    private static class Flow {
+        public Node[] path = new Node[3];
+        public double allocation = 0.0;
+    }
+    
     /** 
      * Called when we need to compute the bandwidth assigned to each
-     * transfer.
+     * transfer. This uses the progressive filling algorithm.
      */
-    public static Map<Transfer, Double> allocateBandwidth(Set<Transfer> transfers) {
-        // TODO Make this use arrays instead of maps if it is too slow
+    public static double[] allocateBandwidth(Transfer[] transfers) {
         
-        HashMap<Transfer, Double> allocations = new HashMap<Transfer, Double>();
-        HashMap<Port, Double> ports = new HashMap<Port, Double>();
-        HashMap<Link, Double> links = new HashMap<Link, Double>();
+        Flow[] flows = new Flow[transfers.length];
+        ArrayList<Node> nodes = new ArrayList<Node>();
         
-        for (Transfer t: transfers) {
+        // These are used to find the set of unique Ports and Links
+        HashMap<Port, Node> ports = new HashMap<Port, Node>();
+        HashMap<Link, Node> links = new HashMap<Link, Node>();
+        
+        // This loop just sets up the data structures
+        for (int i=0; i<transfers.length; i++) {
+            Node n;
+            
+            // Create a flow for each transfer
+            Transfer t = transfers[i];
+            Flow f = flows[i] = new Flow();
+            
+            // Add the source port
             Port src = t.getSourcePort();
+            if (ports.containsKey(src)) {
+                n = ports.get(src);
+            } else {
+                n = new Node();
+                nodes.add(n);
+                n.capacity = src.getBandwidth();
+                ports.put(src, n);
+            }
+            n.flows.add(f);
+            f.path[0] = n;
+            
+            // Add the destination port
             Port dest = t.getDestinationPort();
+            if (ports.containsKey(dest)) {
+                n = ports.get(dest);
+            } else {
+                n = new Node();
+                nodes.add(n);
+                n.capacity = dest.getBandwidth();
+                ports.put(dest, n);
+            }
+            n.flows.add(f);
+            f.path[1] = n;
+            
+            // Add the link
             Link link = t.getLink();
-            
-            // Allocated bandwidth is initially 0
-            allocations.put(t, 0.0);
-            
-            // All of the ports and links have an initial capacity
-            ports.put(src, src.getBandwidth());
-            ports.put(dest, dest.getBandwidth());
-            links.put(link, link.getBandwidth());
+            if (links.containsKey(link)) {
+                n = links.get(link);
+            } else {
+                n = new Node();
+                nodes.add(n);
+                n.capacity = link.getBandwidth();
+                links.put(link, n);
+            }
+            n.flows.add(f);
+            f.path[2] = n;
         }
         
-        // We keep iterating over the transfers until there is no more
-        // available bandwidth to allocate
-        boolean change;
-        do {
-            change = false;
+        // As long as there are nodes remaining that have flows
+        int nnodes = nodes.size();
+        while (nnodes > 0) {
             
-            for (Transfer t : transfers) {
-                Port src = t.getSourcePort();
-                Port dest = t.getDestinationPort();
-                Link link = t.getLink();
-                
-                // Allocated bandwidth
-                double tBW = allocations.get(t);
-                
-                // Available bandwidth
-                double srcBW = ports.get(src);
-                double destBW = ports.get(dest);
-                double linkBW = links.get(link);
-                
-                // If the src, dest, and link have enough available bandwidth
-                if (srcBW >= DELTA_BW &&
-                    destBW >= DELTA_BW &&
-                    linkBW >= DELTA_BW) {
-                    
-                    // Decrement available bandwidth
-                    ports.put(src, srcBW - DELTA_BW);
-                    ports.put(dest, destBW - DELTA_BW);
-                    links.put(link, linkBW - DELTA_BW);
-                    
-                    // Increment allocated bandwidth
-                    allocations.put(t, tBW + DELTA_BW);
-                    
-                    change = true;
+            // Find the node with the smallest remaining fair share
+            Node minNode = null;
+            double minShare = Double.MAX_VALUE;
+            for (Node n : nodes) {
+                double share = n.capacity / n.flows.size();
+                if (share <= minShare) {
+                    minShare = share;
+                    minNode = n;
                 }
             }
-        } while (change);
+            
+            // Allocate the min share to each flow that uses the min node
+            Flow[] myflows = minNode.flows.toArray(new Flow[0]);
+            for (Flow f : myflows) {
+                f.allocation += minShare;
+                for (Node n : f.path) {
+                    n.capacity -= minShare;
+                    n.flows.remove(f);
+                }
+            }
+            
+            // Remove all nodes with no remaining flows
+            int i = 0;
+            while (i < nnodes) {
+                Node n = nodes.get(i);
+                if (n.flows.size() == 0) {
+                    // Swap with the last node
+                    nnodes--;
+                    nodes.set(i, nodes.get(nnodes));
+                } else {
+                    i++;
+                }
+            }
+        }
         
+        // Return allocations
+        double[] allocations = new double[transfers.length];
+        for (int i=0; i<transfers.length; i++) {
+            allocations[i] = flows[i].allocation;
+        }
         return allocations;
     }
     
