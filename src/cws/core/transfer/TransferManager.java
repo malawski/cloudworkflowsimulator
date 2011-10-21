@@ -3,8 +3,6 @@ package cws.core.transfer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
@@ -49,7 +47,7 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
     public static final double MSEC_TO_SEC = 1.0 / 1000.0;
     
     /** Smallest unit of bandwidth in Mbps */
-    public static final double DELTA_BW = 1.0;
+    public static final double DELTA_BW = 0.1;
     
     /** All the incomplete transfers */
     private HashSet<Transfer> activeTransfers;
@@ -145,12 +143,13 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
         if (activeTransfers.size() > 0) {
         
             // Recompute bandwidth for remaining transfers
-            Map<Transfer, Double> allocations = 
-                    TransferManager.allocateBandwidth(activeTransfers);
+            Transfer[] transfers = activeTransfers.toArray(new Transfer[0]);
+            double[] allocations = 
+                    TransferManager.allocateBandwidth(transfers);
             
             // Update bandwidth
-            for (Transfer t: activeTransfers) {
-                t.updateBandwidth(allocations.get(t));
+            for (int i=0; i<transfers.length; i++) {
+                transfers[i].updateBandwidth(allocations[i]);
             }
             
             // Compute the next completion time and send an update
@@ -162,62 +161,97 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
         }
     }
     
+    private static class Path {
+        public int src;
+        public int dest;
+        public int link;
+    }
+    
     /** 
      * Called when we need to compute the bandwidth assigned to each
      * transfer.
      */
-    public static Map<Transfer, Double> allocateBandwidth(Set<Transfer> transfers) {
-        // TODO Make this use arrays instead of maps if it is too slow
+    public static double[] allocateBandwidth(Transfer[] transfers) {
         
-        HashMap<Transfer, Double> allocations = new HashMap<Transfer, Double>();
-        HashMap<Port, Double> ports = new HashMap<Port, Double>();
-        HashMap<Link, Double> links = new HashMap<Link, Double>();
+        HashMap<Port, Integer> port_map = new HashMap<Port, Integer>();
+        HashMap<Link, Integer> link_map = new HashMap<Link, Integer>();
+        int next_bw = 0;
         
-        for (Transfer t: transfers) {
+        Path[] paths = new Path[transfers.length];
+        double[] allocations = new double[transfers.length];
+        
+        for (int i=0; i<transfers.length; i++) {
+            Transfer t = transfers[i];
             Port src = t.getSourcePort();
             Port dest = t.getDestinationPort();
             Link link = t.getLink();
             
             // Allocated bandwidth is initially 0
-            allocations.put(t, 0.0);
+            allocations[i] = 0.0;
             
-            // All of the ports and links have an initial capacity
-            ports.put(src, src.getBandwidth());
-            ports.put(dest, dest.getBandwidth());
-            links.put(link, link.getBandwidth());
+            // Keep track of all the paths
+            Path p = new Path();
+            paths[i] = p;
+            
+            if (port_map.containsKey(src)) {
+                p.src = port_map.get(src);
+            } else {
+                p.src = next_bw++;
+                port_map.put(src, p.src);
+            }
+            
+            if (port_map.containsKey(dest)) {
+                p.dest = port_map.get(dest);
+            } else {
+                p.dest = next_bw++;
+                port_map.put(dest, p.dest);
+            }
+            
+            if (link_map.containsKey(link)) {
+                p.link = link_map.get(link);
+            } else {
+                p.link = next_bw++;
+                link_map.put(link, p.link);
+            }
         }
+        
+        double[] bw = new double[next_bw];
+        
+        for (Port p : port_map.keySet()) {
+            int index = port_map.get(p);
+            bw[index] = p.getBandwidth();
+        }
+        
+        for (Link l : link_map.keySet()) {
+            int index = link_map.get(l);
+            bw[index] = l.getBandwidth();
+        }
+        
+        link_map = null;
+        port_map = null;
+        
         
         // We keep iterating over the transfers until there is no more
         // available bandwidth to allocate
         boolean change;
         do {
             change = false;
+        
+            for (int i=0; i<paths.length; i++) {
+                Path p = paths[i];
             
-            for (Transfer t : transfers) {
-                Port src = t.getSourcePort();
-                Port dest = t.getDestinationPort();
-                Link link = t.getLink();
-                
-                // Allocated bandwidth
-                double tBW = allocations.get(t);
-                
-                // Available bandwidth
-                double srcBW = ports.get(src);
-                double destBW = ports.get(dest);
-                double linkBW = links.get(link);
-                
-                // If the src, dest, and link have enough available bandwidth
-                if (srcBW >= DELTA_BW &&
-                    destBW >= DELTA_BW &&
-                    linkBW >= DELTA_BW) {
+                // If the src, dest, and link have available bandwidth
+                if (bw[p.src] >= DELTA_BW &&
+                    bw[p.dest] >= DELTA_BW &&
+                    bw[p.link] >= DELTA_BW) {
                     
                     // Decrement available bandwidth
-                    ports.put(src, srcBW - DELTA_BW);
-                    ports.put(dest, destBW - DELTA_BW);
-                    links.put(link, linkBW - DELTA_BW);
+                    bw[p.src] -= DELTA_BW;
+                    bw[p.dest] -= DELTA_BW;
+                    bw[p.link] -= DELTA_BW;
                     
                     // Increment allocated bandwidth
-                    allocations.put(t, tBW + DELTA_BW);
+                    allocations[i] += DELTA_BW;
                     
                     change = true;
                 }

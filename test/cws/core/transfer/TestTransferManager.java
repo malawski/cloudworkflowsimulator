@@ -1,7 +1,6 @@
 package cws.core.transfer;
 
 import java.util.HashSet;
-import java.util.Map;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
@@ -21,7 +20,7 @@ public class TestTransferManager  {
     
     @Before
     public void setup() {
-        DELTA = TransferManager.DELTA_BW + TransferManager.DELTA_BW/10.0;
+        DELTA = TransferManager.DELTA_BW + (TransferManager.DELTA_BW/10.0);
     }
     
     @Test
@@ -31,19 +30,17 @@ public class TestTransferManager  {
         Port c = new Port(100);
         Link l = new Link(1000, 0);
         
-        Transfer t1 = new Transfer(a, c, l, 0L, 0);
-        Transfer t2 = new Transfer(b, c, l, 0L, 0);
+        Transfer[] transfers = new Transfer[] {
+                new Transfer(a, c, l, 0L, 0),
+                new Transfer(b, c, l, 0L, 0)
+        };
         
-        HashSet<Transfer> transfers = new HashSet<Transfer>();
-        transfers.add(t1);
-        transfers.add(t2);
+        double[] allocations = TransferManager.allocateBandwidth(transfers);
         
-        Map<Transfer, Double> allocations = 
-                TransferManager.allocateBandwidth(transfers);
+        System.out.println(allocations[0]);
         
-        for (Transfer t: transfers) {
-            assertEquals(50.0, allocations.get(t), DELTA);
-        }
+        assertEquals(50.0, allocations[0], DELTA);
+        assertEquals(50.0, allocations[1], DELTA);
     }
     
     @Test
@@ -53,19 +50,17 @@ public class TestTransferManager  {
         Port c = new Port(1000);
         Link l = new Link(1000, 0);
         
-        Transfer t1 = new Transfer(a, c, l, 0L, 0);
-        Transfer t2 = new Transfer(b, c, l, 0L, 0);
+        Transfer[] transfers = new Transfer[] {
+                new Transfer(a, c, l, 0L, 0),
+                new Transfer(b, c, l, 0L, 0)
+        };
         
-        HashSet<Transfer> transfers = new HashSet<Transfer>();
-        transfers.add(t1);
-        transfers.add(t2);
+        double[] allocations = TransferManager.allocateBandwidth(transfers);
         
-        Map<Transfer, Double> allocations = 
-                TransferManager.allocateBandwidth(transfers);
+        System.out.println(allocations[0]);
         
-        for (Transfer t: transfers) {
-            assertEquals(100.0, allocations.get(t), DELTA);
-        }
+        assertEquals(100.0, allocations[0], DELTA);
+        assertEquals(100.0, allocations[1], DELTA);
     }
     
     @Test
@@ -75,19 +70,17 @@ public class TestTransferManager  {
         Port c = new Port(100);
         Link l = new Link(50, 0);
         
-        Transfer t1 = new Transfer(a, c, l, 0L, 0);
-        Transfer t2 = new Transfer(b, c, l, 0L, 0);
+        Transfer[] transfers = new Transfer[] {
+                new Transfer(a, c, l, 0L, 0),
+                new Transfer(b, c, l, 0L, 0)
+        };
         
-        HashSet<Transfer> transfers = new HashSet<Transfer>();
-        transfers.add(t1);
-        transfers.add(t2);
+        double[] allocations = TransferManager.allocateBandwidth(transfers);
         
-        Map<Transfer, Double> allocations = 
-                TransferManager.allocateBandwidth(transfers);
+        System.out.println(allocations[0]);
         
-        for (Transfer t: transfers) {
-            assertEquals(25.0, allocations.get(t), DELTA);
-        }
+        assertEquals(25.0, allocations[0], DELTA);
+        assertEquals(25.0, allocations[1], DELTA);
     }
     
     @Test
@@ -97,21 +90,19 @@ public class TestTransferManager  {
         Port c = new Port(100);
         Link l = new Link(1000, 0);
         
-        Transfer t1 = new Transfer(a, c, l, 0L, 0);
-        Transfer t2 = new Transfer(b, c, l, 0L, 0);
-        Transfer t3 = new Transfer(a, c, l, 0L, 0);
+        Transfer[] transfers = new Transfer[] {
+                new Transfer(a, c, l, 0L, 0),
+                new Transfer(b, c, l, 0L, 0),
+                new Transfer(a, c, l, 0L, 0)
+        };
         
-        HashSet<Transfer> transfers = new HashSet<Transfer>();
-        transfers.add(t1);
-        transfers.add(t2);
-        transfers.add(t3);
+        double[] allocations = TransferManager.allocateBandwidth(transfers);
         
-        Map<Transfer, Double> allocations = 
-                TransferManager.allocateBandwidth(transfers);
+        System.out.println(allocations[1]);
         
-        for (Transfer t: transfers) {
-            assertEquals(100/3.0, allocations.get(t), DELTA);
-        }
+        assertEquals(100/3.0, allocations[0], DELTA);
+        assertEquals(100/3.0, allocations[1], DELTA);
+        assertEquals(100/3.0, allocations[2], DELTA);
     }
     
     @Test
@@ -122,21 +113,17 @@ public class TestTransferManager  {
         Port d = new Port(30);
         Link l = new Link(1000, 0);
         
-        Transfer t1 = new Transfer(a, c, l, 0L, 0);
-        Transfer t2 = new Transfer(b, c, l, 0L, 0);
-        Transfer t3 = new Transfer(b, d, l, 0L, 0);
+        Transfer[] transfers = new Transfer[] {
+                new Transfer(a, c, l, 0L, 0),
+                new Transfer(b, c, l, 0L, 0),
+                new Transfer(b, d, l, 0L, 0)
+        };
         
-        HashSet<Transfer> transfers = new HashSet<Transfer>();
-        transfers.add(t1);
-        transfers.add(t2);
-        transfers.add(t3);
+        double[] allocations = TransferManager.allocateBandwidth(transfers);
         
-        Map<Transfer, Double> allocations = 
-                TransferManager.allocateBandwidth(transfers);
-        
-        assertEquals(90.0, allocations.get(t1), DELTA);
-        assertEquals(70.0, allocations.get(t2), DELTA);
-        assertEquals(30.0, allocations.get(t3), DELTA);
+        assertEquals(90.0, allocations[0], DELTA);
+        assertEquals(70.0, allocations[1], DELTA);
+        assertEquals(30.0, allocations[2], DELTA);
     }
     
     @Test
@@ -146,18 +133,15 @@ public class TestTransferManager  {
         Port c = new Port(5);
         Link l = new Link(1000, 0);
         
-        Transfer t1 = new Transfer(a, c, l, 0L, 0);
-        Transfer t2 = new Transfer(b, c, l, 0L, 0);
+        Transfer[] transfers = new Transfer[] {
+                new Transfer(a, c, l, 0L, 0),
+                new Transfer(b, c, l, 0L, 0)
+        };
         
-        HashSet<Transfer> transfers = new HashSet<Transfer>();
-        transfers.add(t1);
-        transfers.add(t2);
+        double[] allocations = TransferManager.allocateBandwidth(transfers);
         
-        Map<Transfer, Double> allocations = 
-                TransferManager.allocateBandwidth(transfers);
-        
-        assertEquals(2.5, allocations.get(t1), DELTA);
-        assertEquals(2.5, allocations.get(t2), DELTA);
+        assertEquals(2.5, allocations[0], DELTA);
+        assertEquals(2.5, allocations[1], DELTA);
     }
     
     @Test
@@ -166,18 +150,15 @@ public class TestTransferManager  {
         Port b = new Port(100);
         Link l = new Link(1000, 0);
         
-        Transfer t1 = new Transfer(a, b, l, 0L, 0);
-        Transfer t2 = new Transfer(a, b, l, 0L, 0);
+        Transfer[] transfers = new Transfer[] {
+                new Transfer(a, b, l, 0L, 0),
+                new Transfer(a, b, l, 0L, 0)
+        };
         
-        HashSet<Transfer> transfers = new HashSet<Transfer>();
-        transfers.add(t1);
-        transfers.add(t2);
+        double[] allocations = TransferManager.allocateBandwidth(transfers);
         
-        Map<Transfer, Double> allocations = 
-                TransferManager.allocateBandwidth(transfers);
-        
-        assertEquals(50, allocations.get(t1), DELTA);
-        assertEquals(50, allocations.get(t2), DELTA);
+        assertEquals(50, allocations[0], DELTA);
+        assertEquals(50, allocations[1], DELTA);
     }
     
     @Test
@@ -188,46 +169,40 @@ public class TestTransferManager  {
         Port d = new Port(30);
         Link l = new Link(1000, 0);
         
-        Transfer t1 = new Transfer(a, c, l, 0L, 0);
-        Transfer t2 = new Transfer(b, c, l, 0L, 0);
-        Transfer t3 = new Transfer(b, d, l, 0L, 0);
-        Transfer t4 = new Transfer(b, d, l, 0L, 0);
+        Transfer[] transfers = new Transfer[] {
+                new Transfer(a, c, l, 0L, 0),
+                new Transfer(b, c, l, 0L, 0),
+                new Transfer(b, d, l, 0L, 0),
+                new Transfer(b, d, l, 0L, 0)
+        };
         
-        HashSet<Transfer> transfers = new HashSet<Transfer>();
-        transfers.add(t1);
-        transfers.add(t2);
-        transfers.add(t3);
-        transfers.add(t4);
+        double[] allocations = TransferManager.allocateBandwidth(transfers);
         
-        Map<Transfer, Double> allocations = 
-                TransferManager.allocateBandwidth(transfers);
-        
-        assertEquals(90.0, allocations.get(t1), DELTA);
-        assertEquals(70.0, allocations.get(t2), DELTA);
-        assertEquals(15.0, allocations.get(t3), DELTA);
-        assertEquals(15.0, allocations.get(t4), DELTA);
+        assertEquals(90.0, allocations[0], DELTA);
+        assertEquals(70.0, allocations[1], DELTA);
+        assertEquals(15.0, allocations[2], DELTA);
+        assertEquals(15.0, allocations[3], DELTA);
     }
     
     @Test
     public void testAllocateScaling() {
-        HashSet<Transfer> transfers = new HashSet<Transfer>();
+        int count = 20000;
+        Transfer[] transfers = new Transfer[count];
         
-        for (int i=0; i<20000; i++) {
+        for (int i=0; i<count; i++) {
             Port a = new Port(100);
             Port b = new Port(100);
             Link l = new Link(100, 0);
-            Transfer t = new Transfer(a, b, l, 0, 0);
-            transfers.add(t);
+            transfers[i] = new Transfer(a, b, l, 0, 0);
         }
         
         double start = System.currentTimeMillis();
-        Map<Transfer, Double> allocations = 
-                TransferManager.allocateBandwidth(transfers);
+        double[] allocations = TransferManager.allocateBandwidth(transfers);
         double finish = System.currentTimeMillis();
         double elapsed = (finish-start)/1000;
         
-        for (Transfer t : transfers) {
-            assertEquals(100.0, allocations.get(t), DELTA);
+        for (int i=0; i<count; i++) {
+            assertEquals(100.0, allocations[i], DELTA);
         }
         
         assertTrue("BW allocation too slow", elapsed <= 1.0);
@@ -290,7 +265,7 @@ public class TestTransferManager  {
         double time1 = estimateTransferTime(
                 t1.getTransferSize(), 1000.0, t1.getRTT());
         
-        assertEquals(time1, t1.getTransferTime(), 0.0001);
+        assertEquals(time1, t1.getTransferTime(), 0.001);
     }
     
     @Test
@@ -316,7 +291,7 @@ public class TestTransferManager  {
         double time1 = estimateTransferTime(
                 t1.getTransferSize(), 100.0, t1.getRTT());
         
-        assertEquals(time1, t1.getTransferTime(), 0.0001);
+        assertEquals(time1, t1.getTransferTime(), 0.001);
     }
     
     @Test
@@ -344,10 +319,10 @@ public class TestTransferManager  {
         
         double time1 = estimateTransferTime(
                 t1.getTransferSize(), 500.0, t1.getRTT());
-        assertEquals(time1, t1.getTransferTime(), 0.0001);
+        assertEquals(time1, t1.getTransferTime(), 0.001);
         
         double time2 = estimateTransferTime(
                 t2.getTransferSize(), 500.0, t2.getRTT());
-        assertEquals(time2, t2.getTransferTime(), 0.0001);
+        assertEquals(time2, t2.getTransferTime(), 0.001);
     }
 }
