@@ -110,11 +110,11 @@ public class Job {
         for (int i=0;i<tasks.length;i++) {
         	Task task = dag.getTask(tasks[i]);
         	Node node = nodesMap.get(tasksMap.get(task));
-        	List<Task> parents = task.children; //we have to agree on parenthood
+        	List<Task> parents = task.parents;
         	for (Task parent : parents) {
         		node.addParent(nodesMap.get(tasksMap.get(parent)));
         	}
-        	if (task.children.isEmpty()) node.setEligible(true); 
+        	if (task.parents.isEmpty()) node.setEligible(true); 
         }
 	}
 	
