@@ -38,6 +38,12 @@ public interface WorkflowEvent {
 
     /** Cloudlet execution is comlplete */
     public static final int CLOUDLET_COMPLETE = 9;
+    
+    /** Client entity submits a VM termination request */
+    public static final int TERMINATE_VM = 10;
+    
+    /** VM termination is complete */
+    public static final int VM_TERMINATION_COMPLETE = 11;
 
     
 }

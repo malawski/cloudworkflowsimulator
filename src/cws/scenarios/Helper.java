@@ -7,10 +7,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Map;
 
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.Vm;
 
 import cws.core.dag.Job;
 
@@ -73,6 +75,37 @@ public class Helper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
+	}
+
+	public static void printVmList(Map<Integer, Double> vmCreationTimes, Map<Integer, Double> vmDestroyTimes, String name) {
+
+		Vm vm;
+
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw, true);
+		
+		
+		String indent = "    ";
+		pw.println();
+		pw.println("========== VMs ==========");
+		pw.println("VM ID" + indent + "Creation Time" + indent
+				+ "Destroy Time");
+
+		DecimalFormat dft = new DecimalFormat("###.##");
+
+		for (Integer vmid : vmCreationTimes.keySet() ) {
+			
+			pw.print(indent + vmid + indent + indent);
+
+				pw.println(indent + indent + dft.format(vmCreationTimes.get(vmid))
+						+ indent + indent
+						+ dft.format(vmDestroyTimes.get(vmid))
+						);
+			}
+		
+		Log.print(sw.toString());
+		stringToFile(sw.toString(), name + "-vms.txt");
+		
 	}
 
 }

@@ -97,8 +97,8 @@ public class Job {
     	
         for (int i=0;i<tasks.length;i++) {
         	Task task = dag.getTask(tasks[i]);
-        	long mi = (long) task.size * 1000; // we assume that the execution times in seconds are measured on 1000 MIPS processors 
-        	Cloudlet cloudlet = new Cloudlet(i, mi , 1, 100, 100, utilizationModel, utilizationModel, utilizationModel);
+        	double mi = task.size * 1000.0; // we assume that the execution times in seconds are measured on 1000 MIPS processors 
+        	Cloudlet cloudlet = new Cloudlet(i, (long) mi , 1, 100, 100, utilizationModel, utilizationModel, utilizationModel);
     		cloudlet.setUserId(brokerId);
         	cloudlets.add(cloudlet);
         	tasksMap.put(task, cloudlet);
