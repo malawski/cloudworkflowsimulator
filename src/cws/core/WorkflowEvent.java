@@ -45,5 +45,30 @@ public interface WorkflowEvent {
     /** VM termination is complete */
     public static final int VM_TERMINATION_COMPLETE = 11;
 
+
     
+    
+    
+    /** Start a new VM */
+    public static final int VM_LAUNCH = 12;
+    
+    /** VM started up */
+    public static final int VM_LAUNCHED = 13;
+    
+    /** Terminate an existing VM */
+    public static final int VM_TERMINATE = 14;
+    
+    /** VM was terminated */
+    public static final int VM_TERMINATED = 15;
+    
+    
+    
+    /** Submit a new task */
+    public static final int JOB_SUBMIT = 16;
+    
+    /** Job begins execution on remote resource */
+    public static final int JOB_STARTED = 17;
+    
+    /** Job finished execution on remote host */
+    public static final int JOB_FINISHED = 18;
 }
