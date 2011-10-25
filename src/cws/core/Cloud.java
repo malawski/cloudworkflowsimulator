@@ -76,6 +76,11 @@ public class Cloud extends SimEntity implements WorkflowEvent {
     }
     
     private void vmLaunched(VM vm) {
+        // Sanity check
+        if (!vms.contains(vm)) {
+            throw new RuntimeException("Unknown VM");
+        }
+        
         // Listeners are informed
         for (VMListener l : vmListeners) {
             l.vmLaunched(vm);
@@ -86,6 +91,11 @@ public class Cloud extends SimEntity implements WorkflowEvent {
     }
     
     private void terminateVM(VM vm) {
+        // Sanity check
+        if (!vms.contains(vm)) {
+            throw new RuntimeException("Unknown VM");
+        }
+        
         // We terminate the VM now...
         sendNow(vm.getId(), VM_TERMINATE);
         
@@ -94,6 +104,11 @@ public class Cloud extends SimEntity implements WorkflowEvent {
     }
     
     private void vmTerminated(VM vm) {
+     // Sanity check
+        if (!vms.contains(vm)) {
+            throw new RuntimeException("Unknown VM");
+        }
+        
         vm.setTerminateTime(CloudSim.clock());
         vms.remove(vm);
         
