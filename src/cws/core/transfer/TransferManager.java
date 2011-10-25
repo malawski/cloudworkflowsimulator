@@ -50,10 +50,22 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
     /** All the incomplete transfers */
     private HashSet<Transfer> activeTransfers;
     
+    /** Listeners for transfer events */
+    private HashSet<TransferListener> listeners;
+    
     public TransferManager() {
         super("TransferManager");
         CloudSim.addEntity(this);
         activeTransfers = new HashSet<Transfer>();
+        listeners = new HashSet<TransferListener>();
+    }
+    
+    public void addListener(TransferListener tl) {
+        listeners.add(tl);
+    }
+    
+    public void removeListener(TransferListener tl) {
+        listeners.remove(tl);
     }
     
     @Override
@@ -96,6 +108,11 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
         // Start transfer
         t.start();
         
+        // Notify listeners
+        for (TransferListener tl : listeners) {
+            tl.transferStarted(t);
+        }
+        
         // It takes 1 RTT to complete the initial handshake in TCP 
         double rttSec = t.getRTT() * MSEC_TO_SEC;
         send(this.getId(), rttSec, HANDSHAKE_COMPLETE, t);
@@ -131,7 +148,7 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
         // Remove any completed transfers
         for (Transfer t: completedTransfers) {
             activeTransfers.remove(t);
-                
+            
             // It takes 1 RTT to get the final ACK
             double rttSec = t.getRTT() * MSEC_TO_SEC;
             send(this.getId(), rttSec, FINAL_ACK_RECEIVED, t);
@@ -147,7 +164,20 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
             
             // Update bandwidth
             for (int i=0; i<transfers.length; i++) {
+                
+                // Did bandwidth change by more than 1bps?
+                boolean changed = Math.abs(transfers[i].getCurrentBandwidth() -
+                        allocations[i]) >= 0.000001;
+                
+                // Update bandwidth
                 transfers[i].updateBandwidth(allocations[i]);
+                
+                // If bandwidth changed, notify listeners
+                if (changed) {
+                    for (TransferListener tl : listeners) {
+                        tl.bandwidthChanged(transfers[i]);
+                    }
+                }
             }
             
             // Compute the next completion time and send an update
@@ -285,6 +315,11 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
         
         // Finish the transfer
         t.finish();
+        
+        // Notify listeners
+        for (TransferListener tl : listeners) {
+            tl.transferFinished(t);
+        }
         
         // Inform the owner that their transfer is complete
         sendNow(t.getOwner(), TRANSFER_COMPLETE, t); 
