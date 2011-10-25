@@ -20,8 +20,8 @@ public class Transfer {
     /** Conversion constant for Mbps to bps */
     public static final double MBPS_TO_BPS = 1000000.0;
     
-    /** Bytes of overhead per packet. Based on IP */
-    public static final int PACKET_OVERHEAD = 40;
+    /** Bytes of overhead per packet. Based on IPv4 (20B) and TCP (20B)*/
+    public static final int PACKET_OVERHEAD = 20+20;
     
     /** Unique ID for this transfer */
     private long id;
@@ -83,7 +83,8 @@ public class Transfer {
         
         // Compute how much we are actually going to transfer
         int mtu = link.getMTU();
-        long packets = (long)Math.ceil((1.0*dataSize) / mtu);
+        int mss = mtu - PACKET_OVERHEAD;
+        long packets = (long)Math.ceil((1.0*dataSize) / mss);
         long overhead = packets * PACKET_OVERHEAD;
         this.transferSize = dataSize + overhead;
         
