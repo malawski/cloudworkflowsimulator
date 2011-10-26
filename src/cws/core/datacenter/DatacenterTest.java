@@ -350,7 +350,7 @@ public class DatacenterTest {
 		
 	}
 	
-    //@Test
+    @Test
     public void testDatacenterVMs() {
         CloudSim.init(1, null, false);
         
@@ -372,7 +372,7 @@ public class DatacenterTest {
     
 
 
-	//@Test
+	@Test
     public void testDatacenterVMs2() {
         CloudSim.init(1, null, false);
         
@@ -391,7 +391,7 @@ public class DatacenterTest {
         
     }
     
-    //@Test
+    @Test
     public void testDatacenterCloudlets() {
         CloudSim.init(1, null, false);
         
@@ -415,32 +415,8 @@ public class DatacenterTest {
         
     }
 
-    //@Test
-    public void testDatacenterCloudlets2() {
-        CloudSim.init(1, null, false);
-        
-        DatacenterClient datacenterClient = new DatacenterClient("Client");
-        Datacenter datacenter  = new Datacenter("Datacenter");
-        
-        datacenterClient.setDatacenter(datacenter);
-        
-        List<Vm> listVMs = VmListGenerator.generateVmList(10, datacenterClient.getId());
-        List<Cloudlet> cloudlets = CloudletListGenerator.generateCloudlets(120, 1, 600000, 300, 300, datacenterClient.getId()); 
-        
-        datacenterClient.setVMs(new HashSet<Vm>(listVMs));
-        datacenterClient.setCloudlets(cloudlets);
-        
-        CloudSim.startSimulation();
-        
-        assertEquals(listVMs.size(), datacenterClient.getRunningVMs().size());
-        assertEquals(cloudlets.size(), datacenterClient.getCompletedCloudlets().size());
-        
-        Helper.printCloudletList(cloudlets, "testDatacenterCloudlets2");
-        
-    }
     
-    
-    //@Test
+    @Test
     public void testDatacenterDAG() {
         CloudSim.init(1, null, false);
         
@@ -472,36 +448,6 @@ public class DatacenterTest {
     }
     
 
-    //@Test
-    public void testDatacenterDAG2() {
-        CloudSim.init(1, null, false);
-        
-        DatacenterDAGClient datacenterClient = new DatacenterDAGClient("Client");
-        Datacenter datacenter  = new Datacenter("Datacenter");
-        
-        datacenterClient.setDatacenter(datacenter);
-        
-        List<Vm> listVMs = VmListGenerator.generateVmList(10, datacenterClient.getId());
-        List<Cloudlet> cloudlets = CloudletListGenerator.generateCloudlets(400, 1, 600000, 300, 300, datacenterClient.getId()); 
-
-    	Job job = new Job();
-    	job.setCloudlets(cloudlets);
-    	job.generateDag();
-
-        
-        datacenterClient.setVMs(new HashSet<Vm>(listVMs));
-        datacenterClient.setCloudlets(cloudlets);
-        datacenterClient.setJob(job);
-        
-        
-        CloudSim.startSimulation();
-        
-        assertEquals(listVMs.size(), datacenterClient.getRunningVMs().size());
-        assertEquals(cloudlets.size(), datacenterClient.getCompletedCloudlets().size());
-        
-        Helper.printCloudletList(cloudlets, "testDatacenterDAG2");
-        
-    }
     
     
     
@@ -554,49 +500,73 @@ public class DatacenterTest {
         
         CloudSim.startSimulation();
         
-        //assertEquals(listVMs.size(), datacenterClient.getRunningVMs().size());
         assertEquals(job.getCloudlets().size(), datacenterClient.getCompletedCloudlets().size());
         
         Helper.printCloudletList(job.getCloudlets(), "testDatacenterProvisionerDAG");
         
     }
     
-    @Test
-    public void testDatacenterDeprovisionerDAG() {
+    
+	public void runDatacenterDeprovisioner(String dagPath, String outputName) {
+
         CloudSim.init(1, null, false);
         
-//        try {
-//			Log.setOutput(new FileOutputStream(new File("testDatacenterDeprovisionerDAG.log")));
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-        
-        DatacenterDeprovisionerDAGClient datacenterClient = new DatacenterDeprovisionerDAGClient("Client");
-        Datacenter datacenter  = new Datacenter("Datacenter");
-        
-        datacenterClient.setDatacenter(datacenter);
-        
-        List<Vm> listVMs = VmListGenerator.generateVmList(1, datacenterClient.getId());
+		// try {
+		// Log.setOutput(new FileOutputStream(new
+		// File("testDatacenterDeprovisionerDAG.log")));
+		// } catch (FileNotFoundException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 
-    	Job job = new Job();
-    	job.readDag(datacenterClient.getId(), "dags/cybershake_small.dag");
-        
-        datacenterClient.setVMs(new HashSet<Vm>(listVMs));
-        datacenterClient.setCloudlets(job.getCloudlets());
-        datacenterClient.setJob(job);      
-        
-        CloudSim.startSimulation();
-        
-        assertEquals(0, datacenterClient.getRunningVMs().size());
-        assertEquals(job.getCloudlets().size(), datacenterClient.getCompletedCloudlets().size());
-        
-        Helper.printCloudletList(job.getCloudlets(), "testDatacenterDeprovisionerDAG");
-        Helper.printVmList(datacenter.getVmCreationTimes(), datacenter.getVmTerminationTimes(), "testDatacenterDeprovisionerDAG");
-        
+		DatacenterDeprovisionerDAGClient datacenterClient = new DatacenterDeprovisionerDAGClient("Client");
+		Datacenter datacenter = new Datacenter("Datacenter");
+
+		datacenterClient.setDatacenter(datacenter);
+
+		List<Vm> listVMs = VmListGenerator.generateVmList(1, datacenterClient.getId());
+
+		Job job = new Job();
+		job.readDag(datacenterClient.getId(), dagPath);
+
+		datacenterClient.setVMs(new HashSet<Vm>(listVMs));
+		datacenterClient.setCloudlets(job.getCloudlets());
+		datacenterClient.setJob(job);
+
+		CloudSim.startSimulation();
+
+		assertEquals(0, datacenterClient.getRunningVMs().size());
+		assertEquals(job.getCloudlets().size(), datacenterClient.getCompletedCloudlets().size());
+
+		Helper.printCloudletList(job.getCloudlets(), outputName);
+		Helper.printVmList(datacenter.getVmCreationTimes(), datacenter.getVmTerminationTimes(), outputName);
+	}
+    
+    
+    //@Test
+    public void testDatacenterDeprovisionerDAG() {
+        runDatacenterDeprovisioner("dags/cybershake_small.dag", "testDatacenterDeprovisionerDAG");
     }
     
     
+    @Test
+    public void testDatacenterDeprovisioner30DAG() {
+    	runDatacenterDeprovisioner("dags/CyberShake_30.dag", "testDatacenterDeprovisioner30DAG");
+    }
+
+    @Test
+    public void testDatacenterDeprovisioner50DAG() {
+    	runDatacenterDeprovisioner("dags/CyberShake_50.dag", "testDatacenterDeprovisioner50DAG");
+    }
     
+    @Test
+    public void testDatacenterDeprovisioner100DAG() {
+    	runDatacenterDeprovisioner("dags/CyberShake_100.dag", "testDatacenterDeprovisioner100DAG");        
+    }
     
+    @Test
+    public void testDatacenterDeprovisioner1000DAG() {
+    	runDatacenterDeprovisioner("dags/CyberShake_1000.dag", "testDatacenterDeprovisioner1000DAG");        
+    }
+       
 }
