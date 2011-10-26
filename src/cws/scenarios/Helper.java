@@ -1,6 +1,7 @@
 package cws.scenarios;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,6 +18,8 @@ import org.cloudbus.cloudsim.Vm;
 import cws.core.dag.Job;
 
 public class Helper {
+	
+	private static String OUTPUT_PATH = "output";
 	
 	/**
 	 * Prints the Cloudlet objects.
@@ -56,7 +59,7 @@ public class Helper {
 			}
 		}
 		Log.print(sw.toString());
-		stringToFile(sw.toString(), fileName + ".txt");
+		stringToFile(sw.toString(),  fileName + ".txt");
 
 	}
 	
@@ -68,7 +71,7 @@ public class Helper {
 	public static void stringToFile(String s, String fileName) {
 		BufferedWriter out;
 		try {
-			out = new BufferedWriter(new FileWriter(fileName));
+			out = new BufferedWriter(new FileWriter(OUTPUT_PATH + File.separator + fileName));
 			out.write(s);
 			out.close();
 		} catch (IOException e) {
