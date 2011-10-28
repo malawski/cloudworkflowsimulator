@@ -2,8 +2,17 @@ package cws.core.datacenter;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.cloudbus.cloudsim.Log;
@@ -17,10 +26,62 @@ import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEvent;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGParser;
+import cws.core.dag.Task;
+
 
 
 
 public class CloudTest {
+	
+	private static String OUTPUT_PATH = "output";
+
+	
+	/**
+	 * This cloud client adds functionality of dynamically provisioning 
+	 * and deprovisioning VMs using very aggressive algorithm
+	 * 
+	 * @author malawski
+	 *
+	 */
+	private class CloudDeprovisionerDAGClient extends CloudDAGClient {
+		
+		public CloudDeprovisionerDAGClient(String name) {
+			super(name);
+		}
+		
+		@Override
+		public void startEntity() {
+			submitVMs(vms);
+			newJobs.addAll(jobs);
+			// we do not want to create new entities during initialization
+			// scheduleJobs();
+		}
+		
+		@Override
+		protected void provisionVMs() {
+					
+			// provisioning
+			if (eligibleJobs.size() > freeVMs.size() + submittedVMs.size()) {
+				HashSet<VM> vms = new HashSet<VM>();
+				VM vm = new VM(1000, 1, 1.0, 1.0);
+				vms.add(vm);
+				submitVMs(vms);
+			}
+			
+			//deprovisioning
+			if(eligibleJobs.size() < freeVMs.size()) {
+				for (Iterator<VM> it = freeVMs.iterator(); it.hasNext();) {
+					VM vm = it.next();
+					shuttingVMs.add(vm);
+					it.remove();
+					Log.printLine(CloudSim.clock() + "Terminating VM " + vm.getId());
+					sendNow(cloud.getId(), VM_TERMINATE, vm);
+				}
+			}	
+		}
+	}
+	
 	
 	
 	
@@ -33,22 +94,37 @@ public class CloudTest {
 	 */
 	private class CloudDAGClient extends CloudClient {
 
-		Set<Job> eligibleJobs;
+		protected Set<Job> eligibleJobs;
+		protected Map<Task,Job> tasks2jobs;
 		
 		protected DAG dag;
 		
 		public CloudDAGClient(String name) {
 			super(name);
 			eligibleJobs = new HashSet<Job>();
+			tasks2jobs = new HashMap<Task, Job>();
 		}
 
 		public void setDAG(DAG dag) {
 			this.dag = dag;
+			String[] tasks = dag.getTasks();
+			for (int i = 0; i< tasks.length; i++) {
+				Task task = dag.getTask(tasks[i]);
+				// we assume that the execution times in seconds are measured on 1000 MIPS processors 
+				double mi = 1000.0 * task.size ;
+				Job job = new Job((int) mi);
+				job.setTask(task);
+				jobs.add(job);
+				tasks2jobs.put(task, job);
+				if (task.parents.isEmpty()) eligibleJobs.add(job);
+			}
 		}
 		
 		
-		
+		@Override
 		protected void scheduleJobs() {
+			
+			provisionVMs();
 			
 			// if there is nothing to do, just return
 			if (freeVMs.isEmpty()) return;
@@ -63,22 +139,31 @@ public class CloudTest {
 				busyVMs.add(vm);
 				jobIt.remove(); // remove job from eligible set
 				submittedJobs.add(job);
+				Log.printLine(CloudSim.clock() + " Submitting job " + job.getID() + " to VM " + job.getVM().getId());
 				sendNow(vm.getId(), JOB_SUBMIT, job);				
 			}		
 		}
 		
-//      @TODO		
-//		protected void completeCloudlet(Cloudlet cloudlet) {
-//	    	Vm vm = vmids.get(cloudlet.getVmId());
-//	    	busyVMs.remove(vm);
-//	    	freeVMs.add(vm);
-//	    	runningCloudlets.remove(cloudlet);
-//	    	completedCloudlets.add(cloudlet);
-//			dag.processCloudletReturn(cloudlet);
-//	    	scheduleCloudlets();
-//		}
-//		
-		
+		protected void completeJob(Job job) {
+			Log.printLine(CloudSim.clock() + " Job " + job.getID() + " finished on VM " + job.getVM().getId());
+			
+			VM vm = job.getVM();
+	    	busyVMs.remove(vm);
+	    	freeVMs.add(vm);
+	    	runningJobs.remove(job);
+	    	completedJobs.add(job);
+	    	
+	    	// update eligibility
+	    	for (Task child: job.getTask().children) {
+	    		Set<Job> parents = new HashSet<Job>();
+	    		for (Task parent : child.parents) {
+	    			parents.add(tasks2jobs.get(parent));
+	    		}
+	    		if (completedJobs.containsAll(parents))	eligibleJobs.add(tasks2jobs.get(child));
+	    	}
+	    	
+	    	scheduleJobs();
+		}	
 	}
 	
 	
@@ -93,7 +178,7 @@ public class CloudTest {
 
 		protected Cloud cloud;
 		/** The set of VMs. */
-		private Set<VM> vms;
+		protected Set<VM> vms;
 		
 		/** The set of submitted VMs (not running yet) */
 		protected Set<VM> submittedVMs;
@@ -128,8 +213,8 @@ public class CloudTest {
 
 		protected Set<Job> jobs;
 		
-		/** map from ids to VM objects - probably should be moved to a global scope */
-//		protected Map<Integer,VM> vmids;
+		
+		protected void provisionVMs() {}
 		
 		public CloudClient(String name) {
 			super(name);
@@ -238,18 +323,20 @@ public class CloudTest {
 		}
 
 		protected void vmTerminationComplete(VM vm) {
+			Log.printLine(CloudSim.clock() + " VM terminated " + vm.getId());
 			shuttingVMs.remove(vm);
 			runningVMs.remove(vm);
 			terminatedVMs.add(vm);
 		}
 
 		protected void startJob(Job job) {
-			Log.printLine(CloudSim.clock() + " Job started " + job.getID());
+			Log.printLine(CloudSim.clock() + " Job " + job.getID() + " started on VM " + job.getVM().getId());
 			submittedJobs.remove(job);
 			runningJobs.add(job);
 		}
 		
 		protected void completeJob(Job job) {
+			Log.printLine(CloudSim.clock() + " Job " + job.getID() + " finished on VM " + job.getVM().getId());
 	    	VM vm = job.getVM();
 	    	busyVMs.remove(vm);
 	    	freeVMs.add(vm);
@@ -262,6 +349,89 @@ public class CloudTest {
 		public void shutdownEntity() {	}
 		
 	}
+	
+	
+	
+	public static void printJobs(Set<Job> jobs, String fileName) {
+
+		
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw, true);
+		
+		
+		String indent = "    ";
+		pw.println();
+		pw.println("========== OUTPUT ==========");
+		pw.println("Job ID" + indent + "STATUS" + indent
+				+ "Data center ID" + indent + "VM ID" + indent + "Time" + indent
+				+ "Start Time" + indent + "Finish Time");
+
+		DecimalFormat dft = new DecimalFormat("###.##");
+		for (Job job : jobs) {
+			pw.print(indent + job.getID() + indent + indent);
+
+			if (job.getState() == Job.State.SUCCESS) {
+				pw.print("SUCCESS");
+
+				pw.println(indent + indent + job.getVM().getCloud()
+						+ indent + indent + indent + job.getVM().getId()
+						+ indent + indent
+						+ dft.format(job.getDuration()) + indent
+						+ indent + dft.format(job.getStartTime())
+						+ indent + indent
+						+ dft.format(job.getFinishTime()));
+			}
+		}
+		Log.print(sw.toString());
+		stringToFile(sw.toString(),  fileName + ".txt");
+
+	}
+	
+	
+	public static void printVmList(Set<VM> vms, String name) {
+
+
+
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw, true);
+		
+		
+		String indent = "    ";
+		pw.println();
+		pw.println("========== VMs ==========");
+		pw.println("VM ID" + indent + "Creation Time" + indent
+				+ "Destroy Time");
+
+		DecimalFormat dft = new DecimalFormat("###.##");
+
+		for (VM vm : vms) {
+			
+			pw.print(indent + vm.getId() + indent + indent);
+
+				pw.println(indent + indent + dft.format(vm.getLaunchTime())
+						+ indent + indent
+						+ dft.format(vm.getTerminateTime())
+						);
+			}
+		
+		Log.print(sw.toString());
+		stringToFile(sw.toString(), name + "-vms.txt");
+		
+	}
+	
+	public static void stringToFile(String s, String fileName) {
+		BufferedWriter out;
+		try {
+			out = new BufferedWriter(new FileWriter(OUTPUT_PATH + File.separator + fileName));
+			out.write(s);
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
+	
+	
 	
     @Test
     public void testDatacenterVMs() {
@@ -336,4 +506,81 @@ public class CloudTest {
 
 	}
 
+	@Test
+	public void testDatacenterDAG100() {
+		
+		CloudSim.init(1, null, false);
+
+		CloudDAGClient cloudClient = new CloudDAGClient("Client");
+		Cloud cloud = new Cloud();
+		cloudClient.setCloud(cloud);
+		
+		HashSet<VM> vms = new HashSet<VM>();
+		for (int i = 0; i < 10; i++) {
+			VM vm = new VM(1000, 1, 1.0, 1.0);
+			vms.add(vm);
+		}
+
+		DAG dag = DAGParser.parseDAG(new File("dags/CyberShake_30.dag"));
+		
+		cloudClient.setVMs(vms);
+		cloudClient.setDAG(dag);
+
+		CloudSim.startSimulation();
+
+		assertEquals(vms.size(), cloudClient.getRunningVMs().size());
+		assertEquals(dag.numTasks(), cloudClient.getCompletedJobs().size());
+		
+		printJobs(cloudClient.getCompletedJobs(), "CyberShake_30");
+
+	}
+	
+	
+	public void runCloudDeprovisioner(String dagPath, String outputName) {
+
+        CloudSim.init(1, null, false);
+        
+		// try {
+		// Log.setOutput(new FileOutputStream(new
+		// File("testDatacenterDeprovisionerDAG.log")));
+		// } catch (FileNotFoundException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+
+
+		CloudDeprovisionerDAGClient cloudClient = new CloudDeprovisionerDAGClient("Client");
+		Cloud cloud = new Cloud();
+		cloudClient.setCloud(cloud);
+		
+		HashSet<VM> vms = new HashSet<VM>();
+		VM vm = new VM(1000, 1, 1.0, 1.0);
+		vms.add(vm);
+
+
+		DAG dag = DAGParser.parseDAG(new File(dagPath));
+		
+		cloudClient.setVMs(vms);
+		cloudClient.setDAG(dag);
+
+		CloudSim.startSimulation();
+
+		assertEquals(0, cloudClient.getRunningVMs().size());
+		assertEquals(dag.numTasks(), cloudClient.getCompletedJobs().size());
+		
+		printJobs(cloudClient.getCompletedJobs(), outputName);
+		printVmList(cloudClient.getTerminatedVMs(), outputName);
+	}
+	
+	
+    @Test
+    public void testCloudDeprovisioner100DAG() {
+    	runCloudDeprovisioner("dags/CyberShake_100.dag", "DeprovisionerCyberShake_100");        
+    }
+
+    @Test
+    public void testCloudDeprovisionerCybershakeDAG() {
+    	runCloudDeprovisioner("dags/cybershake_small.dag", "Deprovisionercybershake_small");        
+    }
+    
 }

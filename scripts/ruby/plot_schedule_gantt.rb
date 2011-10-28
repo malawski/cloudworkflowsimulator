@@ -97,4 +97,6 @@ end
 #plot_schedule 'testDatacenterDeprovisioner30DAG'
 #plot_schedule 'testDatacenterDeprovisioner50DAG'
 #plot_schedule 'testDatacenterDeprovisioner100DAG'
-plot_schedule 'output/testDatacenterDeprovisioner1000DAG'
+#plot_schedule 'output/testDatacenterDeprovisioner1000DAG'
+#plot_schedule 'output/DeprovisionerCyberShake_100'
+plot_schedule 'output/Deprovisionercybershake_small'
