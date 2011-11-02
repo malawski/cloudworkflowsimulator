@@ -242,10 +242,10 @@ public class VM extends SimEntity implements WorkflowEvent {
                 terminateVM();
                 break;
             case JOB_SUBMIT:
-                queueJob(ev.getSource(), (Job)ev.getData());
+                jobSubmit((Job)ev.getData());
                 break;
             case JOB_FINISHED:
-                finishJob((Job)ev.getData());
+                jobFinish((Job)ev.getData());
                 break;
             default:
                 throw new RuntimeException("Unknown event: "+ev);
@@ -273,7 +273,7 @@ public class VM extends SimEntity implements WorkflowEvent {
         
         // Fail any queued jobs
         for (Job job : jobs) {
-            job.setState(Job.State.FAILURE);
+            job.setResult(Job.Result.FAILURE);
             sendNow(job.getOwner(), JOB_FINISHED, job);
         }
         
@@ -282,16 +282,15 @@ public class VM extends SimEntity implements WorkflowEvent {
         idleCores = cores;
     }
     
-    private void queueJob(int owner, Job job) {
+    private void jobSubmit(Job job) {
         // Sanity check
         if (!running) {
             throw new RuntimeException("Cannot execute jobs: VM not running");
         }
         
-        job.setOwner(owner);
+        job.setSubmitTime(CloudSim.clock());
+        job.setState(Job.State.IDLE);
         job.setVM(this);
-        job.setRemoteQueueTime(CloudSim.clock());
-        job.setState(Job.State.QUEUED);
         
         // Queue the job
         jobs.add(job);
@@ -300,7 +299,7 @@ public class VM extends SimEntity implements WorkflowEvent {
         startJobs();
     }
     
-    private void startJob(Job job) {
+    private void jobStart(Job job) {
         // The job is now running
         job.setStartTime(CloudSim.clock());
         job.setState(Job.State.RUNNING);
@@ -309,21 +308,22 @@ public class VM extends SimEntity implements WorkflowEvent {
         send(job.getOwner(), 0.0, JOB_STARTED, job);
         
         // Compute the duration of the job on this VM
-        int size = job.getSize();
-        double duration = size*1.0 / mips;
+        double size = job.getSize();
+        double duration = size / mips;
         send(getId(), duration, JOB_FINISHED, job);
         
         // One core is now busy running the job
         idleCores--;
     }
     
-    private void finishJob(Job job) {
+    private void jobFinish(Job job) {
         // Dequeue the job
         jobs.remove(job);
         
         // Complete the job
         job.setFinishTime(CloudSim.clock());
-        job.setState(Job.State.SUCCESS);
+        job.setState(Job.State.TERMINATED);
+        job.setResult(Job.Result.SUCCESS);
         
         // Increment the usage
         cpuSecondsConsumed += job.getDuration();
@@ -342,7 +342,7 @@ public class VM extends SimEntity implements WorkflowEvent {
         // While there are still idle jobs and cores
         while(jobs.size() > 0 && idleCores > 0) {
             // Start the next job in the queue
-            startJob(jobs.poll());
+            jobStart(jobs.poll());
         }
     }
 }

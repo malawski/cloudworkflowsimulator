@@ -1,5 +1,7 @@
 package cws.core;
 
+import org.cloudbus.cloudsim.core.CloudSim;
+
 import cws.core.dag.Task;
 
 /**
@@ -12,9 +14,15 @@ public class Job {
     
     /** Job states */
     public static enum State {
-        NEW,
         QUEUED,
+        IDLE,
         RUNNING,
+        TERMINATED
+    }
+    
+    /** Job results */
+    public static enum Result {
+        NONE,
         SUCCESS,
         FAILURE
     }
@@ -32,10 +40,13 @@ public class Job {
     private int owner;
     
     /** The size of the job in millions of instructions (MI) */
-    private int size;
+    private double size;
     
-    /** The time the job was queued on the remote resource */
-    private double remoteQueueTime;
+    /** Time the job was released */
+    private double releaseTime;
+    
+    /** Submit time of the job */
+    private double submitTime;
     
     /** The start time of the job */
     private double startTime;
@@ -43,13 +54,19 @@ public class Job {
     /** The finish time of the job */
     private double finishTime;
     
-    /** Did the job succeed or fail? */
+    /** What is the current state of the job? */
     private State state;
     
-    public Job(int size) {
+    /** Job result */
+    private Result result;
+    
+    public Job(Task task, int owner) {
         this.id = next_id++;
-        this.size = size;
-        this.state = State.NEW;
+        this.owner = owner;
+        this.size = task.size;
+        this.releaseTime = CloudSim.clock();
+        this.state = State.QUEUED;
+        this.result = Result.NONE;
     }
     
     public int getID() {
@@ -84,16 +101,24 @@ public class Job {
         this.size = size;
     }
     
-    public int getSize() {
+    public double getSize() {
         return size;
     }
     
-    public void setRemoteQueueTime(double remoteQueueTime) {
-        this.remoteQueueTime = remoteQueueTime;
+    public void setReleaseTime(double releaseTime) {
+        this.releaseTime = releaseTime;
     }
     
-    public double getRemoteQueueTime() {
-        return remoteQueueTime;
+    public double getReleaseTime(double releaseTime) {
+        return this.releaseTime;
+    }
+    
+    public void setSubmitTime(double submitTime) {
+        this.submitTime = submitTime;
+    }
+    
+    public double getSubmitTime() {
+        return submitTime;
     }
     
     public void setStartTime(double startTime) {
@@ -123,7 +148,15 @@ public class Job {
     public State getState() {
         return state;
     }
-
+    
+    public void setResult(Result result) {
+        this.result = result;
+    }
+    
+    public Result getResult() {
+        return result;
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;
