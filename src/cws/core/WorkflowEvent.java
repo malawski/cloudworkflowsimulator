@@ -44,9 +44,6 @@ public interface WorkflowEvent {
     
     /** VM termination is complete */
     public static final int VM_TERMINATION_COMPLETE = 11;
-
-
-    
     
     
     /** Start a new VM */
@@ -61,7 +58,9 @@ public interface WorkflowEvent {
     /** VM was terminated */
     public static final int VM_TERMINATED = 15;
     
-    
+    /////////////////////////////////////////////////////////
+    // JOB EVENTS
+    /////////////////////////////////////////////////////////
     
     /** Submit a new task */
     public static final int JOB_SUBMIT = 16;
@@ -71,4 +70,15 @@ public interface WorkflowEvent {
     
     /** Job finished execution on remote host */
     public static final int JOB_FINISHED = 18;
+    
+    /////////////////////////////////////////////////////////
+    // DAG EVENTS
+    /////////////////////////////////////////////////////////
+    
+    public static final int DAG_SUBMIT = 19;
+    
+    public static final int DAG_STARTED = 20;
+    
+    public static final int DAG_FINISHED = 21;
+            
 }
