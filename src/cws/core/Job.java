@@ -33,6 +33,9 @@ public class Job {
     /** The VM where this job ran */
     private VM vm;
     
+    /** The DAG that spawned this job */
+    private DAGJob dagJob;
+    
     /** The task that this job executes */
     private Task task;
     
@@ -60,8 +63,10 @@ public class Job {
     /** Job result */
     private Result result;
     
-    public Job(Task task, int owner) {
+    public Job(DAGJob dagJob, Task task, int owner) {
         this.id = next_id++;
+        this.dagJob = dagJob;
+        this.task = task;
         this.owner = owner;
         this.size = task.size;
         this.releaseTime = CloudSim.clock();
@@ -87,6 +92,14 @@ public class Job {
     
     public VM getVM() {
         return vm;
+    }
+    
+    public void setDAGJob(DAGJob dagJob) {
+        this.dagJob = dagJob;
+    }
+    
+    public DAGJob getDAGJob() {
+        return dagJob;
     }
     
     public void setTask(Task task) {
