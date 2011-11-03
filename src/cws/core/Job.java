@@ -64,11 +64,15 @@ public class Job {
     private Result result;
     
     public Job(DAGJob dagJob, Task task, int owner) {
+        this(task.size);
+        setDAGJob(dagJob);
+        setTask(task);
+        setOwner(owner);
+    }
+    
+    public Job(double size) {
         this.id = next_id++;
-        this.dagJob = dagJob;
-        this.task = task;
-        this.owner = owner;
-        this.size = task.size;
+        this.size = size;
         this.releaseTime = CloudSim.clock();
         this.state = State.QUEUED;
         this.result = Result.NONE;
@@ -122,7 +126,7 @@ public class Job {
         this.releaseTime = releaseTime;
     }
     
-    public double getReleaseTime(double releaseTime) {
+    public double getReleaseTime() {
         return this.releaseTime;
     }
     
@@ -190,5 +194,9 @@ public class Job {
         if (id != other.id)
             return false;
         return true;
+    }
+    
+    public String toString() {
+        return "<Job id="+Integer.toString(id)+">";
     }
 }

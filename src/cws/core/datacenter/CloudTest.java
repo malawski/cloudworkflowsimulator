@@ -238,7 +238,8 @@ public class CloudTest {
 			// we assume that the execution times in seconds are measured on
 			// 1000 MIPS processors
 			double mi = 1000.0 * task.size;
-			Job job = new Job((int) mi);
+			Job job = new Job(mi);
+			job.setOwner(getId());
 			job.setTask(task);
 			jobs.add(job);
 			return job;
@@ -492,7 +493,7 @@ public class CloudTest {
 		for (Job job : jobs) {
 			pw.print(indent + job.getID() + indent + indent);
 
-			if (job.getState() == Job.State.SUCCESS) {
+			if (job.getState() == Job.State.TERMINATED && job.getResult() == Job.Result.SUCCESS) {
 				pw.print("SUCCESS");
 
 				pw.println(indent + indent + job.getVM().getCloud()
@@ -528,7 +529,7 @@ public class CloudTest {
 		for (Job job : jobs) {
 			pw.print(indent + job.getID() + indent + indent);
 
-			if (job.getState() == Job.State.SUCCESS) {
+			if (job.getState() == Job.State.TERMINATED && job.getResult() == Job.Result.SUCCESS) {
 				pw.print("SUCCESS");
 
 				pw.println(indent + indent + jobPriorities.get(job)
