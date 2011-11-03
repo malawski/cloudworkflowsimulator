@@ -104,7 +104,7 @@ doc.children.each { |node|
 f.close
 
 output_file_name = File.basename(input_file_name)
-output_file_name.gsub!(/\.(xml|dax)$/, "")
+output_file_name = output_file_name.gsub(/\.(xml|dax)$/, "")
 output_file_name << ".dag"
 
 
