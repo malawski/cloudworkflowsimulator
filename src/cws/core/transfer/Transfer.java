@@ -200,6 +200,12 @@ public class Transfer {
                     currentBandwidth * MBPS_TO_BPS * elapsed);
             long bytesTransferred = (long)Math.ceil(bitsTransferred / 8.0);
             
+            // Always make sure at least 1 byte is transferred so 
+            // we will be sure to make progress
+            if (bytesTransferred == 0) {
+                bytesTransferred = 1;
+            }
+            
             this.bytesRemaining -= bytesTransferred;
             
             // Sanity check in case we simulate too long
