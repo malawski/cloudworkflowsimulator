@@ -27,4 +27,15 @@ public class TestDAGParser {
         DAG dag = DAGParser.parseDAG(new File("dags/test.dag"));
         assertEquals(4, dag.numTasks());
     }
+    
+    @Test
+    public void testDAX() {
+        DAG dag = DAGParser.parseDAX(new File("dags/Montage_25.xml"));
+        assertEquals(25, dag.numTasks());
+        assertEquals(38, dag.numFiles());
+        Task t = dag.getTask("ID00022");
+        assertEquals(t.id, "ID00022");
+        assertEquals(2, t.inputs.size());
+        assertEquals(2, t.outputs.size());
+    }
 }
