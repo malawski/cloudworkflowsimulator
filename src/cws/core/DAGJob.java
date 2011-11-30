@@ -29,6 +29,9 @@ public class DAGJob {
     /** List of all tasks that are ready but have not been claimed */
     private LinkedList<Task> queue;
     
+    /** Workflow priority */
+    private int priority;
+    
     public DAGJob(DAG dag, int owner) {
         this.dag = dag;
         this.owner = owner;
@@ -60,6 +63,14 @@ public class DAGJob {
     public void setDAG(DAG dag) {
         this.dag = dag;
     }
+    
+    public int getPriority() {
+		return priority;
+	}
+
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
     
     /** Check to see if a task has been released */
     public boolean isReleased(Task t) {

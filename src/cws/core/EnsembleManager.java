@@ -44,8 +44,10 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
     
     @Override
     public void startEntity() {
-        // Submit the first DAG
-        submitDAG(dags.pop());
+        // Submit all DAGs
+    	while(!dags.isEmpty()) {
+    		submitDAG(dags.pop());
+    	}
     }
     
     @Override
@@ -69,8 +71,11 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
     
     private void prioritizeDAGs(Collection<DAG> dags) {
         // For now just add them in whatever order they come in
+    	int priority = 0;
         for (DAG d : dags) {
-            this.dags.add(new DAGJob(d, getId()));
+        	DAGJob dj = new DAGJob(d, getId());
+        	dj.setPriority(priority++);
+            this.dags.add(dj);
         }
     }
     
