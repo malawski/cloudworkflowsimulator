@@ -3,7 +3,10 @@ package cws.core;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
+import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
@@ -32,17 +35,60 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     /** The current VMs */
     private LinkedList<VM> vms = new LinkedList<VM>();
     
+
+	/** The set of free VMs, i.e. the ones which are not executing any jobs (idle) */
+	protected Set<VM> freeVMs = new HashSet<VM>();
+	
+	/** The set of busy VMs, i.e. the ones which execute jobs */
+	protected Set<VM> busyVMs = new HashSet<VM>();
+    
     /** The list of unmatched ready jobs */
     private LinkedList<Job> queue = new LinkedList<Job>();
     
-    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler) {
+    /** The value that is used by provisioner to estimate system load */
+    private int queueLength = 0;
+    
+    /** Deadline */
+    private double deadline = Double.MAX_VALUE;
+    
+    /** Budget */
+    private double budget= Double.MAX_VALUE;
+
+	public WorkflowEngine(Provisioner provisioner, Scheduler scheduler) {
         super("WorkflowEngine"+(next_id++));
         this.provisioner = provisioner;
         this.scheduler = scheduler;
         CloudSim.addEntity(this);
     }
-    
-    public List<Job> getQueuedJobs() {
+	
+    public int getQueueLength() {
+		return queueLength;
+	}
+
+	public void setQueueLength(int queueLength) {
+		this.queueLength = queueLength;
+	}
+	
+	public double getDeadline() {
+		return deadline;
+	}
+
+	public void setDeadline(double deadline) {
+		this.deadline = deadline;
+	}
+
+
+	public double getBudget() {
+		return budget;
+	}
+
+
+	public void setBudget(double budget) {
+		this.budget = budget;
+	}
+
+	
+    public Queue<Job> getQueuedJobs() {
         return queue;
     }
     
@@ -50,9 +96,22 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         return vms;
     }
     
+	public Set<VM> getFreeVMs() {
+		return freeVMs;
+	}
+
+	public Set<VM> getBusyVMs() {
+		return busyVMs;
+	}
+    
+    public void addJobListener(JobListener jobListener) {
+    	jobListeners.add(jobListener);
+    }
+    
     @Override
     public void startEntity() {
-        // Do nothing
+    	// send the first provisioning request
+    	send(this.getId(), 10.0, PROVISIONING_REQUEST);
     }
     
     @Override
@@ -73,6 +132,10 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
             case JOB_FINISHED:
                 jobFinished((Job)ev.getData());
                 break;
+            case PROVISIONING_REQUEST:
+                if (provisioner!=null)
+                	if (!vms.isEmpty() || !dags.isEmpty()) provisioner.provisionResources(this);
+                break;
             default:
                 throw new RuntimeException("Unrecognized event: "+ev);
         }
@@ -83,12 +146,28 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         // Do nothing
     }
     
-    private void vmLaunched(VM vm) {
+    /** 
+	 * Compute total cost consumed by all VMs.
+	 * @return
+	 */
+	public double getCost() {
+		
+		double cost = 0;
+		
+		for (VM vm : vms) {
+			cost+=vm.getCost();
+		}
+		return cost;
+	}
+
+	private void vmLaunched(VM vm) {
         vms.add(vm);
+        freeVMs.add(vm);
+        scheduler.scheduleJobs(this);
     }
     
     private void vmTerminated(VM vm) {
-        vms.remove(vm);
+
     }
     
     private void dagSubmit(DAGJob dj) {
@@ -143,13 +222,21 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
                 dags.remove(dj);
                 sendNow(dj.getOwner(), DAG_FINISHED, dj);
             }
+            
+    		Log.printLine(CloudSim.clock() + " Job " + j.getID() + " finished on VM " + j.getVM().getId());
+        	VM vm = j.getVM();
+        	busyVMs.remove(vm);
+        	freeVMs.add(vm);
         }
         
         // If the job failed
         if (j.getResult() == Job.Result.FAILURE) {
             // Retry the job
+    		Log.printLine(CloudSim.clock() + " Job " + j.getID() + " failed on VM " + j.getVM().getId() + " resubmitting...");
             Job retry = new Job(dj, t, getId());
             queue.add(retry);
         }
+        
+        scheduler.scheduleJobs(this);
     }
 }
