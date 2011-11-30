@@ -63,8 +63,12 @@ public class Job {
     /** Job result */
     private Result result;
     
-    public Job(DAGJob dagJob, Task task, int owner) {
-        this(task.size);
+    
+
+	public Job(DAGJob dagJob, Task task, int owner) {
+		// we assume that the execution times in seconds are measured on
+		// 1000 MIPS processors
+        this(task.size*1000.0);
         setDAGJob(dagJob);
         setTask(task);
         setOwner(owner);
@@ -173,6 +177,7 @@ public class Job {
     public Result getResult() {
         return result;
     }
+
     
     @Override
     public int hashCode() {
