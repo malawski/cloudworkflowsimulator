@@ -1,10 +1,15 @@
 package cws.core;
 
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
+import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.core.predicates.Predicate;
+import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
 import cws.core.transfer.Port;
 
@@ -65,6 +70,9 @@ public class VM extends SimEntity implements WorkflowEvent {
     
     /** Queue of jobs submitted to this VM */
     private LinkedList<Job> jobs;
+
+    /** Set of jobs currently running */
+    private Set<Job> runningJobs;
     
     /** Time that the VM was launched */
     private double launchTime;
@@ -94,6 +102,7 @@ public class VM extends SimEntity implements WorkflowEvent {
         this.inputPort = new Port(bandwidth);
         this.outputPort = new Port(bandwidth);
         this.jobs = new LinkedList<Job>();
+        this.runningJobs = new HashSet<Job>();
         this.idleCores = cores;
         this.launchTime = -1.0;
         this.terminateTime = -1.0;
@@ -270,12 +279,23 @@ public class VM extends SimEntity implements WorkflowEvent {
     private void terminateVM() {
         // Can no longer accept jobs 
         running = false;
+
+        // cancel future events
+        Predicate p = new PredicateType(JOB_FINISHED);
+		CloudSim.cancelAll(getId(), p);
+		        
+		// Move running jobs back to the queue...
+		
+		jobs.addAll(runningJobs);
+		runningJobs.clear();
         
-        // Fail any queued jobs
+        // ... and fail all queued jobs
         for (Job job : jobs) {
             job.setResult(Job.Result.FAILURE);
-            sendNow(job.getOwner(), JOB_FINISHED, job);
+            send(job.getOwner(), 0.0, JOB_FINISHED, job);
+    		Log.printLine(CloudSim.clock() + " Terminating job " + job.getID() + " on VM " + job.getVM().getId());
         }
+        
         
         // Reset dynamic state
         jobs.clear();
@@ -303,6 +323,9 @@ public class VM extends SimEntity implements WorkflowEvent {
         // The job is now running
         job.setStartTime(CloudSim.clock());
         job.setState(Job.State.RUNNING);
+        // add it to the running set
+        runningJobs.add(job);
+
         
         // Tell the owner
         send(job.getOwner(), 0.0, JOB_STARTED, job);
@@ -311,14 +334,22 @@ public class VM extends SimEntity implements WorkflowEvent {
         double size = job.getSize();
         double duration = size / mips;
         send(getId(), duration, JOB_FINISHED, job);
+		Log.printLine(CloudSim.clock() + " Starting job " + job.getID() + " on VM " + job.getVM().getId() + " duration " + duration);
+
         
         // One core is now busy running the job
         idleCores--;
     }
     
     private void jobFinish(Job job) {
-        // Dequeue the job
-        jobs.remove(job);
+    	
+        // Sanity check
+        if (!running) {
+            throw new RuntimeException("Cannot finish job: VM not running");
+        }
+    	
+        // remove from the running set
+        runningJobs.remove(job);
         
         // Complete the job
         job.setFinishTime(CloudSim.clock());
@@ -341,7 +372,7 @@ public class VM extends SimEntity implements WorkflowEvent {
     private void startJobs() {
         // While there are still idle jobs and cores
         while(jobs.size() > 0 && idleCores > 0) {
-            // Start the next job in the queue
+            // Start the next job in the queue 
             jobStart(jobs.poll());
         }
     }
