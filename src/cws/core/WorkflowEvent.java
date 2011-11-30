@@ -80,5 +80,13 @@ public interface WorkflowEvent {
     public static final int DAG_STARTED = 20;
     
     public static final int DAG_FINISHED = 21;
+    
+    /////////////////////////////////////////////////////////
+    // PROVISIONING EVENTS
+    /////////////////////////////////////////////////////////
+    
+    /** Submit next  provisioning request */
+    public static final int PROVISIONING_REQUEST = 22;
+
             
 }
