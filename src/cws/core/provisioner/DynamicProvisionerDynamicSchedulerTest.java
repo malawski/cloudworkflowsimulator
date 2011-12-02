@@ -23,6 +23,7 @@ import cws.core.dag.DAGParser;
 import cws.core.log.WorkflowLog;
 import cws.core.scheduler.DAGDynamicScheduler;
 import cws.core.scheduler.EnsembleDynamicScheduler;
+import cws.core.scheduler.WorkflowAwareEnsembleScheduler;
 
 
 public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
@@ -80,10 +81,17 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 	public void testDPDS() {
 		
 		double deadline = 7200.0; //seconds
-		double budget = 45.0;
+		double budget;
 		double price = 1.0;
 		int numDAGs = 40;
 		
+		budget = 49.0;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		
+		budget = 48.0;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		
+		budget = 45.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
 		
 		budget = 44.0;
@@ -120,6 +128,20 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 	
 
 	
+	@Test
+	public void testAwareDPDS() {
+		
+		double deadline = 7200.0; //seconds
+		double budget;
+		double price = 1.0;
+		int numDAGs = 40;
+		
+		budget = 49.0;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		
+	}
+	
 	
 	public void runScenario(Provisioner provisioner, Scheduler scheduler, double deadline, double budget, double price, int numDAGs) {
 			
@@ -154,6 +176,8 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		
 		int numVMs = (int) Math.floor(budget / (deadline / (60 * 60)) / price); 
 		Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
+		Log.printLine(CloudSim.clock() + " Total budget " + budget);
+
 		
 		HashSet<VM> vms = new HashSet<VM>();
 		for (int i = 0; i < numVMs; i++) {
@@ -169,6 +193,9 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		assertTrue(engine.getBusyVMs().isEmpty());
 		
 		Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
+		Log.printLine(CloudSim.clock() + " Total budget " + budget);
+		Log.printLine(CloudSim.clock() + " Total cost " + engine.getCost());
+
 		
 		String fName = "test" + provisioner.getClass().getSimpleName()+scheduler.getClass().getSimpleName()+dagName+"x"+numDAGs+"d"+deadline+"b"+budget;
 		
