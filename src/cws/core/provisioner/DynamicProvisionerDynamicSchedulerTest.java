@@ -136,7 +136,13 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		double price = 1.0;
 		int numDAGs = 40;
 		
+		
 		budget = 49.0;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		
+		// for this budget we should see the improvement of aware over unaware algorithm
+		budget = 48.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), deadline, budget, price, numDAGs);
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
 		
