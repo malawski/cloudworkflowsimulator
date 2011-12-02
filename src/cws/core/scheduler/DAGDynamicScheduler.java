@@ -43,26 +43,19 @@ public class DAGDynamicScheduler implements Scheduler, WorkflowEvent {
      * @param engine
      */
 	protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-		Iterator<Job> jobIt = jobs.iterator();
 
 		Set<VM> freeVMs = engine.getFreeVMs();
 		Set<VM> busyVMs = engine.getBusyVMs();
 		
-		Iterator<VM> vmIt = freeVMs.iterator();
-		while (jobIt.hasNext() && vmIt.hasNext()) {
-			Job job = jobIt.next();
-			VM vm = vmIt.next();
+		while (!freeVMs.isEmpty() && !jobs.isEmpty()) {
+			Job job = jobs.poll();
+			VM vm = freeVMs.iterator().next();
 			job.setVM(vm);
-			vmIt.remove(); // remove VM from free set
-			busyVMs.add(vm);
-			jobIt.remove(); // remove job from new set
+			freeVMs.remove(vm); // remove VM from free set
+			busyVMs.add(vm); //add vm to busy set
 			Log.printLine(CloudSim.clock() + " Submitting job " + job.getID() + " to VM " + job.getVM().getId());
 			CloudSim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);	
 		}
 	}
-	
-	
-
-	
 
 }
