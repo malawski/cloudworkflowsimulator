@@ -13,6 +13,8 @@ import cws.core.DAGJob;
 import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
+import cws.core.dag.DAG;
+import cws.core.dag.Task;
 import cws.core.dag.algorithms.Characteristics;
 
 
@@ -26,7 +28,7 @@ import cws.core.dag.algorithms.Characteristics;
 public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 	
 	
-	private Set<DAGJob> startedDAGs = new HashSet<DAGJob>();
+	private Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
 	private Set<DAGJob> rejectedDAGs = new HashSet<DAGJob>();
 
 	@Override
@@ -46,28 +48,10 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 		Queue<Job> jobs = engine.getQueuedJobs();
 		
 		// move all jobs to priority queue
+		prioritizedJobs.addAll(jobs);
+		jobs.clear();
 		
-		while (!jobs.isEmpty()) {
-			Job job = jobs.poll();
-			DAGJob dj = job.getDAGJob();
-			
-			if (rejectedDAGs.contains(dj)) {
-				// skip this job
-			} else if (startedDAGs.contains(dj)) {
-				// schedule the job
-				prioritizedJobs.add(job);
-			}
-			
-			else if (admitDAG(dj, engine))
-			{
-					prioritizedJobs.add(job);
-					startedDAGs.add(dj);
-			} else {
-					rejectedDAGs.add(dj);
-				
-			}
 
-		}
 			// use prioritized list for scheduling
 		scheduleQueue(prioritizedJobs, engine);	
 		
@@ -76,13 +60,56 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 		
 	}
 		
+    /**
+     * Schedule all jobs from the queue to available free VMs.
+     * Successfully scheduled jobs are removed from the queue. 
+     * @param jobs
+     * @param engine
+     */
+	protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
+
+		Set<VM> freeVMs = engine.getFreeVMs();
+		Set<VM> busyVMs = engine.getBusyVMs();
+		
+		while (!freeVMs.isEmpty() && !jobs.isEmpty()) {
+			Job job = jobs.poll();
+			
+			
+			// remove first job from the prioroty queue if dag not admitted
+			
+			DAGJob dj = job.getDAGJob();
+			
+			if (rejectedDAGs.contains(dj)) {
+				// ignore
+				return;
+			} else if (admittedDAGs.contains(dj)) {
+				// schedule the job
+			} else if (admitDAG(dj, engine)) {
+				// if the DAG is admitted we add it to the queue
+				admittedDAGs.add(dj);
+			} else {
+				rejectedDAGs.add(dj);
+				// skip this job
+				return;
+			}
+			
+			
+			VM vm = freeVMs.iterator().next();
+			job.setVM(vm);
+			freeVMs.remove(vm); // remove VM from free set
+			busyVMs.add(vm); //add vm to busy set
+			Log.printLine(CloudSim.clock() + " Submitting job " + job.getID() + " to VM " + job.getVM().getId());
+			CloudSim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);	
+		}
+	}
+	
 
 		
 	// decide what to do with the job from a new dag
 	private boolean admitDAG(DAGJob dj, WorkflowEngine engine) {
 			
 		double costEstimate = estimateCost(dj, engine);	
-		double budgetRemaining = estimateBudgetRemaining(dj, engine);
+		double budgetRemaining = estimateBudgetRemaining(engine);
 		Log.printLine(CloudSim.clock() + " Cost estimate: " + costEstimate + " Budget remaining: " + budgetRemaining);
 
 		return costEstimate<budgetRemaining ;
@@ -99,9 +126,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 		
 		Characteristics c = new Characteristics(dj.getDAG());
 		double sumRuntime = c.sumRuntime();
-		// assume that all vms are homogeneous
-		double vmPrice = 0;
-		if (!engine.getAvailableVMs().isEmpty()) vmPrice = engine.getAvailableVMs().get(0).getPrice();
+		double vmPrice = vmPrice(engine);
 		return vmPrice*sumRuntime/3600.0;
 	}
 
@@ -112,12 +137,13 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 	 * @param engine
 	 * @return
 	 */
-	private double estimateBudgetRemaining(DAGJob dj, WorkflowEngine engine) {
+	
+	private double estimateBudgetRemaining(WorkflowEngine engine) {
 
 		// remaining budget for starting new vms 
 		double rn = engine.getBudget()-engine.getCost();
 
-		// compute remaining (cot consumed) budget of currently running VMs
+		// compute remaining (not consumed) budget of currently running VMs
 		double rc = 0.0;
 		
 		Set<VM> vms = new HashSet<VM>();
@@ -128,12 +154,51 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 			rc += vm.getCost() - vm.getRuntime()*vm.getPrice()/3600.0;
 		}
 		
-		// we add this for safety in order not to underestimate our budget
-		double safetyMargin = 1.0;
+		// compute remaining runtime of admitted workflows
+		double ra = 0.0;
 		
-		return rn+rc-safetyMargin;
+		for (DAGJob admittedDJ : admittedDAGs) {
+			if (!admittedDJ.isFinished()) {
+				ra+=computeRemainingCost(admittedDJ, engine);
+			}
+		}
+		
+		// we add this for safety in order not to underestimate our budget
+		double safetyMargin = 0.1;
+		
+		return rn+rc-ra-safetyMargin;
 	}
 
+	/** Estimate remaining cost = total remaining time of incomplete tasks * price
+	 * 
+	 * @param admittedDJ
+	 * @param engine
+	 * @return
+	 */
 	
+	private double computeRemainingCost(DAGJob admittedDJ, WorkflowEngine engine) {
+
+		double cost = 0.0;
+		DAG dag = admittedDJ.getDAG();
+		for (String taskName : dag.getTasks()) {
+			Task task = dag.getTask(taskName);
+			if (!admittedDJ.isComplete(task)) cost+=task.size*vmPrice(engine);
+		}
+		return cost/3600.0;
+	}
+
+
+
+	/** 
+	 * get the price of VM hour, assuming that all the vms are homogeneous
+	 * @param engine
+	 * @return
+	 */
+	
+	private double vmPrice(WorkflowEngine engine) {
+		double vmPrice = 0;
+		if (!engine.getAvailableVMs().isEmpty()) vmPrice = engine.getAvailableVMs().get(0).getPrice();
+		return vmPrice;
+	}
 
 }
