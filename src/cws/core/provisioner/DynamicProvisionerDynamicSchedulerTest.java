@@ -80,49 +80,50 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 	@Test
 	public void testDPDS() {
 		
+		String dagName = "CyberShake_1000.dag";
 		double deadline = 7200.0; //seconds
 		double budget;
 		double price = 1.0;
 		int numDAGs = 40;
 		
 		budget = 49.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 48.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 45.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 44.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 40.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 10.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 9.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 8.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 7.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 6.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 5.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 4.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 1.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 	}
 	
@@ -131,6 +132,8 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 	@Test
 	public void testAwareDPDS() {
 		
+		String dagName = "CyberShake_1000.dag";
+
 		double deadline = 7200.0; //seconds
 		double budget;
 		double price = 1.0;
@@ -138,25 +141,90 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		
 		
 		budget = 49.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), deadline, budget, price, numDAGs);
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		// for this budget we should see the improvement of aware over unaware algorithm
 		budget = 48.0;
-		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), deadline, budget, price, numDAGs);
-		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 	}
 	
+	@Test
+	public void testAwareDPDSMontage() {
+		
+		String dagName = "Montage_1000.dag";
+
+		double deadline = 7200.0; //seconds
+		double budget;
+		double price = 1.0;
+		int numDAGs = 40;
+		
+		
+		budget = 41.0;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+
+	}
 	
-	public void runScenario(Provisioner provisioner, Scheduler scheduler, double deadline, double budget, double price, int numDAGs) {
+	@Test
+	public void testAwareDPDSInspiral() {
+		
+		String dagName = "Inspiral_1000.dag";
+
+		double deadline = 72000.0; //seconds
+		double budget;
+		double price = 1.0;
+		int numDAGs = 40;
+		
+		
+		budget = 400.0;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+
+	}
+
+	@Test
+	public void testAwareDPDSEpigenomics() {
+		
+		String dagName = "Epigenomics_997.dag";
+
+		double deadline = 720000.0; //seconds
+		double budget;
+		double price = 1.0;
+		int numDAGs = 40;
+		
+		
+		budget = 3350.0;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+
+	}
+	
+	@Test
+	public void testAwareDPDSSipht() {
+		
+		String dagName = "Sipht_1000.dag";
+
+		double deadline = 200000.0; //seconds
+		double budget;
+		double price = 1.0;
+		int numDAGs = 40;
+		
+		
+		budget = 458.0;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+
+	}
+	
+	public void runScenario(Provisioner provisioner, Scheduler scheduler, String dagName, double deadline, double budget, double price, int numDAGs) {
 			
 		CloudSim.init(1, null, false);
 
 			
 		List<DAG> dags = new ArrayList<DAG>();
-		
-		String dagName = "CyberShake_1000.dag";
 
 
 		
