@@ -1,0 +1,158 @@
+FILE region.hdr 304
+FILE 2mass-atlas-ID00000s-jID00000.fits 4222080
+FILE p2mass-atlas-ID00000s-jID00000.fits 4163084
+FILE p2mass-atlas-ID00000s-jID00000_area.fits 4163084
+FILE 2mass-atlas-ID00001s-jID00001.fits 4222080
+FILE p2mass-atlas-ID00001s-jID00001.fits 4161831
+FILE p2mass-atlas-ID00001s-jID00001_area.fits 4161831
+FILE 2mass-atlas-ID00002s-jID00002.fits 4222080
+FILE p2mass-atlas-ID00002s-jID00002.fits 4182323
+FILE p2mass-atlas-ID00002s-jID00002_area.fits 4182323
+FILE 2mass-atlas-ID00003s-jID00003.fits 4222080
+FILE p2mass-atlas-ID00003s-jID00003.fits 4170858
+FILE p2mass-atlas-ID00003s-jID00003_area.fits 4170858
+FILE 2mass-atlas-ID00004s-jID00004.fits 4222080
+FILE p2mass-atlas-ID00004s-jID00004.fits 4157647
+FILE p2mass-atlas-ID00004s-jID00004_area.fits 4157647
+FILE fit.txt 272
+FILE diff.txt 408404
+FILE fits_list.tbl 245
+FILE fits.tbl 1889
+FILE pimages.tbl 837
+FILE corrections.tbl 265
+FILE c2mass-atlas-ID00000s-jID00000_area.fits 4163084
+FILE c2mass-atlas-ID00000s-jID00000.fits 4163084
+FILE c2mass-atlas-ID00001s-jID00001_area.fits 4161831
+FILE c2mass-atlas-ID00001s-jID00001.fits 4161831
+FILE c2mass-atlas-ID00002s-jID00002_area.fits 4182323
+FILE c2mass-atlas-ID00002s-jID00002.fits 4182323
+FILE c2mass-atlas-ID00003s-jID00003.fits 4170858
+FILE c2mass-atlas-ID00003s-jID00003_area.fits 4170858
+FILE c2mass-atlas-ID00004s-jID00004.fits 4157647
+FILE c2mass-atlas-ID00004s-jID00004_area.fits 4157647
+FILE cimages.tbl 837
+FILE newcimages.tbl 1599
+FILE mosaic_ID00022_ID00022.fits 46509614
+FILE mosaic_ID00022_ID00022_area.fits 46509614
+FILE shrunken_ID00023_ID00023.fits 1861129
+FILE shrunken_ID00023_ID00023.jpg 204856
+TASK ID00000 Montage::mProjectPP:1.0 13.39
+TASK ID00001 Montage::mProjectPP:1.0 13.83
+TASK ID00002 Montage::mProjectPP:1.0 13.36
+TASK ID00003 Montage::mProjectPP:1.0 13.60
+TASK ID00004 Montage::mProjectPP:1.0 13.78
+TASK ID00005 Montage::mDiffFit:1.0 10.59
+TASK ID00006 Montage::mDiffFit:1.0 10.59
+TASK ID00007 Montage::mDiffFit:1.0 10.88
+TASK ID00008 Montage::mDiffFit:1.0 10.81
+TASK ID00009 Montage::mDiffFit:1.0 10.49
+TASK ID00010 Montage::mDiffFit:1.0 10.51
+TASK ID00011 Montage::mDiffFit:1.0 10.51
+TASK ID00012 Montage::mDiffFit:1.0 10.62
+TASK ID00013 Montage::mDiffFit:1.0 10.37
+TASK ID00014 Montage::mConcatFit:1.0 0.72
+TASK ID00015 Montage::mBgModel:1.0 1.42
+TASK ID00016 Montage::mBackground:1.0 10.39
+TASK ID00017 Montage::mBackground:1.0 10.64
+TASK ID00018 Montage::mBackground:1.0 10.83
+TASK ID00019 Montage::mBackground:1.0 10.93
+TASK ID00020 Montage::mBackground:1.0 10.76
+TASK ID00021 Montage::mImgTbl:1.0 1.39
+TASK ID00022 Montage::mAdd:1.0 3.03
+TASK ID00023 Montage::mShrink:1.0 3.86
+TASK ID00024 Montage::mJPEG:1.0 0.45
+INPUTS ID00000 region.hdr 2mass-atlas-ID00000s-jID00000.fits
+OUTPUTS ID00000 p2mass-atlas-ID00000s-jID00000.fits p2mass-atlas-ID00000s-jID00000_area.fits
+INPUTS ID00001 region.hdr 2mass-atlas-ID00001s-jID00001.fits
+OUTPUTS ID00001 p2mass-atlas-ID00001s-jID00001.fits p2mass-atlas-ID00001s-jID00001_area.fits
+INPUTS ID00002 region.hdr 2mass-atlas-ID00002s-jID00002.fits
+OUTPUTS ID00002 p2mass-atlas-ID00002s-jID00002.fits p2mass-atlas-ID00002s-jID00002_area.fits
+INPUTS ID00003 region.hdr 2mass-atlas-ID00003s-jID00003.fits
+OUTPUTS ID00003 p2mass-atlas-ID00003s-jID00003.fits p2mass-atlas-ID00003s-jID00003_area.fits
+INPUTS ID00004 region.hdr 2mass-atlas-ID00004s-jID00004.fits
+OUTPUTS ID00004 p2mass-atlas-ID00004s-jID00004.fits p2mass-atlas-ID00004s-jID00004_area.fits
+INPUTS ID00005 region.hdr p2mass-atlas-ID00000s-jID00000.fits p2mass-atlas-ID00000s-jID00000_area.fits p2mass-atlas-ID00001s-jID00001.fits p2mass-atlas-ID00001s-jID00001_area.fits
+OUTPUTS ID00005 fit.txt diff.txt
+INPUTS ID00006 region.hdr p2mass-atlas-ID00001s-jID00001.fits p2mass-atlas-ID00001s-jID00001_area.fits p2mass-atlas-ID00000s-jID00000.fits p2mass-atlas-ID00000s-jID00000_area.fits
+OUTPUTS ID00006 fit.txt diff.txt
+INPUTS ID00007 region.hdr p2mass-atlas-ID00001s-jID00001.fits p2mass-atlas-ID00001s-jID00001_area.fits p2mass-atlas-ID00003s-jID00003.fits p2mass-atlas-ID00003s-jID00003_area.fits
+OUTPUTS ID00007 fit.txt diff.txt
+INPUTS ID00008 region.hdr p2mass-atlas-ID00002s-jID00002.fits p2mass-atlas-ID00002s-jID00002_area.fits p2mass-atlas-ID00000s-jID00000.fits p2mass-atlas-ID00000s-jID00000_area.fits
+OUTPUTS ID00008 fit.txt diff.txt
+INPUTS ID00009 region.hdr p2mass-atlas-ID00002s-jID00002.fits p2mass-atlas-ID00002s-jID00002_area.fits p2mass-atlas-ID00001s-jID00001.fits p2mass-atlas-ID00001s-jID00001_area.fits
+OUTPUTS ID00009 fit.txt diff.txt
+INPUTS ID00010 region.hdr p2mass-atlas-ID00002s-jID00002.fits p2mass-atlas-ID00002s-jID00002_area.fits
+OUTPUTS ID00010 fit.txt diff.txt
+INPUTS ID00011 region.hdr p2mass-atlas-ID00003s-jID00003.fits p2mass-atlas-ID00003s-jID00003_area.fits p2mass-atlas-ID00001s-jID00001.fits p2mass-atlas-ID00001s-jID00001_area.fits
+OUTPUTS ID00011 fit.txt diff.txt
+INPUTS ID00012 region.hdr p2mass-atlas-ID00004s-jID00004.fits p2mass-atlas-ID00004s-jID00004_area.fits p2mass-atlas-ID00001s-jID00001.fits p2mass-atlas-ID00001s-jID00001_area.fits
+OUTPUTS ID00012 fit.txt diff.txt
+INPUTS ID00013 region.hdr p2mass-atlas-ID00004s-jID00004.fits p2mass-atlas-ID00004s-jID00004_area.fits p2mass-atlas-ID00003s-jID00003.fits p2mass-atlas-ID00003s-jID00003_area.fits
+OUTPUTS ID00013 fit.txt diff.txt
+INPUTS ID00014 fits_list.tbl fit.txt diff.txt
+OUTPUTS ID00014 fits.tbl
+INPUTS ID00015 pimages.tbl fits.tbl
+OUTPUTS ID00015 corrections.tbl
+INPUTS ID00016 corrections.tbl p2mass-atlas-ID00000s-jID00000.fits p2mass-atlas-ID00000s-jID00000_area.fits
+OUTPUTS ID00016 c2mass-atlas-ID00000s-jID00000_area.fits c2mass-atlas-ID00000s-jID00000.fits
+INPUTS ID00017 corrections.tbl p2mass-atlas-ID00001s-jID00001.fits p2mass-atlas-ID00001s-jID00001_area.fits
+OUTPUTS ID00017 c2mass-atlas-ID00001s-jID00001_area.fits c2mass-atlas-ID00001s-jID00001.fits
+INPUTS ID00018 corrections.tbl p2mass-atlas-ID00002s-jID00002.fits p2mass-atlas-ID00002s-jID00002_area.fits
+OUTPUTS ID00018 c2mass-atlas-ID00002s-jID00002_area.fits c2mass-atlas-ID00002s-jID00002.fits
+INPUTS ID00019 corrections.tbl p2mass-atlas-ID00003s-jID00003.fits p2mass-atlas-ID00003s-jID00003_area.fits
+OUTPUTS ID00019 c2mass-atlas-ID00003s-jID00003.fits c2mass-atlas-ID00003s-jID00003_area.fits
+INPUTS ID00020 corrections.tbl p2mass-atlas-ID00004s-jID00004.fits p2mass-atlas-ID00004s-jID00004_area.fits
+OUTPUTS ID00020 c2mass-atlas-ID00004s-jID00004.fits c2mass-atlas-ID00004s-jID00004_area.fits
+INPUTS ID00021 cimages.tbl c2mass-atlas-ID00000s-jID00000_area.fits c2mass-atlas-ID00000s-jID00000.fits c2mass-atlas-ID00001s-jID00001_area.fits c2mass-atlas-ID00001s-jID00001.fits c2mass-atlas-ID00002s-jID00002_area.fits c2mass-atlas-ID00002s-jID00002.fits c2mass-atlas-ID00003s-jID00003.fits c2mass-atlas-ID00003s-jID00003_area.fits c2mass-atlas-ID00004s-jID00004.fits c2mass-atlas-ID00004s-jID00004_area.fits
+OUTPUTS ID00021 newcimages.tbl
+INPUTS ID00022 region.hdr newcimages.tbl
+OUTPUTS ID00022 mosaic_ID00022_ID00022.fits mosaic_ID00022_ID00022_area.fits
+INPUTS ID00023 mosaic_ID00022_ID00022.fits mosaic_ID00022_ID00022_area.fits
+OUTPUTS ID00023 shrunken_ID00023_ID00023.fits
+INPUTS ID00024 shrunken_ID00023_ID00023.fits
+OUTPUTS ID00024 shrunken_ID00023_ID00023.jpg
+EDGE ID00001 ID00005
+EDGE ID00000 ID00005
+EDGE ID00001 ID00006
+EDGE ID00000 ID00006
+EDGE ID00001 ID00007
+EDGE ID00003 ID00007
+EDGE ID00002 ID00008
+EDGE ID00000 ID00008
+EDGE ID00002 ID00009
+EDGE ID00001 ID00009
+EDGE ID00002 ID00010
+EDGE ID00001 ID00011
+EDGE ID00003 ID00011
+EDGE ID00001 ID00012
+EDGE ID00004 ID00012
+EDGE ID00004 ID00013
+EDGE ID00003 ID00013
+EDGE ID00012 ID00014
+EDGE ID00013 ID00014
+EDGE ID00010 ID00014
+EDGE ID00011 ID00014
+EDGE ID00006 ID00014
+EDGE ID00005 ID00014
+EDGE ID00009 ID00014
+EDGE ID00008 ID00014
+EDGE ID00007 ID00014
+EDGE ID00014 ID00015
+EDGE ID00000 ID00016
+EDGE ID00015 ID00016
+EDGE ID00001 ID00017
+EDGE ID00015 ID00017
+EDGE ID00002 ID00018
+EDGE ID00015 ID00018
+EDGE ID00003 ID00019
+EDGE ID00015 ID00019
+EDGE ID00004 ID00020
+EDGE ID00015 ID00020
+EDGE ID00020 ID00021
+EDGE ID00016 ID00021
+EDGE ID00017 ID00021
+EDGE ID00018 ID00021
+EDGE ID00019 ID00021
+EDGE ID00021 ID00022
+EDGE ID00022 ID00023
+EDGE ID00023 ID00024
