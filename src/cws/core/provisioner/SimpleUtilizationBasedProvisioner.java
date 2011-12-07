@@ -1,5 +1,6 @@
 package cws.core.provisioner;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 	// below this utilization threshold we start deprovisioning vms
 	private static final double LOWER_THRESHOLD = 0.70;
 	
+	// number of initially provisioned VMs to be used for setting limits for autoscaling
 	private int initialNumVMs = 0;
 
 	@Override
@@ -42,11 +44,82 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 		double vmPrice = 0;
 		if (!engine.getAvailableVMs().isEmpty()) vmPrice = engine.getAvailableVMs().get(0).getPrice();
 		
-		// if we are close to the budget by one VM*hour
-		if ( budget - cost <= vmPrice || time > deadline) {
+		
+		
+		// running vms are free + busy
+		Set<VM> runningVMs = new HashSet<VM>(engine.getFreeVMs());
+		runningVMs.addAll(engine.getBusyVMs());
+		
+		int numVMsRunning = runningVMs.size();
+		
+		// find VMs that will complete their billing hour 
+		// during the next provisioning cycle
+		Set<VM> completingVMs = new HashSet<VM>();		
+		
+		for (VM vm : runningVMs) {
+			double vmRuntime = vm.getRuntime();
+
+			// full hours (rounded up)
+			double vmHours = Math.ceil(vmRuntime/3600.0);
+
+			// seconds till next full hour
+			double secondsRemaining = vmHours*3600.0-vmRuntime;
 			
-			terminateInstances(engine, engine.getFreeVMs());
-			terminateInstances(engine, engine.getBusyVMs());
+			// we add "magic number" 11.0 to include also the deprovisioning time
+			if (secondsRemaining<PROVISIONER_INTERVAL+11.0) {
+				completingVMs.add(vm);
+			}
+		}
+		
+		int numVMsCompleting = completingVMs.size();
+	
+		Log.printLine(CloudSim.clock() + " Provisioner: number of instances : " + numVMsRunning);
+		Log.printLine(CloudSim.clock() + " Provisioner: number of instances completing: " + numVMsCompleting);	
+	
+		
+		// if we are close to the budget 
+		if ( budget - cost < vmPrice * numVMsCompleting  || time > deadline) {
+			
+			// compute number of vms to terminate
+			// it is the number that would overrun the budget if not terminated
+			int numToTerminate = numVMsRunning - (int) Math.floor(((budget - cost)/vmPrice));
+		
+			Log.printLine(CloudSim.clock() + " Provisioner: number of instances to terminate: " + numToTerminate);
+
+			// set of vms scheduled for termination
+			Set<VM> toTerminate = new HashSet<VM>();
+
+			// select VMs to terminate
+			if (numToTerminate<numVMsCompleting) {
+				// select only from completing vms
+				Iterator<VM> completingIt = completingVMs.iterator();
+				for (int i=0; i<numToTerminate; i++) {
+					VM vm;
+					vm = completingIt.next();
+					toTerminate.add(vm);
+				}	
+			} else {
+				// terminate all completing and add more from free and busy ones
+				toTerminate.addAll(completingVMs);
+				int added = toTerminate.size();
+				
+				Iterator<VM> freeIt = engine.getFreeVMs().iterator();
+				Iterator<VM> busyIt = engine.getBusyVMs().iterator();
+				while (added<numToTerminate) {
+					VM vm;
+					if (freeIt.hasNext()) vm = freeIt.next();
+					else vm = busyIt.next();
+					if (toTerminate.add(vm)) added++;
+				}
+			
+			}
+
+			
+			// start terminating vms
+			Set<VM> terminated = terminateInstances(engine, toTerminate);
+			// remove terminated vms from free and busy sets
+			engine.getFreeVMs().removeAll(terminated);
+			engine.getBusyVMs().removeAll(terminated);
 			
 			// some instances may be still running so we want to be invoked again to stop them before they reach full hour
 			if (engine.getFreeVMs().size()+engine.getBusyVMs().size()>0)
@@ -62,16 +135,36 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 				
 		Log.printLine(CloudSim.clock() + " Provisioner: utilization: " + utilization);
 
-		if (utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS < MAX_SCALING * initialNumVMs) {
+		// if we are close to constraints we should not provision new vms
+		boolean finishing_phase = budget - cost <= vmPrice * numVMsCompleting  || time > deadline;
+		
+		// if:
+		// we are not in finishing phase,
+		// and utilization is high
+		// and we are below max limit
+		// and we have money left for one instance more
+		// then: deploy new instance
+		if (! finishing_phase && utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS <= MAX_SCALING * initialNumVMs && budget - cost >= vmPrice) {
 			
 			VM vm = new VM(1000, 1, 1.0, 1.0);
 			Log.printLine(CloudSim.clock() + " Starting VM: " + vm.getId());
 			CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
 			
-		} else if (utilization < LOWER_THRESHOLD) {
+		} else if (! finishing_phase && utilization < LOWER_THRESHOLD) {
 			
-			Set<VM> freeVMs = engine.getFreeVMs();
-			terminateInstances(engine, freeVMs);	
+			// select Vms to terminate
+			Set<VM> toTerminate = new HashSet<VM>();
+
+			// terminate half of the instances
+			// make sure that if there is only one instance it should be terminated
+			int numToTerminate = (int) Math.ceil(engine.getFreeVMs().size()/2.0);
+			Iterator<VM> vmIt = engine.getFreeVMs().iterator();
+			for (int i=0;i<numToTerminate && vmIt.hasNext(); i++) {
+				toTerminate.add(vmIt.next());
+			}
+				
+			Set<VM> terminated = terminateInstances(engine, toTerminate);	
+			engine.getFreeVMs().removeAll(terminated);
 			
 		}
 		
@@ -85,13 +178,17 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 	 * that are close to the full hour of operation.
 	 * Thus this method has to be invoked several times 
 	 * to effectively terminate all the instances.
+	 * The method modifies the given vmSet by removing the terminated Vms.
+	 *  
 	 * 
 	 * @param engine
 	 * @param vmSet
+	 * @return set of VMs that were terminated
 	 */
 	
-	private void terminateInstances(WorkflowEngine engine, Set<VM> vmSet) {
+	private Set<VM> terminateInstances(WorkflowEngine engine, Set<VM> vmSet) {
 		
+		Set<VM> removed = new HashSet<VM>();
 		Iterator<VM> vmIt = vmSet.iterator();
 		
 		while (vmIt.hasNext()) {
@@ -105,12 +202,14 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 			double secondsRemaining = vmHours*3600.0-vmRuntime;
 			
 			//terminate only vms that have less seconds remaining than a defined threshold
-			if (secondsRemaining<=PROVISIONER_INTERVAL) {
+			if (secondsRemaining<PROVISIONER_INTERVAL+11.0) {
 				vmIt.remove();
+				removed.add(vm);
 				Log.printLine(CloudSim.clock() + " Terminating VM: " + vm.getId());
 				CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);				
 			}
 		}
+		return removed;
 	}
 
 }
