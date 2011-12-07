@@ -150,11 +150,14 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 		pw.println("========== DAGJobs ==========");
 		pw.println("Priority" + indent + "Finished" );
 
+		int finished = 0;
 		for (DAGJob dj : djs) {
 			pw.print(indent + dj.getPriority() + indent + indent);
 			pw.print(indent + dj.isFinished() + indent + indent);
 			pw.println(); 
+			if (dj.isFinished()) finished++;
 		}
+		pw.println("Completed DAGs: " + finished);
 		Log.print(sw.toString());
 
 		
