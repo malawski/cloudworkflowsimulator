@@ -88,42 +88,55 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		
 		budget = 49.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 48.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 45.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 44.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 40.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 10.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 9.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 8.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 7.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 6.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 
 		budget = 5.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 4.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 		budget = 1.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		
 	}
 	
@@ -140,14 +153,31 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		int numDAGs = 40;
 		
 		
-		budget = 49.0;
+		
+		budget = 41.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 		
-		// for this budget we should see the improvement of aware over unaware algorithm
-		budget = 48.0;
+		budget = 0.5;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+		
+		budget = 1.5;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+
+		budget = 2.5;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+
+		budget = 11.3;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+
+		budget = 12.7;
+		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+
 		
 	}
 	
@@ -162,7 +192,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		int numDAGs = 40;
 		
 		
-		budget = 41.0;
+		budget = 73.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 
@@ -213,8 +243,24 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		int numDAGs = 40;
 		
 		
-		budget = 458.0;
+		budget = 457.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagName, deadline, budget, price, numDAGs);
+		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
+
+	}
+
+	@Test
+	public void testBudgetOverrun() {
+		
+		String dagName = "Sipht_1000.dag";
+
+		double deadline = 200000.0; //seconds
+		double budget;
+		double price = 1.0;
+		int numDAGs = 40;
+		
+		
+		budget = 450.0;
 		runScenario(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagName, deadline, budget, price, numDAGs);
 
 	}
