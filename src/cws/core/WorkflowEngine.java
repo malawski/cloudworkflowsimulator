@@ -225,8 +225,8 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
             
     		Log.printLine(CloudSim.clock() + " Job " + j.getID() + " finished on VM " + j.getVM().getId());
         	VM vm = j.getVM();
-        	busyVMs.remove(vm);
-        	freeVMs.add(vm);
+        	// add to free if contained in busy set
+        	if (busyVMs.remove(vm)) freeVMs.add(vm);
         }
         
         // If the job failed
