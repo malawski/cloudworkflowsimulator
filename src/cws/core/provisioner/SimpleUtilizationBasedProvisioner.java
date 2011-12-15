@@ -15,8 +15,6 @@ import cws.core.WorkflowEvent;
 
 public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner implements Provisioner, WorkflowEvent {
 
-	// maximum autoscaling factor over initial number of provisioned VMs 
-	private static final double MAX_SCALING = 2.0;
 	// above this utilization threshold we start provisioning additional VMs
 	private static final double UPPER_THRESHOLD=0.90;
 	// below this utilization threshold we start deprovisioning vms
@@ -101,16 +99,16 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 			} else {
 				// terminate all completing and add more from free and busy ones
 				toTerminate.addAll(completingVMs);
-				int added = toTerminate.size();
-				
-				Iterator<VM> freeIt = engine.getFreeVMs().iterator();
-				Iterator<VM> busyIt = engine.getBusyVMs().iterator();
-				while (added<numToTerminate) {
-					VM vm;
-					if (freeIt.hasNext()) vm = freeIt.next();
-					else vm = busyIt.next();
-					if (toTerminate.add(vm)) added++;
-				}
+//				int added = toTerminate.size();
+//				
+//				Iterator<VM> freeIt = engine.getFreeVMs().iterator();
+//				Iterator<VM> busyIt = engine.getBusyVMs().iterator();
+//				while (added<numToTerminate) {
+//					VM vm;
+//					if (freeIt.hasNext()) vm = freeIt.next();
+//					else vm = busyIt.next();
+//					if (toTerminate.add(vm)) added++;
+//				}
 			
 			}
 
@@ -144,7 +142,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 		// and we are below max limit
 		// and we have money left for one instance more
 		// then: deploy new instance
-		if (! finishing_phase && utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS <= MAX_SCALING * initialNumVMs && budget - cost >= vmPrice) {
+		if (! finishing_phase && utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS <= getMax_scaling() * initialNumVMs && budget - cost >= vmPrice) {
 			
 			VM vm = new VM(1000, 1, 1.0, 1.0);
 			Log.printLine(CloudSim.clock() + " Starting VM: " + vm.getId());
@@ -211,5 +209,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 		}
 		return removed;
 	}
+
+
 
 }
