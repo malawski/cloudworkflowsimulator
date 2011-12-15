@@ -24,6 +24,8 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
     
+    private LinkedList<DAGJob> allDAGJobs = new LinkedList<DAGJob>();
+    
     private HashSet<JobListener> jobListeners = new HashSet<JobListener>();
     
     /** The provisioner that allocates resources for this workflow engine */
@@ -173,6 +175,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     private void dagSubmit(DAGJob dj) {
         
         dags.add(dj);
+        allDAGJobs.add(dj);
         
         // The DAG starts immediately
         sendNow(dj.getOwner(), DAG_STARTED, dj);
@@ -239,4 +242,8 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         
         scheduler.scheduleJobs(this);
     }
+
+	public LinkedList<DAGJob> getAllDags() {
+		return allDAGJobs;
+	}
 }
