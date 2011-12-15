@@ -1,144 +1,4 @@
-require 'scanf.rb'
-require 'rubygems'
-require 'gnuplot'
-require 'set'
-
-
-# Plot Gantt charts from CloudSim log files using Gnuplot
-# 
-# Author: Maciej Malawski
-
-
-class Tasks
-  attr_reader :xlo, :xhi, :y, :ids, :types, :distinct_types
-  
-  def read_tasks (filename)
-    
-    str = `cat #{filename}.txt | grep SUCCESS`
-
-    jobs = Hash.new
-    @distinct_types = Set.new
-
-    str.each do |line|
-      data = line.scanf(" %d   SUCCESS  %d %d %f %f %f")
-      jobs[data[0]] = [data [1], data[2], data[4], data[5]]
-    end
-
-    @xlo = Array.new
-    @xhi = Array.new
-    @y = Array.new
-    @ids = Array.new
-    @types = Array.new
-
-    jobs.keys.each do |id|
-      @xlo[id] = jobs[id][2]
-      @xhi[id] = jobs[id][3]
-      @y[id] = jobs[id][1]
-      @ids[id] = id
-      @types[id] = jobs[id][0]
-      @distinct_types.add(jobs[id][0])
-    end
-  end
-  
-  
-end
-
-
-def read_array (filter)
-  str = `#{filter}`
-
-  cols = Array.new
-
-  str.each do |line|
-    row = line.split
-    if cols[0]==nil
-      # create array of columns
-      for i in 0..row.size-1
-        cols[i]=Array.new
-      end
-    end
-    for i in 0..row.size-1
-        cols[i].push row[i]
-    end
-  end
-  return cols
-end
-  
-
-
-def plot_schedule (filename)
-
-  tasks = Tasks.new
-  tasks.read_tasks(filename)
-  
-  vms = read_array("cat #{filename}-vms.txt | grep -e '[0-9]'  ")
-
-  ymax = vms.length + 0.8
-  
-  inputs = read_array("cat #{filename}-inputs-transfer.txt | grep -e '[0-9]'  ")
-
-  outputs = read_array("cat #{filename}-outputs-transfer.txt | grep -e '[0-9]'  ")
-    
-  
-
-  Gnuplot.open do |gp|
-    Gnuplot::Plot.new( gp ) do |plot|
-
-      plot.title  "Schedule " + File.basename(filename)
-      plot.xlabel "time"
-      plot.ylabel "VM ID"
-      #plot.ytics 50
-      #plot.yrange "[-0.8:#{ymax}]"
-      #plot.terminal 'pdf size 8.5,11 font "arial,6" linewidth 1'
-      #plot.terminal 'pdf size 11,8.5 font "arial,6" linewidth 1'
-      #plot.output filename + ".pdf"
-      #puts "Saving plot to file: " + filename + ".pdf"
-
-      data = Array.new
-
-      vmset = Gnuplot::DataSet.new( vms ) do |ds|
-        ds.using = "2:1:2:3:($1-0.5):($1+0.5)"
-        ds.with = "boxxyerrorbars fs solid 0.55 noborder"
-        ds.title = 'VMs'
-      end
-      
-      data.push(vmset) if vms.size > 0
-      
-      inputset = Gnuplot::DataSet.new( inputs ) do |ds|
-        ds.using = "2:1:2:3:($1-0.3):($1+0.3)"
-        ds.with = "boxxyerrorbars fs solid 0.55 "
-        ds.title = 'Inputs'
-      end
-      
-      data.push(inputset) if inputs.size > 0
-
-      outputset = Gnuplot::DataSet.new( outputs ) do |ds|
-        ds.using = "2:1:2:3:($1-0.3):($1+0.3)"
-        ds.with = "boxxyerrorbars fs solid 0.55 "
-        ds.title = 'Outputs'
-      end
-      
-      data.push(outputset) if outputs.size > 0
-      
-            
-      tasks.distinct_types.to_a.sort.each do |type|
-        # here we do filtering based on type (e.g. priority)
-        dataset = Gnuplot::DataSet.new( [tasks.xlo, tasks.y, tasks.xlo, tasks.xhi, tasks.types] ) do |ds|
-          ds.using = "($5==#{type} ? $1 : NaN):2:3:4:($2-0.4):($2+0.4)"
-          ds.with = "boxxyerrorbars fs solid 0.55"
-          ds.title = "Job type #{type}"
-        end
-        data.push(dataset)
-      end
-
-                    
-      plot.data = data
-      
-    end
-
-  end
-
-end
+require "#{File.dirname(__FILE__)}/plots.rb"
 
 
 #plot_schedule 'testDatacenterCloudlets2'
@@ -202,39 +62,69 @@ end
 #plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b49.0'
 #plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b49.0'
 
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b41.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b41.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b41.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b41.0'
+#
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b45.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b44.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b10.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b9.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b8.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b7.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b6.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b5.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b4.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b1.0'
+#
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b45.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b44.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b10.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b9.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b8.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b7.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b6.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b5.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b4.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b1.0'
+#
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerMontage_1000.dagx40d7200.0b73.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerMontage_1000.dagx40d7200.0b73.0'
+#
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerInspiral_1000.dagx40d72000.0b400.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerInspiral_1000.dagx40d72000.0b400.0'
+#
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerEpigenomics_997.dagx40d720000.0b3350.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerEpigenomics_997.dagx40d720000.0b3350.0'
 
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b45.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b44.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b10.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b9.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b8.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b7.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b6.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b5.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b4.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCyberShake_1000.dagx40d7200.0b1.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerEpigenomics_997.dagx40d115200.0b35000.0m2.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerEpigenomics_997.dagx40d115200.0b35000.0m2.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerEpigenomics_997.dagx40d115200.0b35000.0m0.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerEpigenomics_997.dagx40d115200.0b35000.0m0.0'
 
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b45.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b44.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b10.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b9.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b8.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b7.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b6.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b5.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b4.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCyberShake_1000.dagx40d7200.0b1.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerEpigenomics_997.dagx40d72000.0b3350.0m2.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerEpigenomics_997.dagx40d72000.0b3350.0m2.0'
+#lot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerEpigenomics_997.dagx40d72000.0b3350.0m0.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerEpigenomics_997.dagx40d72000.0b3350.0m0.0'
 
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerMontage_1000.dagx40d7200.0b73.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerMontage_1000.dagx40d7200.0b73.0'
 
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerInspiral_1000.dagx40d72000.0b400.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerInspiral_1000.dagx40d72000.0b400.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerSipht_1000.dagx40d200000.0b457.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerSipht_1000.dagx40d200000.0b457.0'
 
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerEpigenomics_997.dagx40d720000.0b3350.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerEpigenomics_997.dagx40d720000.0b3350.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicScheduleravianflu_large.dagx40d720000.0b20000.0m2.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleScheduleravianflu_large.dagx40d720000.0b20000.0m2.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicScheduleravianflu_large.dagx40d720000.0b20000.0m0.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleScheduleravianflu_large.dagx40d720000.0b20000.0m0.0'
 
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerSipht_1000.dagx40d200000.0b457.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerSipht_1000.dagx40d200000.0b457.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerpsload_large.dagx40d72000.0b800.0m2.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerpsload_large.dagx40d72000.0b800.0m2.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerpsload_large.dagx40d72000.0b800.0m0.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerpsload_large.dagx40d72000.0b800.0m0.0'
+
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerpsmerge_small.dagx40d72000.0b8000.0m2.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerpsmerge_small.dagx40d72000.0b8000.0m2.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerpsmerge_small.dagx40d72000.0b8000.0m0.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerpsmerge_small.dagx40d72000.0b8000.0m0.0'
+
+
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerpsload_large.dagx40d252000.0b600.0m0.0'
+plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerpsload_medium.dagx40d122400.0b100.0m0.0'
