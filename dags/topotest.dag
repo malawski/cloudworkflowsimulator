@@ -1,0 +1,13 @@
+# Synthetic DAG for testing topological sort algorithm
+
+TASK E task 1.0
+TASK D task 1.0
+TASK C task 1.0
+TASK A task 1.0
+TASK B task 1.0
+
+EDGE A C
+EDGE B C
+EDGE B D
+EDGE C E
+EDGE D E

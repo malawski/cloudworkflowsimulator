@@ -1,0 +1,14 @@
+# Synthetic DAG for testing critical path algo
+
+TASK A task 1.0
+TASK B task 1.0
+TASK C task 1.0
+TASK D task 1.0
+TASK E task 1.0
+
+EDGE A C
+EDGE C E
+EDGE A B
+EDGE B C
+EDGE C D
+EDGE D E
