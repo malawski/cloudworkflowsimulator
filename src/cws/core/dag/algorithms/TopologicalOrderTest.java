@@ -1,54 +1,55 @@
 package cws.core.dag.algorithms;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-
-
 
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 
-
 public class TopologicalOrderTest {
-   
+    
     @Test
-    public void topologicalTest() {
+    public void topotest() {
+        DAG dag = DAGParser.parseDAG(new File("dags/topotest.dag"));
+        checkTopologicalSort(dag);
+    }
+    
+    @Test
+    public void test() {
         DAG dag = DAGParser.parseDAG(new File("dags/test.dag"));
-        TopologicalOrder order = new TopologicalOrder(dag);
-        System.out.println(order.postorder());
-        for (Task task : order.reversePostorder()) System.out.print(task + " ");
-        System.out.println();
+        checkTopologicalSort(dag);
     }
-
+    
     @Test
-    public void topologicalTest30() {
+    public void cybershake30() {
         DAG dag = DAGParser.parseDAG(new File("dags/CyberShake_30.dag"));
-        TopologicalOrder order = new TopologicalOrder(dag);
-        System.out.println(order.postorder());
-        for (Task task : order.reversePostorder()) System.out.print(task + " ");
-        System.out.println();
-        for (Task task : order.postorder()) {
-        	checkOrder(task, order.postorder());        	
-        }      
+        checkTopologicalSort(dag);
     }
-   
-    void checkOrder(Task task, Iterable<Task> postorder) {
-        boolean before = true;       
-        for (Task t : postorder) {
-            if (t==task) {
-                before = false;
-            } else if (before) {
-                assertFalse(task.parents.contains(t));
-            } else {
-            	assertFalse(task.children.contains(t));
+    
+    void checkTopologicalSort(DAG dag) {
+        // Compute the topological order
+        TopologicalOrder order = new TopologicalOrder(dag);
+        
+        // Copy to a list
+        ArrayList<Task> l = new ArrayList<Task>(dag.numTasks());
+        for (Task t : order) {
+            l.add(t);
+        }
+        
+        // Validate that all the children of each task have a sort index later
+        // than their parent
+        for (String id: dag.getTasks()) {
+            Task t = dag.getTask(id);
+            int pi = l.indexOf(t);
+            for (Task c : t.children) {
+                int ci = l.indexOf(c);
+                assertTrue(String.format("%s should be after %s", c.id, t.id), 
+                        ci > pi);
             }
         }
-       
     }
-   
 }
-
