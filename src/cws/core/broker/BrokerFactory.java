@@ -18,8 +18,7 @@ public class BrokerFactory {
 		try {
 			broker = new DatacenterBroker("Broker");
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException(e);
 		}
 		return broker;
 	}
@@ -29,8 +28,7 @@ public class BrokerFactory {
 		try {
 			broker = new DatacenterBrokerRandom("Broker");
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException(e);
 		}
 		return broker;
 	}
@@ -40,8 +38,7 @@ public class BrokerFactory {
 		try {
 			broker = new DatacenterBrokerRandomLimited("Broker", maxInStage);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException(e);
 		}
 		return broker;
 	}
@@ -51,8 +48,7 @@ public class BrokerFactory {
 		try {
 			broker = new DatacenterBrokerRandomDAG("Broker");
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException(e);
 		}
 		return broker;
 	}
@@ -62,8 +58,7 @@ public class BrokerFactory {
 		try {
 			broker = new DatacenterBrokerRandomLimitedDAG("Broker", maxInStage);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException(e);
 		}
 		return broker;
 	}

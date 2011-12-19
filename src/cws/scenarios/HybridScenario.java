@@ -73,9 +73,7 @@ public class HybridScenario extends Scenario{
 			Log.printLine("Hybrid Scenario finished!");
 			return debts;
 		} catch (Exception e) {
-			e.printStackTrace();
-			Log.printLine("Unwanted errors happen");
-			return 0;
+			throw new RuntimeException(e);
 		}
 	}
 

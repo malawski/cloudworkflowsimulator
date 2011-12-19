@@ -2,9 +2,6 @@ package cws.core.datacenter;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -239,7 +236,8 @@ public class DatacenterTest {
 			return completedCloudlets;
 		}
 		
-		public List<Cloudlet> getCloudlets() {
+		@SuppressWarnings("unused")
+        public List<Cloudlet> getCloudlets() {
 			return cloudlets;
 		}
 
@@ -259,7 +257,8 @@ public class DatacenterTest {
 			return runningVMs;
 		}
 		
-		public Set<Vm> getTerminatedVMs() {
+		@SuppressWarnings("unused")
+        public Set<Vm> getTerminatedVMs() {
 			return terminatedVMs;
 		}
 
@@ -515,8 +514,7 @@ public class DatacenterTest {
 		// Log.setOutput(new FileOutputStream(new
 		// File("testDatacenterDeprovisionerDAG.log")));
 		// } catch (FileNotFoundException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
+		// throw new RuntimeException(e);
 		// }
 
 		DatacenterDeprovisionerDAGClient datacenterClient = new DatacenterDeprovisionerDAGClient("Client");

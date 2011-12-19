@@ -8,15 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
 import org.junit.Test;
 
 import cws.core.Cloud;
-import cws.core.DAGJob;
 import cws.core.EnsembleManager;
-import cws.core.Job;
 import cws.core.Provisioner;
-import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
@@ -87,7 +83,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
 		List<DAG> dags = new ArrayList<DAG>();
 		dags.add(dag);
 		
-		EnsembleManager em = new EnsembleManager(dags, engine);
+		new EnsembleManager(dags, engine);
 
 		
 		CloudSim.startSimulation();
@@ -128,7 +124,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
 		List<DAG> dags = new ArrayList<DAG>();
 		dags.add(dag);
 		
-		EnsembleManager em = new EnsembleManager(dags, engine);
+		new EnsembleManager(dags, engine);
 
 		
 		CloudSim.startSimulation();
@@ -169,7 +165,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
 			dags.add(dag);
 		}
 		
-		EnsembleManager em = new EnsembleManager(dags, engine);
+		new EnsembleManager(dags, engine);
 
 		
 		CloudSim.startSimulation();

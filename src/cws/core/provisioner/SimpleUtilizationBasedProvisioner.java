@@ -7,7 +7,6 @@ import java.util.Set;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 
-import cws.core.Cloud;
 import cws.core.Provisioner;
 import cws.core.VM;
 import cws.core.WorkflowEngine;

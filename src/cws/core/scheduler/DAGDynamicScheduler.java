@@ -1,7 +1,5 @@
 package cws.core.scheduler;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Queue;
 import java.util.Set;
 
@@ -9,10 +7,8 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 
 import cws.core.Job;
-import cws.core.JobListener;
 import cws.core.Scheduler;
 import cws.core.VM;
-import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 

@@ -82,7 +82,7 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 		List<DAG> dags = new ArrayList<DAG>();
 		dags.add(dag);
 		
-		EnsembleManager em = new EnsembleManager(dags, engine);
+		new EnsembleManager(dags, engine);
 
 		
 		CloudSim.startSimulation();
@@ -123,7 +123,7 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 		List<DAG> dags = new ArrayList<DAG>();
 		dags.add(dag);
 		
-		EnsembleManager em = new EnsembleManager(dags, engine);
+		new EnsembleManager(dags, engine);
 
 		
 		CloudSim.startSimulation();

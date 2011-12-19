@@ -55,8 +55,6 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 	
 	@Override
 	public void dagStarted(DAGJob dagJob) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -171,8 +169,7 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 			out.write(s);
 			out.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}	
 	}
 

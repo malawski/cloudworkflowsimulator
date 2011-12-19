@@ -1,7 +1,6 @@
 package cws.core.transfer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -9,7 +8,6 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import cws.core.WorkflowEvent;
 
@@ -17,10 +15,6 @@ public class TestRandomTransferManager  {
     public static final long KB = 1024;
     public static final long MB = 1024 * KB;
     public static final long GB = 1024 * MB;
-    
-    private double DELTA = 0.000001;
-    
-
     
     private class TransferDriver extends SimEntity implements WorkflowEvent {
         private TransferManager tm;
@@ -52,9 +46,6 @@ public class TestRandomTransferManager  {
         public void shutdownEntity() { }
     }
     
-
-
-    
     @Test
     public void testSimpleTransfer24() {
         CloudSim.init(1, null, false);
@@ -66,22 +57,18 @@ public class TestRandomTransferManager  {
         Port a = new Port(1000);
         Port[] b = new Port[4];
         for (int i=0; i<4; i++) {
-        	b[i] = new Port(1000);
+            b[i] = new Port(1000);
         }
         Link l = new Link(1000, 1000.0);
         List<Transfer> transfers = new ArrayList<Transfer>();        
         
         for (int i=0; i<24;i++) {
-        	Transfer t1 = new Transfer(a, b[i%4], l, (int) (100*rng.nextDouble())*MB, td.getId());
+            Transfer t1 = new Transfer(a, b[i%4], l, (int) (100*rng.nextDouble())*MB, td.getId());
             transfers.add(t1);
-        }        
-
+        }
         
         td.setTransfers(transfers);
         
         CloudSim.startSimulation();
-        
-
     }
-    
 }

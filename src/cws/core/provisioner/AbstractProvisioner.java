@@ -2,7 +2,6 @@ package cws.core.provisioner;
 
 import cws.core.Cloud;
 import cws.core.Provisioner;
-import cws.core.WorkflowEvent;
 
 public abstract class AbstractProvisioner implements Provisioner {
 

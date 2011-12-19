@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Test;
 
 import cws.core.Cloud;
-import cws.core.DAGJob;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
 import cws.core.VM;
@@ -68,7 +66,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 			dags.add(dag);
 		}
 		
-		EnsembleManager em = new EnsembleManager(dags, engine);
+		new EnsembleManager(dags, engine);
 
 		
 		CloudSim.startSimulation();

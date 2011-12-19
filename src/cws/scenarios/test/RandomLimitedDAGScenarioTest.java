@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import cws.core.PublicDatacenter;
 import cws.core.broker.BrokerFactory;
-import cws.core.broker.DatacenterBrokerRandomDAG;
 import cws.core.broker.DatacenterBrokerRandomLimitedDAG;
 import cws.core.dag.Job;
 import cws.scenarios.CloudletListGenerator;

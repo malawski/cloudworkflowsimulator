@@ -1,15 +1,10 @@
 package cws.core;
 
-
-
-
-
 import java.util.List;
 import java.util.Map;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
@@ -21,9 +16,7 @@ import org.cloudbus.cloudsim.core.CloudSimTags;
  *
  */
 public class PublicDatacenter extends Datacenter {
-
-
-
+    
 	/**
 	 * Instantiates a new datacenter.
 	 *
@@ -43,8 +36,6 @@ public class PublicDatacenter extends Datacenter {
 			List<Storage> storageList,
 			double schedulingInterval) throws Exception {
 		super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
-
-
 	}
 
 	/**
@@ -77,7 +68,7 @@ public class PublicDatacenter extends Datacenter {
 			
 			//MM added cost 
 			double amount = 0.0;
-			String indent = "    ";
+//			String indent = "    ";
 			
 			for (Host host : this.<Host>getHostList()) {
 				for (Vm vm : host.getVmList()) {
@@ -111,10 +102,4 @@ public class PublicDatacenter extends Datacenter {
 		double debts = map.get(userID);
 		return debts;
 	}
-
-
-
-
-
-
 }

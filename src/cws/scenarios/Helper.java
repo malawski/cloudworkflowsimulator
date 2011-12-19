@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.Vm;
 
 import cws.core.dag.Job;
 
@@ -75,15 +74,11 @@ public class Helper {
 			out.write(s);
 			out.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}	
 	}
 
 	public static void printVmList(Map<Integer, Double> vmCreationTimes, Map<Integer, Double> vmDestroyTimes, String name) {
-
-		Vm vm;
-
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw, true);
 		

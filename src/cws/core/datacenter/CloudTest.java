@@ -359,7 +359,8 @@ public class CloudTest {
 			return completedJobs;
 		}
 		
-		public Set<Job> getJobs() {
+		@SuppressWarnings("unused")
+        public Set<Job> getJobs() {
 			return jobs;
 		}
 
@@ -585,12 +586,9 @@ public class CloudTest {
 			out.write(s);
 			out.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}	
 	}
-	
-	
 	
     //@Test
     public void testCloudVMs() {
@@ -703,8 +701,7 @@ public class CloudTest {
 		// Log.setOutput(new FileOutputStream(new
 		// File("testDatacenterDeprovisionerDAG.log")));
 		// } catch (FileNotFoundException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
+		// throw new RuntimeException(e);
 		// }
 
 

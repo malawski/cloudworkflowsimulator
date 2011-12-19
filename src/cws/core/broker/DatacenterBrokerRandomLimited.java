@@ -17,12 +17,10 @@ public class DatacenterBrokerRandomLimited extends DatacenterBroker {
 	private int cloudletsSubmitted;
 	private Random random;
 	private int maxInStage;
-	private int stage;
 
 	public DatacenterBrokerRandomLimited(String name, int maxInStage) throws Exception {
 		super(name);
 		cloudletsSubmitted=0;
-		stage = 0;
 		this.maxInStage = maxInStage;
 		random = new Random();
 	}

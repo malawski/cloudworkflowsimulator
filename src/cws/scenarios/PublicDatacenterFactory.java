@@ -90,7 +90,7 @@ public class PublicDatacenterFactory {
 			datacenter = new PublicDatacenter(name, characteristics,
 					new VmAllocationPolicySimple(hostList), storageList, 0);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 		return datacenter;

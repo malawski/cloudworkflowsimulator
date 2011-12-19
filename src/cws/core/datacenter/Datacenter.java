@@ -230,8 +230,7 @@ public class Datacenter extends SimEntity implements WorkflowEvent {
         try {
 			cloudlet.setCloudletStatus(Cloudlet.SUCCESS);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
         sendNow(cloudlet.getUserId(), CLOUDLET_COMPLETE, cloudlet);		
 	}
