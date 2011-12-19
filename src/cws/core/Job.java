@@ -63,12 +63,8 @@ public class Job {
     /** Job result */
     private Result result;
     
-    
-
-	public Job(DAGJob dagJob, Task task, int owner) {
-		// we assume that the execution times in seconds are measured on
-		// 1000 MIPS processors
-        this(task.size*1000.0);
+    public Job(DAGJob dagJob, Task task, int owner, double size) {
+        this(size);
         setDAGJob(dagJob);
         setTask(task);
         setOwner(owner);

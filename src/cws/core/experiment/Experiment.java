@@ -11,6 +11,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import cws.core.Cloud;
 import cws.core.DAGJob;
 import cws.core.EnsembleManager;
+import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
@@ -37,7 +38,7 @@ public class Experiment {
 	
 		List<DAG> dags = new ArrayList<DAG>();
 		
-		WorkflowEngine engine = new WorkflowEngine(param.getProvisioner() , param.getScheduler());
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), param.getProvisioner(), param.getScheduler());
 		Cloud cloud = new Cloud();
 		param.getProvisioner().setCloud(cloud);
 		param.getProvisioner().setMax_scaling(param.getMax_scaling());

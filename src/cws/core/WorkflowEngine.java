@@ -50,30 +50,37 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     /** The value that is used by provisioner to estimate system load */
     private int queueLength = 0;
     
+    private JobFactory jobFactory = null;
+    
     /** Deadline */
     private double deadline = Double.MAX_VALUE;
     
     /** Budget */
-    private double budget= Double.MAX_VALUE;
+    private double budget = Double.MAX_VALUE;
 
-	public WorkflowEngine(Provisioner provisioner, Scheduler scheduler) {
+    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler) {
         super("WorkflowEngine"+(next_id++));
+        this.jobFactory = jobFactory;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
         CloudSim.addEntity(this);
     }
-	
+    
+    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler) {
+        this(new SimpleJobFactory(), provisioner, scheduler);
+    }
+    
     public int getQueueLength() {
-		return queueLength;
-	}
+        return queueLength;
+    }
 
-	public void setQueueLength(int queueLength) {
-		this.queueLength = queueLength;
-	}
-	
-	public double getDeadline() {
-		return deadline;
-	}
+    public void setQueueLength(int queueLength) {
+        this.queueLength = queueLength;
+    }
+    
+    public double getDeadline() {
+        return deadline;
+    }
 
 	public void setDeadline(double deadline) {
 		this.deadline = deadline;
@@ -190,7 +197,10 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
             Task t = dj.nextReadyTask();
             if (t == null)
                 break;
-            Job j = new Job(dj, t, getId());
+            Job j = jobFactory.createJob(dj, t, getId());
+            j.setDAGJob(dj);
+            j.setTask(t);
+            j.setOwner(getId());
             queue.add(j);
         }
     }
@@ -226,17 +236,17 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
                 sendNow(dj.getOwner(), DAG_FINISHED, dj);
             }
             
-    		Log.printLine(CloudSim.clock() + " Job " + j.getID() + " finished on VM " + j.getVM().getId());
-        	VM vm = j.getVM();
-        	// add to free if contained in busy set
-        	if (busyVMs.remove(vm)) freeVMs.add(vm);
+            Log.printLine(CloudSim.clock() + " Job " + j.getID() + " finished on VM " + j.getVM().getId());
+            VM vm = j.getVM();
+            // add to free if contained in busy set
+            if (busyVMs.remove(vm)) freeVMs.add(vm);
         }
         
         // If the job failed
         if (j.getResult() == Job.Result.FAILURE) {
             // Retry the job
-    		Log.printLine(CloudSim.clock() + " Job " + j.getID() + " failed on VM " + j.getVM().getId() + " resubmitting...");
-            Job retry = new Job(dj, t, getId());
+            Log.printLine(CloudSim.clock() + " Job " + j.getID() + " failed on VM " + j.getVM().getId() + " resubmitting...");
+            Job retry = jobFactory.createJob(dj, t, getId());
             queue.add(retry);
         }
         

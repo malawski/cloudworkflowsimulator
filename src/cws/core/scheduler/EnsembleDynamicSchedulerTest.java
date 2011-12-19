@@ -13,6 +13,7 @@ import org.junit.Test;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
+import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
@@ -31,7 +32,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
 		
 		Provisioner provisioner = null;
 		DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
-		WorkflowEngine engine = new WorkflowEngine(provisioner , scheduler);
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
 		Cloud cloud = new Cloud();
 		
 
@@ -60,7 +61,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
 		
 		Provisioner provisioner = null;
 		DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
-		WorkflowEngine engine = new WorkflowEngine(provisioner , scheduler);
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner , scheduler);
 		Cloud cloud = new Cloud();
 		
 		
@@ -103,7 +104,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
 		
 		Provisioner provisioner = null;
 		DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
-		WorkflowEngine engine = new WorkflowEngine(provisioner , scheduler);
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner , scheduler);
 		Cloud cloud = new Cloud();
 		
 
@@ -144,7 +145,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
 		
 		Provisioner provisioner = null;
 		DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
-		WorkflowEngine engine = new WorkflowEngine(provisioner , scheduler);
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner , scheduler);
 		Cloud cloud = new Cloud();
 		
 

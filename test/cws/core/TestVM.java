@@ -6,8 +6,6 @@ import org.cloudbus.cloudsim.core.SimEvent;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import cws.core.dag.Task;
-
 public class TestVM {
     
     private class VMDriver extends SimEntity implements WorkflowEvent {
@@ -59,8 +57,7 @@ public class TestVM {
     public void testSingleJob() {
         CloudSim.init(1, null, false);
         
-        Task t = new Task("a", "a", 1000);
-        Job j = new Job(null, t, 0);
+        Job j = new Job(1000);
         
         VM vm = new VM(100, 1, 100, 0.40);
         
@@ -79,9 +76,8 @@ public class TestVM {
     public void testTwoJobs() {
         CloudSim.init(1, null, false);
         
-        Task t = new Task("a", "a", 1000);
-        Job j1 = new Job(null, t, 0);
-        Job j2 = new Job(null, t, 0);
+        Job j1 = new Job(1000);
+        Job j2 = new Job(1000);
         
         VM vm = new VM(100, 1, 100, 0.40);
         
@@ -105,9 +101,8 @@ public class TestVM {
     public void testMultiCoreVM() {
         CloudSim.init(1, null, false);
         
-        Task t = new Task("a", "a", 1000);
-        Job j1 = new Job(null, t, 0);
-        Job j2 = new Job(null, t, 0);
+        Job j1 = new Job(1000);
+        Job j2 = new Job(1000);
         
         VM vm = new VM(100, 2, 100, 0.40);
         

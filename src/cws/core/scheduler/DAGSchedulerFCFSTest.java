@@ -14,6 +14,7 @@ import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
 import cws.core.Scheduler;
+import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
@@ -32,7 +33,7 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 		
 		Provisioner provisioner = null;
 		Scheduler scheduler = new DAGSchedulerFCFS();
-		WorkflowEngine engine = new WorkflowEngine(provisioner , scheduler);
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
 		Cloud cloud = new Cloud();
 		
 		HashSet<VM> vms = new HashSet<VM>();
@@ -59,7 +60,7 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 		
 		Provisioner provisioner = null;
 		Scheduler scheduler = new DAGSchedulerFCFS();
-		WorkflowEngine engine = new WorkflowEngine(provisioner , scheduler);
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
 		Cloud cloud = new Cloud();
 		
 		WorkflowLog jobLog = new WorkflowLog();
@@ -102,7 +103,7 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 		
 		Provisioner provisioner = null;
 		Scheduler scheduler = new DAGSchedulerFCFS();
-		WorkflowEngine engine = new WorkflowEngine(provisioner , scheduler);
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
 		Cloud cloud = new Cloud();
 		
 		WorkflowLog jobLog = new WorkflowLog();

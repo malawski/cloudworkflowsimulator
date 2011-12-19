@@ -13,6 +13,7 @@ import org.junit.Test;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
+import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
@@ -40,7 +41,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		
 		Provisioner provisioner = new SimpleQueueBasedProvisioner();
 		DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
-		WorkflowEngine engine = new WorkflowEngine(provisioner , scheduler);
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
 		Cloud cloud = new Cloud();
 		provisioner.setCloud(cloud);
 
