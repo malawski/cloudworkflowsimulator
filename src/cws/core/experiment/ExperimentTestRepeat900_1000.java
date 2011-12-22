@@ -16,7 +16,7 @@ import org.junit.Test;
  */
 
 public class ExperimentTestRepeat900_1000 {
-
+    
 	String dagPath;
 	String dagName;
 	double budget;
@@ -35,10 +35,9 @@ public class ExperimentTestRepeat900_1000 {
 	 * 
 	 ******************************/
 	
-	
 	@Test
 	public void testRunExperimentMontage0() {		
-		
+
 		dagPath = "../projects/pegasus/Montage/";
 		dagName = "MONTAGE";
 		

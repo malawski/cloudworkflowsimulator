@@ -8,8 +8,10 @@ import java.util.List;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 
+import cws.core.Cloud;
 import cws.core.DAGJob;
 import cws.core.EnsembleManager;
+import cws.core.Scheduler;
 import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
@@ -17,6 +19,7 @@ import cws.core.WorkflowEvent;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.log.WorkflowLog;
+import cws.core.provisioner.AbstractProvisioner;
 import cws.core.provisioner.SimpleUtilizationBasedProvisioner;
 import cws.core.scheduler.EnsembleDynamicScheduler;
 import cws.core.scheduler.WorkflowAwareEnsembleScheduler;
@@ -32,41 +35,45 @@ public class Experiment {
 	public ExperimentResult runExperiment(ExperimentDescription param) {
 		
 		ExperimentResult result = new ExperimentResult();
-			
+		
+		AbstractProvisioner prov = (AbstractProvisioner)param.getProvisioner();
+		
+		Scheduler sched = param.getScheduler();
+		
 		CloudSim.init(1, null, false);
-	
+		
+		Cloud cloud = new Cloud();
+		prov.setCloud(cloud);
+		
+		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), prov, sched);
+		
 		List<DAG> dags = new ArrayList<DAG>();
-		
-		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), param.getProvisioner(), param.getScheduler());
-		
 		for (int i = 0; i < param.getDags().length; i++) {
 			DAG dag = parse(new File(param.getDagPath() + param.getDags()[i]));
 			dags.add(dag);
-		}		
+		}
 		
 		EnsembleManager em = new EnsembleManager(dags, engine);
-
+		
 		engine.setDeadline(param.getDeadline());
 		engine.setBudget(param.getBudget());
 		
-		WorkflowLog wfLog = new WorkflowLog();		
+		WorkflowLog wfLog = new WorkflowLog();
 		engine.addJobListener(wfLog);
-		engine.getCloud().addVMListener(wfLog);
+		cloud.addVMListener(wfLog);
 		em.addDAGJobListener(wfLog);
 		
-
 		// calculate estimated number of VMs to consume budget evenly before deadline
 		// ceiling is used to start more vms so that the budget is consumed just before deadline
 		int numVMs = (int) Math.ceil(param.getBudget() / (param.getDeadline() / (60 * 60)) / param.getPrice()); 
 		Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
 		Log.printLine(CloudSim.clock() + " Total budget " + param.getBudget());
-
 		
 		HashSet<VM> vms = new HashSet<VM>();
 		for (int i = 0; i < numVMs; i++) {
 			VM vm = new VM(1000, 1, 1.0, param.getPrice());
-			vms.add(vm);			
-			CloudSim.send(engine.getId(), engine.getCloud().getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+			vms.add(vm);
+			CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
 		}	
 		
 		CloudSim.startSimulation();
@@ -75,18 +82,17 @@ public class Experiment {
 		
 		wfLog.printJobs(fName);
 		wfLog.printVmList(fName);
-		wfLog.printDAGJobs();		
+		wfLog.printDAGJobs();
 		
 		Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
 		Log.printLine(CloudSim.clock() + " Total budget " + param.getBudget());
 		Log.printLine(CloudSim.clock() + " Total cost " + engine.getCost());
 		
 		result.setBudget(param.getBudget());
+		result.setDeadline(param.getDeadline());
 		result.setCost(engine.getCost());
 		result.setNumBusyVMs(engine.getBusyVMs().size());
 		result.setNumFreeVMs(engine.getFreeVMs().size());
-		result.setDeadline(engine.getDeadline());
-	
 		
 		int finished = 0;
 		for (DAGJob dj : engine.getAllDags()) {
@@ -108,7 +114,7 @@ public class Experiment {
 	private DAG parse (File file) {
 		if (file.getName().endsWith("dag")) return DAGParser.parseDAG(file);
 		else if (file.getName().endsWith("dax")) return DAGParser.parseDAX(file);
-		else throw new RuntimeException("Unrecognized file: " + file.getName());		
+		else throw new RuntimeException("Unrecognized file: " + file.getName());
 	}
 	
 	
@@ -134,15 +140,18 @@ public class Experiment {
 		double deadline;
 		ExperimentResult resultsAware[] = new ExperimentResult[N+1];
 		ExperimentResult resultsSimple[] = new ExperimentResult[N+1];
-
 		
 		for (int i=start; i<= N; i+=step) {
 			deadline = 3600*i; //seconds
 			Experiment experiment = new Experiment();
-			resultsAware[i] = experiment.runExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dags,
-				deadline, budget, price, max_scaling));
-			resultsSimple[i] = experiment.runExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dags,
-					deadline, budget, price, max_scaling));
+			resultsAware[i] = experiment.runExperiment(new ExperimentDescription(
+			        new SimpleUtilizationBasedProvisioner(max_scaling), 
+			        new WorkflowAwareEnsembleScheduler(), dagPath, dags,
+			        deadline, budget, price, max_scaling));
+			resultsSimple[i] = experiment.runExperiment(new ExperimentDescription(
+			        new SimpleUtilizationBasedProvisioner(max_scaling), 
+			        new EnsembleDynamicScheduler(), dagPath, dags,
+			        deadline, budget, price, max_scaling));
 		}
 		
 		StringBuffer outAware = new StringBuffer();

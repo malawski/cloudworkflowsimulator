@@ -34,6 +34,23 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
         CloudSim.addEntity(this);
     }
     
+    public EnsembleManager(WorkflowEngine engine) {
+        this(null, engine);
+    }
+    
+    private void prioritizeDAGs(Collection<DAG> dags) {
+        if (dags == null)
+            return;
+        
+        // For now just add them in whatever order they come in
+        int priority = 0;
+        for (DAG d : dags) {
+            DAGJob dj = new DAGJob(d, getId());
+            dj.setPriority(priority++);
+            this.dags.add(dj);
+        }
+    }
+    
     public void addDAGJobListener(DAGJobListener l) {
         this.listeners.add(l);
     }
@@ -44,10 +61,11 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
     
     @Override
     public void startEntity() {
+        System.out.println("Starting em");
         // Submit all DAGs
-    	while(!dags.isEmpty()) {
-    		submitDAG(dags.pop());
-    	}
+        while(!dags.isEmpty()) {
+            submitDAG(dags.pop());
+        }
     }
     
     @Override
@@ -69,17 +87,7 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
         // Do nothing
     }
     
-    private void prioritizeDAGs(Collection<DAG> dags) {
-        // For now just add them in whatever order they come in
-    	int priority = 0;
-        for (DAG d : dags) {
-        	DAGJob dj = new DAGJob(d, getId());
-        	dj.setPriority(priority++);
-            this.dags.add(dj);
-        }
-    }
-    
-    private void submitDAG(DAGJob dagJob) {
+    public void submitDAG(DAGJob dagJob) {
         // Submit the dag to the workflow engine
         sendNow(engine.getId(), DAG_SUBMIT, dagJob);
     }
@@ -96,9 +104,7 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
         for (DAGJobListener l : listeners) {
             l.dagFinished(dag);
         }
-        
-        // Submit the next dag
-        if (dags.size() > 0)
-            submitDAG(dags.pop());
+        // Remove the DAG
+        dags.remove(dag);
     }
 }

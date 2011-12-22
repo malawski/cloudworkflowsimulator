@@ -24,6 +24,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
     
+    /** XXX How is this different than the one above? */
     private LinkedList<DAGJob> allDAGJobs = new LinkedList<DAGJob>();
     
     private HashSet<JobListener> jobListeners = new HashSet<JobListener>();
@@ -37,48 +38,48 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     /** The current VMs */
     private LinkedList<VM> vms = new LinkedList<VM>();
     
-
-	/** The set of free VMs, i.e. the ones which are not executing any jobs (idle) */
-	protected Set<VM> freeVMs = new HashSet<VM>();
-	
-	/** The set of busy VMs, i.e. the ones which execute jobs */
-	protected Set<VM> busyVMs = new HashSet<VM>();
+    /** The set of free VMs, i.e. the ones which are not executing any jobs (idle) */
+    protected Set<VM> freeVMs = new HashSet<VM>();
+    
+    /** The set of busy VMs, i.e. the ones which execute jobs */
+    protected Set<VM> busyVMs = new HashSet<VM>();
     
     /** The list of unmatched ready jobs */
     private LinkedList<Job> queue = new LinkedList<Job>();
     
-    /** The value that is used by provisioner to estimate system load */
-    private int queueLength = 0;
-    
+    /**
+     * A factory for creating Job objects from Task objects
+     */
     private JobFactory jobFactory = null;
     
-    private Cloud cloud = null;
+    /** 
+     * The value that is used by provisioner to estimate system load
+     * FIXME This seems unnecessary 
+     */
+    private int queueLength = 0;
     
-    /** Deadline */
+    /** 
+     * Deadline
+     * XXX Why should the workflow engine know about the deadline? 
+     */
     private double deadline = Double.MAX_VALUE;
     
-    /** Budget */
-    private double budget = Double.MAX_VALUE;
+    /** 
+     * Budget
+     * XXX Why should the workflow engine know about the budget? 
+     */
+    double budget = Double.MAX_VALUE;
 
-    public WorkflowEngine(Cloud cloud, JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler) {
+    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler) {
         super("WorkflowEngine"+(next_id++));
         this.jobFactory = jobFactory;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
-        this.cloud = cloud;
         CloudSim.addEntity(this);
     }
     
-    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler) {
-        this(new Cloud(), jobFactory, provisioner, scheduler);
-    }
-    
     public WorkflowEngine(Provisioner provisioner, Scheduler scheduler) {
-        this(new Cloud(), new SimpleJobFactory(), provisioner, scheduler);
-    }
-    
-    public Cloud getCloud() {
-        return cloud;
+        this(new SimpleJobFactory(), provisioner, scheduler);
     }
     
     public int getQueueLength() {
@@ -93,21 +94,19 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         return deadline;
     }
 
-	public void setDeadline(double deadline) {
-		this.deadline = deadline;
-	}
+    public void setDeadline(double deadline) {
+        this.deadline = deadline;
+    }
+    
+    public double getBudget() {
+        return budget;
+    }
 
 
-	public double getBudget() {
-		return budget;
-	}
-
-
-	public void setBudget(double budget) {
-		this.budget = budget;
-	}
-
-	
+    public void setBudget(double budget) {
+        this.budget = budget;
+    }
+    
     public Queue<Job> getQueuedJobs() {
         return queue;
     }
@@ -116,22 +115,22 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         return vms;
     }
     
-	public Set<VM> getFreeVMs() {
-		return freeVMs;
-	}
+    public Set<VM> getFreeVMs() {
+        return freeVMs;
+    }
 
-	public Set<VM> getBusyVMs() {
-		return busyVMs;
-	}
+    public Set<VM> getBusyVMs() {
+        return busyVMs;
+    }
     
     public void addJobListener(JobListener jobListener) {
-    	jobListeners.add(jobListener);
+        jobListeners.add(jobListener);
     }
     
     @Override
     public void startEntity() {
-    	// send the first provisioning request
-    	send(this.getId(), 10.0, PROVISIONING_REQUEST);
+        // send the first provisioning request
+        send(this.getId(), 10.0, PROVISIONING_REQUEST);
     }
     
     @Override
@@ -154,7 +153,8 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
                 break;
             case PROVISIONING_REQUEST:
                 if (provisioner!=null)
-                	if (!vms.isEmpty() || !dags.isEmpty()) provisioner.provisionResources(this);
+                    if (vms.size()>0 || dags.size()>0)
+                        provisioner.provisionResources(this);
                 break;
             default:
                 throw new RuntimeException("Unrecognized event: "+ev);
@@ -167,15 +167,15 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     }
     
     /** 
-	 * Compute total cost consumed by all VMs.
-	 * @return
+     * XXX Why does the workflow engine do this?
+     * @return total cost consumed by all VMs.
 	 */
 	public double getCost() {
 		
 		double cost = 0;
 		
 		for (VM vm : vms) {
-			cost+=vm.getCost();
+			cost += vm.getCost();
 		}
 		return cost;
 	}
@@ -187,7 +187,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     }
     
     private void vmTerminated(VM vm) {
-
+        /* Do nothing */
     }
     
     private void dagSubmit(DAGJob dj) {

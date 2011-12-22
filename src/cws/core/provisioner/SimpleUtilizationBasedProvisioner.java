@@ -34,8 +34,8 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 		
 		// check the deadline and budget constraints
 		
-		double deadline = engine.getDeadline();
 		double budget = engine.getBudget();
+		double deadline = engine.getDeadline();
 		double time = CloudSim.clock();
 		double cost = engine.getCost();
 
@@ -43,9 +43,8 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 
 		// assuming all VMs are homogeneous
 		double vmPrice = 0;
-		if (!engine.getAvailableVMs().isEmpty()) vmPrice = engine.getAvailableVMs().get(0).getPrice();
-		
-		
+		if (!engine.getAvailableVMs().isEmpty()) 
+		    vmPrice = engine.getAvailableVMs().get(0).getPrice();
 		
 		// running vms are free + busy
 		Set<VM> runningVMs = new HashSet<VM>(engine.getFreeVMs());
@@ -149,7 +148,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 			
 			VM vm = new VM(1000, 1, 1.0, 1.0);
 			Log.printLine(CloudSim.clock() + " Starting VM: " + vm.getId());
-			CloudSim.send(engine.getId(), engine.getCloud().getId(), 0.0, VM_LAUNCH, vm);
+			CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
 			
 		} else if (! finishing_phase && utilization < LOWER_THRESHOLD) {
 			
@@ -207,12 +206,9 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 				vmIt.remove();
 				removed.add(vm);
 				Log.printLine(CloudSim.clock() + " Terminating VM: " + vm.getId());
-				CloudSim.send(engine.getId(), engine.getCloud().getId(), 0.0, VM_TERMINATE, vm);				
+				CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
 			}
 		}
 		return removed;
 	}
-
-
-
 }
