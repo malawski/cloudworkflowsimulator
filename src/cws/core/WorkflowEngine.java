@@ -52,22 +52,33 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     
     private JobFactory jobFactory = null;
     
+    private Cloud cloud = null;
+    
     /** Deadline */
     private double deadline = Double.MAX_VALUE;
     
     /** Budget */
     private double budget = Double.MAX_VALUE;
 
-    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler) {
+    public WorkflowEngine(Cloud cloud, JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler) {
         super("WorkflowEngine"+(next_id++));
         this.jobFactory = jobFactory;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
+        this.cloud = cloud;
         CloudSim.addEntity(this);
     }
     
+    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler) {
+        this(new Cloud(), jobFactory, provisioner, scheduler);
+    }
+    
     public WorkflowEngine(Provisioner provisioner, Scheduler scheduler) {
-        this(new SimpleJobFactory(), provisioner, scheduler);
+        this(new Cloud(), new SimpleJobFactory(), provisioner, scheduler);
+    }
+    
+    public Cloud getCloud() {
+        return cloud;
     }
     
     public int getQueueLength() {

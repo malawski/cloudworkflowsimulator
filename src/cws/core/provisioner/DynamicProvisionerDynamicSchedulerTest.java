@@ -10,9 +10,7 @@ import java.util.List;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Test;
 
-import cws.core.Cloud;
 import cws.core.EnsembleManager;
-import cws.core.Provisioner;
 import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
@@ -39,16 +37,13 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		CloudSim.init(1, null, false);
 
 		
-		Provisioner provisioner = new SimpleQueueBasedProvisioner();
+		SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner();
 		DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
 		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
-		Cloud cloud = new Cloud();
-		provisioner.setCloud(cloud);
-
-
+		
 		WorkflowLog wfLog = new WorkflowLog();		
 		engine.addJobListener(wfLog);
-		cloud.addVMListener(wfLog);
+		engine.getCloud().addVMListener(wfLog);
 		
 		engine.setDeadline(7200.0);
 		engine.setBudget(45.0);
@@ -57,7 +52,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		for (int i = 0; i < 10; i++) {
 			VM vm = new VM(1000, 1, 1.0, 1.0);
 			vms.add(vm);
-			CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+			CloudSim.send(engine.getId(), engine.getCloud().getId(), 0.0, VM_LAUNCH, vm);
 		}
 		
 		List<DAG> dags = new ArrayList<DAG>();
@@ -90,81 +85,81 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		double max_scaling = 2.0;
 		
 		budget = 49.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		budget = 48.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		budget = 45.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		budget = 44.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		budget = 40.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		budget = 10.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		budget = 9.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		budget = 8.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		budget = 7.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		budget = 6.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		budget = 5.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		budget = 4.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		budget = 1.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 	}
@@ -185,39 +180,39 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		
 		
 		budget = 41.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		budget = 0.5;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		budget = 1.5;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		budget = 2.5;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		budget = 11.3;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		budget = 12.7;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 		
@@ -236,9 +231,9 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
 		
 		budget = 73.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 	}
@@ -256,9 +251,9 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
 		
 		budget = 400.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 	}
@@ -276,17 +271,17 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
 		
 		budget = 3350.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		
 		budget = 35000.0;
 		deadline = 115200.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 
@@ -306,16 +301,16 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
 		max_scaling = 2.0;
 		budget = 20000.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		max_scaling = 0.0;
 		budget = 20000.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 
@@ -336,16 +331,16 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		
 		max_scaling = 2.0;
 		budget = 800.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		max_scaling = 0.0;
 		budget = 800.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath,  dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath,  dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 	}
@@ -364,16 +359,16 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		
 		max_scaling = 2.0;
 		budget = 8000.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		max_scaling = 0.0;
 		budget = 8000.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 	}
@@ -394,34 +389,34 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		
 		budget = 3350.0;
 		deadline = 72000.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		
 		budget = 35000.0;
 		deadline = 115200.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		max_scaling = 0;
 		
 		budget = 3350.0;
 		deadline = 72000.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 		
 		budget = 35000.0;
 		deadline = 115200.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 		
 	}
@@ -440,9 +435,9 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
 		
 		budget = 457.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 	}
@@ -459,7 +454,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		double max_scaling = 2.0;
 
 		budget = 450.0;
-		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dagName,
+		runTestExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dagName,
 				deadline, budget, price, numDAGs, max_scaling));
 
 	}

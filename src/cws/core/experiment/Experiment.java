@@ -8,7 +8,6 @@ import java.util.List;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 
-import cws.core.Cloud;
 import cws.core.DAGJob;
 import cws.core.EnsembleManager;
 import cws.core.SimpleJobFactory;
@@ -39,9 +38,6 @@ public class Experiment {
 		List<DAG> dags = new ArrayList<DAG>();
 		
 		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), param.getProvisioner(), param.getScheduler());
-		Cloud cloud = new Cloud();
-		param.getProvisioner().setCloud(cloud);
-		param.getProvisioner().setMax_scaling(param.getMax_scaling());
 		
 		for (int i = 0; i < param.getDags().length; i++) {
 			DAG dag = parse(new File(param.getDagPath() + param.getDags()[i]));
@@ -55,7 +51,7 @@ public class Experiment {
 		
 		WorkflowLog wfLog = new WorkflowLog();		
 		engine.addJobListener(wfLog);
-		cloud.addVMListener(wfLog);
+		engine.getCloud().addVMListener(wfLog);
 		em.addDAGJobListener(wfLog);
 		
 
@@ -70,7 +66,7 @@ public class Experiment {
 		for (int i = 0; i < numVMs; i++) {
 			VM vm = new VM(1000, 1, 1.0, param.getPrice());
 			vms.add(vm);			
-			CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+			CloudSim.send(engine.getId(), engine.getCloud().getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
 		}	
 		
 		CloudSim.startSimulation();
@@ -143,9 +139,9 @@ public class Experiment {
 		for (int i=start; i<= N; i+=step) {
 			deadline = 3600*i; //seconds
 			Experiment experiment = new Experiment();
-			resultsAware[i] = experiment.runExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new WorkflowAwareEnsembleScheduler(), dagPath, dags,
+			resultsAware[i] = experiment.runExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new WorkflowAwareEnsembleScheduler(), dagPath, dags,
 				deadline, budget, price, max_scaling));
-			resultsSimple[i] = experiment.runExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(), new EnsembleDynamicScheduler(), dagPath, dags,
+			resultsSimple[i] = experiment.runExperiment(new ExperimentDescription(new SimpleUtilizationBasedProvisioner(max_scaling), new EnsembleDynamicScheduler(), dagPath, dags,
 					deadline, budget, price, max_scaling));
 		}
 		

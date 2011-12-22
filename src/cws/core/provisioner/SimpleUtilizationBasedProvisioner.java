@@ -15,12 +15,16 @@ import cws.core.WorkflowEvent;
 public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner implements Provisioner, WorkflowEvent {
 
 	// above this utilization threshold we start provisioning additional VMs
-	private static final double UPPER_THRESHOLD=0.90;
+	private static final double UPPER_THRESHOLD = 0.90;
 	// below this utilization threshold we start deprovisioning vms
 	private static final double LOWER_THRESHOLD = 0.70;
 	
 	// number of initially provisioned VMs to be used for setting limits for autoscaling
 	private int initialNumVMs = 0;
+	
+	public SimpleUtilizationBasedProvisioner(double maxScaling) {
+	    super(maxScaling);
+	}
 
 	@Override
 	public void provisionResources(WorkflowEngine engine) {
@@ -141,11 +145,11 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 		// and we are below max limit
 		// and we have money left for one instance more
 		// then: deploy new instance
-		if (! finishing_phase && utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS <= getMax_scaling() * initialNumVMs && budget - cost >= vmPrice) {
+		if (! finishing_phase && utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS <= getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 			
 			VM vm = new VM(1000, 1, 1.0, 1.0);
 			Log.printLine(CloudSim.clock() + " Starting VM: " + vm.getId());
-			CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+			CloudSim.send(engine.getId(), engine.getCloud().getId(), 0.0, VM_LAUNCH, vm);
 			
 		} else if (! finishing_phase && utilization < LOWER_THRESHOLD) {
 			
@@ -203,7 +207,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 				vmIt.remove();
 				removed.add(vm);
 				Log.printLine(CloudSim.clock() + " Terminating VM: " + vm.getId());
-				CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);				
+				CloudSim.send(engine.getId(), engine.getCloud().getId(), 0.0, VM_TERMINATE, vm);				
 			}
 		}
 		return removed;
