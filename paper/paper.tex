@@ -1,4 +1,5 @@
 \documentclass{sig-alternate}
+\usepackage{algorithm,algpseudocode}
 
 \begin{document}
 
@@ -6,7 +7,7 @@
 %\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
 %\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
 
-\title{Something About Workflow Scheduling in Clouds}
+\title{Cost- and Deadline-constrained Scheduling of Scientific Workflow Ensembles in IaaS Clouds}
 %\subtitle{[Extended Abstract]}
 
 \numberofauthors{2}
@@ -42,11 +43,13 @@ Abstract goes here.
 \section{Related Work}
 General policy and rule-based approaches to dynamic provisioning (e.g. Amazon Auto Scaling\footnote{http://aws.amazon.com/autoscaling} and RightScale\footnote{http://www.rightscale.com}).
 
-Policy-based approaches for scientific workloads (e.g. \cite{Marshall2010})
+Policy-based approaches for scientific workloads (e.g. \cite{Marshall2010, Kim2011}). Our approach is different in that we consider workflows, while policy based approaches typically consider bags of independent tasks or unpredictable batch workloads. This enables us to take advantage of scheduling heuristics that cannot be applied to independent tasks.
 
-Workflow scheduling in utility grids (e.g. \cite{Yu2005})
+Deadline-constrained cost-minimization workflow scheduling. Our work is different from \cite{Yu2005, Abrishami2010} in that we consider ensembles of workflows in IaaS clouds, which allow one to provision resources on a per-hour billing model, rather than utility grids, which allow one to choose from a pool of existing resources with a per-job billing model. Our work is different from \cite{Mao2011} in that we consider ensembles of workflows rather than unpredictable workloads containing workflows. We also have budget constraints rather than cost minimization as a goal. In other words, we assume that there is more work to be done than the available budget, so some work must be rejected. Therefore cost is not something we optimize, but rather a constraint.
 
-Workflow ensemble scheduling in clouds (e.g. \cite{Mao2011})
+Budget-constrained workflow scheduling \cite{Sakellariou2007}.
+
+Bi-criteria scheduling and multi-criteria scheduling. These approaches are similar to ours in that we have two scheduling criteria: cost and makespan. The challenge in multi-criteria scheduling is to derive an objective function that takes into account all of the criteria. These approaches typically use metaheuristics that run for a long time before producing good results.
 
 \section{Problem Description}
 \subsection{Application Model}
@@ -57,6 +60,23 @@ Workflow ensemble scheduling in clouds (e.g. \cite{Mao2011})
 \subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
 \subsection{Static Provisioning Static Scheduling (SPSS)}
+
+% This is an example of how we can do algorithms
+\begin{algorithm}
+\caption{Euclid's algorithm}
+\label{alg:euclid}
+\begin{algorithmic}[1]
+\Procedure{Euclid}{$a,b$}       \Comment{The g.c.d. of a and b}
+    \State $r\gets a\bmod b$
+    \While{$r\not=0$}           \Comment{We have the answer if r is 0}
+        \State $a\gets b$
+        \State $b\gets r$
+        \State $r\gets a\bmod b$
+    \EndWhile
+    \State \textbf{return} $b$  \Comment{The gcd is b}
+\EndProcedure
+\end{algorithmic} 
+\end{algorithm}
 
 \section{Performance Evaluation}
 
