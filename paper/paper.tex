@@ -63,17 +63,80 @@ Bi-criteria scheduling and multi-criteria scheduling. These approaches are simil
 
 % This is an example of how we can do algorithms
 \begin{algorithm}
-\caption{Euclid's algorithm}
-\label{alg:euclid}
+\caption{Admit DAGs}
+\label{alg:admit}
 \begin{algorithmic}[1]
-\Procedure{Euclid}{$a,b$}       \Comment{The g.c.d. of a and b}
-    \State $r\gets a\bmod b$
-    \While{$r\not=0$}           \Comment{We have the answer if r is 0}
-        \State $a\gets b$
-        \State $b\gets r$
-        \State $r\gets a\bmod b$
+\Procedure{AdmitDAGs}{$W,b,d$}
+    \State $P\gets empty\ plan$
+    \State $A\gets \emptyset$ \Comment{Set of admitted DAGs}
+    \For{$w\ in\ W$}
+        \State $P^\prime \gets$\ \Call{PlanDAG}{$w,P,d$}
+        \If{$P^\prime\ is\ a\ valid\ plan$}
+            \If{$Cost(P^\prime) \le b$}
+                \State $P\gets\ P^\prime$ \Comment{Accept new plan}
+                \State $A \gets A\ +\ w$ \Comment{Admit w}
+            \EndIf
+        \EndIf
+    \EndFor
+    \State \textbf{return} $P,A$
+\EndProcedure
+\end{algorithmic} 
+\end{algorithm}
+
+
+\begin{algorithm}
+\caption{PlanDAG}
+\label{alg:plandag}
+\begin{algorithmic}[1]
+\Procedure{PlanDAG}{$w,P,d$}
+    \State $P^\prime\gets \emptyset$
+    \State assign each task in w to its cheapest resource type
+    \State $cp \gets\ CriticalPath(w)$
+    \While{$cp > d$}
+        \State upgrade resource type of task with greatest improvement in runtime for least cost
+        \State $cp \gets\ CriticalPath(w)$
     \EndWhile
-    \State \textbf{return} $b$  \Comment{The gcd is b}
+    \State \Call{DeadlineDistribution}{w,d}
+    \For{$t\ in\ w\ sorted\ by\ Deadline(t)$}
+        \State choose resource r in $P^\prime$ that minimizes Cost(t)
+        \If{$AFT(t,r) < Deadline(t)$}
+            \State Schedule(t,r)
+        \Else
+            \State provision a new resource r
+            \State Schedule(t,r)
+        \EndIf
+    \EndFor
+    \State \textbf{return} $P^\prime$
+\EndProcedure
+\end{algorithmic} 
+\end{algorithm}
+
+
+\begin{algorithm}
+\caption{Deadline Distribution}
+\label{alg:deadlinedistribution}
+\begin{algorithmic}[1]
+\Procedure{DeadlineDistribution}{$w,d$}
+    \State assign $Level(t)$ to each task t in w
+    \For{$level\ l\ in\ w$}
+        \State $Tasks(l) \gets$ number of tasks in l
+        \State $Runtime(l) \gets$ runtime of tasks in l
+    \EndFor
+    \State $T \gets$ total number of tasks in w
+    \State $R \gets$ total runtime of tasks in w
+    \State $CP \gets$ critical path of w
+    \For{$level\ l\ in\ w$}
+        \State $r \gets \alpha * (Runtime(l)/R)$
+        \State $t \gets (1-\alpha) * (Tasks(l)/T)$
+        \State $FT(l) \gets (r + t) * (d - CP)$
+    \EndFor
+    \For{$task\ t\ in\ w$}
+        \State $est \gets 0$
+        \For{p in Pred(t)}
+            \State $est \gets Deadline(p)$
+        \EndFor
+        \State $Deadline(t) \gets est + RT(t) + FT(Level(t))$
+    \EndFor
 \EndProcedure
 \end{algorithmic} 
 \end{algorithm}
