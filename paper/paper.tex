@@ -113,8 +113,8 @@ The approach is to schedule each workflow in the ensemble in priority order, rej
 \caption{Ensemble planning algorithm}
 \label{alg:admit}
 \begin{algorithmic}[1]
-\Require W: workflow ensemble, b: budget, d: deadline
-\Ensure Schedule as much of W as possible given b and d
+\Require $W$: workflow ensemble; $b$: budget; $d$: deadline
+\Ensure Schedule as much of $W$ as possible given $b$ and $d$
 \Procedure{PlanEnsemble}{$W,b,d$}
     \State $P\gets empty\ plan$
     \State $A\gets \emptyset$ \Comment{Set of admitted DAGs}
@@ -137,7 +137,7 @@ The approach is to schedule each workflow in the ensemble in priority order, rej
 \caption{DAG planning algorithm}
 \label{alg:plandag}
 \begin{algorithmic}[1]
-\Require $w$: DAG, $P$: current plan, $d$: deadline
+\Require $w$: DAG; $P$: current plan; $d$: deadline
 \Ensure Create plan for $w$ that minimizes cost and meets deadline $d$
 \Procedure{PlanDAG}{$w,P,d$}
     \State $P^\prime\gets$ copy of $P$
@@ -161,32 +161,32 @@ The approach is to schedule each workflow in the ensemble in priority order, rej
 \caption{Deadline distribution algorithm}
 \label{alg:deadlinedistribution}
 \begin{algorithmic}[1]
-\Require w: DAG, d: global deadline
+\Require $w$: DAG; $d$: global deadline
 \Ensure Assign sub-deadlines to each task in w
 \Procedure{DeadlineDistribution}{$w,d$}
-    \State assign $Level(t)$ to each task t in w
-    \For{$level\ l\ in\ w$}
-        \State $Tasks(l) \gets$ number of tasks in l
-        \State $Runtime(l) \gets$ runtime of tasks in l
-    \EndFor
-    \State $T \gets$ total number of tasks in w
-    \State $R \gets$ total runtime of tasks in w
-    \State $CP \gets$ critical path of w
-    \For{$level\ l\ in\ w$}
+    \State $T \gets$ total number of tasks in $w$
+    \State $R \gets$ total runtime of tasks in $w$
+    \State $CP \gets$ length of critical path of $w$
+    \State assign $Level(t)$ to each task $t$ in $w$
+    \For{level $l\ \in w$}
+        \State $Tasks(l) \gets$ number of tasks in $l$
+        \State $Runtime(l) \gets$ runtime of tasks in $l$
         \State $r \gets \alpha * (Runtime(l)/R)$
         \State $t \gets (1-\alpha) * (Tasks(l)/T)$
         \State $FT(l) \gets (r + t) * (d - CP)$
     \EndFor
-    \For{$task\ t\ in\ w$}
-        \State $est \gets 0$
-        \For{p in Pred(t)}
-            \State $est \gets Deadline(p)$
-        \EndFor
-        \State $Deadline(t) \gets est + RT(t) + FT(Level(t))$
+    \For{task $t \in w$}
+        \State $LST(t) \gets \max(Deadline(p))\ for\ p \in Pred(t)$
+        \State $Deadline(t) \gets LST(t) + RT(t) + FT(Level(t))$
     \EndFor
 \EndProcedure
 \end{algorithmic} 
 \end{algorithm}
+
+\begin{equation}
+\label{eq:scaling}
+FT(l) = \left[{\alpha}*\frac{T_l}{t}\right] + \left[{(1 - \alpha)}*\frac{R_l}{r} \right]
+\end{equation}
 
 \section{Performance Evaluation}
 
