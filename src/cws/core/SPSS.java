@@ -50,8 +50,8 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     /** Schedule of tasks for each VM */
     private HashMap<VM, Queue<Task>> vmQueues = new HashMap<VM, Queue<Task>>();
     
-    /** Set of busy VMs */
-    private HashSet<VM> busy = new HashSet<VM>();
+    /** Set of idle VMs */
+    private HashSet<VM> idle = new HashSet<VM>();
     
     public SPSS(double budget, double deadline, List<DAG> dags) {
         this.budget = budget;
@@ -121,19 +121,18 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     public void plan() {
         // We assume the dags are in priority order
         for (DAG dag : allDAGs) {
-            Plan newPlan = planDAG(dag, plan);
-            if (newPlan == null) {
-                // Plan was not feasible
-                System.out.println("Rejecting DAG: plan not feasible");
-            } else {
+            try {
+                Plan newPlan = planDAG(dag, plan);
                 // Plan was feasible
                 if (newPlan.getCost() <= budget) {
                     admittedDAGs.add(dag);
                     plan = newPlan;
                     System.out.println("Admitting DAG. Cost of new plan "+plan.getCost());
                 } else {
-                    System.out.println("Rejecting DAG: budget exceeded");
+                    System.out.println("Rejecting DAG: New plan exceeds budget");
                 }
+            } catch (NoFeasiblePlan m) {
+                System.out.println("Rejecting DAG: "+m.getMessage());
             }
         }
         
@@ -172,15 +171,16 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     /**
      * Develop a plan for a single DAG
      */
-    Plan planDAG(DAG dag, Plan currentPlan) {
+    Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
         TopologicalOrder order = new TopologicalOrder(dag);
         
         // Initial task assignment
         HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
+        double minCost = 0.0;
         for (Task t : order) {
             
-            // FIXME For now assign each task to the SMALL VM type
+            // Initially we assign each VM to the SMALL type
             VMType vm = VMType.SMALL;
             vmTypes.put(t, vm);
             
@@ -188,15 +188,28 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
             // MIPS of the VM
             double runtime = t.size / vm.mips;
             runtimes.put(t, runtime);
+            
+            // Compute the minimum cost of running this workflow
+            minCost += (runtime/(60*60)) * vm.price;
+        }
+        
+        // Check to make sure the minimum cost is within our budget
+        // This is just an optimization
+        if (currentPlan.getCost() + minCost > budget) {
+            throw new NoFeasiblePlan(
+                    "Minimum cost of workflow ("+minCost+") " +
+                    "exceeds budget ("+budget+") given " +
+                    "current plan cost ("+currentPlan.getCost()+")");
         }
         
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = new CriticalPath(order, runtimes);
-        double criticalPathLength = path.getCriticalPathLength();
-        if (criticalPathLength > ensembleDeadline) {
-            throw new RuntimeException(
-                    "Cannot plan DAG: best critical path > deadline");
+        double criticalPath = path.getCriticalPathLength();
+        if (criticalPath > ensembleDeadline) {
+            throw new NoFeasiblePlan(
+                    "Cannot plan DAG: best critical path ("+criticalPath+") " +
+                    "> deadline ("+ensembleDeadline+")");
         }
         
         /* FIXME Later we will determine the best VM type for each task
@@ -280,15 +293,16 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
                         }
                         
                         double aft = ast + runtime;
-                        if (aft > deadline) {
+                        if (aft > deadline || aft > r.getStart()) {
                             break nogap;
                         }
                         
                         double cost = r.getCostWith(ast, r.getEnd()) - r.getCost();
                         Slot sl = new Slot(t, ast, runtime);
                         Solution soln = new Solution(r, sl, cost);
-                        if (soln.betterThan(best))
+                        if (soln.betterThan(best)) {
                             best = soln;
+                        }
                     }
                     
                     // Option 2: Leave a big gap
@@ -297,11 +311,11 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
                         
                         double ast = r.getStart() - (runtimeHours*60*60);
                         if (ast < earliestStart) {
-                            break biggap;
+                            ast = earliestStart;
                         }
                         
                         double aft = ast + runtime;
-                        if (aft > deadline) {
+                        if (aft > deadline || aft > r.getStart()) {
                             break biggap;
                         }
                         
@@ -313,17 +327,17 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
                         }
                     }
                     
-                    // Option 3: Use the slack time (medium gap)
+                    // Option 3: Use some slack time (medium gap)
                     slack: {
                         double slack = (r.getHours()*60*60) - (r.getEnd()-r.getStart());
                         
                         double ast = r.getStart() - slack;
                         if (ast < earliestStart) {
-                            break slack;
+                            ast = earliestStart;
                         }
                         
                         double aft = ast + runtime;
-                        if (aft > deadline) {
+                        if (aft > deadline || aft > r.getStart()) {
                             break slack;
                         }
                         
@@ -358,7 +372,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
                     }
                     
                     // Sanity check
-                    if (begin > end) {
+                    if (begin > end && begin-end > 1e-9) {
                         throw new RuntimeException("Negative sized empty slot");
                     }
                     
@@ -529,12 +543,13 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     
     @Override
     public void vmLaunched(VM vm) {
+        idle.add(vm);
         submitNextTaskFor(vm);
     }
     
     @Override
     public void vmTerminated(VM vm) {
-        /* Do nothing */
+        idle.remove(vm);
     }
     
     @Override
@@ -548,7 +563,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         VM vm = taskMap.get(task);
         submitNextTaskFor(vm);
     }
-
+    
     @Override
     public void jobSubmitted(Job job) { }
 
@@ -571,13 +586,13 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         
         VM vm = job.getVM();
         
-        busy.remove(vm);
+        idle.add(vm);
         submitNextTaskFor(vm);
     }
     
     private void submitNextTaskFor(VM vm) {
         // If the VM is busy, do nothing
-        if (busy.contains(vm))
+        if (!idle.contains(vm))
             return;
         
         Queue<Task> vmqueue = vmQueues.get(vm);
@@ -624,7 +639,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         readyJobs.remove(task);
             
         // Submit the job to the VM
-        busy.add(vm);
+        idle.remove(vm);
         job.setVM(vm);
         CloudSim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);
     }
@@ -644,11 +659,11 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         
         List<DAG> dags = new ArrayList<DAG>();
         for (int i = 0; i < 10; i++) {
-            DAG dag = DAGParser.parseDAG(new File("dags/Montage_1000.dag"));
+            DAG dag = DAGParser.parseDAG(new File("dags/Inspiral_1000.dag"));
             dags.add(dag);
         }
         
-        SPSS spss = new SPSS(21, 800, dags);
+        SPSS spss = new SPSS(23.50, 40000, dags);
         
         Cloud cloud = new Cloud();
         WorkflowEngine engine = new WorkflowEngine(spss, spss);
@@ -705,8 +720,10 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         TreeMap<Double,Slot> schedule;
         
         public Resource(Resource other) {
-            this.vmtype = other.vmtype;
-            this.schedule = new TreeMap<Double,Slot>(other.schedule);
+            this(other.vmtype);
+            for (Double s : other.schedule.navigableKeySet()) {
+                schedule.put(s, other.schedule.get(s));
+            }
         }
         
         public Resource(VMType type) {
@@ -822,5 +839,12 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
             }
             return cost;
         }
-    }   
+    } 
+    
+    class NoFeasiblePlan extends Exception {
+        private static final long serialVersionUID = 1L;
+        public NoFeasiblePlan(String msg) {
+            super(msg);
+        }
+    }
 }
