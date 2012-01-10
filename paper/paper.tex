@@ -14,6 +14,7 @@
 \author{
     \alignauthor Maciej Malawski and Jarek Nabrzyski\\
        \affaddr{University of Notre Dame}\\
+       \affaddr{Center for Research Computing}\\
        \affaddr{111 Information Technology Center}\\
        \affaddr{Notre Dame, IN, USA}\\
        \email{\{mmalawsk,naber\}@nd.edu}
@@ -25,7 +26,7 @@
 }
 
 \maketitle
-
+ 
 \begin{abstract}
 Abstract goes here.
 \end{abstract}
@@ -38,6 +39,13 @@ Abstract goes here.
 \keywords{Scientific workflows, DAG scheduling, simulation}
 
 \section{Introduction}
+
+Workflows are important but workflow ensembles are more important, see
+CyberShake or other examples.
+
+Clouds are interesting and different from grids.
+
+Define problems: scheduling and provisioning.
 
 
 \section{Related Work}
@@ -58,6 +66,31 @@ Bi-criteria scheduling and multi-criteria scheduling. These approaches are simil
 
 \section{Algorithms}
 \subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
+
+% This is an example of how we can do algorithms
+\begin{algorithm}
+\caption{Priority-based scheduling}
+\label{alg:ds}
+\begin{algorithmic}[1]
+\Procedure{schedule}{}
+    \State $Q\gets set\ of\ released\ tasks$
+    \State $P\gets empty\ priority\ queue$
+    \While{$Q \neq \emptyset$}
+    	\For{$task\ t\in Q$}
+    		\State \Call{Insert}{$t,P$} 
+    	\EndFor
+    	\While{$FreeVMs \neq \emptyset \wedge P \neq \emptyset $}
+    		\State $VM\gets$ \Call{SelectRandom}{$FreeVMs$}
+    		\State $t\gets$ \Call{Pop}{$P$}
+    		\State \Call{Submit}{$t,VM$}
+    	\EndWhile
+    	\State \Call{Wait}{$task\ finished$}
+    	\State \Call{Update}{$Q$}
+    \EndWhile
+\EndProcedure
+\end{algorithmic} 
+\end{algorithm}
+
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
 \subsection{Static Provisioning Static Scheduling (SPSS)}
 
@@ -142,6 +175,12 @@ Bi-criteria scheduling and multi-criteria scheduling. These approaches are simil
 \end{algorithm}
 
 \section{Performance Evaluation}
+
+\subsection{Simulator}
+
+\subsection{Scenarios}
+
+\subsection{Results}
 
 
 \section{Conclusion and Future Work}
