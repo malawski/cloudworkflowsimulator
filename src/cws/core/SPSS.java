@@ -53,10 +53,14 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     /** Set of idle VMs */
     private HashSet<VM> idle = new HashSet<VM>();
     
-    public SPSS(double budget, double deadline, List<DAG> dags) {
+    /** Tuning parameter for deadline distribution (low alpha = runtime, high alpha = tasks) */
+    private double alpha;
+    
+    public SPSS(double budget, double deadline, List<DAG> dags, double alpha) {
         this.budget = budget;
         this.ensembleDeadline = deadline;
         this.allDAGs = dags;
+        this.alpha = alpha;
     }
     
     public void setCloud(Cloud c) {
@@ -208,7 +212,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         double criticalPath = path.getCriticalPathLength();
         if (criticalPath > ensembleDeadline) {
             throw new NoFeasiblePlan(
-                    "Cannot plan DAG: best critical path ("+criticalPath+") " +
+                    "Best critical path ("+criticalPath+") " +
                     "> deadline ("+ensembleDeadline+")");
         }
         
@@ -223,7 +227,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         
         // Get deadlines for each task (deadline distribution)
         final HashMap<Task, Double> deadlines = 
-                deadlineDistribution(order, runtimes, 0.7);
+                deadlineDistribution(order, runtimes, this.alpha);
         
         // Sort tasks by deadline
         LinkedList<Task> sortedTasks = new LinkedList<Task>();
@@ -659,11 +663,11 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         
         List<DAG> dags = new ArrayList<DAG>();
         for (int i = 0; i < 10; i++) {
-            DAG dag = DAGParser.parseDAG(new File("dags/Inspiral_1000.dag"));
+            DAG dag = DAGParser.parseDAG(new File("dags/Montage_25.dag"));
             dags.add(dag);
         }
         
-        SPSS spss = new SPSS(23.50, 40000, dags);
+        SPSS spss = new SPSS(0.45, 300, dags, 0.7);
         
         Cloud cloud = new Cloud();
         WorkflowEngine engine = new WorkflowEngine(spss, spss);
@@ -676,6 +680,8 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         spss.plan();
         
         CloudSim.startSimulation();
+        
+        System.out.println("Workflows Completed: "+spss.admittedDAGs.size());
         
         System.out.println("Budget: "+spss.getBudget());
         System.out.println("Plan Cost: "+spss.getPlanCost());
