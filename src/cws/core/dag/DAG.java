@@ -22,29 +22,33 @@ public class DAG {
     }
     
     public void addFile(String name, double size) {
+        if (size < 0) {
+            throw new RuntimeException(
+                    "Invalid size for file '"+name+"': "+size);
+        }
         files.put(name, size);
     }
     
     public void addEdge(String parent, String child) {
         Task p = tasks.get(parent);
         if (p == null) {
-            throw new RuntimeException("Invalid parent: "+parent);
+            throw new RuntimeException("Invalid edge: Parent not found: "+parent);
         }
         Task c = tasks.get(child);
         if (c == null) {
-            throw new RuntimeException("Invalid child: "+child);
+            throw new RuntimeException("Invalid edge: Child not found: "+child);
         }
         p.children.add(c);
         c.parents.add(p);
     }
     
     public void setInputs(String task, List<String> inputs) {
-        Task t = tasks.get(task);
+        Task t = getTask(task);
         t.inputs = inputs;
     }
     
     public void setOutputs(String task, List<String> outputs) {
-        Task t = tasks.get(task);
+        Task t = getTask(task);
         t.outputs = outputs;
     }
     
@@ -57,10 +61,16 @@ public class DAG {
     }
     
     public Task getTask(String id) {
+        if (!tasks.containsKey(id)) {
+            throw new RuntimeException("Task not found: "+id);
+        }
         return tasks.get(id);
     }
     
     public double getFileSize(String name) {
+        if (!files.containsKey(name)) {
+            throw new RuntimeException("File not found: "+name);
+        }
         return files.get(name);
     }
     

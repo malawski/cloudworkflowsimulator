@@ -20,6 +20,10 @@ public class Task {
         this.id = id;
         this.transformation = transformation;
         this.size = size;
+        if (size <= 0) {
+            throw new RuntimeException(
+                    "Invalid size for task "+id+" ("+transformation+"): "+size);
+        }
     }
     
     /* IT IS IMPORTANT THAT THESE ARE NOT IMPLEMENTED
