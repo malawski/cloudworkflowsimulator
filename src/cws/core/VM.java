@@ -279,23 +279,21 @@ public class VM extends SimEntity implements WorkflowEvent {
     private void terminateVM() {
         // Can no longer accept jobs 
         running = false;
-
+        
         // cancel future events
         Predicate p = new PredicateType(JOB_FINISHED);
-		CloudSim.cancelAll(getId(), p);
-		        
-		// Move running jobs back to the queue...
-		
-		jobs.addAll(runningJobs);
-		runningJobs.clear();
+        CloudSim.cancelAll(getId(), p);
+        
+        // Move running jobs back to the queue...
+        jobs.addAll(runningJobs);
+        runningJobs.clear();
         
         // ... and fail all queued jobs
         for (Job job : jobs) {
             job.setResult(Job.Result.FAILURE);
             send(job.getOwner(), 0.0, JOB_FINISHED, job);
-    		Log.printLine(CloudSim.clock() + " Terminating job " + job.getID() + " on VM " + job.getVM().getId());
+            Log.printLine(CloudSim.clock() + " Terminating job " + job.getID() + " on VM " + job.getVM().getId());
         }
-        
         
         // Reset dynamic state
         jobs.clear();
@@ -342,12 +340,12 @@ public class VM extends SimEntity implements WorkflowEvent {
     }
     
     private void jobFinish(Job job) {
-    	
+        
         // Sanity check
         if (!running) {
             throw new RuntimeException("Cannot finish job: VM not running");
         }
-    	
+        
         // remove from the running set
         runningJobs.remove(job);
         

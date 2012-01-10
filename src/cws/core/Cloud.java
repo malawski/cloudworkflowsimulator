@@ -104,7 +104,7 @@ public class Cloud extends SimEntity implements WorkflowEvent {
     }
     
     private void vmTerminated(VM vm) {
-     // Sanity check
+        // Sanity check
         if (!vms.contains(vm)) {
             throw new RuntimeException("Unknown VM");
         }

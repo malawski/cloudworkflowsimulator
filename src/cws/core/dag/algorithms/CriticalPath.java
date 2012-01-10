@@ -3,7 +3,6 @@ package cws.core.dag.algorithms;
 import java.util.HashMap;
 import java.util.Map;
 
-import cws.core.dag.DAG;
 import cws.core.dag.Task;
 
 
@@ -16,18 +15,35 @@ public class CriticalPath {
     private Map<Task, Double> eft;
     private Double length = null;
     
-    public CriticalPath(DAG dag, TopologicalOrder order) {
-        eft = new HashMap<Task, Double>();
-
+    public CriticalPath(TopologicalOrder order) {
+        this(order, null);
+    }
+    
+    public CriticalPath(TopologicalOrder order, Map<Task, Double> runtimes) {
+        this.eft = new HashMap<Task, Double>();
+        
+        /* XXX By default use the task size as its runtime. This is not strictly
+         * correct because the size is in MI and the runtime depends on the VM
+         * type that the task runs on.
+         */
+        if (runtimes == null) {
+            runtimes = new HashMap<Task, Double>();
+            for (Task task : order) {
+                runtimes.put(task, task.size);
+            }
+        }
+        
         // Initially the finish time is whatever the runtime is
         for (Task task : order) {
-            eft.put(task, task.size);
+            eft.put(task, runtimes.get(task));
         }
         
         // Now we adjust the values in the topological order
         for (Task task : order) {
             for (Task child : task.children) {
-                eft.put(child, Math.max(eft.get(child), eft.get(task)+child.size));
+                eft.put(child, 
+                        Math.max(eft.get(child), 
+                                 eft.get(task)+runtimes.get(child)));
             }
         }
     }
@@ -37,13 +53,6 @@ public class CriticalPath {
      */
     public double eft(Task task) {
         return eft.get(task);
-    }
-    
-    /** 
-     * @return Earliest start time of task
-     */
-    public double est(Task task) {
-        return eft.get(task) - task.size;
     }
     
     /**

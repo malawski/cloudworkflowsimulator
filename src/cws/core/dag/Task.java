@@ -22,6 +22,14 @@ public class Task {
         this.size = size;
     }
     
+    /* IT IS IMPORTANT THAT THESE ARE NOT IMPLEMENTED
+    
+    Using the default implementation allows us to put Tasks from
+    different DAGs that have the same task ID into a single HashMap
+    or HashSet. That way we don't have to maintain a reference from
+    the Task to the DAG that owns it--we can mix tasks from different
+    DAGs in the same data structure.
+    
     @Override
     public int hashCode() {
         return id.hashCode();
@@ -35,6 +43,7 @@ public class Task {
         Task t = (Task)o;
         return this.id.equals(t.id);
     }
+    */
     
     @Override
     public String toString() {

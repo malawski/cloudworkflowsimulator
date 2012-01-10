@@ -61,7 +61,6 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
     
     @Override
     public void startEntity() {
-        System.out.println("Starting em");
         // Submit all DAGs
         while(!dags.isEmpty()) {
             submitDAG(dags.pop());

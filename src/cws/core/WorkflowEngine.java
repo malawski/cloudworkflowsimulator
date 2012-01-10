@@ -101,8 +101,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     public double getBudget() {
         return budget;
     }
-
-
+    
     public void setBudget(double budget) {
         this.budget = budget;
     }
@@ -123,14 +122,22 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         return busyVMs;
     }
     
-    public void addJobListener(JobListener jobListener) {
-        jobListeners.add(jobListener);
+    public LinkedList<DAGJob> getAllDags() {
+        return allDAGJobs;
+    }
+    
+    public void addJobListener(JobListener l) {
+        jobListeners.add(l);
+    }
+    
+    public void removeJobListener(JobListener l) {
+        jobListeners.remove(l);
     }
     
     @Override
     public void startEntity() {
         // send the first provisioning request
-        send(this.getId(), 10.0, PROVISIONING_REQUEST);
+        send(this.getId(), 0.0, PROVISIONING_REQUEST);
     }
     
     @Override
@@ -212,7 +219,16 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
             j.setDAGJob(dj);
             j.setTask(t);
             j.setOwner(getId());
-            queue.add(j);
+            jobReleased(j);
+        }
+    }
+    
+    private void jobReleased(Job j) {
+        queue.add(j);
+        
+        // Notify listeners that job was released
+        for (JobListener jl : jobListeners) {
+            jl.jobReleased(j);
         }
     }
     
@@ -225,6 +241,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     
     private void jobFinished(Job j) {
         // Notify the listeners
+        // IT IS IMPORTANT THAT THIS HAPPENS FIRST
         for (JobListener jl : jobListeners) {
             jl.jobFinished(j);
         }
@@ -258,13 +275,9 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
             // Retry the job
             Log.printLine(CloudSim.clock() + " Job " + j.getID() + " failed on VM " + j.getVM().getId() + " resubmitting...");
             Job retry = jobFactory.createJob(dj, t, getId());
-            queue.add(retry);
+            jobReleased(retry);
         }
         
         scheduler.scheduleJobs(this);
     }
-
-	public LinkedList<DAGJob> getAllDags() {
-		return allDAGJobs;
-	}
 }
