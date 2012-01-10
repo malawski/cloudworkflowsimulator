@@ -60,9 +60,19 @@ Budget-constrained workflow scheduling \cite{Sakellariou2007}.
 Bi-criteria scheduling and multi-criteria scheduling. These approaches are similar to ours in that we have two scheduling criteria: cost and makespan. The challenge in multi-criteria scheduling is to derive an objective function that takes into account all of the criteria. These approaches typically use metaheuristics that run for a long time before producing good results.
 
 \section{Problem Description}
-\subsection{Application Model}
-\subsection{System Model}
+\subsection{Resource Model}
+Describe the Amazon EC2 resource model. Instances are requested on-demand. Instance pricing is per-hour. Multiple VM types are available, but for this paper we focus on a single VM type because we assume that there will typically be one VM type with the best price/performance ratio for the application.
 
+\subsection{Application Model}
+The target applications for this paper are scientific workflows that can be modeled as Directed Acyclic Graphs (DAGs).
+
+We assume that we have runtime estimates for each task in the workflow.
+
+Currently we do not consider data sizes, but rather assume that data is stored in a shared cloud storage system such as Amazon S3 and that data transfer times are included in task runtime estimates. Further, data transfer times are equal across the VMs.
+
+An ensemble consists of several related workflows. Each workflow is given a priority.
+
+The goal is to complete as many workflows as possible given a budget and a deadline.
 
 \section{Algorithms}
 \subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
@@ -92,14 +102,20 @@ Bi-criteria scheduling and multi-criteria scheduling. These approaches are simil
 \end{algorithm}
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
+
 \subsection{Static Provisioning Static Scheduling (SPSS)}
 
-% This is an example of how we can do algorithms
+We assume that the workflows are very wide such that the critical path of any given workflow is much less than the deadline.
+
+The approach is to schedule each workflow in the ensemble in priority order, rejecting any workflows that cannot be completed by the deadline or that cause the cost of the plan to exceed the budget. Once the plan is complete, then the workflows are executed according to the plan.
+
 \begin{algorithm}
-\caption{Admit DAGs}
+\caption{Ensemble planning algorithm}
 \label{alg:admit}
 \begin{algorithmic}[1]
-\Procedure{AdmitDAGs}{$W,b,d$}
+\Require $W$: workflow ensemble; $b$: budget; $d$: deadline
+\Ensure Schedule as much of $W$ as possible given $b$ and $d$
+\Procedure{PlanEnsemble}{$W,b,d$}
     \State $P\gets empty\ plan$
     \State $A\gets \emptyset$ \Comment{Set of admitted DAGs}
     \For{$w\ in\ W$}
@@ -118,24 +134,20 @@ Bi-criteria scheduling and multi-criteria scheduling. These approaches are simil
 
 
 \begin{algorithm}
-\caption{PlanDAG}
+\caption{DAG planning algorithm}
 \label{alg:plandag}
 \begin{algorithmic}[1]
+\Require $w$: DAG; $P$: current plan; $d$: deadline
+\Ensure Create plan for $w$ that minimizes cost and meets deadline $d$
 \Procedure{PlanDAG}{$w,P,d$}
-    \State $P^\prime\gets \emptyset$
-    \State assign each task in w to its cheapest resource type
-    \State $cp \gets\ CriticalPath(w)$
-    \While{$cp > d$}
-        \State upgrade resource type of task with greatest improvement in runtime for least cost
-        \State $cp \gets\ CriticalPath(w)$
-    \EndWhile
+    \State $P^\prime\gets$ copy of $P$
     \State \Call{DeadlineDistribution}{w,d}
     \For{$t\ in\ w\ sorted\ by\ Deadline(t)$}
-        \State choose resource r in $P^\prime$ that minimizes Cost(t)
+        \State Choose resource r in $P^\prime$ that minimizes Cost(t)
         \If{$AFT(t,r) < Deadline(t)$}
             \State Schedule(t,r)
         \Else
-            \State provision a new resource r
+            \State Provision a new resource r
             \State Schedule(t,r)
         \EndIf
     \EndFor
@@ -146,33 +158,35 @@ Bi-criteria scheduling and multi-criteria scheduling. These approaches are simil
 
 
 \begin{algorithm}
-\caption{Deadline Distribution}
+\caption{Deadline distribution algorithm}
 \label{alg:deadlinedistribution}
 \begin{algorithmic}[1]
+\Require $w$: DAG; $d$: global deadline
+\Ensure Assign sub-deadlines to each task in w
 \Procedure{DeadlineDistribution}{$w,d$}
-    \State assign $Level(t)$ to each task t in w
-    \For{$level\ l\ in\ w$}
-        \State $Tasks(l) \gets$ number of tasks in l
-        \State $Runtime(l) \gets$ runtime of tasks in l
-    \EndFor
-    \State $T \gets$ total number of tasks in w
-    \State $R \gets$ total runtime of tasks in w
-    \State $CP \gets$ critical path of w
-    \For{$level\ l\ in\ w$}
+    \State $T \gets$ total number of tasks in $w$
+    \State $R \gets$ total runtime of tasks in $w$
+    \State $CP \gets$ length of critical path of $w$
+    \State assign $Level(t)$ to each task $t$ in $w$
+    \For{level $l\ \in w$}
+        \State $Tasks(l) \gets$ number of tasks in $l$
+        \State $Runtime(l) \gets$ runtime of tasks in $l$
         \State $r \gets \alpha * (Runtime(l)/R)$
         \State $t \gets (1-\alpha) * (Tasks(l)/T)$
         \State $FT(l) \gets (r + t) * (d - CP)$
     \EndFor
-    \For{$task\ t\ in\ w$}
-        \State $est \gets 0$
-        \For{p in Pred(t)}
-            \State $est \gets Deadline(p)$
-        \EndFor
-        \State $Deadline(t) \gets est + RT(t) + FT(Level(t))$
+    \For{task $t \in w$}
+        \State $LST(t) \gets \max(Deadline(p))\ for\ p \in Pred(t)$
+        \State $Deadline(t) \gets LST(t) + RT(t) + FT(Level(t))$
     \EndFor
 \EndProcedure
 \end{algorithmic} 
 \end{algorithm}
+
+\begin{equation}
+\label{eq:scaling}
+FT(l) = \left[{\alpha}*\frac{T_l}{t}\right] + \left[{(1 - \alpha)}*\frac{R_l}{r} \right]
+\end{equation}
 
 \section{Performance Evaluation}
 
