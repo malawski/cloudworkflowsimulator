@@ -75,7 +75,24 @@ An ensemble consists of several related workflows. Each workflow is given a prio
 The goal is to complete as many workflows as possible given a budget and a deadline.
 
 \section{Algorithms}
-\subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
+
+\subsection{Static Provisioning Dynamic Scheduling (SPDS)}
+
+This is the simplest strategy based on static provisioning of resources and
+on-line scheduling of workflow tasks. Given the budget $B$ and deadline $d$
+together with the hourly price $p$ of a VM it is possible to compute the number
+of VMs $N_{VM}$ to provision so that they consume the whole budget between the
+deadline. 
+
+\begin{equation}
+\label{eq:static-plan}
+N_{VM} = \lceil B / d / p \rceil
+\end{equation}
+
+Although simple, such provisioning plan has the advantage that it
+minimizes the number of provisioning and deprovisioning requests.
+Once the resources are provisioned, the tasks are scheduled to VMs using dynamic
+priority-based algorithm shown in Algorithm~\ref{alg:ds}. 
 
 % This is an example of how we can do algorithms
 \begin{algorithm}
@@ -100,6 +117,30 @@ The goal is to complete as many workflows as possible given a budget and a deadl
 \EndProcedure
 \end{algorithmic} 
 \end{algorithm}
+
+Initially all the
+released tasks from all the workflows are submitted to the queue $Q$. Then, they
+are inserted into priority queue $P$ based on the priority of workflows. If
+there are free VMs available, the tasks from the priority queue are submitted to
+the randomly choosen VMs. The process is repeated each time a task finishes.
+Using the priority queue guarantees that tasks from lower priority workflows are
+always submitted later than the higher priority ones and that the lower priority
+tasks can occupy idle VMs. However, as there is no preemption, long-running
+low-priority tasks may delay execution of high-priority tasks when such ones
+become ready. Fig.~\ref{fig:spss-example} shows the example plan generated using
+SPSS algorithm.
+
+\begin{figure}[htb] 
+\centering
+\includegraphics[width=1.0\columnwidth]{figures/spds-gantt}
+ \caption{Example of schedule generated using SPSS algorithm: tasks are labelled
+ by colors depending on the workflow. }
+\label{fig:spss-example}
+\end{figure}
+
+\subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
+
+
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
 
