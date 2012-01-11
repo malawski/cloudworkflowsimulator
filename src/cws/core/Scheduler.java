@@ -7,4 +7,5 @@ package cws.core;
  */
 public interface Scheduler {
     public void scheduleJobs(WorkflowEngine engine);
+    public void setWorkflowEngine(WorkflowEngine engine);
 }
