@@ -11,6 +11,8 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import cws.core.Cloud;
 import cws.core.DAGJob;
 import cws.core.EnsembleManager;
+import cws.core.Provisioner;
+import cws.core.SPSS;
 import cws.core.Scheduler;
 import cws.core.SimpleJobFactory;
 import cws.core.VM;
@@ -34,18 +36,28 @@ public class Experiment {
 	
 	public ExperimentResult runExperiment(ExperimentDescription param) {
 		
+		boolean useSPSS = false;
+		
 		ExperimentResult result = new ExperimentResult();
 		
-		AbstractProvisioner prov = (AbstractProvisioner)param.getProvisioner();
+		Provisioner prov = param.getProvisioner();
 		
 		Scheduler sched = param.getScheduler();
 		
+		if (sched.getClass().getName() == "cws.core.SPSS") useSPSS = true;
+		
 		CloudSim.init(1, null, false);
+
 		
 		Cloud cloud = new Cloud();
 		prov.setCloud(cloud);
 		
-		WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), prov, sched);
+		WorkflowEngine engine;
+		
+		if (useSPSS)  engine = new WorkflowEngine(new SimpleJobFactory(1), prov, sched);
+		else engine = new WorkflowEngine(new SimpleJobFactory(1000), prov, sched);
+		
+		sched.setWorkflowEngine(engine);
 		
 		List<DAG> dags = new ArrayList<DAG>();
 		for (int i = 0; i < param.getDags().length; i++) {
@@ -69,12 +81,19 @@ public class Experiment {
 		Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
 		Log.printLine(CloudSim.clock() + " Total budget " + param.getBudget());
 		
-		HashSet<VM> vms = new HashSet<VM>();
-		for (int i = 0; i < numVMs; i++) {
-			VM vm = new VM(1000, 1, 1.0, param.getPrice());
-			vms.add(vm);
-			CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
-		}	
+		if (!useSPSS) { 
+			HashSet<VM> vms = new HashSet<VM>();
+			for (int i = 0; i < numVMs; i++) {
+				VM vm = new VM(1000, 1, 1.0, param.getPrice());
+				vms.add(vm);
+				CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+			}	
+		}
+
+		if (useSPSS) {
+			((SPSS)sched).setEnsembleManager(em);
+			((SPSS)sched).plan();
+		}
 		
 		CloudSim.startSimulation();
 		
@@ -111,7 +130,7 @@ public class Experiment {
 	 * @return DAG object
 	 */
 	
-	private DAG parse (File file) {
+	private static DAG parse (File file) {
 		if (file.getName().endsWith("dag")) return DAGParser.parseDAG(file);
 		else if (file.getName().endsWith("dax")) return DAGParser.parseDAX(file);
 		else throw new RuntimeException("Unrecognized file: " + file.getName());
@@ -138,12 +157,26 @@ public class Experiment {
 			int N, int step, int start, double max_scaling, int runID) {
 		
 		double deadline;
+		ExperimentResult resultsSPSS[] = new ExperimentResult[N+1];
 		ExperimentResult resultsAware[] = new ExperimentResult[N+1];
 		ExperimentResult resultsSimple[] = new ExperimentResult[N+1];
 		
 		for (int i=start; i<= N; i+=step) {
 			deadline = 3600*i; //seconds
 			Experiment experiment = new Experiment();
+			
+			//FIXME: align interfaces
+			List<DAG> dag_objects = new ArrayList<DAG>();
+			for (int j = 0; j < dags.length; j++) {
+				DAG dag = parse(new File(dagPath + dags[j]));
+				dag_objects.add(dag);
+			}
+			
+			SPSS spss = new SPSS(budget, deadline, dag_objects, 0.7);
+
+			resultsSPSS[i] = experiment.runExperiment(new ExperimentDescription(
+			        spss, spss, dagPath, dags,
+			        deadline, budget, price, max_scaling));
 			resultsAware[i] = experiment.runExperiment(new ExperimentDescription(
 			        new SimpleUtilizationBasedProvisioner(max_scaling), 
 			        new WorkflowAwareEnsembleScheduler(), dagPath, dags,
@@ -154,15 +187,18 @@ public class Experiment {
 			        deadline, budget, price, max_scaling));
 		}
 		
+		StringBuffer outSPSS = new StringBuffer();
 		StringBuffer outAware = new StringBuffer();
 		StringBuffer outSimple = new StringBuffer();
 
 		for (int i=start; i<= N; i+=step) {
+			outSPSS.append(resultsSPSS[i].getDeadline() + "  " + resultsSPSS[i].getNumFinishedDAGs() + "\n");
 			outAware.append(resultsAware[i].getDeadline() + "  " + resultsAware[i].getNumFinishedDAGs() + "\n");
 			outSimple.append(resultsSimple[i].getDeadline() + "  " + resultsSimple[i].getNumFinishedDAGs() + "\n");
 			
 		}
-		
+
+		WorkflowLog.stringToFile(outSPSS.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputSPSS.txt");
 		WorkflowLog.stringToFile(outAware.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputAware.txt");
 		WorkflowLog.stringToFile(outSimple.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputSimple.txt");			
 		
