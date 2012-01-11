@@ -127,4 +127,16 @@ require "#{File.dirname(__FILE__)}/plots.rb"
 
 
 #plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerpsload_large.dagx40d252000.0b600.0m0.0'
-plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerpsload_medium.dagx40d122400.0b100.0m0.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerpsload_medium.dagx40d122400.0b100.0m0.0'
+
+
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerMONTAGE.n.1000.8.dagx100d68400.0b40.0m0.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerMONTAGE.n.1000.8.dagx100d68400.0b40.0m0.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCYBERSHAKE.n.1000.8.dagx100d43200.0b100.0m0.0'
+
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCYBERSHAKE.n.1000.8.dagx100d50400.0b100.0m0.0'
+#plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCYBERSHAKE.n.1000.8.dagx100d50400.0b100.0m0.0'
+
+plot_schedule 'output/testSPSSSPSSCYBERSHAKE.n.1000.8.dagx100d50400.0b100.0m0.0'
+plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerCYBERSHAKE.n.1000.8.dagx100d50400.0b100.0m0.0'
+plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerCYBERSHAKE.n.1000.8.dagx100d50400.0b100.0m0.0'
