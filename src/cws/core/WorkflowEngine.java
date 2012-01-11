@@ -137,7 +137,8 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     @Override
     public void startEntity() {
         // send the first provisioning request
-        send(this.getId(), 0.0, PROVISIONING_REQUEST);
+    	// it should be sent after dag submissions events
+        send(this.getId(), 0.0001, PROVISIONING_REQUEST);
     }
     
     @Override
