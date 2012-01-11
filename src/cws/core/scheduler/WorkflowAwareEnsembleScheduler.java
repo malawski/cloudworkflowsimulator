@@ -130,6 +130,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
 		// remaining budget for starting new vms 
 		double rn = engine.getBudget()-engine.getCost();
+		if (rn<0) rn=0;
 
 		// compute remaining (not consumed) budget of currently running VMs
 		double rc = 0.0;
@@ -153,6 +154,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 		
 		// we add this for safety in order not to underestimate our budget
 		double safetyMargin = 0.1;
+		
+		Log.printLine(CloudSim.clock() + " Budget for new VMs: " + rn + " Budget on running VMs: " + rc + " Remaining budget of admitted workflows: " + ra);
 		
 		return rn+rc-ra-safetyMargin;
 	}
