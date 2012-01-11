@@ -51,7 +51,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {40.0, 80.0, 120.0, 160.0, 200.0};
 		
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 20);			
 		}		
 		
 	}
@@ -73,7 +73,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {40.0, 80.0, 120.0, 160.0, 200.0};
 		
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 20);			
 		}
 		
 	}
@@ -95,7 +95,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {400.0, 800.0, 1200.0, 1600.0, 2000.0};
 
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 20);			
 		}
 		
 	}
@@ -118,7 +118,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {4000.0, 8000.0, 12000.0, 16000.0, 20000.0};
 		
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 20);			
 		}
 			
 	}
@@ -140,7 +140,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {200.0, 400.0, 600.0, 800.0, 1000.0};
 
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 20);			
 		}
 		
 	}
@@ -170,7 +170,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {40.0, 80.0, 120.0, 160.0, 200.0};
 		
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 20);			
 		}		
 		
 	}
@@ -192,7 +192,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {40.0, 80.0, 120.0, 160.0, 200.0};
 		
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 20);			
 		}
 		
 	}
@@ -214,7 +214,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {400.0, 800.0, 1200.0, 1600.0, 2000.0};
 
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 20);			
 		}
 		
 	}
@@ -237,7 +237,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {4000.0, 8000.0, 12000.0, 16000.0, 20000.0};
 		
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 20);			
 		}
 			
 	}
@@ -259,7 +259,7 @@ public class ExperimentTestRepeat900_1000 {
 		double[] budgets= {200.0, 400.0, 600.0, 800.0, 1000.0};
 
 		for (double budget : budgets) {
-			Experiment.runSeriesRepeat(dagPath, dags, budget, price,  N, step, start, max_scaling, 10);			
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price,  N, step, start, max_scaling, 20);			
 		}
 		
 	}
