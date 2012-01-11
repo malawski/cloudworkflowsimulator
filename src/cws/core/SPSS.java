@@ -33,6 +33,8 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     private double budget;
     private double ensembleDeadline;
     
+    private int priority = 0;
+    
     private Plan plan = new Plan();
     
     /** List of all dags in ensemble */
@@ -531,6 +533,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     
     private void submitDAG(DAG dag) {
         DAGJob dagJob = new DAGJob(dag, manager.getId());
+        dagJob.setPriority(priority++);
         CloudSim.send(manager.getId(), engine.getId(), 0.0, DAG_SUBMIT, dagJob);
     }
     
@@ -696,7 +699,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     }
     
     enum VMType {
-        SMALL(1, 0.10),
+        SMALL(1, 1.0),
         MEDIUM(5, 0.40),
         LARGE(10, 0.80);
         
