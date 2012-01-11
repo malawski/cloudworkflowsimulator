@@ -54,4 +54,11 @@ public class DAGDynamicScheduler implements Scheduler, WorkflowEvent {
 		}
 	}
 
+
+	@Override
+	public void setWorkflowEngine(WorkflowEngine engine) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

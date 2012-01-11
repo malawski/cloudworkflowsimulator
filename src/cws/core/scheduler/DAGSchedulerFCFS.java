@@ -45,6 +45,12 @@ public class DAGSchedulerFCFS implements Scheduler, WorkflowEvent {
 				}
 		}			
 	}
+
+	@Override
+	public void setWorkflowEngine(WorkflowEngine engine) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 
 }
