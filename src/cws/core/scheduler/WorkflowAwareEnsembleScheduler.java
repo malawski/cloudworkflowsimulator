@@ -76,7 +76,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 			
 			if (rejectedDAGs.contains(dj)) {
 				// ignore
-				return;
+				continue;
 			} else if (admittedDAGs.contains(dj)) {
 				// schedule the job
 			} else if (admitDAG(dj, engine)) {
@@ -85,7 +85,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 			} else {
 				rejectedDAGs.add(dj);
 				// skip this job
-				return;
+				continue;
 			}
 			
 			
