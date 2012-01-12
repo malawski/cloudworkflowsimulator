@@ -21,6 +21,7 @@ import cws.core.dag.Task;
 import cws.core.dag.DAGParser;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.log.WorkflowLog;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -133,9 +134,9 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
                 if (newPlan.getCost() <= budget) {
                     admittedDAGs.add(dag);
                     plan = newPlan;
-                    System.out.println("Admitting DAG. Cost of new plan "+plan.getCost());
+                    System.out.println("Admitting DAG. Cost of new plan: "+plan.getCost());
                 } else {
-                    System.out.println("Rejecting DAG: New plan exceeds budget");
+                    System.out.println("Rejecting DAG: New plan exceeds budget: "+newPlan.getCost());
                 }
             } catch (NoFeasiblePlan m) {
                 System.out.println("Rejecting DAG: "+m.getMessage());
@@ -184,6 +185,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
         double minCost = 0.0;
+        double totalRuntime = 0.0;
         for (Task t : order) {
             
             // Initially we assign each VM to the SMALL type
@@ -197,7 +199,11 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
             
             // Compute the minimum cost of running this workflow
             minCost += (runtime/(60*60)) * vm.price;
+            totalRuntime += runtime;
         }
+        
+        System.out.println(" Min Cost: "+minCost);
+        System.out.println(" Total Runtime: "+totalRuntime);
         
         // Check to make sure the minimum cost is within our budget
         // This is just an optimization
@@ -212,6 +218,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = new CriticalPath(order, runtimes);
         double criticalPath = path.getCriticalPathLength();
+        System.out.println(" Critical path: "+criticalPath);
         if (criticalPath > ensembleDeadline) {
             throw new NoFeasiblePlan(
                     "Best critical path ("+criticalPath+") " +
@@ -229,7 +236,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         
         // Get deadlines for each task (deadline distribution)
         final HashMap<Task, Double> deadlines = 
-                deadlineDistribution(order, runtimes, this.alpha);
+                deadlineDistribution2(order, runtimes, this.alpha);
         
         // Sort tasks by deadline
         LinkedList<Task> sortedTasks = new LinkedList<Task>();
@@ -310,7 +317,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
                             best = soln;
                         }
                     }
-                    
+                    /*
                     // Option 2: Leave a big gap
                     biggap: {
                         int runtimeHours = (int)Math.ceil(runtime / (60*60));
@@ -358,6 +365,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
                             best = soln;
                         }
                     }
+                    */
                 }
                 
                 // Try placing it in a gap in the schedule
@@ -443,6 +451,23 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     /**
      * Assign deadlines to each task in the DAG
      */
+    HashMap<Task, Double> deadlineDistribution2(TopologicalOrder order, HashMap<Task, Double> runtimes, double alpha) {
+        HashMap<Task,Double> deadlines = new HashMap<Task,Double>();
+        for (Task t : order.reverse()) {
+            double deadline = ensembleDeadline;
+            for (Task c : t.children) {
+                deadline = Math.min(deadline, deadlines.get(c)-runtimes.get(c));
+            }
+            deadlines.put(t, deadline);
+        }
+        
+        for (Task t : order) {
+            System.out.println(t.id+": "+deadlines.get(t)); 
+        }
+        
+        return deadlines;
+    }
+    
     HashMap<Task, Double> deadlineDistribution(TopologicalOrder order, HashMap<Task, Double> runtimes, double alpha) {
         
         // Sanity check
@@ -661,43 +686,6 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         /* Do nothing */
     }
     
-    public static void main(String[] args) {
-        CloudSim.init(1, null, false);
-        
-        List<DAG> dags = new ArrayList<DAG>();
-        for (int i = 0; i < 10; i++) {
-            DAG dag = DAGParser.parseDAG(new File("dags/Montage_25.dag"));
-            dags.add(dag);
-        }
-        
-        SPSS spss = new SPSS(0.45, 300, dags, 0.7);
-        
-        Cloud cloud = new Cloud();
-        WorkflowEngine engine = new WorkflowEngine(spss, spss);
-        EnsembleManager manager = new EnsembleManager(engine);
-        
-        spss.setCloud(cloud);
-        spss.setEnsembleManager(manager);
-        spss.setWorkflowEngine(engine);
-        
-        spss.plan();
-        
-        CloudSim.startSimulation();
-        
-        System.out.println("Workflows Completed: "+spss.admittedDAGs.size());
-        
-        System.out.println("Budget: "+spss.getBudget());
-        System.out.println("Plan Cost: "+spss.getPlanCost());
-        System.out.println("Actual Cost: "+spss.getActualCost());
-        
-        System.out.println("Deadline: "+spss.getDeadline());
-        System.out.println("Finish time: "+spss.getActualFinish());
-        
-        if (spss.readyJobs.size() > 0) {
-            throw new RuntimeException("Ready tasks remain");
-        }
-    }
-    
     enum VMType {
         SMALL(1, 1.0),
         MEDIUM(5, 0.40),
@@ -814,6 +802,15 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
             if (this.resource.schedule.size() > 0 && other.resource.schedule.size() == 0)
                 return true;
             
+            
+            // New resources are better
+            /*
+            if (this.resource.schedule.size() == 0 && other.resource.schedule.size() > 0)
+                return true;
+            if (this.resource.schedule.size() > 0 && other.resource.schedule.size() == 0)
+                return false;
+            */
+            
             // Earlier starts are better
             if (this.slot.start < other.slot.start)
                 return true;
@@ -854,6 +851,57 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         private static final long serialVersionUID = 1L;
         public NoFeasiblePlan(String msg) {
             super(msg);
+        }
+    }
+    
+    public static void main(String[] args) {
+        CloudSim.init(1, null, false);
+        
+        List<DAG> dags = new ArrayList<DAG>();
+        for (int i = 0; i < 10; i++) {
+            DAG dag = DAGParser.parseDAG(new File("dags/Montage_25.dag"));
+            dags.add(dag);
+        }
+        
+        double deadline = 400;
+        double budget = 4.5;
+        double alpha = 0.7;
+        
+        SPSS spss = new SPSS(budget, deadline, dags, alpha);
+        
+        Cloud cloud = new Cloud();
+        WorkflowEngine engine = new WorkflowEngine(spss, spss);
+        EnsembleManager manager = new EnsembleManager(engine);
+        
+        spss.setCloud(cloud);
+        spss.setEnsembleManager(manager);
+        spss.setWorkflowEngine(engine);
+        
+        WorkflowLog log = new WorkflowLog();
+        engine.addJobListener(log);
+        cloud.addVMListener(log);
+        manager.addDAGJobListener(log);
+        
+        spss.plan();
+        
+        CloudSim.startSimulation();
+        
+        String fName = "testSPSSSPSSMontage_25.dag"+"x"+dags.size()+"d"+deadline+"b"+budget+"m0";
+        log.printJobs(fName);
+        log.printVmList(fName);
+        log.printDAGJobs();
+        
+        System.out.println("Workflows Completed: "+spss.admittedDAGs.size());
+        
+        System.out.println("Budget: "+spss.getBudget());
+        System.out.println("Plan Cost: "+spss.getPlanCost());
+        System.out.println("Actual Cost: "+spss.getActualCost());
+        
+        System.out.println("Deadline: "+spss.getDeadline());
+        System.out.println("Finish time: "+spss.getActualFinish());
+        
+        if (spss.readyJobs.size() > 0) {
+            throw new RuntimeException("Ready tasks remain");
         }
     }
 }
