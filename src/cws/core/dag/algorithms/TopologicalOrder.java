@@ -42,6 +42,15 @@ public class TopologicalOrder implements Iterable<Task> {
         postorder.add(task);
     }
     
+    public Iterable<Task> reverse() {
+        return new Iterable<Task>() {
+            @Override
+            public Iterator<Task> iterator() {
+                return postorder.iterator();
+            }
+        };
+    }
+    
     @Override
     public Iterator<Task> iterator() {
         return postorder.descendingIterator();
