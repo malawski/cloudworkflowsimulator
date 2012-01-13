@@ -1,6 +1,9 @@
 package cws.core;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -203,15 +206,6 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         System.out.println(" Min Cost: "+minCost);
         System.out.println(" Total Runtime: "+totalRuntime);
         
-        // Check to make sure the minimum cost is within our budget
-        // This is just an optimization
-        if (currentPlan.getCost() + minCost > budget) {
-            throw new NoFeasiblePlan(
-                    "Minimum cost of workflow ("+minCost+") " +
-                    "exceeds budget ("+budget+") given " +
-                    "current plan cost ("+currentPlan.getCost()+")");
-        }
-        
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = new CriticalPath(order, runtimes);
@@ -232,9 +226,32 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
          *  }
          */
         
+        
+        Plan best = null;
+        
+        double LST = ensembleDeadline - criticalPath;
+        
+        for (double EST = 0.0; EST <= LST; EST += 3600.0) {
+            Plan newPlan = planDAG(dag, currentPlan, runtimes, vmTypes, EST);
+            if (best == null) {
+                best = newPlan;
+            } else {
+                if (newPlan.getCost() < best.getCost()) {
+                    best = newPlan;
+                }
+            }
+        }
+        
+        return best;
+    }
+    
+    Plan planDAG(DAG dag, Plan currentPlan, HashMap<Task, Double> runtimes, HashMap<Task, VMType> vmTypes, double EST) {
+        
+        TopologicalOrder order = new TopologicalOrder(dag);
+        
         // Get deadlines for each task (deadline distribution)
         final HashMap<Task, Double> deadlines = 
-                deadlineDistribution(order, runtimes, this.alpha);
+                deadlineDistributionEST(order, runtimes, this.alpha, EST);
         
         // Sort tasks by deadline
         LinkedList<Task> sortedTasks = new LinkedList<Task>();
@@ -315,7 +332,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
                             best = soln;
                         }
                     }
-                    /*
+                    
                     // Option 2: Leave a big gap
                     biggap: {
                         int runtimeHours = (int)Math.ceil(runtime / (60*60));
@@ -363,7 +380,6 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
                             best = soln;
                         }
                     }
-                    */
                 }
                 
                 // Try placing it in a gap in the schedule
@@ -449,7 +465,94 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
     /**
      * Assign deadlines to each task in the DAG
      */
-    HashMap<Task, Double> deadlineDistribution2(TopologicalOrder order, HashMap<Task, Double> runtimes, double alpha) {
+    HashMap<Task, Double> deadlineDistributionEST(TopologicalOrder order, HashMap<Task, Double> runtimes, double alpha, double EST) {
+            // Sanity check
+            if (alpha < 0 || alpha > 1) {
+                throw new RuntimeException(
+                        "Invalid alpha: "+alpha+". Valid range is [0,1].");
+            }
+            
+            // The level of each task is max[p in parents](p.level) + 1
+            HashMap<Task, Integer> levels = new HashMap<Task, Integer>();
+            int numlevels = 0;
+            for (Task t : order) {
+                int level = 0;
+                for (Task p : t.parents) {
+                    int plevel = levels.get(p);
+                    level = Math.max(level, plevel+1);
+                }
+                levels.put(t, level);
+                numlevels = Math.max(numlevels, level+1);
+            }
+            
+            /* Compute:
+             * 1. Total number of tasks in DAG
+             * 2. Total number of tasks in each level
+             * 3. Total runtime of tasks in DAG
+             * 4. Total runtime of tasks in each level
+             */
+            double totalTasks = 0;
+            double[] totalTasksByLevel = new double[numlevels];
+            
+            double totalRuntime = 0;
+            double[] totalRuntimesByLevel = new double[numlevels];
+            
+            for (Task t : order) {
+                double runtime = runtimes.get(t);
+                int level = levels.get(t);
+                
+                totalRuntime += runtime;
+                totalRuntimesByLevel[level] += runtime;
+                
+                totalTasks += 1;
+                totalTasksByLevel[level] += 1;
+            }
+            
+            /* The excess time share for each level is:
+             * 
+             *          //         tasksInLevel \   /             runtimeInLevel \\
+             *  frac =  || alpha * ------------ | + | (1-alpha) * -------------- ||
+             *          \\          totalTasks  /   \              totalRuntime  //
+             * 
+             *  share = frac * (deadline - critical_path)
+             * 
+             * In other words, each level gets a fraction of the spare time that is 
+             * proportional to the combination of the number of tasks it has as well
+             * as the total runtime of those tasks.
+             */
+            double[] shares = new double[numlevels];
+            CriticalPath path = new CriticalPath(order, runtimes);
+            double criticalPathLength = path.getCriticalPathLength();
+            double spare = this.ensembleDeadline - (criticalPathLength + EST);
+            for (int i=0; i<numlevels; i++) {
+                
+                double taskPart = alpha * (totalTasksByLevel[i]/totalTasks);
+                double runtimePart = (1-alpha) * (totalRuntimesByLevel[i]/totalRuntime);
+                
+                shares[i] = (taskPart + runtimePart) * spare;
+            }
+            
+            /* The deadline of a task t is:
+             * 
+             * t.deadline = max[p in t.parents](p.deadline) + t.runtime + shares[t.level]
+             */
+            HashMap<Task, Double> deadlines = new HashMap<Task, Double>();
+            for (Task t : order) {
+                int level = levels.get(t);
+                double latestDeadline = EST;
+                for (Task p : t.parents) {
+                    double pdeadline = deadlines.get(p);
+                    latestDeadline = Math.max(latestDeadline, pdeadline);
+                }
+                double runtime = runtimes.get(t);
+                double deadline = latestDeadline + runtime + shares[level];
+                deadlines.put(t, deadline);
+            }
+            
+            return deadlines;
+        }
+    
+    HashMap<Task, Double> deadlineDistributionLST(TopologicalOrder order, HashMap<Task, Double> runtimes, double alpha) {
         HashMap<Task,Double> deadlines = new HashMap<Task,Double>();
         for (Task t : order.reverse()) {
             double deadline = ensembleDeadline;
@@ -844,17 +947,28 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         }
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         CloudSim.init(1, null, false);
         
         List<DAG> dags = new ArrayList<DAG>();
-        for (int i = 0; i < 10; i++) {
-            DAG dag = DAGParser.parseDAG(new File("dags/Sipht_1000.dag"));
+        
+        File ens = new File("dags/ensemble2.txt");
+        BufferedReader reader = new BufferedReader(new FileReader(ens));
+        for (String line = reader.readLine(); line!= null; line = reader.readLine()) {
+            DAG dag = DAGParser.parseDAG(new File(line));
             dags.add(dag);
         }
         
+        /*
+        
+        for (int i = 0; i < 50; i++) {
+            DAG dag = DAGParser.parseDAG(new File("../projects/pegasus/CyberShake/CYBERSHAKE.n.1000.8.dag"));
+            dags.add(dag);
+        }
+        */
+        
         double deadline = 10*3600;
-        double budget = 300;
+        double budget = 120;
         double alpha = 0.7;
         
         SPSS spss = new SPSS(budget, deadline, dags, alpha);
