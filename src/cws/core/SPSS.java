@@ -234,7 +234,7 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         
         // Get deadlines for each task (deadline distribution)
         final HashMap<Task, Double> deadlines = 
-                deadlineDistribution2(order, runtimes, this.alpha);
+                deadlineDistribution(order, runtimes, this.alpha);
         
         // Sort tasks by deadline
         LinkedList<Task> sortedTasks = new LinkedList<Task>();
@@ -801,15 +801,6 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
             if (this.resource.schedule.size() > 0 && other.resource.schedule.size() == 0)
                 return true;
             
-            
-            // New resources are better
-            /*
-            if (this.resource.schedule.size() == 0 && other.resource.schedule.size() > 0)
-                return true;
-            if (this.resource.schedule.size() > 0 && other.resource.schedule.size() == 0)
-                return false;
-            */
-            
             // Earlier starts are better
             if (this.slot.start < other.slot.start)
                 return true;
@@ -858,12 +849,12 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         
         List<DAG> dags = new ArrayList<DAG>();
         for (int i = 0; i < 10; i++) {
-            DAG dag = DAGParser.parseDAG(new File("dags/Montage_25.dag"));
+            DAG dag = DAGParser.parseDAG(new File("dags/Sipht_1000.dag"));
             dags.add(dag);
         }
         
-        double deadline = 400;
-        double budget = 4.5;
+        double deadline = 10*3600;
+        double budget = 300;
         double alpha = 0.7;
         
         SPSS spss = new SPSS(budget, deadline, dags, alpha);
@@ -882,6 +873,12 @@ public class SPSS implements WorkflowEvent, Provisioner, Scheduler, VMListener, 
         manager.addDAGJobListener(log);
         
         spss.plan();
+        
+        try {
+            //Thread.sleep(10000);
+        } catch (Exception e) {
+            
+        }
         
         CloudSim.startSimulation();
         
