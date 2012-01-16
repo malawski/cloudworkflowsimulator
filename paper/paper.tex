@@ -4,11 +4,12 @@
 \begin{document}
 
 \conferenceinfo{HPDC}{'12 Delft, The Netherlands}
-%\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
-%\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
+% \CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden
+% - IF NEED BE. \crdata{0-12345-67-8/90/01}  % Allows default copyright data
+% (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
 
 \title{Cost- and Deadline-constrained Scheduling of Scientific Workflow Ensembles in IaaS Clouds}
-%\subtitle{[Extended Abstract]}
+% \subtitle{[Extended Abstract]}
 
 \numberofauthors{2}
 \author{
@@ -40,13 +41,58 @@ Abstract goes here.
 
 \section{Introduction}
 
-Workflows are important but workflow ensembles are more important, see
-CyberShake or other examples.
+Scientific workflows, usually represented as directed acyclic graphs (DAG), are
+the important class of applications that have been studied in the context of
+resource management and scheduling on grid and utility computing systems.
+However, large computational applications are not just individual workflows but
+rather sets of inter-related workflows grouped in {\em ensembles}. All the
+workflows in an ensemble typically have a similar structure, but they differ by
+input data, number of tasks and individual tasks sizes. A good example of
+scientific workflow ensemble comes from the CyberShake
+application~\cite{Callaghan11}, which calculates seismic hazards for a given
+geographical region such as California. In order to produce a hazard map, the
+hazard curves need to be computed for a set of geographical sites, while each
+site requires running a single complex scientific workflow. Workflows for each
+site may differ not only by their parameters, but also by priority; e.g. some of
+the points on the map correspond to urban areas or strategic locations such as
+power plants, whereas others may be located in low populated regions. Another
+examples of workflow ensembles come from astronomical applications, such as
+Montage~\cite{Deelman08} or search for Earth-like planets from Kepler project
+data~\cite{vockler11}, where multiple workflows are typically required to
+process data covering different parts of the sky.
+ 
+Infrastructure-as-a-service (Iaas) clouds offer capabilities of creating
+(provisioning) computational resources on demand in a pay-per-use model and are regarded by
+scientific community as a potentially attractive source of computing
+resources~\cite{Ostermann10,Keahey09}. In contrast to clusters and grids which
+typically offer best-effort resource provisioning capabilities, clouds give more
+flexibility in terms of creating a controlled and managed computing environment
+with the ability of adjusting resource capacity to the computing demands, often
+called auto-scaling. Giving the users more control, however, clouds also require
+developing new methods of task scheduling and resource provisioning. The
+resource management decisions in cloud scenarios not only have to take into
+account performance related metrics such as workflow makespan or resource
+utilization, but also budget considerations, since the resources from public
+(commercial) cloud providers are usually not free~\cite{Durkee10}.
 
-Clouds are interesting and different from grids.
-
-Define problems: scheduling and provisioning.
-
+In this paper, to get insight into these resource management challenges for
+scietific workflow on clouds, we address a new important problem of maximizing
+the number of completed workflows from an ensemble under both budget and
+deadline constraints. The motivation is to answer the fundamental question of a
+researcher: how much work can be completed in a limited budget and timeframe of
+a research project. The goals of this paper are to discuss and assess possible
+static and dynamic strategies for both task scheduling and resource
+provisioning. Based on the knowledge of workflow scheduling algorithms we
+analyze strategies for on-line scheduling of individual tasks as well as static
+algorithms that rely on the information about the workflow structure (critical
+paths and workflow levels) and estimates of task runtimes. In addition, we
+analyze a hybrid workflow-aware dynamic scheduling algorithm, which uses the
+workflow structure information to estimate which workflows should be rejected
+from the ensemble due to the constraints. As methodology in the study of the
+proposed algorithms we use simulation techniques. We have developed cloud workflow simulator based on
+CloudSim~\cite{Calheiros11}, which models the infrastructure and the application. The
+algorithms are subject to evaluation on a set of scientific workflow ensembles with a broad range ofbudget and deadline parameters. 
+The paper is organized as follows [\ldots]
 
 \section{Related Work}
 General policy and rule-based approaches to dynamic provisioning (e.g. Amazon Auto Scaling\footnote{http://aws.amazon.com/autoscaling} and RightScale\footnote{http://www.rightscale.com}).
