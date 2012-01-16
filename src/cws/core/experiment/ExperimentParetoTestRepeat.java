@@ -49,7 +49,8 @@ public class ExperimentParetoTestRepeat {
 		start = 1;
 		max_scaling = 0;
 		
-		double[] budgets= {40.0, 80.0, 120.0, 160.0, 200.0};
+//		double[] budgets= {10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0};
+		double[] budgets= {20.0, 30.0, 50.0, 60.0, 80.0};
 		
 		for (double budget : budgets) {
 			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 1);			
@@ -71,7 +72,8 @@ public class ExperimentParetoTestRepeat {
 		max_scaling = 0;
 
 		
-		double[] budgets= {40.0, 60.0, 80.0, 100.0, 120.0};
+//		double[] budgets= {10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0, 120.0, 140.0};
+		double[] budgets= {30.0, 50.0, 80.0, 100.0, 140.0};
 		
 		for (double budget : budgets) {
 			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 1);			
@@ -80,7 +82,7 @@ public class ExperimentParetoTestRepeat {
 	}
 
 	
-	@Test
+	//@Test
 	public void testRunExperimentCybershakePareto() {		
 
 		dagPath = "../projects/pegasus/CyberShake/";
@@ -108,7 +110,7 @@ public class ExperimentParetoTestRepeat {
 		dagPath = "../projects/pegasus/LIGO/";
 		dagName = "LIGO";
 		
-		String[] dags = DAGListGenerator.generateDAGListPareto(new Random(0), dagName, 40);
+		String[] dags = DAGListGenerator.generateDAGListPareto(new Random(0), dagName, 100);
 		
 		N = 40;
 		step = 1;
@@ -116,7 +118,8 @@ public class ExperimentParetoTestRepeat {
 		max_scaling = 0;
 
 
-		double[] budgets= {400.0, 800.0, 1200.0, 1600.0, 2000.0};
+//		double[] budgets= {200.0, 400.0, 600.0, 800.0, 1000.0, 1200.0, 1400.0, 1600.0, 1800.0, 2000.0};
+		double[] budgets= {400.0, 600.0, 800.0, 1000.0, 1200.0};
 
 		for (double budget : budgets) {
 			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 1);			
@@ -131,15 +134,17 @@ public class ExperimentParetoTestRepeat {
 		dagPath = "../projects/pegasus/Genome/";
 		dagName = "GENOME";
 		
-		String[] dags = DAGListGenerator.generateDAGListPareto(new Random(0), dagName, 40);
+		String[] dags = DAGListGenerator.generateDAGListPareto(new Random(0), dagName, 100);
 		
 		N = 1500;
-		step = 10;
-		start = 10;
+		step = 100;
+		start = 100;
 		max_scaling = 0;
 
 		
-		double[] budgets= {4000.0, 8000.0, 12000.0, 16000.0, 20000.0};
+//		double[] budgets= {2000.0, 4000.0, 6000.0, 8000.0, 10000.0, 12000.0, 14000.0, 16000.0, 18000.0, 20000.0};
+		double[] budgets= {4000.0, 6000.0, 8000.0, 10000.0, 12000.0};
+
 		
 		for (double budget : budgets) {
 			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 1);			
@@ -147,20 +152,44 @@ public class ExperimentParetoTestRepeat {
 			
 	}
 
+	//@Test
+	public void testRunExperimentEpigenomicsPareto() {
+		
+		dagPath = "../projects/pegasus/Genome/";
+		dagName = "GENOME";
+		
+		String[] dags = DAGListGenerator.generateDAGListPareto(new Random(0), dagName, 100);
+		
+		N = 1000;
+		step = 100;
+		start = 1000;
+		max_scaling = 0;
+
+		
+		double[] budgets= {4000.0};
+		
+		for (double budget : budgets) {
+			Experiment.runSeriesRepeat(dagPath, dags, budget, price, N, step, start, max_scaling, 1);			
+		}
+			
+	}
+	
+	
 	@Test
 	public void testRunExperimentSipht0() {
 		
 		dagPath = "../projects/pegasus/SIPHT/";
 		dagName = "SIPHT";
 		
-		String[] dags = DAGListGenerator.generateDAGListPareto(new Random(0), dagName, 40);
+		String[] dags = DAGListGenerator.generateDAGListPareto(new Random(0), dagName, 100);
 
 		N = 50;
-		step = 1;
-		start = 1;
+		step = 5;
+		start = 5;
 		max_scaling = 0;
 
 		
+//		double[] budgets= {200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1100.0};
 		double[] budgets= {200.0, 400.0, 600.0, 800.0, 1000.0};
 
 		for (double budget : budgets) {

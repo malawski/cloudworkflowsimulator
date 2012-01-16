@@ -284,14 +284,73 @@ FT(l) = \left[{\alpha}*\frac{T_l}{t}\right] + \left[{(1 - \alpha)}*\frac{R_l}{r}
 \subsection{Results}
 
 
-\begin{figure}[htb] 
+\begin{figure*}[htb] 
 \centering
-\includegraphics[width=1.0\columnwidth]{figures/CYBERSHAKE-Pareto}
-\caption{Comparison of DPDS and AW-DPDS algorithms for ensembles of
- 100 Pareto-distributed Cybershake workflows}
-\label{fig:CYBERSHAKE.n.1000.8.dagh1-20m0}
-\end{figure}
+\includegraphics[width=1.0\textwidth]{figures/MONTAGE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/LIGO-n-1000-8-dagh1-40m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/GENOME-n-1000-8-dagh100-1500m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/SIPHT-n-1000-8-dagh5-50m0.pdf}
+\caption{Comparison of DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
+Pareto-distributed workflows}
+\label{fig:}
+\end{figure*}
 
+
+\begin{figure*}[htb] 
+\centering
+\includegraphics[width=1.0\textwidth]{figures/score-MONTAGE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/score-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/score-LIGO-n-1000-8-dagh1-40m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/score-GENOME-n-1000-8-dagh100-1500m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/score-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\caption{Comparison of DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
+Pareto-distributed workflows. Score is computed as $\sum(1/(p+1))$ where
+priorities of subsequent workflows are $p=0,1,2,\ldots$ (0 means highest
+priority).}
+\label{fig:}
+\end{figure*}
+
+\begin{figure*}[htb] 
+\centering
+\includegraphics[width=1.0\textwidth]{figures/score2-MONTAGE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/score2-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/score2-LIGO-n-1000-8-dagh1-40m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/score2-GENOME-n-1000-8-dagh100-1500m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/score2-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\caption{Comparison of DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
+Pareto-distributed workflows. Score is computed as $\sum(2^(-p))$ where
+priorities of subsequent workflows are $p=0,1,2,\ldots$ (0 means highest
+priority).}
+\label{fig:}
+\end{figure*}
+
+\begin{figure*}[htb] 
+\centering
+\includegraphics[width=1.0\textwidth]{figures/size-MONTAGE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/size-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/size-LIGO-n-1000-8-dagh1-40m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/size-GENOME-n-1000-8-dagh100-1500m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/size-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\caption{Comparison of DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
+Pareto-distributed workflows. Score is equal to the total work completed,
+i.e. it is sum of runtimes (in hours) of tasks of completed workflows.}
+\label{fig:}
+\end{figure*}
+
+\begin{figure*}[htb] 
+\centering
+\includegraphics[width=1.0\textwidth]{figures/cost-MONTAGE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/cost-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/cost-LIGO-n-1000-8-dagh1-40m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/cost-GENOME-n-1000-8-dagh100-1500m0.pdf}
+\includegraphics[width=1.0\textwidth]{figures/cost-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\caption{Comparison of DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
+Pareto-distributed workflows. Plot shows effective computing cost in \$ per
+hour calclated by dividing sum of task runtimes by the total budget. Higher
+cost results from lower resource utilization.}
+\label{fig:}
+\end{figure*}
 
 
 

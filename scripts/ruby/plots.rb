@@ -96,9 +96,9 @@ def plot_schedule (filename)
       #puts "Saving plot to file: " + filename + ".pdf"
       plot.set "key right outside"
       plot.set "grid"
-      plot.terminal "png size 1024,768"
+      #plot.terminal "png size 1024,768"
       #plot.output 'output/' + dag + deadline + ".png"
-      plot.output filename + ".png"
+      #plot.output filename + ".png"
 
       data = Array.new
 
