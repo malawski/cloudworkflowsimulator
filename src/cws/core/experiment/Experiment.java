@@ -3,6 +3,7 @@ package cws.core.experiment;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Log;
@@ -113,14 +114,36 @@ public class Experiment {
 		result.setNumBusyVMs(engine.getBusyVMs().size());
 		result.setNumFreeVMs(engine.getFreeVMs().size());
 		
+		List<Integer> priorities = new LinkedList<Integer>();
+		List<Double> sizes = new LinkedList<Double>();
+
+		
 		int finished = 0;
 		for (DAGJob dj : engine.getAllDags()) {
-			if (dj.isFinished()) finished++;
+			if (dj.isFinished()) {
+				finished++;
+				priorities.add(dj.getPriority());
+				sizes.add(sumRuntime(dj.getDAG()));
+			}
 		}
 		result.setNumFinishedDAGs(finished);
+		result.setPriorities(priorities);
+		result.setSizes(sizes);
 		
 		return result;
 	}
+	
+	
+	/**
+	 * @return The total runtime of all tasks in the workflow
+	 */
+	public double sumRuntime(DAG dag) {
+        double sum = 0.0;
+        for (String taskName : dag.getTasks()) {
+            sum += dag.getTask(taskName).size;
+        }
+        return sum;
+    }
 	
 	
 	/**
@@ -187,6 +210,8 @@ public class Experiment {
 			        deadline, budget, price, max_scaling));
 		}
 		
+		// write number of dags finished
+		
 		StringBuffer outSPSS = new StringBuffer();
 		StringBuffer outAware = new StringBuffer();
 		StringBuffer outSimple = new StringBuffer();
@@ -201,6 +226,39 @@ public class Experiment {
 		WorkflowLog.stringToFile(outSPSS.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputSPSS.txt");
 		WorkflowLog.stringToFile(outAware.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputAware.txt");
 		WorkflowLog.stringToFile(outSimple.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputSimple.txt");			
+
+		// write priorities of dags finished
+		
+		StringBuffer prioritiesSPSS = new StringBuffer();
+		StringBuffer prioritiesAware = new StringBuffer();
+		StringBuffer prioritiesSimple = new StringBuffer();
+
+		for (int i=start; i<= N; i+=step) {
+			prioritiesSPSS.append(resultsSPSS[i].formatPriorities());
+			prioritiesAware.append(resultsAware[i].formatPriorities());
+			prioritiesSimple.append(resultsSimple[i].formatPriorities());			
+		}
+
+		WorkflowLog.stringToFile(prioritiesSPSS.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-prioritiesSPSS.txt");
+		WorkflowLog.stringToFile(prioritiesAware.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-prioritiesAware.txt");
+		WorkflowLog.stringToFile(prioritiesSimple.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-prioritiesSimple.txt");			
+
+		// write sizes of dags finished
+
+		StringBuffer sizesSPSS = new StringBuffer();
+		StringBuffer sizesAware = new StringBuffer();
+		StringBuffer sizesSimple = new StringBuffer();
+
+		for (int i=start; i<= N; i+=step) {
+			sizesSPSS.append(resultsSPSS[i].formatSizes());
+			sizesAware.append(resultsAware[i].formatSizes());
+			sizesSimple.append(resultsSimple[i].formatSizes());			
+		}
+
+		WorkflowLog.stringToFile(sizesSPSS.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-sizesSPSS.txt");
+		WorkflowLog.stringToFile(sizesAware.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-sizesAware.txt");
+		WorkflowLog.stringToFile(sizesSimple.toString(), dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-sizesSimple.txt");			
+
 		
 	}
 	

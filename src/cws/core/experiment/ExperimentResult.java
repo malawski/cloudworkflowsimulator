@@ -1,5 +1,7 @@
 package cws.core.experiment;
 
+import java.util.List;
+
 public class ExperimentResult {
 	
 	private double cost;
@@ -9,6 +11,10 @@ public class ExperimentResult {
 	private int numTotalVMs;
 	private int numFinishedDAGs;
 	private double deadline;
+	private List<Integer> priorities;
+	private List<Double> sizes;
+	
+
 
 	public double getCost() {
 		return cost;
@@ -52,5 +58,58 @@ public class ExperimentResult {
 	public void setDeadline(double deadline) {
 		this.deadline = deadline;
 	}
+	public List<Integer> getPriorities() {
+		return priorities;
+	}
+	public void setPriorities(List<Integer> priorities) {
+		this.priorities = priorities;
+	}
+	public List<Double> getSizes() {
+		return sizes;
+	}
+	public void setSizes(List<Double> sizes) {
+		this.sizes = sizes;
+	}
+	
+	/**
+	 * Format the list of priorities of completed DAGs as a string
+	 * @return the string containing: deadline and space separated priorities
+	 */
+	
+	public String formatPriorities() {
+		
+		StringBuffer prioritiesBuffer = new StringBuffer();
+
+		prioritiesBuffer.append(getDeadline());
+		
+		for (int priority : getPriorities()) {
+			prioritiesBuffer.append(" " + priority);
+		}
+		
+		prioritiesBuffer.append("\n");
+		
+		return prioritiesBuffer.toString();
+	}
+	
+	/**
+	 * Format the list of sizes of completed DAGs as a string
+	 * @return the string containing: deadline and space separated sizes
+	 */
+	
+	public String formatSizes() {
+		
+		StringBuffer sizesBuffer = new StringBuffer();
+
+		sizesBuffer.append(getDeadline());
+		
+		for (double size : getSizes()) {
+			sizesBuffer.append(" " + size);
+		}
+		
+		sizesBuffer.append("\n");
+		
+		return sizesBuffer.toString();
+	}
+	
 
 }
