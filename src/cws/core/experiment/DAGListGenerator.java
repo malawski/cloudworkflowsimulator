@@ -40,6 +40,16 @@ public class DAGListGenerator {
 		}
 		return dags;
 	}
+
+	
+	public static String[] generateDAGListConstant(String name, int size, int length) {
+		
+		String dags[] = new String[length];
+		for (int i=0; i<length; i++) {
+				dags[i] = name + ".n." + size + "." + i%20 + ".dag";
+		}
+		return dags;
+	}
 	
 	public static String[] generateDAGListPareto(Random seed, String name, int length) {
 		ArrayList<String> dags = new ArrayList<String>(length);
