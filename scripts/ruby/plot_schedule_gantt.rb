@@ -144,3 +144,4 @@ require "#{File.dirname(__FILE__)}/plots.rb"
 plot_schedule 'output/testSPSSSPSSGENOME.n.1000.8.dagx100d3600000.0b4000.0m0.0'
 plot_schedule 'output/testSimpleUtilizationBasedProvisionerWorkflowAwareEnsembleSchedulerGENOME.n.1000.8.dagx100d3600000.0b4000.0m0.0'
 #plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerGENOME.n.1000.8.dagx100d3600000.0b4000.0m0.0'
+plot_schedule 'output/testSimpleUtilizationBasedProvisionerEnsembleDynamicSchedulerSIPHT.n.1000.0.dagx100d108000.0b200.0m0.0'
