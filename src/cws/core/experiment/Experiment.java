@@ -44,7 +44,7 @@ public class Experiment {
 		
 		Scheduler sched = param.getScheduler();
 		
-		if (sched.getClass().getName() == "cws.core.SPSS") useSPSS = true;
+		if (sched.getClass().getName() == "cws.core.algorithms.SPSS") useSPSS = true;
 		
 		CloudSim.init(1, null, false);
 
