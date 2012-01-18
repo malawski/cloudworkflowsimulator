@@ -1,42 +1,3 @@
-#path <- "/home/malawski/cloudworkflowsimulator/output/"
-
-path <- ""
-prefix <- ""
-
-dpdsStats("Montage", prefix, "MONTAGE.n.1000.8.dag", c(20.0, 80.0), '1-20', 0)
-#dpdsStats("Montage", prefix, "MONTAGE.n.1000.8.dag", c(20.0, 30.0, 50.0, 60.0, 80.0), '1-20', 0)
-#dpdsStats("MONTAGE.n.1000.8.dag", c(10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0), '1-20', 0)
-#dpdsStats("MONTAGE.n.1000.0.dag", c(40.0, 80.0, 120.0, 160.0, 200.0), '1-20', 2, 0:9)
-
-dpdsStats("CyberShake", prefix, "CYBERSHAKE.n.1000.8.dag", c(50.0, 100.0), '1-20', 0)
-#dpdsStats("CyberShake", prefix, "CYBERSHAKE.n.1000.8.dag", c(30.0, 50.0, 80.0, 100.0, 140.0), '1-20', 0)
-#dpdsStats("CYBERSHAKE.n.1000.8.dag", c(10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0, 120.0, 140.0), '1-20', 0)
-#dpdsStats("CYBERSHAKE.n.1000.8.dag", c(40.0, 80.0, 120.0, 160.0, 200.0), '1-20', 0)
-#dpdsStats("CYBERSHAKE.n.1000.0.dag", c(40.0, 80.0, 120.0, 160.0, 200.0), '1-20', 2, 0:9)
-
-dpdsStats("LIGO", prefix, "LIGO.n.1000.8.dag", c(600.0, 1200.0), '1-40', 0)
-#dpdsStats("LIGO", prefix, "LIGO.n.1000.8.dag", c(400.0, 600.0, 800.0, 1000.0, 1200.0), '1-40', 0)
-#dpdsStats("LIGO.n.1000.8.dag", c(200.0, 400.0, 600.0, 800.0, 1000.0, 1200.0, 1400.0, 1600.0, 1800.0, 2000.0), '1-40', 0)
-#dpdsStats("LIGO.n.1000.0.dag", c(2000.0, 1600.0, 1200.0, 800.0, 400.0), '1-40', 2, 0:9)
-
-dpdsStats("Epigenomics", prefix, "GENOME.n.1000.8.dag", c(6000.0, 10000.0), '100-1500', 0)
-#dpdsStats("Epigenomics", prefix, "GENOME.n.1000.8.dag", c(4000.0, 6000.0, 8000.0, 10000.0, 12000.0), '100-1500', 0)
-#dpdsStats("GENOME.n.1000.8.dag", c(2000.0, 4000.0, 6000.0, 8000.0, 10000.0, 12000.0, 14000.0, 16000.0, 18000.0, 20000.0), '100-1500', 0)
-#dpdsStats("GENOME.n.1000.0.dag", c(4000.0, 8000.0, 12000.0, 16000.0, 20000.0), '10-1500', 2, 0:9)
-
-
-#dpdsStats("SIPHT", prefix, "SIPHT.n.1000.8.dag",  c(400.0, 1000.0), '5-50', 0)
-dpdsStats("SIPHT", prefix, "SIPHT.n.1000.8.dag",  c(200.0, 400.0, 600.0, 800.0, 1000.0), '5-50', 0)
-#dpdsStats("SIPHT.n.1000.8.dag",  c(200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1100.0), '5-50', 0)
-#dpdsStats("SIPHT.n.1000.0.dag",  c(1000.0, 800.0, 600.0, 400.0, 200.0), '1-50', 2, 0:9)
-
-#prefix <- "constant-"
-#dpdsStats("Montage", prefix, "MONTAGE.n.1000.0.dag", c(20.0, 30.0, 50.0, 60.0, 80.0), '1-20', 0)
-#dpdsStats("CyberShake", prefix, "CYBERSHAKE.n.1000.0.dag", c(30.0, 50.0, 80.0, 100.0, 140.0), '1-20', 0)
-#dpdsStats("LIGO", prefix, "LIGO.n.1000.0.dag", c(400.0, 600.0, 800.0, 1000.0, 1200.0), '1-40', 0)
-#dpdsStats("Epigenomics", prefix, "GENOME.n.1000.0.dag", c(4000.0, 6000.0, 8000.0, 10000.0, 12000.0), '100-1500', 0)
-#dpdsStats("SIPHT", prefix, "SIPHT.n.1000.0.dag",  c(200.0, 400.0, 600.0, 800.0, 1000.0), '5-50', 0)
-
 
 
 
@@ -62,13 +23,13 @@ readScores <- function(prefix, dag, budgets, runIds, deadline, n_deadlines, max_
 				score = 0.0
 				# we skip the first value since it contains a deadline
 				for (p in scores[2:n_scores]) {
-					score = score + 1/(p+1)
+					#score = score + 1/(p+1)
 					#score = score + 2^(-p)
-					#score = score + p/3600.0
+					score = score + p/3600.0
 				}
 				#print(score)
-				s[runId+1,i,deadline_id] = score
-				#s[runId+1,i,deadline_id] = budgets[i]/score
+				#s[runId+1,i,deadline_id] = score
+				s[runId+1,i,deadline_id] = budgets[i]/score
 				
 			}
 		}
@@ -116,13 +77,13 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
 	# matrix with score per (runId, budget, deadline)
 	# s - Simple, sA - Aware, sS - SPSS
 	
-	s = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-prioritiesSimple.txt")
-	sA = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-prioritiesAware.txt")
-	sS = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-prioritiesSPSS.txt")
+	#s = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-prioritiesSimple.txt")
+	#sA = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-prioritiesAware.txt")
+	#sS = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-prioritiesSPSS.txt")
 
-	#s = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-sizesSimple.txt")
-	#sA = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-sizesAware.txt")
-	#sS = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-sizesSPSS.txt")
+	s = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-sizesSimple.txt")
+	sA = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-sizesAware.txt")
+	sS = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-sizesSPSS.txt")
 	
 	
 	#print(s)
@@ -168,8 +129,12 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
 	
 	# plot averaged results
 	pdf(file=paste(prefix, dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=7, width=3, bg="white")
-	
 	par(mfrow=c(2,1))
+	
+	#pdf(file=paste(prefix, dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=3, width=10, bg="white")
+	#par(mfrow=c(1,5))
+	
+	
 	#title(main=paste(dag, " max scaling ", max_scaling), col.main="black", font.main=4)
 	
 	for (i in 1:n_budgets) {
@@ -203,8 +168,10 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
 	
 	# plot scores
 	pdf(file=paste(prefix, "score-", dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=7, width=3, bg="white")
-	
 	par(mfrow=c(2,1))
+
+	
+
 	#title(main=paste(dag, " max scaling ", max_scaling), col.main="black", font.main=4)
 	
 	for (i in 1:n_budgets) {
@@ -222,9 +189,9 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
 		
 		legend(x_range*1.0, avg_s[i,length(hours)]+5, paste("$",budgets[i]), cex=1.2, bty="n");
 		
-		title(ylab="score", cex.lab=1.2)
+		#title(ylab="score", cex.lab=1.2)
 		#title(ylab="total runtime in hours", cex.lab=1.2)
-		#title(ylab="computing cost in $/h", cex.lab=1.2)
+		title(ylab="computing cost in $/h", cex.lab=1.2)
 	
 		title(xlab="deadline in hours", cex.lab=1.2)
 		axis(2,cex.axis=1.2)
@@ -233,7 +200,8 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
 		box()
 		
 	}
-	legend("bottomright", c("DPDS", "WA-DPDS", "SPSS"), cex=0.8, col=c("red", "blue","green"), pch=1:3 );
+	#legend("bottomright", c("DPDS", "WA-DPDS", "SPSS"), cex=0.8, col=c("red", "blue","green"), pch=1:3 );
+	legend("topright", c("DPDS", "WA-DPDS", "SPSS"), cex=0.8, col=c("red", "blue","green"), pch=1:3 );
 	mtext(title, side=3, outer=TRUE, line=-1.5) 
 	dev.off()
 	
@@ -339,6 +307,45 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
 #}
 
 
+
+#path <- "/home/malawski/cloudworkflowsimulator/output/"
+
+path <- ""
+prefix <- "pareto-"
+
+dpdsStats("Montage", prefix, "MONTAGE.n.1000.8.dag", c(20.0, 80.0), '1-20', 0)
+#dpdsStats("Montage", prefix, "MONTAGE.n.1000.8.dag", c(20.0, 30.0, 50.0, 60.0, 80.0), '1-20', 0)
+#dpdsStats("MONTAGE.n.1000.8.dag", c(10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0), '1-20', 0)
+#dpdsStats("MONTAGE.n.1000.0.dag", c(40.0, 80.0, 120.0, 160.0, 200.0), '1-20', 2, 0:9)
+
+dpdsStats("CyberShake", prefix, "CYBERSHAKE.n.1000.8.dag", c(50.0, 100.0), '1-20', 0)
+#dpdsStats("CyberShake", prefix, "CYBERSHAKE.n.1000.8.dag", c(30.0, 50.0, 80.0, 100.0, 140.0), '1-20', 0)
+#dpdsStats("CYBERSHAKE.n.1000.8.dag", c(10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0, 120.0, 140.0), '1-20', 0)
+#dpdsStats("CYBERSHAKE.n.1000.8.dag", c(40.0, 80.0, 120.0, 160.0, 200.0), '1-20', 0)
+#dpdsStats("CYBERSHAKE.n.1000.0.dag", c(40.0, 80.0, 120.0, 160.0, 200.0), '1-20', 2, 0:9)
+
+dpdsStats("LIGO", prefix, "LIGO.n.1000.8.dag", c(600.0, 1200.0), '1-40', 0)
+#dpdsStats("LIGO", prefix, "LIGO.n.1000.8.dag", c(400.0, 600.0, 800.0, 1000.0, 1200.0), '1-40', 0)
+#dpdsStats("LIGO.n.1000.8.dag", c(200.0, 400.0, 600.0, 800.0, 1000.0, 1200.0, 1400.0, 1600.0, 1800.0, 2000.0), '1-40', 0)
+#dpdsStats("LIGO.n.1000.0.dag", c(2000.0, 1600.0, 1200.0, 800.0, 400.0), '1-40', 2, 0:9)
+
+dpdsStats("Epigenomics", prefix, "GENOME.n.1000.8.dag", c(6000.0, 10000.0), '100-1500', 0)
+#dpdsStats("Epigenomics", prefix, "GENOME.n.1000.8.dag", c(4000.0, 6000.0, 8000.0, 10000.0, 12000.0), '100-1500', 0)
+#dpdsStats("GENOME.n.1000.8.dag", c(2000.0, 4000.0, 6000.0, 8000.0, 10000.0, 12000.0, 14000.0, 16000.0, 18000.0, 20000.0), '100-1500', 0)
+#dpdsStats("GENOME.n.1000.0.dag", c(4000.0, 8000.0, 12000.0, 16000.0, 20000.0), '10-1500', 2, 0:9)
+
+
+#dpdsStats("SIPHT", prefix, "SIPHT.n.1000.8.dag",  c(400.0, 1000.0), '5-50', 0)
+dpdsStats("SIPHT", prefix, "SIPHT.n.1000.8.dag",  c(200.0, 400.0, 600.0, 800.0, 1000.0), '5-50', 0)
+#dpdsStats("SIPHT.n.1000.8.dag",  c(200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1100.0), '5-50', 0)
+#dpdsStats("SIPHT.n.1000.0.dag",  c(1000.0, 800.0, 600.0, 400.0, 200.0), '1-50', 2, 0:9)
+
+#prefix <- "constant-"
+#dpdsStats("Montage", prefix, "MONTAGE.n.1000.0.dag", c(20.0, 30.0, 50.0, 60.0, 80.0), '1-20', 0)
+#dpdsStats("CyberShake", prefix, "CYBERSHAKE.n.1000.0.dag", c(30.0, 50.0, 80.0, 100.0, 140.0), '1-20', 0)
+#dpdsStats("LIGO", prefix, "LIGO.n.1000.0.dag", c(400.0, 600.0, 800.0, 1000.0, 1200.0), '1-40', 0)
+#dpdsStats("Epigenomics", prefix, "GENOME.n.1000.0.dag", c(4000.0, 6000.0, 8000.0, 10000.0, 12000.0), '100-1500', 0)
+#dpdsStats("SIPHT", prefix, "SIPHT.n.1000.0.dag",  c(200.0, 400.0, 600.0, 800.0, 1000.0), '5-50', 0)
 
 
 
