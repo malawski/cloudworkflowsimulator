@@ -176,7 +176,7 @@ Using the priority queue guarantees that tasks from lower priority workflows are
 always submitted later than the higher priority ones and that the lower priority
 tasks can occupy idle VMs. However, as there is no preemption, long-running
 low-priority tasks may delay execution of high-priority tasks when such ones
-become ready. Fig.~\ref{fig:spss-example} shows the example plan generated using
+become ready. Fig.~\ref{fig:spds-example} shows the example plan generated using
 SPDS algorithm. It can be seen that tasks from lower priority workflows can fill
 idle time of provisioned virtual machines.
 
@@ -185,7 +185,7 @@ idle time of provisioned virtual machines.
 \includegraphics[width=1.0\columnwidth]{figures/spds-gantt}
  \caption{Example of schedule generated using SPDS algorithm: tasks are labelled
  by colors depending on the workflow. }
-\label{fig:spss-example}
+\label{fig:spds-example}
 \end{figure}
 
 \subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
@@ -242,6 +242,61 @@ cycle. The remaining time threshold is calculated as a sum of provisioner
 interval and estimated termination delay. This guarantees that no VMs canoverrun the assigned budget. To avoid uncontrolled increase of number ofinstances, which may happen in the case of highly parallel workflows,provisioner checks also the maximum scaling factor from the initial number ofprovisioned VMs and prohibits starting new ones when this threshold is reached.
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
+
+DPDS algorithm does not use any information about workflow structure: it deals
+only with scheduling of individual released/ready tasks using their
+workflow priorities. If there are no high priority tasks in the ready queue,
+then lower priority tasks are submitted to idle resources. This may lead to the
+deficiency in the following scenario: if a long-running task of low
+priority is submitted to the idle machine and then several high
+priority tasks are released to the ready queue, they become delayed by the
+execution of the low priority task. This usually does not cause a problem when
+the number of tasks and resources is high, but when the execution approaches the
+budget and deadline constraint, we have observed that tasks of low-priority
+workflows may prevent higher priority workflows from completion. This
+observation leads to the improvemed algorithm which we call workflow-aware DPDS
+(WA-DPDS).
+
+WA-DPDS extends DPDS by introducing a workflow admission procedure, which is
+invoked each time a task of a new workflow is at the head of priority queue,
+i.e. just before it is submitted. The procedure estimates if there is enough
+budget remaining to admit a new workflow: if not, all its tasks are rejected.
+Algorithm~\ref{alg:wa-dpds} estimates the cost of admitting a new workflow and
+compares it to the current cost (consumed budget) and remaining budget, taking
+into account that started VMs have been already paid for. It adds a small safety
+margin choosen to avoid overestimation of a budget.
+
+\begin{algorithm}
+\caption{Workflow admission algorithm for WA-DPDS}
+\label{alg:wa-dpds}
+\begin{algorithmic}[1]
+\Require $w$: workflow; $b$: budget; $c$: current cost
+\Procedure{Admit}{$w,b,c$}
+    \State $r_n\gets b-c$ \Comment{Remaining budget for new VMs}
+    \State $r_c\gets remaining\ cost\ on\ running\ VMs$
+    \State $r_a\gets remaining\ cost\ of\ admitted\ workflows$
+	\State $r_m\gets 0.1$ \Comment{Safety margin}
+	\State $r_b\gets r_n+r_c-r_a-r_m$ \Comment{Budget remaining}
+	\State $c_w\gets estimate\ cost(w)$
+    \If{$c_w<r_b$}
+    	\State \textbf{return} $TRUE$
+    \Else
+    	\State \textbf{return} $FALSE$
+	\EndIf    	 
+\EndProcedure
+\end{algorithmic} 
+\end{algorithm}
+
+
+Admission procedure relies only on the total estimated resource consumption and
+compares it to the budget remaining. We found that this estimation is useful not
+only to prevent low-priority workflows from delaying ligh-priority ones, but
+also in the case of ensembles consisting of workflows of non-uniform sizes, it
+allows to reject big and costly workflows that would overrun the budget and
+instead schedule some smaller ones to efficiently utilize idle resources. It
+would be also possible to extend the admission procedure to check other
+constraints, such as whether estimated critical path exceeds the deadline.
+
 
 \subsection{Static Provisioning Static Scheduling (SPSS)}
 
@@ -328,6 +383,15 @@ The approach is to schedule each workflow in the ensemble in priority order, rej
 FT(l) = \left[{\alpha}*\frac{T_l}{t}\right] + \left[{(1 - \alpha)}*\frac{R_l}{r} \right]
 \end{equation}
 
+\begin{figure}[htb] 
+\centering
+\includegraphics[width=1.0\columnwidth]{figures/spss-gantt}
+ \caption{Example of schedule generated using SPSS algorithm: tasks are labelled
+ by colors depending on the workflow. }
+\label{fig:spss-example}
+\end{figure}
+
+
 \section{Performance Evaluation}
 
 \subsection{Simulator}
@@ -348,6 +412,15 @@ shorter, since it forces provisioning of multiple VMs and thus increases
 overheads due to parallel execution so the budget cannot be spent so
 efficiently.
 
+\begin{figure}[tb] 
+\centering
+\includegraphics[width=0.6\columnwidth]{figures/ensemble-pareto}
+\caption{Pareto-like distribution of workflow sizes in ensemble. }
+\label{fig:ensemble-distribution}
+\end{figure}
+
+
+
 We assumed that the interesting number of workflows in ensemble should be in the
 order of between 10 and 100 workflows. This is motivated by several reasons:
 first, such numbers are typical for the real applications, e.g. the number of geographical sites for
@@ -358,11 +431,31 @@ workflows is larger that 100 and each workflow has a large number of parallel
 tasks, the problem of efficiently allocating them to the resources becomes much
 easier and similar to the bag-of-tasks problem.
 
-\begin{figure}[htb] 
+
+\begin{figure*}[t] 
 \centering
-\includegraphics[width=0.6\columnwidth]{figures/ensemble-pareto}
-\caption{Pareto-like distribution of workflow sizes in ensemble. }
-\label{fig:ensemble-distribution}
+\includegraphics[width=0.19\textwidth]{figures/pareto-MONTAGE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-LIGO-n-1000-8-dagh1-40m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-GENOME-n-1000-8-dagh100-1500m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\caption{Number of workflows completed for DPDS, AW-DPDS and SPSS
+algorithms on ensembles of 100 Pareto-distributed workflows}
+\label{fig:number-complete-pareto}
+\end{figure*}
+
+
+\begin{figure}[b!] 
+\centering
+%\includegraphics[width=0.19\textwidth]{figures/pareto-score-MONTAGE-n-1000-8-dagh1-20m0.pdf}
+%\includegraphics[width=0.19\textwidth]{figures/pareto-score-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-score-LIGO-n-1000-8-dagh1-40m0.pdf}
+%\includegraphics[width=0.19\textwidth]{figures/pareto-score-GENOME-n-1000-8-dagh100-1500m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-score-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\caption{Comparison of algorithms based on score, which  is computed as
+$\sum(1/(p+1))$ where priorities of subsequent workflows are $p=0,1,2,\ldots$ (0 means highest
+priority).}
+\label{fig:score}
 \end{figure}
 
 In order to evaluate the algorithms on a standard ser of workflows, we used
@@ -385,6 +478,23 @@ workflows (of size $\geq$ 900) is slightly increased to represent the
 in the ensemble. The workflows are sorted according to their size and the largest workflows are
 given the highest priority. 
 
+
+
+
+\begin{figure*}[t]  
+\centering
+\includegraphics[width=0.19\textwidth]{figures/pareto-size-MONTAGE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-size-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-size-LIGO-n-1000-8-dagh1-40m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-size-GENOME-n-1000-8-dagh100-1500m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-size-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\caption{ Total work completed expressed as the sum of runtimes (in hours) of
+tasks of completed workflows.Data computed for DPDS, AW-DPDS and SPSS
+algorithms on ensembles of 100 Pareto-distributed workflows}
+\label{fig:total-time}
+\end{figure*}
+
+
 In the tests we we assumed that all the VMs are homogeneous and have the
 processing speed of 1000 MIPS (million instructions per second), the price for
 one VM-hour is \$1 and that the sizes of tasks in the workflow gallery are given
@@ -404,7 +514,24 @@ tasks, so they require budgets up to \$1,500 and deadlines extended to 40
 hours. Epigenomics workflow is even more costly and needs approximately \$12,000
 and 1500 hours to complete the full ensemble.
 
+We show the results of three algorithms (TODO: ADD MORE): DPDS, WA-DPDS and
+SPSS. These tests were run with maximum autoscaling factor set to 1.0 for
+DPDS and WA-DPDS. After experimenting with DPDS and WA-DPDS we found that due to
+high parallelism of workflows the resource utilization remains high most of the time, 
+which leads to rapid provisioning of new resources at the beginning of ensemble
+execution. This in turn results in less efficient total utilization due to high
+level of parallelism. Setting the scaling limit to 1.0, ensures that the shape
+of resource provisioning plan is closest to a rectangle (see
+Fig.~\ref{fig:spds-example}) and the VM termination procedure
+(Algorithm~\ref{alg:prov}) allows maximum utilization of VMs before shutdown.
+
+
+
+
 \subsection{Metrics}
+
+
+
 
 There are multiple ways to evaluate the algorithms and also different metrics
 are relevant to the application users that are needed to take the planning
@@ -416,19 +543,6 @@ decisions. The set of metrics for each ensemble run we prepared includes:
   \item effective cost of computing per hour $C_{eff}$, which includes
   overheads.
 \end{itemize}
-
-
-\begin{figure*}[t] 
-\centering
-\includegraphics[width=0.19\textwidth]{figures/MONTAGE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/LIGO-n-1000-8-dagh1-40m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/GENOME-n-1000-8-dagh100-1500m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/SIPHT-n-1000-8-dagh5-50m0.pdf}
-\caption{Number of workflows completed for DPDS, AW-DPDS and SPSS
-algorithms on ensembles of 100 Pareto-distributed workflows}
-\label{fig:number-complete-pareto}
-\end{figure*}
 
 
 The number of workflows completed is a simplest metric and allows distinguishing
@@ -459,18 +573,7 @@ resource cost: $C_{eff} = b/T_C$ in dollars per hour.
 \subsection{Discussion of Results}
 
 
-\begin{figure}[b!] 
-\centering
-%\includegraphics[width=0.19\textwidth]{figures/score-MONTAGE-n-1000-8-dagh1-20m0.pdf}
-%\includegraphics[width=0.19\textwidth]{figures/score-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/score-LIGO-n-1000-8-dagh1-40m0.pdf}
-%\includegraphics[width=0.19\textwidth]{figures/score-GENOME-n-1000-8-dagh100-1500m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/score-SIPHT-n-1000-8-dagh5-50m0.pdf}
-\caption{Comparison of algorithms based on score, which  is computed as
-$\sum(1/(p+1))$ where priorities of subsequent workflows are $p=0,1,2,\ldots$ (0 means highest
-priority).}
-\label{fig:score}
-\end{figure}
+
 
 We run the simulations for the constraint values ranging between the
 estimated limits as indicated in Section~\ref{sec:scenarios}, resulting in
@@ -483,31 +586,19 @@ the observed algorithm behavior.
 
 
 
-\begin{figure*}[htb]  
+\begin{figure*}[htb] 
 \centering
-\includegraphics[width=0.19\textwidth]{figures/size-MONTAGE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/size-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/size-LIGO-n-1000-8-dagh1-40m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/size-GENOME-n-1000-8-dagh100-1500m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/size-SIPHT-n-1000-8-dagh5-50m0.pdf}
-\caption{Comparison of DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
-Pareto-distributed workflows. Score is equal to the total work completed,
-i.e. it is sum of runtimes (in hours) of tasks of completed workflows.}
-\label{fig:total-time}
-\end{figure*}
-
-\begin{figure*}[b!] 
-\centering
-\includegraphics[width=0.19\textwidth]{figures/cost-MONTAGE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/cost-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/cost-LIGO-n-1000-8-dagh1-40m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/cost-GENOME-n-1000-8-dagh100-1500m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/cost-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-cost-MONTAGE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-cost-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-cost-LIGO-n-1000-8-dagh1-40m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-cost-GENOME-n-1000-8-dagh100-1500m0.pdf}
+\includegraphics[width=0.19\textwidth]{figures/pareto-cost-SIPHT-n-1000-8-dagh5-50m0.pdf}
 \caption{Effective computing cost in \$ per hour calclated by dividing sum of
 task runtimes by the total budget. Higher cost results from lower resource utilization. Data based on DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
 Pareto-distributed workflows.}
 \label{fig:cost}
 \end{figure*}
+
 
 
 Fig.~\ref{fig:number-complete-pareto} shows the number of the workflows
@@ -534,6 +625,10 @@ does not degrade the solution, but rather in many cases it allows rejecting
 larger workflows that would lead to budget overrun. Thus it can save the space
 for smaller workflows that can complete.
 
+
+
+
+
 Fig.~\ref{fig:score} shows the score $s$ as defined in Eq.~\ref{eq:score}
 computed for two sample applications. Comparing
 Fig.~\ref{fig:number-complete-pareto} to Fig.~\ref{fig:score} we can see that
@@ -542,6 +637,14 @@ of the solution by one workflow may mean adding a one low-priority workflow.
 Nevertheless we can see that the curves on both figures have a very similar
 shape, which mens that our algorithms obey the priority rules and do not try to
 admit lower-priority workflows at the cost of the more important ones.
+
+\begin{figure}[htb] 
+\centering
+\includegraphics[width=0.6\columnwidth]{figures/pareto-budget-SIPHT-n-1000-8-dagh5-50h10m0.pdf}
+\caption{Comparison of number of workflows completed for a given deadline,
+plotted versus different budget amounts.}
+\label{fig:budgets}
+\end{figure}
 
 
 Fig.~\ref{fig:total-time} presents the same results using the total computing
@@ -590,28 +693,46 @@ constraints but as objectives.
 % \end{figure*}
        
                
-
-
-
-    
-
-
-
-
-\begin{figure}[htb] 
-\centering
-\includegraphics[width=0.6\columnwidth]{figures/budget-SIPHT-n-1000-8-dagh5-50h10m0.pdf}
-\caption{Comparison of number of workflows completed for a given deadline,
-plotted versus different budget amounts.}
-\label{fig:}
-\end{figure}
-
-
-
+Fig.~\ref{fig:budgets} whows the same data for SIPHT ensemble from another
+perspective. It helps answer the question: given a deadline, how many workflows
+can be finished when we increse the budget. In Fig.~\ref{fig:budgets} the growth
+is super-linear, what results from the distribution of workflow sizes in the
+ensemble (see Fig.~\ref{fig:ensemble-distribution}). For ensemble of equal size
+workflows (see Fig. TODO: ADD FIGURE FROM CONSTANT DISTRIBUTION) the growth is
+nearly linear. It can be also observed that staitc algorithms give better
+results for smaller budgets, while dynamic algorithms for larger ones.
 
 
 
 \section{Conclusion and Future Work}
+
+Summary:
+
+ - new interesting problem was addressed and analyzed
+
+ - dynamic and static strtegies were evaluated
+ 
+ - new algorithms were developed
+ 
+ - simulation studies were done
+ 
+Lessons learned:
+
+ - pros and cons of dynamic/static methods
+ 
+ - problems faced and solved
+ 
+ - observations about parallelization level, shape of the plan
+ 
+
+Future work:
+
+ - deal with uncertaineties of predictions
+ 
+ - deal with heterogeneity and multiple clouds (ref to Gideon's and Jens'
+ experiments on EC2 and FutureGrid)
+ 
+ - add data transfers to cost models (ref to paper on data sharing)
 
 
 %\section{Acknowledgments}
