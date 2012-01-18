@@ -31,4 +31,12 @@ public class DAGListGeneratorTest {
 		assertEquals("SIPHT.n.50.0.dag", dags[39]);
 		assertEquals("SIPHT.n.300.1.dag", dags[7]);	
 	}
+	
+	@Test
+	public void testConstant40() {
+		String[] dags = DAGListGenerator.generateDAGListConstant("SIPHT", 1000, 40);
+		assertEquals("SIPHT.n.1000.0.dag", dags[0]);
+		assertEquals("SIPHT.n.1000.19.dag", dags[39]);
+		assertEquals("SIPHT.n.1000.7.dag", dags[7]);	
+	}
 }
