@@ -2,10 +2,8 @@ package cws.core.experiment;
 
 import static org.junit.Assert.*;
 
-import java.util.HashMap;
 import java.util.Random;
 
-import org.cloudbus.cloudsim.distributions.ParetoDistr;
 import org.junit.Test;
 
 public class DAGListGeneratorTest {
