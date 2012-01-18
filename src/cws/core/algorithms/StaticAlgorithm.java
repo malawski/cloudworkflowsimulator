@@ -555,14 +555,6 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
                 return false;
             }
             
-            // Earlier starts are better
-            if (this.slot.start < other.slot.start) {
-                return true;
-            }
-            if (this.slot.start > other.slot.start) {
-                return false;
-            }
-            
             // Existing resources are better
             if (!this.newresource && other.newresource) {
                 return true;
@@ -571,7 +563,14 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
                 return false;
             }
             
-            //throw new RuntimeException("Here");
+            // Earlier starts are better
+            if (this.slot.start < other.slot.start) {
+                return true;
+            }
+            if (this.slot.start > other.slot.start) {
+                return false;
+            }
+            
             return true;
         }
         
