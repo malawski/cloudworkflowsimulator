@@ -205,24 +205,20 @@ priority workflows are not available.
 \end{figure}
 
 \subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
-
+ 
 The static provisioning approach of SPDS may not be optimal when resource demand
 changes during ensemble execution. In those cases, SPDS may either over-provision, 
 wasting the budget on idle VMs, or under-provision, using up the deadline while starving 
-the application of usable VMs. One of the advantages of elasticity in cloud computing
-is that the number of resources can be changed in response to application demand. 
-In policy-based provisioning (or auto-scaling) systems, the number of provisioned VMs 
-is adjusted based on application demand as measured by metrics such as resource 
-utilization and queue length. The DPDS algorithm uses resource utilization
-to determine when to provision and de-provision VMs. The provisioner
-module periodically computes utilization as the percentage of idle VMs. The
-provisioner algorithm detects which VMs are finishing their hourly billing cycle
-during the next provisioning period and decides whether they should continue
-running, should be terminated or new VMs should be provisioned: see
-Algorithm~\ref{alg:prov}.
-
+the application of usable VMs. One of the advantages of elasticity in cloud computing 
+is that the number of resources can be changed to meet the demands of an application.
+In policy-based provisioning (or auto-scaling) systems, metrics such as resource 
+utilization and queue length are monitored to estimate application demand. The DPDS 
+algorithm uses this approach to determine when to provision and de-provision VMs. The 
+algorithm periodically computes resource utilization as the percentage of idle VMs, and
+adjusts the number of VMs if the utilization is above or below given thresholds.
 Because it is assumed that VMs are billed by the hour, DPDS only considers VMs that are
-approaching their hourly billing cycle when deciding which VMs to terminate.
+approaching their hourly billing cycle when deciding which VMs to terminate. This process
+is described in Algorithm~\ref{alg:prov}.
 
 \begin{algorithm}
 \caption{Dynamic provisioning algorithm for DPDS}
@@ -230,42 +226,42 @@ approaching their hourly billing cycle when deciding which VMs to terminate.
 \begin{algorithmic}[1]
 \Require $c$: consumed budget; $b$: total budget; $d$: deadline; $p$: price;
 $t$: current time; $u_h$: upper utilization threshold; $u_l$: lower utilization
-threshold.
+threshold; $v_{max}$: maximum number of VMs
 \Procedure{Provision}{}
-    \State $V_C\gets set\ of\ VMs\ completing\ billing\ cycle$
-    \State $n_T\gets\ 0$ \Comment{number of VMs to terminate} 
-    \If{$ b - c < p * |V_C| \vee t > d $ }
-    	\State $V_R\gets set\ of\ running\ VMs$
-    	\State $n_T\gets |V_R| - \lfloor(b-c)/p\rfloor$ 
-    	\State $V_T\gets select\ n_T VMs\ to\ terminate\ from\ V_C$
-    	\State \Call{Terminate}{$V_T$}
+	\State $V_R\gets$ set of running VMs
+    \State $V_C\gets$ set of VMs completing billing cycle
+    \If{$ b - c < |V_C| * p\ or\ t > d $ }
+    	\State $n_T\gets |V_R| - \lfloor(b-c)/p\rfloor$
+    	\State $V_T\gets$ select $n_T$ VMs to terminate from $V_C$
+    	\State \Call{Terminate}{$V_T$} \label{l:terminate1}
     \Else 
-    	\If{$u>u_h$}
+		\State $u\gets$ current VM utilization
+    	\If{$u>u_h$ and $|V_R| < v_{max}$}
     		\State \Call{Start}{$new\ VM$}
-    	\EndIf
-    	\If{$u<u_l$}
-    		\State $V_F\gets free\ (idle)\ VMs$
-    		\State $n_T\gets \lceil|V_F|/2\rceil$ 
-    		\State \Call{Terminate}{$V_T$}
+    	\ElsIf{$u<u_l$}
+    		\State $V_I\gets$ set of idle VMs
+    		\State $n_T\gets \lceil|V_I|/2\rceil$ \label{l:nT2}
+			\State $V_T\gets$ select $n_T$ VMs to terminate from $V_I$
+    		\State \Call{Terminate}{$V_T$} \label{l:terminate2}
     	\EndIf 
     \EndIf
 \EndProcedure
 \end{algorithmic} 
 \end{algorithm}
 
-The number of instances to terminate $n_T$ computed in line 6 is the number that
-would overrun the budget if not terminated. On the other hand $n_T$ computed in
-line 15 prevents terminating all the instances too quickly, but makes sure that
-if there is only one instance left it should be terminated. However, the
-termination process is not immediate: to make sure that VMs that have been
-already paid for are not terminated prematurely the \textsc{Terminate} procedure
-terminates only these instances that are close to the end of their billing
-cycle. The remaining time threshold is calculated as a sum of provisioner
-interval and estimated termination delay. This guarantees that no VMs can
-overrun the assigned budget. To avoid uncontrolled increase of number of
-instances, which may happen in the case of highly parallel workflows,
-provisioner checks also the maximum scaling factor from the initial number of
-provisioned VMs and prohibits starting new ones when this threshold is reached.
+The set of VMs completing their billing cycle is determined by considering both the
+provisioner interval, and the termination delay of the provider. This guarantees 
+that VMs can be terminated before they start the next billing cycle and prevents the
+budget from being overrun. The VMs terminated in line \ref{l:terminate1} are the ones 
+that would overrun the budget if not terminated in the current provisioning cycle. 
+The VMs terminated on line \ref{l:nT2} are chosen to increase the resource utilization
+to the desired threshold. In order to prevent instances from being
+terminated too quickly, potentially wasting resources that have already been paid for
+but could be used later, no more than half of the idle resources are terminated during
+each provisioning cycle. To avoid an uncontrolled increase in the number of
+instances, which may happen in the case of highly parallel workflows, the provisioner 
+will not start a new VM if the user-defined scaling parameter, $v_{max}$, has
+been reached.
 
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
