@@ -92,7 +92,9 @@ workflow structure information to estimate which workflows should be rejected
 from the ensemble due to the constraints. As methodology in the study of the
 proposed algorithms we use simulation techniques. We have developed cloud workflow simulator based on
 CloudSim~\cite{Calheiros11}, which models the infrastructure and the application. The
-algorithms are subject to evaluation on a set of scientific workflow ensembles with a broad range ofbudget and deadline parameters. 
+algorithms are subject to evaluation on a set of scientific workflow ensembles with a broad range of
+budget and deadline parameters. 
+
 The paper is organized as follows [\ldots]
 
 \section{Related Work}
@@ -123,93 +125,113 @@ An ensemble consists of several related workflows. Each workflow is given a prio
 
 The goal is to complete as many workflows as possible given a budget and a deadline.
 
+
 \section{Algorithms}
 
-\subsection{Static Provisioning Dynamic Scheduling\\
+In this section we describe several algorithms we developed to execute ensembles of
+workflows on the cloud under budget and deadline constraints.
+
+\subsection{Static Provisioning Dynamic Scheduling \\
 (SPDS) }
 \label{sec:spds}
-This is the simplest strategy based on static provisioning of resources and
-on-line scheduling of workflow tasks. Given the budget $B$ and deadline $d$
-together with the hourly price $p$ of a VM it is possible to compute the number
-of VMs $N_{VM}$ to provision so that they consume the whole budget before the
-deadline. 
+
+The simplest strategy for executing ensembles of workflows in the cloud is to use
+provision resources statically and schedule workflow tasks dynamically. Given a 
+budget $b$, deadline $d$, and the hourly price $p$ of a VM it is easy to calculate
+the number of VMs, $N_{VM}$, to provision so that the entire budget is consumed before
+the deadline:
 
 \begin{equation}
 \label{eq:static-plan}
-N_{VM} = \lceil B / d / p \rceil
+N_{VM} = \lceil b / d / p \rceil
 \end{equation}
 
-Although simple, such provisioning plan has the advantage that it
-minimizes the number of provisioning and deprovisioning requests.
-Once the resources are provisioned, the tasks are scheduled to VMs using dynamic
-priority-based Algorithm~\ref{alg:ds}. 
+The SPDS algorithm statically provisions VMs at the start of the ensemble execution 
+and keeps them running until the deadline is reached, or the budget runs out.
+This provisioning plan has the advantage that it minimizes the number of provisioning 
+and de-provisioning requests.
+
+Once the VMs are provisioned, the tasks are mapped onto idle VMs using the dynamic
+priority-based scheduling procedure shown in Algorithm~\ref{alg:ds}.
 
 \begin{algorithm}
-\caption{Priority-based scheduling}
+\caption{Priority-based scheduling algorithm for SPDS}
 \label{alg:ds}
 \begin{algorithmic}[1]
-\Procedure{schedule}{}
-    \State $Q\gets set\ of\ released\ tasks$
-    \State $P\gets empty\ priority\ queue$
-    \While{$Q \neq \emptyset$}
-    	\For{$task\ t\in Q$}
-    		\State \Call{Insert}{$t,P$} 
-    	\EndFor
-    	\While{$FreeVMs \neq \emptyset \wedge P \neq \emptyset $}
-    		\State $VM\gets$ \Call{SelectRandom}{$FreeVMs$}
+\Procedure{Schedule}{}
+    \State $P\gets$ empty priority queue
+	\State $IdleVMs\gets$ set of idle VMs
+	\For{root task $t$ in all workflows}
+    	\State \Call{Insert}{$t,P$} 
+    \EndFor
+    \While{deadline not reached}
+    	\While{$IdleVMs \neq \emptyset\ and\ P \neq \emptyset$}
+    		\State $v\gets$ \Call{SelectRandom}{$IdleVMs$}
     		\State $t\gets$ \Call{Pop}{$P$}
-    		\State \Call{Submit}{$t,VM$}
+    		\State \Call{Submit}{$t,v$}
     	\EndWhile
-    	\State \Call{Wait}{$task\ finished$}
-    	\State \Call{Update}{$Q$}
+    	\State Wait for task $t$ to finish on VM $v$
+    	\State Update $P$ with ready children of $t$
+		\State \Call{Insert}{$v,IdleVMs$}
     \EndWhile
 \EndProcedure
 \end{algorithmic} 
 \end{algorithm}
 
-Initially all the
-released tasks from all the workflows are submitted to the queue $Q$. Then, they
-are inserted into priority queue $P$ based on the priority of workflows. If
-there are free VMs available, the tasks from the priority queue are submitted to
-the randomly choosen VMs. The process is repeated each time a task finishes.
-Using the priority queue guarantees that tasks from lower priority workflows are
-always submitted later than the higher priority ones and that the lower priority
-tasks can occupy idle VMs. However, as there is no preemption, long-running
-low-priority tasks may delay execution of high-priority tasks when such ones
-become ready. Fig.~\ref{fig:spds-example} shows the example plan generated using
-SPDS algorithm. It can be seen that tasks from lower priority workflows can fill
-idle time of provisioned virtual machines.
+Initially, the ready tasks from all workflows in the ensemble are added to a 
+priority queue based on the priority of the workflow to which they belong. If
+there are idle VMs available, and the priority queue is not empty, the next task
+from the priority queue is submitted to a randomly chosen idle VM. The process is 
+repeated until there are no idle VMs or the priority queue is empty. The scheduler
+then waits for a task to finish, adds its ready children to the priority queue,
+marks the VM as idle, and the entire process repeats until the deadline is reached.
+
+This algorithm guarantees that tasks from lower priority workflows are
+always deferred when higher-priority tasks are available, but lower-priority
+tasks can still occupy idle VMs when higher-priority tasks are not available. 
+However, because there is no preemption, long-running low-priority tasks may delay 
+the execution of higher-priority tasks. In addition, tasks from low priority 
+workflows may be executed even though there is no chance that those workflows 
+will be completed within the current budget and deadline. Fig.~\ref{fig:spds-example} 
+shows an example schedule generated using the SPDS algorithm. The figure illustrates 
+how tasks from lower priority workflows backfill idle VMs when tasks from higher 
+priority workflows are not available.
 
 \begin{figure}[htb] 
 \centering
 \includegraphics[width=1.0\columnwidth]{figures/spds-gantt}
- \caption{Example of schedule generated using SPDS algorithm: tasks are labelled
- by colors depending on the workflow. }
+ \caption{Example schedule generated using SPDS algorithm. Tasks are colored by workflow. }
 \label{fig:spds-example}
 \end{figure}
 
 \subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
 
-Static provisioning plan used in SPDS algorithm allows no changes to resource
-pool at runtime. However, such plan may not be optimal when resource demand
-changes during execution of workflows. In policy-based provisioning
-(or auto-scaling) systems the metrics such as resource
-utilization or queue length are typicaly used to estimate curret resource
-demand. Our DPDS algorithm is based on resource utilization: the provisioner
+The static provisioning approach of SPDS may not be optimal when resource demand
+changes during ensemble execution. In those cases, SPDS may either over-provision, 
+wasting the budget on idle VMs, or under-provision, using up the deadline while starving 
+the application of usable VMs. One of the advantages of elasticity in cloud computing
+is that the number of resources can be changed in response to application demand. 
+In policy-based provisioning (or auto-scaling) systems, the number of provisioned VMs 
+is adjusted based on application demand as measured by metrics such as resource 
+utilization and queue length. The DPDS algorithm uses resource utilization
+to determine when to provision and de-provision VMs. The provisioner
 module periodically computes utilization as the percentage of idle VMs. The
 provisioner algorithm detects which VMs are finishing their hourly billing cycle
 during the next provisioning period and decides whether they should continue
 running, should be terminated or new VMs should be provisioned: see
 Algorithm~\ref{alg:prov}.
 
+Because it is assumed that VMs are billed by the hour, DPDS only considers VMs that are
+approaching their hourly billing cycle when deciding which VMs to terminate.
+
 \begin{algorithm}
-\caption{Dynamic provisioner}
+\caption{Dynamic provisioning algorithm for DPDS}
 \label{alg:prov}
 \begin{algorithmic}[1]
 \Require $c$: consumed budget; $b$: total budget; $d$: deadline; $p$: price;
-$t$: current time; $u_h$: upper utilization thershold; $u_l$: lower utilization
+$t$: current time; $u_h$: upper utilization threshold; $u_l$: lower utilization
 threshold.
-\Procedure{provision}{}
+\Procedure{Provision}{}
     \State $V_C\gets set\ of\ VMs\ completing\ billing\ cycle$
     \State $n_T\gets\ 0$ \Comment{number of VMs to terminate} 
     \If{$ b - c < p * |V_C| \vee t > d $ }
@@ -236,10 +258,15 @@ would overrun the budget if not terminated. On the other hand $n_T$ computed in
 line 15 prevents terminating all the instances too quickly, but makes sure that
 if there is only one instance left it should be terminated. However, the
 termination process is not immediate: to make sure that VMs that have been
-already paid for are not terminated prematurely the {\em Terminate()} procedure
+already paid for are not terminated prematurely the \textsc{Terminate} procedure
 terminates only these instances that are close to the end of their billing
 cycle. The remaining time threshold is calculated as a sum of provisioner
-interval and estimated termination delay. This guarantees that no VMs canoverrun the assigned budget. To avoid uncontrolled increase of number ofinstances, which may happen in the case of highly parallel workflows,provisioner checks also the maximum scaling factor from the initial number ofprovisioned VMs and prohibits starting new ones when this threshold is reached.
+interval and estimated termination delay. This guarantees that no VMs can
+overrun the assigned budget. To avoid uncontrolled increase of number of
+instances, which may happen in the case of highly parallel workflows,
+provisioner checks also the maximum scaling factor from the initial number of
+provisioned VMs and prohibits starting new ones when this threshold is reached.
+
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
 
@@ -254,7 +281,7 @@ execution of the low priority task. This usually does not cause a problem when
 the number of tasks and resources is high, but when the execution approaches the
 budget and deadline constraint, we have observed that tasks of low-priority
 workflows may prevent higher priority workflows from completion. This
-observation leads to the improvemed algorithm which we call workflow-aware DPDS
+observation leads to the improved algorithm which we call Workflow-Aware DPDS
 (WA-DPDS).
 
 WA-DPDS extends DPDS by introducing a workflow admission procedure, which is
@@ -295,7 +322,8 @@ also in the case of ensembles consisting of workflows of non-uniform sizes, it
 allows to reject big and costly workflows that would overrun the budget and
 instead schedule some smaller ones to efficiently utilize idle resources. It
 would be also possible to extend the admission procedure to check other
-constraints, such as whether estimated critical path exceeds the deadline.
+constraints, such as whether estimated critical path exceeds the deadline.
+
 
 
 \subsection{Static Provisioning Static Scheduling (SPSS)}
@@ -778,7 +806,8 @@ is super-linear, what results from the distribution of workflow sizes in the
 ensemble (see Fig.~\ref{fig:ensemble-distribution}). For ensemble of equal size
 workflows (see Fig. TODO: ADD FIGURE FROM CONSTANT DISTRIBUTION) the growth is
 nearly linear. It can be also observed that staitc algorithms give better
-results for smaller budgets, while dynamic algorithms for larger ones.
+results for smaller budgets, while dynamic algorithms for larger ones.
+
 
 
 
