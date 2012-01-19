@@ -277,13 +277,13 @@ that higher priority workflows will be able to finish.
 In order to address this issue, the Workflow-Aware DPDS (WA-DPDS) algorithm extends 
 DPDS by introducing a workflow admission procedure. The admission procedure is
 invoked whenever WA-DPDS sees the first task of a new workflow at the head of the 
-priority queue (i.e. no other tasks from that workflow have been scheduled yet). 
-The procedure estimates if there is enough
-budget remaining to admit the new workflow: if not, all its tasks are rejected.
+priority queue (i.e. no other tasks from the new workflow have been scheduled yet). 
+The admission procedure estimates if there is enough budget remaining to admit the 
+new workflow: if not, all its tasks are rejected.
 Algorithm~\ref{alg:wa-dpds} estimates the cost of admitting a new workflow and
 compares it to the current cost (consumed budget) and remaining budget, taking
 into account that started VMs have been already paid for. It adds a small safety
-margin choosen to avoid overestimation of a budget.
+margin chosen to avoid overestimation of a budget.
 
 \begin{algorithm}
 \caption{Workflow admission algorithm for WA-DPDS}
@@ -716,9 +716,9 @@ SPSS     &    31 &  18 &  170  & 75 &  42 & 336\tabularnewline
 \begin{tabular}{r|cccccc}
  & M & C & L & E & S & TOTAL\tabularnewline
 \hline
-DPDS      &   58 &  45 &  46 &  15  &  9 & 173\tabularnewline
-WA-DPDS   &    90 &  96  & 84  & 29 &  17 & 316\tabularnewline
-SPSS     &    48 &  27 & 173 &  75 &  42 & 365\tabularnewline
+DPDS      &   58  & 45 &  19 &  14  &  0 & 136\tabularnewline
+WA-DPDS   &    90  & 96  & 57  & 27 &   8 & 278\tabularnewline
+SPSS     &    31 &  18 &  170  & 75 &  42 & 336\tabularnewline
 \end{tabular}
 \medskip
 
@@ -846,7 +846,19 @@ large workflows and thus saving resources for completing the less costly ones.
 Another general observation is that although clouds provide such capabilities as
 dynamic adding and removing of resources at runtime and high parallelization due
 to ilusion of unlimited resources, it turns out that is recommended to avoid
-using these capabilities when possible, in order to achieve high resourceutilization and cost effectiveness. This observation comes from the fact thatstarting and stopping more VMs incurres a cost which can be amortized by runningeach started VM as long as possible before shutdown. This effect was confirmedin the case of SPSS algorithm for Montage and CyberShake workflows with smallbudgets. Similarly, high degree of parallelization (large number of nodes) leadsalso to less efficient resource utilization and in the case of clouds the dropin parallel efficiency means also the increase of cost. This result, clearlyvisible in Fig~\ref{fig:cost}, leads to multi-criteria decision problems andrelated trade-offs. E.g. our simulation results can be used as hints to answerthe question how much time and money is required to actually complete all theworkflows from the given ansemble.
+using these capabilities when possible, in order to achieve high resource
+utilization and cost effectiveness. This observation comes from the fact that
+starting and stopping more VMs incurres a cost which can be amortized by running
+each started VM as long as possible before shutdown. This effect was confirmed
+in the case of SPSS algorithm for Montage and CyberShake workflows with small
+budgets. Similarly, high degree of parallelization (large number of nodes) leads
+also to less efficient resource utilization and in the case of clouds the drop
+in parallel efficiency means also the increase of cost. This result, clearly
+visible in Fig~\ref{fig:cost}, leads to multi-criteria decision problems and
+related trade-offs. E.g. our simulation results can be used as hints to answer
+the question how much time and money is required to actually complete all the
+workflows from the given ansemble.
+
 Another lesson learned from our studies is related to the shapes and granularity
 of the tasks of workflows in the ensembles. The benchmarks workflows that we
 tested have relatively large number of tasks (50--1000). Montage and CyberShake
