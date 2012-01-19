@@ -1,47 +1,89 @@
+library(gmp)
 
 global_titles <<- ""
 global_rankings <<- cbind(c(0,0,0))
 global_rankings_scores <<- cbind(c(0,0,0))
+global_rankings_escores <<- cbind(c(0,0,0))
 
+global_totals <<- cbind(c(0,0,0))
+global_stotals <<- cbind(c(0,0,0))
 
 score_weight <- function(p) {
         return (1/(p+1))
 }
 
-readScores <- function(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, suffix) {
-        n_budgets = length(budgets)
-        n_runIds = length(runIds)
-
-
-        s <- array(0,  dim=c(length(runIds), n_budgets, n_deadlines))
-
-        for (runId in runIds) {
-                score_files <- paste(path, prefix, dag, "b", budgets, ".0h", deadline, "m", max_scaling, ".0", "run", runId, suffix, sep="")
-
-                for (i in 1:n_budgets) {
-                        lines = readLines(score_files[i], n=-1)
-                        #print(lines)
-                        deadline_id = 0
-                        for (line in lines) {
-                                deadline_id = deadline_id +1
-                                scores = as.numeric(unlist(strsplit(line, " ")))
-                                n_scores = length(scores)
-                                score = 0.0
-                                # we skip the first value since it contains a deadline
-                                for (p in scores[2:n_scores]) {
-                                        #score = score + 1/(p+1)                                                                                                            
-                                        #score = score + 2^(-p)                                                                                                              
-                                        score = score + p/3600.0                                                                                                           
-                                }                                                                                                                                           
-                                #print(score)                                                                                                                               
-                                s[runId+1,i,deadline_id] = score                                                                                                            
-                                #s[runId+1,i,deadline_id] = budgets[i]/score                                                                                                
-                                                                                                                                                                            
-                        }
-                }
-        }
-        return(s)
+readExpScores <- function(prefix, dag, budgets, deadline, n_deadlines, max_scaling, suffix) {
+	
+	n_budgets = length(budgets)
+	
+	
+	s <- matrix.bigq(nrow=n_budgets, ncol=n_deadlines)
+	
+	
+	runId=0
+	score_files <- paste(path, prefix, dag, "b", budgets, ".0h", deadline, "m", max_scaling, ".0", "run", runId, suffix, sep="")
+	
+	for (i in 1:n_budgets) {
+		lines = readLines(score_files[i], n=-1)
+		#print(lines)
+		deadline_id = 0
+		for (line in lines) {
+			deadline_id = deadline_id +1
+			scores = as.numeric(unlist(strsplit(line, " ")))
+			n_scores = length(scores)
+			score = as.bigq(0)
+			#print(score)
+			# we skip the first value since it contains a deadline
+			for (p in scores[2:n_scores]) {
+				score = score + 1/as.bigq(2^p)
+				#score = score + 1/as.bigq(p+1)
+				
+			}                                                                                                                                           
+			#print(score)                                                                                                                               
+			s[i,deadline_id] = score                                                                                                            
+			
+		}
+	}
+	
+	return(s)
 }
+
+readScores <- function(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, suffix) {
+	n_budgets = length(budgets)
+	n_runIds = length(runIds)
+	
+		s <- array(0,  dim=c(length(runIds), n_budgets, n_deadlines))
+	
+	for (runId in runIds) {
+		score_files <- paste(path, prefix, dag, "b", budgets, ".0h", deadline, "m", max_scaling, ".0", "run", runId, suffix, sep="")
+		
+		for (i in 1:n_budgets) {
+			lines = readLines(score_files[i], n=-1)
+			print(lines)
+			deadline_id = 0
+			for (line in lines) {
+				deadline_id = deadline_id +1
+				scores = as.numeric(unlist(strsplit(line, " ")))
+				n_scores = length(scores)
+				score = 0
+				#print(score)
+				# we skip the first value since it contains a deadline
+				for (p in scores[2:n_scores]) {
+					#score = score + 1/(p+1)                                                                                                            
+					#score = score + 2^(-p)                                                                                                              
+					score = score + p/3600.0
+					
+				}                                                                                                                                           
+				print(score)                                                                                                                               
+				s[runId+1,i,deadline_id] = score                                                                                                            
+				#s[runId+1,i,deadline_id] = budgets[i]/score                                                                                                
+				
+			}
+		}
+	}
+	return(s)
+}
+
 
 
 dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds={0}) {
@@ -87,6 +129,10 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
         #sA = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-prioritiesAware.txt")
         #sS = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-prioritiesSPSS.txt")
 
+		se = readExpScores(prefix, dag, budgets,  deadline, n_deadlines, max_scaling, "-prioritiesSimple.txt")
+		seA = readExpScores(prefix, dag, budgets, deadline, n_deadlines, max_scaling, "-prioritiesAware.txt")
+		seS = readExpScores(prefix, dag, budgets, deadline, n_deadlines, max_scaling, "-prioritiesSPSS.txt")
+		
         s = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-sizesSimple.txt")
         sA = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-sizesAware.txt")
         sS = readScores(prefix, dag, budgets, runIds, deadline, n_deadlines, max_scaling, "-sizesSPSS.txt")
@@ -130,54 +176,88 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
         print(paste(title, ": Differences in number of dags"))
         print(x)
 
-        diff <- avg_sS-avg_sA
-        positive <- diff>0
-        diffsum  <- rowSums(diff)
-        diffmean <- apply(diff,1,mean)
-        numpositive <- apply(diff,1, function (x) sum(x>0) )
-        numnegative <- apply(diff,1, function (x) sum(x<0) )
-        numzero <- apply(diff,1, function (x) sum(x==0) )
-        total <- n_deadlines
-        percent_better <- numpositive/total * 100
-        percent_worse <- numnegative/total * 100
+        #diff <- avg_sS-avg_sA
+        #positive <- diff>0
+        #diffsum  <- rowSums(diff)
+        #diffmean <- apply(diff,1,mean)
+        #numpositive <- apply(diff,1, function (x) sum(x>0) )
+        #numnegative <- apply(diff,1, function (x) sum(x<0) )
+        #numzero <- apply(diff,1, function (x) sum(x==0) )
+        #total <- n_deadlines
+        #percent_better <- numpositive/total * 100
+        #percent_worse <- numnegative/total * 100
 
-        x <- cbind(budgets, numpositive, numnegative, numzero, total, percent_better, percent_worse)
-        print(paste(title, ": Differences in score"))
-        print(x)
+        #x <- cbind(budgets, numpositive, numnegative, numzero, total, percent_better, percent_worse)
+        #print(paste(title, ": Differences in score"))
+        #print(x)
 
 		# compute rankings for num dags
 		topDPDS <- avg_m>=avg_mA & avg_m>=avg_mS
 		count_topDPDS <-rowSums(topDPDS)
+		totalDPDS <- rowSums(avg_m)
 		
 		topWADPDS <- avg_mA>=avg_m & avg_mA>=avg_mS
 		count_topWADPDS <-rowSums(topWADPDS)
+		totalWADPDS <- rowSums(avg_mA)
 		
 		topSPSS <- avg_mS>=avg_m & avg_mS>=avg_mA
 		count_topSPSS <-rowSums(topSPSS)
+		totalSPSS <- rowSums(avg_mS)
 		
 		x <- cbind(budgets, count_topDPDS, count_topWADPDS, count_topSPSS)
 		print(x)
 		print(colSums(x))
 		global_rankings <<-cbind(global_rankings, colSums(x)[2:4])
 
+		x <- cbind(budgets, totalDPDS, totalWADPDS, totalSPSS)
+		print(x)
+		print(colSums(x))
+		global_totals <<-cbind(global_totals, colSums(x)[2:4])
+		
 
 
 		# compute rankings for scores
 		topDPDS <- avg_s>=avg_sA & avg_s>=avg_sS
 		count_topDPDS <-rowSums(topDPDS)
+		stotalDPDS <- rowSums(avg_s)
 		
 		topWADPDS <- avg_sA>=avg_s & avg_sA>=avg_sS
 		count_topWADPDS <-rowSums(topWADPDS)
+		stotalWADPDS <- rowSums(avg_sA)
 		
 		topSPSS <- avg_sS>=avg_s & avg_sS>=avg_sA
 		count_topSPSS <-rowSums(topSPSS)
+		stotalSPSS <- rowSums(avg_sS)
 		
 		x <- cbind(budgets, count_topDPDS, count_topWADPDS, count_topSPSS)
 		print(x)
 		print(colSums(x))
 		global_titles <<- paste(global_titles, title, " ")
 		global_rankings_scores <<-cbind(global_rankings_scores, colSums(x)[2:4])
+		
+		
+		x <- cbind(budgets, stotalDPDS, stotalWADPDS, stotalSPSS)
+		print(x)
+		print(colSums(x))
+		global_stotals <<-cbind(global_stotals, colSums(x)[2:4])
 
+		# compute rankings for exp scores
+		etopDPDS <- se>=seA & se>=seS
+		ecount_topDPDS <-rowSums(etopDPDS)
+		
+		etopWADPDS <- seA>=se & seA>=seS
+		ecount_topWADPDS <-rowSums(etopWADPDS)
+		
+		etopSPSS <- seS>=se & seS>=seA
+		ecount_topSPSS <-rowSums(etopSPSS)
+		
+		ex <- cbind(budgets, ecount_topDPDS, ecount_topWADPDS, ecount_topSPSS)
+		print(ex)
+		print(colSums(ex))
+		global_rankings_escores <<-cbind(global_rankings_escores, colSums(ex)[2:4])
+		
+		
+		
         x_range = hours[length(hours)]
 
 
@@ -398,9 +478,9 @@ dpdsStats("SIPHT", prefix, "SIPHT.n.1000.8.dag",  c(200.0, 400.0, 600.0, 800.0, 
 #dpdsStats("SIPHT.n.1000.0.dag",  c(1000.0, 800.0, 600.0, 400.0, 200.0), '1-50', 2, 0:9)
 
 #prefix <- "constant-"
-#dpdsStats("Montage", prefix, "MONTAGE.n.1000.0.dag", c(20.0, 30.0, 50.0, 60.0, 80.0), '1-20', 0)
-#dpdsStats("CyberShake", prefix, "CYBERSHAKE.n.1000.0.dag", c(30.0, 50.0, 80.0, 100.0, 140.0), '1-20', 0)
-#dpdsStats("LIGO", prefix, "LIGO.n.1000.0.dag", c(400.0, 600.0, 800.0, 1000.0, 1200.0), '1-40', 0)
+#dpdsStats("Montage", prefix, "MONTAGE.n.1000.0.dag", c(40.0, 80.0, 120.0, 160.0, 200.0), '1-20', 0)
+#dpdsStats("CyberShake", prefix, "CYBERSHAKE.n.1000.0.dag", c(50.0, 150.0, 250.0, 350.0, 450.0), '1-20', 0)
+#pdsStats("LIGO", prefix, "LIGO.n.1000.0.dag", c(500.0, 1000.0, 1500.0, 2000.0, 2500.0), '1-40', 0)
 #dpdsStats("Epigenomics", prefix, "GENOME.n.1000.0.dag", c(4000.0, 6000.0, 8000.0, 10000.0, 12000.0), '100-1500', 0)
 #dpdsStats("SIPHT", prefix, "SIPHT.n.1000.0.dag",  c(500.0, 1000.0, 1500.0, 2000.0, 2500.0), '50-50', 0)
 
@@ -409,9 +489,15 @@ dpdsStats("SIPHT", prefix, "SIPHT.n.1000.8.dag",  c(200.0, 400.0, 600.0, 800.0, 
 
 global_rankings<<-cbind(global_rankings, rowSums(global_rankings))
 global_rankings_scores<<-cbind(global_rankings_scores, rowSums(global_rankings_scores))
+global_rankings_escores<<-cbind(global_rankings_escores, rowSums(global_rankings_escores))
+global_totals<<-cbind(global_totals, rowSums(global_totals))
+global_stotals<<-cbind(global_stotals, rowSums(global_stotals))
+
 
 print(global_titles)
 print(global_rankings)
 print(global_rankings_scores)
-
+print(global_rankings_escores)
+print(global_totals)
+print(global_stotals)
 
