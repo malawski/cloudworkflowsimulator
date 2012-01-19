@@ -266,24 +266,20 @@ been reached.
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
 
-DPDS algorithm does not use any information about workflow structure: it deals
-only with scheduling of individual released/ready tasks using their
-workflow priorities. If there are no high priority tasks in the ready queue,
-then lower priority tasks are submitted to idle resources. This may lead to the
-deficiency in the following scenario: if a long-running task of low
-priority is submitted to the idle machine and then several high
-priority tasks are released to the ready queue, they become delayed by the
-execution of the low priority task. This usually does not cause a problem when
-the number of tasks and resources is high, but when the execution approaches the
-budget and deadline constraint, we have observed that tasks of low-priority
-workflows may prevent higher priority workflows from completion. This
-observation leads to the improved algorithm which we call Workflow-Aware DPDS
-(WA-DPDS).
+The DPDS algorithm does not use any information about the structure of the workflows
+in the ensemble when scheduling tasks: it looks only at the priorities of the ready 
+tasks when deciding which task to schedule next. It does not consider whether a lower 
+priority task belongs to a workflow that it will never be able to complete given the 
+current budget and deadline. As a result, DPDS may execute lower priority tasks just 
+to keep VMs busy that will end up delaying higher priority tasks, making it less likely
+that higher priority workflows will be able to finish.
 
-WA-DPDS extends DPDS by introducing a workflow admission procedure, which is
-invoked each time a task of a new workflow is at the head of priority queue,
-i.e. just before it is submitted. The procedure estimates if there is enough
-budget remaining to admit a new workflow: if not, all its tasks are rejected.
+In order to address this issue, the Workflow-Aware DPDS (WA-DPDS) algorithm extends 
+DPDS by introducing a workflow admission procedure. The admission procedure is
+invoked whenever WA-DPDS sees the first task of a new workflow at the head of the 
+priority queue (i.e. no other tasks from that workflow have been scheduled yet). 
+The procedure estimates if there is enough
+budget remaining to admit the new workflow: if not, all its tasks are rejected.
 Algorithm~\ref{alg:wa-dpds} estimates the cost of admitting a new workflow and
 compares it to the current cost (consumed budget) and remaining budget, taking
 into account that started VMs have been already paid for. It adds a small safety
