@@ -805,33 +805,70 @@ results for smaller budgets, while dynamic algorithms for larger ones.
 
 \section{Conclusion and Future Work}
 
-Summary:
+In this paper we addressed a new interesting and important problem of scheduling
+and resource provisioning for scientific workflow ensembles on IaaS cloud
+infrastructures. The problem is different from previous work on grid or utility
+grid scheduling that cloud infrastructure gives more control over the resources,
+so the resource provisioning plan can be adjusted to the application
+requirements. Therefore the problem space becomes larger: it requires not
+only to select the best scheduling of tasks to available resources, but also
+select the best shape of resource provisioning plan. The formulation of a
+problem as maximization of the number of prioritized workflows completed from
+the ensemble requires also to take the decisions on admitting or rejecting workflows
+based on their estimated resource demands. We believe that such formulation of
+the bi-constrained problem is highly relevant since such
+constraints are typically imposed on many real-world projects.
 
- - new interesting problem was addressed and analyzed
+We have analyzed both static and dynamic scheduling approaches and
+developed the SPDS, DPDS, WA-DPDS and SPSS algorithms realizing these
+strategies. The algorithms were evaluated on ensembles of benchmark
+workflows which represent typical real scientific applications. For the
+purpose of evaluation we have developed a simulator that models the cloud
+infrastructure and the tightly-coupled scheduler and provisioner modules of
+workflow engine. The results of simulation studies indicate that the two algorithms (WA-DPDS and
+SPSD) that take into account the information about the workflow structure and
+estimation of task runtimes yield better results than the simple on-line
+priority-based scheduling strategy with static (constant) resource provisioning
+plan. 
 
- - dynamic and static strtegies were evaluated
- 
- - new algorithms were developed
- 
- - simulation studies were done
- 
-Lessons learned:
+During our work, several interesting lessons were learned about the workflow
+ensembles on cloud infrastructures. One result is that the simple strategy of
+SPDS performs relatively well in terms of number of workflows completed and the
+high resource utilization it can achieve. However, this method does not allow to
+give any advance prediction about the result, so to see its performance the
+whole ensemble needs to be simulated. On the other hand, the method may be
+the only choice in the case no estimates about the task runtimes are available
+in advance. It can be seen that the workflow-aware and static algorithms are
+able to find better quality solutions in terms of the defined metrics: this the
+result mainly of the admission algorithm implemented, which allow rejecting too
+large workflows and thus saving resources for completing the less costly ones.
 
- - pros and cons of dynamic/static methods
- 
- - problems faced and solved
- 
- - observations about parallelization level, shape of the plan
- 
+Another general observation is that although clouds provide such capabilities as
+dynamic adding and removing of resources at runtime and high parallelization due
+to ilusion of unlimited resources, it turns out that is recommended to avoid
+using these capabilities when possible, in order to achieve high resourceutilization and cost effectiveness. This observation comes from the fact thatstarting and stopping more VMs incurres a cost which can be amortized by runningeach started VM as long as possible before shutdown. This effect was confirmedin the case of SPSS algorithm for Montage and CyberShake workflows with smallbudgets. Similarly, high degree of parallelization (large number of nodes) leadsalso to less efficient resource utilization and in the case of clouds the dropin parallel efficiency means also the increase of cost. This result, clearlyvisible in Fig~\ref{fig:cost}, leads to multi-criteria decision problems andrelated trade-offs. E.g. our simulation results can be used as hints to answerthe question how much time and money is required to actually complete all theworkflows from the given ansemble.
+Another lesson learned from our studies is related to the shapes and granularity
+of the tasks of workflows in the ensembles. The benchmarks workflows that we
+tested have relatively large number of tasks (50--1000). Montage and CyberShake
+workflows have fine-grained tasks of short execution times, in the order of
+seconds and minutes. LIGO, Epigenomics and SIPHT have longer tasks: from minutes to hours.
+Therefore the dynamic algorithms achieved better results on the fine grained
+workflows, since the simple random-based allocation strategy leads to good
+load-balancing and high resource utilization. On the other hand, when tasks are
+longer, it becomes more beneficial to apply a static planning strategy of SPSS.
 
-Future work:
-
- - deal with uncertaineties of predictions
- 
- - deal with heterogeneity and multiple clouds (ref to Gideon's and Jens'
- experiments on EC2 and FutureGrid)
- 
- - add data transfers to cost models (ref to paper on data sharing)
+Our current study reveals multiple paths for future work. One interesting
+question would be to answer how the static and dynamic algorithms perform in the
+cases of increased uncertainities and failures, that have important influence
+on overall system performance~\cite{Sakellariou2010,Dongarra2007}. Second
+important goal would be to extend our application and infrastructure model to
+include various data storage options available on clouds. The experimental study
+on that subject~\cite{Juve2010} suggests that data demands of scientific
+workflows have a high impact not only on execution time but also on costs on
+commercial clouds. Finally, we would like to address the heterogeneity of the
+infrastructure, as multiple instance types and providers, including private
+and community clouds will make the problem more complex and
+challenging~\cite{Marshall2010,vockler11,Juve2010}.
 
 
 %\section{Acknowledgments}
