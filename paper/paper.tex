@@ -44,21 +44,21 @@ Abstract goes here.
 
 Scientific workflows, usually represented as directed acyclic graphs (DAG), are
 the important class of applications that have been studied in the context of
-resource management and scheduling on grid and utility computing systems.
+resource management and task scheduling on grid and utility computing systems.
 However, large computational applications are often composed of several 
 inter-related workflows grouped into {\em ensembles}. All the
 workflows in an ensemble typically have a similar structure, but they differ by
-input data, number of tasks and individual tasks sizes. A good example of
+input data, number of tasks and individual task sizes. A good example of
 scientific workflow ensemble comes from the CyberShake
 application~\cite{Callaghan11}, which calculates seismic hazards for a given
 geographical region such as California. In order to produce a hazard map, the
 hazard curves need to be computed for a set of geographical sites, while each
 site requires running a single complex scientific workflow. Workflows for each
-site may differ not only by their parameters, but also by priority; e.g. some of
+site may differ not only in their parameters, but also in their priority; e.g. some of
 the points on the map correspond to urban areas or strategic locations such as
 power plants, whereas others may be located in less populated regions. Another
 example of workflow ensembles comes from astronomical applications, such as
-Montage~\cite{Deelman08} or search for Earth-like planets from Kepler project
+Montage~\cite{Deelman08} or search for exo-solar planets from Kepler project
 data~\cite{vockler11}, where multiple, different workflows are used to
 process data for different areas of the sky.
 
@@ -67,18 +67,18 @@ computational resources on-demand according to a pay-per-use model. These system
 are regarded by the scientific community as a potentially attractive source of 
 low-cost, on-demand computing resources~\cite{Ostermann10,Keahey09}. In contrast 
 to clusters and grids, which typically offer best-effort quality of service, clouds 
-give users more flexibility to creating a controlled and managed computing environment
-with the ability to adjust resource capacity according to the dynamically changing
-computing demands of the application, often called auto-scaling. Giving the users 
-more control, however, also requires the development of new methods for task 
+give users more flexibility to creating a controlled and managed computing environment.
+Clouds provide the ability to adjust resource capacity according to the dynamically changing
+computing demands of the application, often called auto-scaling. However, giving users 
+more control over the resources also requires the development of new methods for task 
 scheduling and resource provisioning. The resource management decisions required 
 in cloud scenarios not only have to take into account traditional performance-related 
-metrics such as workflow makespan or resource utilization, but must also now consider
+metrics such as the workflow makespan or the resource utilization, but must also now consider
 budget constraints, since the resources from public (commercial) cloud providers 
-are usually not free~\cite{Durkee10}.
+usually have monetary costs associated with them~\cite{Durkee10}.
 
-In this paper, to get insight into these resource management challenges for
-scientific workflows on clouds, we address a new important problem of maximizing
+In this paper, we aim to gain insight into resource management challenges when executing 
+scientific workflow ensembles on clouds. In particular we address a new important problem of maximizing
 the number of completed workflows from an ensemble under both budget and
 deadline constraints. The motivation is to answer the fundamental question of a
 researcher: How much computation can be completed given the limited budget and 
@@ -90,8 +90,8 @@ algorithms that rely on the information about the workflow structure (critical
 paths and workflow levels) and estimates of task runtimes. In addition, we
 analyze a hybrid workflow-aware dynamic scheduling algorithm, which uses the
 workflow structure information to estimate which workflows should be rejected
-from the ensemble due to the constraints. As methodology in the study of the
-proposed algorithms we use simulation techniques. We have developed cloud workflow simulator based on
+from the ensemble due to the constraints. We evaluate the algorithms via simulation. 
+We have developed cloud workflow simulator based on
 CloudSim~\cite{Calheiros11}, which models the infrastructure and the application. The
 algorithms are subject to evaluation on a set of scientific workflow ensembles with a broad range of
 budget and deadline parameters. 
@@ -99,10 +99,10 @@ budget and deadline parameters.
 The paper is organized as follows: after analysis of related work in
 Section~\ref{sec:related}, Section~\ref{sec:problem} gives the details about the
 infrastructure and application model we are targeting in this paper.
-Subsequently, in Section~\ref{sec:algorithms} we describe the dynamic and
+In Section~\ref{sec:algorithms} we describe the dynamic and
 static algorithms we developed. Section~\ref{sec:performance} presents test
 scenarios, metrics and results of simulation studies of these algorithms.
-Finally, general conslusions, lessons learned and future work is outlined in
+Finally, general conclusions, lessons learned and future work are outlined in
 Section~\ref{sec:conclusions}.
 
 \section{Related Work}
@@ -111,18 +111,18 @@ General policy and rule-based approaches to dynamic provisioning (e.g. Amazon
 Auto Scaling\footnote{\url{http://aws.amazon.com/autoscaling}} and
 RightScale\footnote{\url{http://www.rightscale.com}}) allow adjusting the size
 of resource pool based on metrics related to infrastructure and application.
-Typical infrastructure-specific metric is system load, whereas
-application-specific metrics include response time and queue length. It is
-possible to set thresholds and limits to tune the behavior of these autoscaling
-systems, but no support for complex applications is provided.
+A typical infrastructure-specific metric is system load, whereas
+application-specific metrics include response time and length of task or
+request queue. It is possible to set thresholds and limits to tune the behavior
+of these autoscaling systems, but no support for complex applications is provided.
 
 Policy-based approaches for scientific workloads (e.g. \cite{Marshall2010,
 Kim2011}) also allow to scale the the cloud resource pool or to extend the
 capabilities of clusters using cloud-burst techniqies. Our approach is different
 in that we consider workflows, while policy based approaches typically consider
 bags of independent tasks or unpredictable batch workloads. This enables us to
-take advantage of scheduling heuristics that cannot be applied to independent
-tasks.
+take advantage of workflow-aware scheduling heuristics that cannot be applied to
+independent tasks.
 
 
 Our work is related to the strategies for deadline-constrained cost-minimization
@@ -138,16 +138,16 @@ more work to be done than the available budget, so some work must be rejected.
 Therefore cost is not something we optimize, but rather a constraint.
 
 
-We should refer to bi-criteria scheduling and multi-criteria scheduling of
+This work is related to bi-criteria scheduling and multi-criteria scheduling of
 workflows~\cite{Wieczorek2009,Prodan10,Dongarra2007}. These approaches are
 similar to ours in that we have two scheduling criteria: cost and makespan. The
 challenge in multi-criteria scheduling is to derive an objective function that
 takes into account all of the criteria. In our case one objective (amount
 of work completed) is subject to optimization, whereas time and cost are
-trated as constraints. Other approaches~\cite{Talukder2009,Pandey2010} use
+treated as constraints. Other approaches~\cite{Talukder2009,Pandey2010} use
 metaheuristics that usually run for a long time before producing good results,
-which makes tham less useful in practical applications. Our work can be also
-regarded as extension of the budget-constrained workflow scheduling
+which makes them less useful in practice. Our work can be also
+regarded as an extension of the budget-constrained workflow scheduling
 \cite{Sakellariou2007} in the sense that we are dealing with workflow ensembles
 and the deadline constraint is added.
  
@@ -156,18 +156,47 @@ and the deadline constraint is added.
 
 \subsection{Resource Model}
 
-We assume a resource model similar to Amazon's Elastic Compute Cloud (EC2). In this model, virtual machine (VM) instances are requested on-demand. The VMs are billed by the hour, with partial hours being rounded up. Although there are multiple VM types with different amounts of CPU, memory, disk space, and I/O, for this paper we focus on a single VM type because we assume that for most applications there will typically be one VM type with the best price/performance ratio for the application.
+We assume a resource model similar to Amazon's Elastic Compute Cloud (EC2). In
+this model, virtual machine (VM) instances are requested on-demand. The VMs are
+billed by the hour, with partial hours being rounded up. Although there are
+multiple VM types with different amounts of CPU, memory, disk space, and I/O,
+for this paper we focus on a single VM type because we assume that for most
+applications there will typically be one VM type with the best price/performance
+ratio for the application~\cite{Juve2009}. We also assume that a submitted task
+has exclusive access to a VM instance and that there is no preemption.
+
 
 \subsection{Application Model}
-The target applications for this paper are scientific workflows that can be modeled as Directed Acyclic Graphs (DAGs), where the nodes in the graph represent computational tasks, and the edges represent data- or control-flow dependencies between the tasks.
+The target applications for this paper are scientific workflows that can be
+modeled as Directed Acyclic Graphs (DAGs), where the nodes in the graph
+represent computational tasks, and the edges represent data- or control-flow
+dependencies between the tasks.
 
-We assume that we have runtime estimates for each task in the workflow based on either a performance model of the application, or historical data that can be mined.
 
-Although scientific workflows are often data-intensive, we do not currently consider the size of input and output data when scheduling tasks. Instead we assume that all workflow data is stored in a shared cloud storage system, such as Amazon S3, and that data transfer times are included in task runtime estimates. We also assume that data transfer times between the shared storage and the VMs are equal for different VMs so that task placement decisions do not have an impact on the runtime of the tasks.
+We assume that we have runtime estimates for each task in the workflow based on
+either a performance model of the application, or historical data that can be
+mined.
 
-This paper focuses on scheduling and provisioning for workflow ensembles. An ensemble consists of several related workflows that a user wishes to run. Each workflow in an ensemble is given a priority that indicates how important the workflow is to the user.
 
-The goal of this workflow ensemble scheduling and cloud provisioning problem is to complete as many high-priority workflows as possible given a fixed budget and deadline.
+Although scientific workflows are often data-intensive, we do not currently
+consider the size of input and output data when scheduling tasks. Instead we
+assume that all workflow data is stored in a shared cloud storage system, such
+as Amazon S3, and that data transfer times are included in task runtime
+estimates. We also assume that data transfer times between the shared storage
+and the VMs are equal for different VMs so that task placement decisions do not
+have an impact on the runtime of the tasks.
+
+
+This paper focuses on scheduling and provisioning for workflow ensembles. A
+workflow ensemble consists of several related workflows that a user wishes to
+run. Each workflow in an ensemble is given a priority that indicates how
+important the workflow is to the user.
+
+
+The goal of this workflow ensemble scheduling and cloud provisioning problem is
+to complete as many high-priority workflows as possible given a fixed budget and
+deadline.
+
 
 \section{Algorithms}
 \label{sec:algorithms}
@@ -244,7 +273,7 @@ priority workflows are not available.
 \begin{figure}[htb] 
 \centering
 \includegraphics[width=1.0\columnwidth]{figures/spds-gantt}
- \caption{Example schedule generated using SPDS algorithm. Tasks are colored by workflow. }
+ \caption{Example schedule generated using SPDS algorithm. The colors indicate how various tasks from different workflows are scheduled onto Virtual Machines. }
 \label{fig:spds-example}
 \end{figure}
 
@@ -256,8 +285,8 @@ wasting the budget on idle VMs, or under-provision, using up the deadline while 
 the application of usable VMs. One of the advantages of elasticity in cloud computing 
 is that the number of resources can be changed to meet the demands of an application.
 In policy-based provisioning (or auto-scaling) systems, metrics such as resource 
-utilization and queue length are monitored to estimate application demand. The DPDS 
-algorithm uses this approach to determine when to provision and de-provision VMs. The 
+utilization or task queue length are monitored to estimate application demand.
+The DPDS algorithm uses this approach to determine when to provision and de-provision VMs. The 
 algorithm periodically computes resource utilization as the percentage of idle VMs, and
 adjusts the number of VMs if the utilization is above or below given thresholds.
 Because it is assumed that VMs are billed by the hour, DPDS only considers VMs that are
@@ -296,7 +325,7 @@ threshold; $v_{max}$: maximum number of VMs
 The set of VMs completing their billing cycle is determined by considering both the
 provisioner interval, and the termination delay of the provider. This guarantees 
 that VMs can be terminated before they start the next billing cycle and prevents the
-budget from being overrun. The VMs terminated in line \ref{l:terminate1} are the ones 
+budget from being overrun. The VMs terminated in line \ref{l:terminate1} of Algorithm~\ref{alg:prov} are the ones 
 that would overrun the budget if not terminated in the current provisioning cycle. 
 The VMs terminated on line \ref{l:nT2} are chosen to increase the resource utilization
 to the desired threshold. In order to prevent instances from being
@@ -305,7 +334,7 @@ but could be used later, no more than half of the idle resources are terminated 
 each provisioning cycle. To avoid an uncontrolled increase in the number of
 instances, which may happen in the case of highly parallel workflows, the provisioner 
 will not start a new VM if the number of running VMs is greater than the product of
-$N_{VM}$ and an autoscaling factor, $v_{max}$.
+$N_{VM}$ and an autoscaling factor, $v_{max}$ that has to be set manually.
 
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
@@ -313,21 +342,21 @@ $N_{VM}$ and an autoscaling factor, $v_{max}$.
 The DPDS algorithm does not use any information about the structure of the workflows
 in the ensemble when scheduling tasks: it looks only at the priorities of the ready 
 tasks when deciding which task to schedule next. It does not consider whether a lower 
-priority task belongs to a workflow that it will never be able to complete given the 
+priority task belongs to a workflow that will never be able to complete given the 
 current budget and deadline. As a result, DPDS may execute lower priority tasks just 
-to keep VMs busy that will end up delaying higher priority tasks, making it less likely
+to keep VMs busy and that will end up delaying higher priority tasks, making it less likely
 that higher priority workflows will be able to finish.
 
 In order to address this issue, the Workflow-Aware DPDS (WA-DPDS) algorithm extends 
 DPDS by introducing a workflow admission procedure. The admission procedure is
 invoked whenever WA-DPDS sees the first task of a new workflow at the head of the 
 priority queue (i.e. when no other tasks from the workflow have been scheduled yet). 
-The admission procedure---shown in Algorithm~\ref{alg:wa-dpds}---estimates if there is 
+The admission procedure---shown in Algorithm~\ref{alg:wa-dpds}---estimates whether there is 
 enough budget remaining to admit the new workflow; if there is not, then the 
 workflow is rejected and its tasks are removed from the queue. This algorithm 
 compares the current cost (consumed budget) and remaining budget, taking
 into account the cost of currently running VMs, and the cost of workflows 
-that have already been admitted. It adds a small safety margin avoid going over
+that have already been admitted. It adds a small safety margin to  avoid going over
 the budget.
 
 \begin{algorithm}
@@ -353,7 +382,7 @@ the budget.
 
 
 This admission procedure relies only on the total estimated resource consumption and
-compares it to the budget remaining. We found that this estimation is useful not
+compares it to the remaining budget. We found that this estimation is useful not
 only to prevent low-priority workflows from delaying high-priority ones, but
 also to reject large and costly workflows that would overrun the budget and
 admit smaller workflows that can efficiently utilize idle resources in ensembles 
@@ -376,7 +405,7 @@ The approach used by SPSS is to plan each workflow in the ensemble in priority
 order, rejecting any workflows that cannot be completed by the deadline or that 
 cause the cost of the plan to exceed the budget. Once the plan is complete, then 
 the VMs are provisioned and tasks are executed according to the schedules given
-by the plan.
+by the plan. However, in this paper we only consider a deterministic environment and task times.
 
 The disadvantage of the static planning approach used by SPSS is that it is 
 sensitive to dynamic changes in the environment and the application that may 
@@ -471,6 +500,7 @@ LST(t) = \begin{cases}
 \max_{p \in Pred(t)} DL(p),&$otherwise.$\cr
 \end{cases}
 $$
+
 
 Algorithm~\ref{alg:planworkflow} shows how SPSS creates low-cost plans for
 each workflow. The \textsc{PlanWorkflow} procedure first calls 
