@@ -277,13 +277,14 @@ that higher priority workflows will be able to finish.
 In order to address this issue, the Workflow-Aware DPDS (WA-DPDS) algorithm extends 
 DPDS by introducing a workflow admission procedure. The admission procedure is
 invoked whenever WA-DPDS sees the first task of a new workflow at the head of the 
-priority queue (i.e. no other tasks from the new workflow have been scheduled yet). 
-The admission procedure estimates if there is enough budget remaining to admit the 
-new workflow: if not, all its tasks are rejected.
-Algorithm~\ref{alg:wa-dpds} estimates the cost of admitting a new workflow and
-compares it to the current cost (consumed budget) and remaining budget, taking
-into account that started VMs have been already paid for. It adds a small safety
-margin chosen to avoid overestimation of a budget.
+priority queue (i.e. when no other tasks from the workflow have been scheduled yet). 
+The admission procedure---shown in Algorithm~\ref{alg:wa-dpds}---estimates if there is 
+enough budget remaining to admit the new workflow; if there is not, then the 
+workflow is rejected and its tasks are removed from the queue. This algorithm 
+compares the current cost (consumed budget) and remaining budget, taking
+into account the cost of currently running VMs, and the cost of workflows 
+that have already been admitted. It adds a small safety margin avoid going over
+the budget.
 
 \begin{algorithm}
 \caption{Workflow admission algorithm for WA-DPDS}
@@ -291,12 +292,12 @@ margin chosen to avoid overestimation of a budget.
 \begin{algorithmic}[1]
 \Require $w$: workflow; $b$: budget; $c$: current cost
 \Procedure{Admit}{$w,b,c$}
-    \State $r_n\gets b-c$ \Comment{Remaining budget for new VMs}
-    \State $r_c\gets remaining\ cost\ on\ running\ VMs$
-    \State $r_a\gets remaining\ cost\ of\ admitted\ workflows$
+    \State $r_n\gets b-c$ \Comment{Budget remaining for new VMs}
+    \State $r_c\gets $cost committed to VMs that are running
+    \State $r_a\gets $cost to complete workflows previously admitted
 	\State $r_m\gets 0.1$ \Comment{Safety margin}
 	\State $r_b\gets r_n+r_c-r_a-r_m$ \Comment{Budget remaining}
-	\State $c_w\gets estimate\ cost(w)$
+	\State $c_w\gets$ \Call{EstimateCost}{w}
     \If{$c_w<r_b$}
     	\State \textbf{return} $TRUE$
     \Else
@@ -307,25 +308,39 @@ margin chosen to avoid overestimation of a budget.
 \end{algorithm}
 
 
-Admission procedure relies only on the total estimated resource consumption and
+This admission procedure relies only on the total estimated resource consumption and
 compares it to the budget remaining. We found that this estimation is useful not
-only to prevent low-priority workflows from delaying ligh-priority ones, but
-also in the case of ensembles consisting of workflows of non-uniform sizes, it
-allows to reject big and costly workflows that would overrun the budget and
-instead schedule some smaller ones to efficiently utilize idle resources. It
-would be also possible to extend the admission procedure to check other
-constraints, such as whether estimated critical path exceeds the deadline.
+only to prevent low-priority workflows from delaying high-priority ones, but
+also to reject large and costly workflows that would overrun the budget and
+admit smaller workflows that can efficiently utilize idle resources in ensembles 
+containing workflows of non-uniform sizes. It would also be possible to extend this 
+admission procedure to check other constraints, such as whether the estimated 
+critical path of the new workflow exceeds the time remaining until the deadline.
 
 
 
 \subsection{Static Provisioning Static Scheduling (SPSS)}
 
-We assume that the workflows are very wide such that the critical path of any given workflow is much less than the deadline.
+The previous algorithms are all online algorithms that make provisioning 
+and scheduling decisions at runtime. As such, they are not able to analyze 
+alternative decisions in order to optimize the schedules.
 
-The approach is to schedule each workflow in the ensemble in priority order, rejecting any workflows that cannot be completed by the deadline or that cause the cost of the plan to exceed the budget. Once the plan is complete, then the workflows are executed according to the plan.
+The SPSS algorithm creates a provisioning and scheduling plan before running 
+any workflow tasks.
+
+The approach is to schedule each workflow in the ensemble in priority order, 
+rejecting any workflows that cannot be completed by the deadline or that cause 
+the cost of the plan to exceed the budget. Once the plan is complete, then the 
+workflows are executed according to the plan.
+
+The disadvantage of the static planning approach used by SPSS is that it is 
+sensitive to dynamic changes in the environment and the application that may 
+disrupt the desired plan.
+
+Algorithm~\ref{alg:admit} shows how ensembles are planned in SPSS.
 
 \begin{algorithm}
-\caption{Ensemble planning algorithm}
+\caption{Ensemble planning algorithm for SPSS}
 \label{alg:admit}
 \begin{algorithmic}[1]
 \Require $W$: workflow ensemble; $b$: budget; $d$: deadline
@@ -347,9 +362,82 @@ The approach is to schedule each workflow in the ensemble in priority order, rej
 \end{algorithmic} 
 \end{algorithm}
 
+The intuition behind this algorithm is that more workflows can be admitted
+if each workflow is able to achieve the lowest-cost schedule that still
+meets the ensemble deadline.
+
+In order to create a plan for a single workflow, the SPSS algorithm assigns 
+sub-deadlines to each individual task in the workflow, and then schedules 
+each task so as to minimize the cost of the task while still meeting its 
+assigned sub-deadline. The idea is that if each task can be completed by 
+its deadline in the least expensive manner possible, then the cost of the
+entire workflow is being minimized without exceeding the ensemble deadline.
+
+SPSS assigns sub-deadlines to each task based on the \emph{float time}
+of the workflow. The float time is the amount of extra time that a workflow
+can extend its critical path and still be completed by the ensemble deadline.
+For a workflow $w$, the float time of $w$ is:
+$$
+FT(w) = d - CP(w)
+$$
+where $d$ is the ensemble deadline and $CP(w)$ is the critical path of $w$.
+Note that we assume that $CP(w) \leq d$, otherwise the workflow cannot be
+completed by the deadline and must be rejected.
+
+SPSS distributes the float time of the workflow by level, so that each level
+of the workflow gets a portion of the workflow's float time proportional to
+the number of tasks in the level, and the total runtime of tasks in the level.
+The idea is that workflows with many tasks and large runtimes should be given
+a larger portion of the float time so that those levels may be serialized.
+Otherwise, many resources need to be allocated to run all of the tasks in 
+parallel, which may be more costly.
+
+The float time of a level $l$ in workflow $w$ is given by:
+
+$$
+FT(l) = FT(w) \Biggl[\left({\alpha}\frac{N(l)}{N(w)}\right) + \left({(1 - \alpha)}\frac{R(l)}{R(w)} \right)\Biggr]
+$$
+
+where $N(w)$ is the number of tasks in the workflow, $N(l)$ is the number of tasks 
+in level $l$, $R(w)$ is the total runtime of all tasks in the workflow, $R(w)$ is
+the total runtime of all tasks in level $l$, and $\alpha$ is a parameter between
+0 and 1 that causes more float time to be given to levels with more tasks (large 
+$\alpha$) or more runtime (small $\alpha$). We set $\alpha$ to be around .7.
+
+The deadline of a task $t$ is then:
+$$
+DL(t) = LST(t) + RT(t) + FT(Level(t))
+$$
+where $Level(t)$ is the level of task t, $RT(t)$ is the runtime of $t$, and $LST(t)$ 
+is the latest start time of $t$ determined by:
+$$
+LST(t) = \begin{cases}
+0,&$if t is a root task$\cr
+\max_{p \in Pred(t)} DL(p),&$otherwise.$\cr
+\end{cases}
+$$
+
+For each task in the workflow the \textsc{PlanDAG} procedure chooses the 
+least expensive scheduling solution that is able to complete the task by 
+its deadline. The algorithm allocates VMs in blocks of one billing cycle 
+(one hour) regardless of the size of the task. When computing the cost 
+of scheduling a task on a given VM it considers idle time from blocks that 
+were allocated for previous tasks to be free, while new blocks cost full
+price. For example, if a task has a runtime of 10 minutes and the price of
+a one-hour billing cycle is \$1, then the algorithm will either schedule 
+the task on an existing VM that has 10 minutes of idle time for a cost of 
+\$0, or it will allocate another block on an existing or new VM for a cost
+of \$1. In addition, the algorithm always prefers to extend the runtime of 
+existing VMs rather than allocating new VMs, and if the cost of scheduling 
+the task on two different VMs is equal, then the solution with the earliest 
+start time is preferred. The result of this is that the algorithm will only
+allocate a new block if there are no existing blocks with enough idle time
+to complete the task by its deadline, and it will only allocate a new VM if
+it cannot add a block to the start or end of an existing VM to complete the
+task by its deadline.
 
 \begin{algorithm}
-\caption{DAG planning algorithm}
+\caption{DAG planning algorithm for SPSS}
 \label{alg:plandag}
 \begin{algorithmic}[1]
 \Require $w$: DAG; $P$: current plan; $d$: deadline
@@ -371,43 +459,15 @@ The approach is to schedule each workflow in the ensemble in priority order, rej
 \end{algorithmic} 
 \end{algorithm}
 
-
-\begin{algorithm}
-\caption{Deadline distribution algorithm}
-\label{alg:deadlinedistribution}
-\begin{algorithmic}[1]
-\Require $w$: DAG; $d$: global deadline
-\Ensure Assign sub-deadlines to each task in w
-\Procedure{DeadlineDistribution}{$w,d$}
-    \State $T \gets$ total number of tasks in $w$
-    \State $R \gets$ total runtime of tasks in $w$
-    \State $CP \gets$ length of critical path of $w$
-    \State assign $Level(t)$ to each task $t$ in $w$
-    \For{level $l\ \in w$}
-        \State $Tasks(l) \gets$ number of tasks in $l$
-        \State $Runtime(l) \gets$ runtime of tasks in $l$
-        \State $r \gets \alpha * (Runtime(l)/R)$
-        \State $t \gets (1-\alpha) * (Tasks(l)/T)$
-        \State $FT(l) \gets (r + t) * (d - CP)$
-    \EndFor
-    \For{task $t \in w$}
-        \State $LST(t) \gets \max(Deadline(p))\ for\ p \in Pred(t)$
-        \State $Deadline(t) \gets LST(t) + RT(t) + FT(Level(t))$
-    \EndFor
-\EndProcedure
-\end{algorithmic} 
-\end{algorithm}
-
-\begin{equation}
-\label{eq:scaling}
-FT(l) = \left[{\alpha}*\frac{T_l}{t}\right] + \left[{(1 - \alpha)}*\frac{R_l}{r} \right]
-\end{equation}
+An example schedule generated by SPSS is shown in Fig.~\ref{fig:spss-example}.
+This example shows how SPSS tends to start many workflows in parallel, running
+each workflow on only a few VMs over a longer period of time. In comparison, 
+the dynamic algorithms tend to run one workflow at a time across many VMs.
 
 \begin{figure}[htb] 
 \centering
 \includegraphics[width=1.0\columnwidth]{figures/spss-gantt}
- \caption{Example of schedule generated using SPSS algorithm: tasks are labelled
- by colors depending on the workflow. }
+ \caption{Example of schedule generated using SPSS algorithm. Tasks are colored by workflow. }
 \label{fig:spss-example}
 \end{figure}
 
