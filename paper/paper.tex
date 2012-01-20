@@ -113,7 +113,8 @@ capabilities of clusters using cloud-burst techniqies. Our approach is different
 in that we consider workflows, while policy based approaches typically consider
 bags of independent tasks or unpredictable batch workloads. This enables us to
 take advantage of scheduling heuristics that cannot be applied to independent
-tasks.
+tasks.
+
 
 Our work is related to the strategies for deadline-constrained cost-minimization
 workflow scheduling, developed for utility grid systems. However, our problem is
@@ -125,14 +126,18 @@ cloud-targeted autoscaling solution~\cite{Mao2011} in that we consider ensembles
 of workflows rather than unpredictable workloads containing workflows. We also have budget constraints
 rather than cost minimization as a goal. In other words, we assume that there is
 more work to be done than the available budget, so some work must be rejected.
-Therefore cost is not something we optimize, but rather a constraint.
+Therefore cost is not something we optimize, but rather a constraint.
+
 
 We should refer to bi-criteria scheduling and multi-criteria scheduling of
 workflows~\cite{Wieczorek2009,Prodan10,Dongarra2007}. These approaches are
 similar to ours in that we have two scheduling criteria: cost and makespan. The
 challenge in multi-criteria scheduling is to derive an objective function that
 takes into account all of the criteria. In our case one objective (amount
-of work completed) is subject to optimization, whereas time and cost aretrated as constraints. Other approaches~\cite{Talukder2009,Pandey2010} usemetaheuristics that usually run for a long time before producing good results,which makes tham less useful in practical applications. Our work can be also
+of work completed) is subject to optimization, whereas time and cost are
+trated as constraints. Other approaches~\cite{Talukder2009,Pandey2010} use
+metaheuristics that usually run for a long time before producing good results,
+which makes tham less useful in practical applications. Our work can be also
 regarded as extension of the budget-constrained workflow scheduling
 \cite{Sakellariou2007} in the sense that we are dealing with workflow ensembles
 and the deadline constraint is added.
@@ -162,9 +167,9 @@ workflows on the cloud under budget and deadline constraints.
 (SPDS) }
 \label{sec:spds}
 
-The simplest strategy for executing ensembles of workflows in the cloud is to use
+The simplest strategy for executing ensembles of workflows in the cloud is to
 provision resources statically and schedule workflow tasks dynamically. Given a 
-budget $b$, deadline $d$, and the hourly price $p$ of a VM it is easy to calculate
+budget $b$, deadline $d$, and the hourly price $p$ of a VM, it is easy to calculate
 the number of VMs, $N_{VM}$, to provision so that the entire budget is consumed before
 the deadline:
 
@@ -173,7 +178,7 @@ the deadline:
 N_{VM} = \lceil b / d / p \rceil
 \end{equation}
 
-The SPDS algorithm statically provisions VMs at the start of the ensemble execution 
+The SPDS algorithm statically provisions $N_{VM}$ VMs at the start of the ensemble execution 
 and keeps them running until the deadline is reached, or the budget runs out.
 This provisioning plan has the advantage that it minimizes the number of provisioning 
 and de-provisioning requests.
@@ -231,7 +236,7 @@ priority workflows are not available.
 \label{fig:spds-example}
 \end{figure}
 
-\subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
+\subsection{Dynamic Provisioning Dynamic \\Scheduling (DPDS)}
  
 The static provisioning approach of SPDS may not be optimal when resource demand
 changes during ensemble execution. In those cases, SPDS may either over-provision, 
@@ -346,25 +351,36 @@ critical path of the new workflow exceeds the time remaining until the deadline.
 
 
 
-\subsection{Static Provisioning Static Scheduling (SPSS)}
+\subsection{Static Provisioning Static Scheduling \\(SPSS)}
 
 The previous algorithms are all online algorithms that make provisioning 
-and scheduling decisions at runtime. As such, they are not able to analyze 
-alternative decisions in order to optimize the schedules.
+and scheduling decisions at runtime. In comparison, the SPSS algorithm 
+creates a provisioning and scheduling plan before running any workflow tasks.
+This enables SPSS to start only those workflows that it knows can be completed
+given the deadline and budget constraints, and eliminates any waste that may
+be allowed by the dynamic algorithms.
 
-The SPSS algorithm creates a provisioning and scheduling plan before running 
-any workflow tasks.
-
-The approach is to schedule each workflow in the ensemble in priority order, 
-rejecting any workflows that cannot be completed by the deadline or that cause 
-the cost of the plan to exceed the budget. Once the plan is complete, then the 
-workflows are executed according to the plan.
+The approach used by SPSS is to plan each workflow in the ensemble in priority 
+order, rejecting any workflows that cannot be completed by the deadline or that 
+cause the cost of the plan to exceed the budget. Once the plan is complete, then 
+the VMs are provisioned and tasks are executed according to the schedules given
+by the plan.
 
 The disadvantage of the static planning approach used by SPSS is that it is 
 sensitive to dynamic changes in the environment and the application that may 
-disrupt the desired plan.
+disrupt the carefully constructed plan.
 
-Algorithm~\ref{alg:admit} shows how ensembles are planned in SPSS.
+Algorithm~\ref{alg:admit} shows how ensembles are planned in SPSS. The algorithm
+starts with an empty plan containing no VMs and no scheduled tasks. Workflows
+from the ensemble are considered in priority order. For each workflow, SPSS
+attempts to build on top of the current plan by provisioning VMs to schedule 
+the tasks of the workflow so that it finishes before the deadline with the least
+possible cost. If the cost of the new plan is less than the budget, then the 
+new plan is accepted and the workflow is admitted. If not, then the new plan is 
+rejected and the process continues with the next workflow in the ensemble. The 
+idea behind this algorithm is that, if each workflow can be completed by the 
+deadline with the lowest possible cost, then the number of workflows that can 
+be completed within the given budget will be maximized.
 
 \begin{algorithm}
 \caption{Ensemble planning algorithm for SPSS}
@@ -373,49 +389,46 @@ Algorithm~\ref{alg:admit} shows how ensembles are planned in SPSS.
 \Require $W$: workflow ensemble; $b$: budget; $d$: deadline
 \Ensure Schedule as much of $W$ as possible given $b$ and $d$
 \Procedure{PlanEnsemble}{$W,b,d$}
-    \State $P\gets empty\ plan$
+    \State $P\gets \emptyset$ \Comment{Current plan}
     \State $A\gets \emptyset$ \Comment{Set of admitted DAGs}
     \For{$w\ in\ W$}
-        \State $P^\prime \gets$\ \Call{PlanDAG}{$w,P,d$}
-        \If{$P^\prime\ is\ a\ valid\ plan$}
-            \If{$Cost(P^\prime) \le b$}
-                \State $P\gets\ P^\prime$ \Comment{Accept new plan}
-                \State $A \gets A\ +\ w$ \Comment{Admit w}
-            \EndIf
+        \State $P^\prime \gets$\ \Call{PlanWorkflow}{$w,P,d$}
+        \If{$Cost(P^\prime) \le b$}
+            \State $P\gets\ P^\prime$ \Comment{Accept new plan}
+            \State $A \gets A\ +\ w$ \Comment{Admit w}
         \EndIf
     \EndFor
     \State \textbf{return} $P,A$
 \EndProcedure
-\end{algorithmic} 
+\end{algorithmic}
 \end{algorithm}
 
-The intuition behind this algorithm is that more workflows can be admitted
-if each workflow is able to achieve the lowest-cost schedule that still
-meets the ensemble deadline.
-
-In order to create a plan for a single workflow, the SPSS algorithm assigns 
+In order to plan a workflow, the SPSS algorithm assigns 
 sub-deadlines to each individual task in the workflow, and then schedules 
 each task so as to minimize the cost of the task while still meeting its 
 assigned sub-deadline. The idea is that if each task can be completed by 
 its deadline in the least expensive manner possible, then the cost of the
-entire workflow is being minimized without exceeding the ensemble deadline.
+entire workflow can be minimized without exceeding the ensemble deadline.
 
 SPSS assigns sub-deadlines to each task based on the \emph{float time}
 of the workflow. The float time is the amount of extra time that a workflow
 can extend its critical path and still be completed by the ensemble deadline.
 For a workflow $w$, the float time of $w$ is:
+
 $$
 FT(w) = d - CP(w)
 $$
+
 where $d$ is the ensemble deadline and $CP(w)$ is the critical path of $w$.
-Note that we assume that $CP(w) \leq d$, otherwise the workflow cannot be
-completed by the deadline and must be rejected.
+We assume that $CP(w) \leq d$, otherwise the workflow cannot be completed 
+by the deadline and must be rejected. For large ensembles we expect the 
+critical path of any individual workflow to be much less than the deadline.
 
 SPSS distributes the float time of the workflow by level, so that each level
 of the workflow gets a portion of the workflow's float time proportional to
-the number of tasks in the level, and the total runtime of tasks in the level.
-The idea is that workflows with many tasks and large runtimes should be given
-a larger portion of the float time so that those levels may be serialized.
+the number of tasks in the level and the total runtime of tasks in the level.
+The idea is that levels containing many tasks and large runtimes should be given
+a larger portion of the float time so that tasks in those levels may be serialized.
 Otherwise, many resources need to be allocated to run all of the tasks in 
 parallel, which may be more costly.
 
@@ -429,14 +442,17 @@ where $N(w)$ is the number of tasks in the workflow, $N(l)$ is the number of tas
 in level $l$, $R(w)$ is the total runtime of all tasks in the workflow, $R(w)$ is
 the total runtime of all tasks in level $l$, and $\alpha$ is a parameter between
 0 and 1 that causes more float time to be given to levels with more tasks (large 
-$\alpha$) or more runtime (small $\alpha$). We set $\alpha$ to be around .7.
+$\alpha$) or more runtime (small $\alpha$). We set $\alpha$ to be 0.7.
 
 The deadline of a task $t$ is then:
+
 $$
 DL(t) = LST(t) + RT(t) + FT(Level(t))
 $$
-where $Level(t)$ is the level of task t, $RT(t)$ is the runtime of $t$, and $LST(t)$ 
+
+where $Level(t)$ is the level of $t$, $RT(t)$ is the runtime of $t$, and $LST(t)$ 
 is the latest start time of $t$ determined by:
+
 $$
 LST(t) = \begin{cases}
 0,&$if t is a root task$\cr
@@ -444,52 +460,58 @@ LST(t) = \begin{cases}
 \end{cases}
 $$
 
-For each task in the workflow the \textsc{PlanDAG} procedure chooses the 
-least expensive scheduling solution that is able to complete the task by 
-its deadline. The algorithm allocates VMs in blocks of one billing cycle 
-(one hour) regardless of the size of the task. When computing the cost 
-of scheduling a task on a given VM it considers idle time from blocks that 
-were allocated for previous tasks to be free, while new blocks cost full
-price. For example, if a task has a runtime of 10 minutes and the price of
-a one-hour billing cycle is \$1, then the algorithm will either schedule 
-the task on an existing VM that has 10 minutes of idle time for a cost of 
-\$0, or it will allocate another block on an existing or new VM for a cost
-of \$1. In addition, the algorithm always prefers to extend the runtime of 
-existing VMs rather than allocating new VMs, and if the cost of scheduling 
-the task on two different VMs is equal, then the solution with the earliest 
-start time is preferred. The result of this is that the algorithm will only
-allocate a new block if there are no existing blocks with enough idle time
-to complete the task by its deadline, and it will only allocate a new VM if
-it cannot add a block to the start or end of an existing VM to complete the
-task by its deadline.
+Algorithm~\ref{alg:planworkflow} shows how SPSS creates low-cost plans for
+each workflow. The \textsc{PlanWorkflow} procedure first calls 
+\textsc{DeadlineDistribution} to assign sub-deadlines to tasks according
+to the procedure described above. Then, the \textsc{PlanWorkflow} procedure
+schedules tasks onto VMs, allocating new VMs when necessary. For each task 
+in the workflow, the the least expensive slot is chosen to schedule the 
+task so that it can be completed by  its deadline. VMs are allocated in 
+blocks of one billing cycle (one hour) regardless of the size of the task. 
+When computing the cost of scheduling a task on a given VM, the algorithm 
+considers idle slots in blocks that were allocated for previous tasks to be 
+free, while slots in new blocks cost the full price of the new block. For 
+example, if a task has a runtime of 10 minutes, and the price of a one-hour 
+billing cycle is \$1, then the algorithm will either schedule the task on 
+an existing VM that has an idle slot larger than 10 minutes for a cost of \$0, 
+or it will allocate a new block on an existing VM, or provision a new VM, for 
+a cost of \$1. If the cost of slots on two different VMs is equal, then the 
+slot with the earliest start time is chosen. To prevent too many VMs from 
+being provisioned, the algorithm always prefers to extend the runtime of 
+existing VMs before allocating new VMs. The result of this is that the 
+algorithm will only allocate a new block if there are no idle slots on 
+existing blocks large enough or early enough to complete the 
+task by its deadline, and it will only allocate a new VM if it cannot add 
+a block to an existing VM to complete the task by its deadline.
 
 \begin{algorithm}
-\caption{DAG planning algorithm for SPSS}
-\label{alg:plandag}
+\caption{Workflow planning algorithm for SPSS}
+\label{alg:planworkflow}
 \begin{algorithmic}[1]
-\Require $w$: DAG; $P$: current plan; $d$: deadline
+\Require $w$: workflow; $P$: current plan; $d$: deadline
 \Ensure Create plan for $w$ that minimizes cost and meets deadline $d$
-\Procedure{PlanDAG}{$w,P,d$}
+\Procedure{PlanWorkflow}{$w,P,d$}
     \State $P^\prime\gets$ copy of $P$
     \State \Call{DeadlineDistribution}{w,d}
-    \For{$t\ in\ w\ sorted\ by\ Deadline(t)$}
-        \State Choose resource r in $P^\prime$ that minimizes Cost(t)
-        \If{$AFT(t,r) < Deadline(t)$}
-            \State Schedule(t,r)
+    \For{$t\ in\ w\ sorted\ by\ DL(t)$}
+        \State $v \gets$ VM that minimizes cost and start time of t
+        \If{$FinishTime(t,v) < DL(t)$}
+            \State Schedule(t,v)
         \Else
-            \State Provision a new resource r
-            \State Schedule(t,r)
+            \State Provision a new VM v
+            \State Schedule(t,v)
         \EndIf
     \EndFor
     \State \textbf{return} $P^\prime$
 \EndProcedure
-\end{algorithmic} 
+\end{algorithmic}
 \end{algorithm}
 
 An example schedule generated by SPSS is shown in Fig.~\ref{fig:spss-example}.
 This example shows how SPSS tends to start many workflows in parallel, running
-each workflow on only a few VMs over a longer period of time. In comparison, 
-the dynamic algorithms tend to run one workflow at a time across many VMs.
+each workflow over a longer period of time on only a few VMs to minimize cost. 
+In comparison, the dynamic algorithms tend to run one workflow at a time across 
+many VMs in parallel.
 
 \begin{figure}[htb] 
 \centering
