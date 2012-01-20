@@ -711,8 +711,8 @@ The number of workflows completed is a simplest metric and allows distinguishing
 which algorithm performs better. However, as the workflows have
 different priorities and sizes, a less efficient algorithm may schedule smaller
 low-priority workflows first, thus increasing the total number of workflows
-complete. It may also happen that too conservative admission algoritm may reject
-overestimate the costs of some large workflows, thus rejest some high-priority
+complete. It may also happen that too conservative admission algorithm may reject
+overestimate the costs of some large workflows, thus reject some high-priority
 ones which actually could fit into the schedule. Therefore we defined a user
 preference score as:
 
@@ -753,7 +753,7 @@ resource cost: $C_{eff} = b/T_C$ in dollars per hour.
 We run the simulations for the constraint values ranging between the
 estimated limits as indicated in Section~\ref{sec:scenarios}, resulting in
 ca. 50-150 (budget, deadline) points for each application. The runs were
-repeated for Pareto-distributed and costant workflow sizes. From this result
+repeated for Pareto-distributed and constant workflow sizes. From this result
 space we selected the most interesting plots which give the good overview  of
 the observed algorithm behavior.
 
@@ -900,7 +900,7 @@ SPSS     &    78 &  77 & 195 &  75  & 50 & 475\tabularnewline
 \end{tabular}
 \medskip
 
-\caption{Summary table for equal size workflows whowing number of times each
+\caption{Summary table for equal size workflows showing number of times each
 algorithm achieved the highest score over all budgets and deadlines. Data from a total of 525 runs on 
 ensembles of equal size workflows for Montage (M), CyberShake (C), LIGO (L), 
 Epigenomics (E), SIPHT (S).
@@ -914,13 +914,13 @@ Fig.~\ref{fig:total-time} presents the same results using the total computing
 time metric $T_C$. These plots confirm our previous observations about the
 algorithms performance, but they also allow to observe a more general property.
 For a given budget, when the deadline is tightened the number of work done
-steeply decreases. Assiging a shorter deadline means that more VMs need to be
+steeply decreases. Assigning a shorter deadline means that more VMs need to be
 provisioned to complete the work, but this leads to higher parallelism and thus
 to the lower parallel efficiency. E.g. running 2 VMs for 10 hours will be more
 efficient than running 10 VMs for 2 hours. Therefore, if deadline permits and
 costs are important, parallelism should be avoided when possible.
 
-These observations are further confirmed when examining the efffective resource
+These observations are further confirmed when examining the effective resource
 cost, as shown in Fig.~\ref{fig:cost}. It can be seen that lower resource
 utilization and lower parallel efficiency for short deadlines lead to
 substantial increase of actual costs of computing. This increase reaches
@@ -935,8 +935,8 @@ We can see that the selection of deadline and cost can be formulated as
 multi-criteria optimization problem and the curves presented in
 Fig.~\ref{fig:cost} are approximations of the Pareto front (or Pareto set) of
 solutions to this problem. In our case the solutions were achieved by maximizing
-the number of work done, which direcly results in minimization of effective cost parameter for a given
-deadline. Therefore, the obtained results can be used to assist the decison in
+the number of work done, which directly results in minimization of effective cost parameter for a given
+deadline. Therefore, the obtained results can be used to assist the decision in
 resource allocation planning, when both cost and time criteria are given not as
 constraints but as objectives.
 
@@ -977,9 +977,10 @@ priorities. It can be observed that based on the sampled problem space the
 workflow-aware algorithms achieve highest score in $\sim$2--3 times more cases
 than the simple DPDS which does not take into account workflow structure or
 size. In average, SPSS performs better in $\sim$20--50\% more times than
-WA-DPDS. We have to note, that the sampled paramter space included the Montage
+WA-DPDS. We have to note, that the sampled parameter space included the Montage
 and CyberShake workflows consisting of many small tasks, for which cases SPSS
-does not perform equally well.
+does not perform equally well.
+
 
 Similar results were achieved for ensembles consisting of workflows of equal
 size. Summary of these results is shown in Table~\ref{tab:num-dags-equal}.
@@ -991,12 +992,13 @@ does not help to complete more work in any case.
                
 Fig.~\ref{fig:budgets} shows the same data for SIPHT ensemble from another
 perspective. It helps answer the question: given a deadline, how many workflows
-can be finished when we increse the budget. In Fig.~\ref{fig:budgets}(a) the
+can be finished when we increase the budget. In Fig.~\ref{fig:budgets}(a) the
 growth is super-linear, what results from the distribution of workflow sizes in
 the ensemble (see Fig.~\ref{fig:ensemble-distribution}). For ensemble of equal
 size workflows (see Fig.~\ref{fig:budgets}(b)) the growth is nearly linear. It
-can be also observed that staitc algorithms give better results for smaller
-budgets, while dynamic algorithms for larger ones.
+can be also observed that static algorithms give better results for smaller
+budgets, while dynamic algorithms for larger ones.
+
 
 
 
@@ -1046,10 +1048,10 @@ large workflows and thus saving resources for completing the less costly ones.
 
 Another general observation is that although clouds provide such capabilities as
 dynamic adding and removing of resources at runtime and high parallelization due
-to ilusion of unlimited resources, it turns out that is recommended to avoid
+to illusion of unlimited resources, it turns out that is recommended to avoid
 using these capabilities when possible, in order to achieve high resource
 utilization and cost effectiveness. This observation comes from the fact that
-starting and stopping more VMs incurres a cost which can be amortized by running
+starting and stopping more VMs incurs a cost which can be amortized by running
 each started VM as long as possible before shutdown. This effect was confirmed
 in the case of SPSS algorithm for Montage and CyberShake workflows with small
 budgets. Similarly, high degree of parallelization (large number of nodes) leads
@@ -1058,7 +1060,7 @@ in parallel efficiency means also the increase of cost. This result, clearly
 visible in Fig~\ref{fig:cost}, leads to multi-criteria decision problems and
 related trade-offs. E.g. our simulation results can be used as hints to answer
 the question how much time and money is required to actually complete all the
-workflows from the given ansemble.
+workflows from the given ensemble.
 
 Another lesson learned from our studies is related to the shapes and granularity
 of the tasks of workflows in the ensembles. The benchmarks workflows that we
@@ -1072,7 +1074,7 @@ longer, it becomes more beneficial to apply a static planning strategy of SPSS.
 
 Our current study reveals multiple paths for future work. One interesting
 question would be to answer how the static and dynamic algorithms perform in the
-cases of increased uncertainities and failures, that have important influence
+cases of increased uncertainties and failures, that have important influence
 on overall system performance~\cite{Sakellariou2010,Dongarra2007}. Second
 important goal would be to extend our application and infrastructure model to
 include various data storage options available on clouds. The experimental study
