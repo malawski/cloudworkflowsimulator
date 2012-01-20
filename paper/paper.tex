@@ -755,7 +755,7 @@ could fit into the schedule. Therefore, we defined the user preference score as:
 
 \begin{equation}
 \label{eq:score}
-s = \sum_{workflows\ completed}{2^{-d}}
+s = \sum_{workflows\ completed}{2^{-p}}
 \end{equation}
 
 where $p$ is the priority of the workflow such that the highest-priority workflow 
@@ -783,12 +783,12 @@ $C_{eff} = b/T_C$, is the effective resource cost in dollars per hour.
 
 \subsection{Discussion of Results}
 
-We run the simulations for the constraint values ranging between the
-estimated limits as indicated in Section~\ref{sec:scenarios}, resulting in
-approximately 50-150 (budget, deadline) points for each application. The runs were
-repeated for Pareto-distributed and constant workflow sizes. From this result
-space we selected the most interesting plots which give the good overview  of
-the observed algorithm behavior.
+We ran simulations for constraint values ranging between the estimated 
+limits indicated in Section~\ref{sec:scenarios}, resulting in approximately 
+50-150 (budget, deadline) data points for each application. The runs were
+repeated for Pareto-distributed and constant workflow ensembles. From this result
+space we selected the most interesting plots that characterize the observed 
+behavior of the algorithms best.
 
 \begin{figure*}[htb] 
 \centering
@@ -804,32 +804,26 @@ Pareto-distributed workflows.}
 \end{figure*}
 
 Fig.~\ref{fig:number-complete-pareto} shows the number of the workflows
-completed for two budget values per each application ensemble. The budget values
+completed for two budget values for each application ensemble. The budget values
 selected correspond to two opposite cases: {\em small budget} (top) and {\em
-large budget} (bottom). The first one allows completing only a small number of
-workflows from the ensemble, while the latter one suffices to finish almost all
-the workflows. It can be seen that the static planning algorithm (SPSS) performs
-better for tighter constraints: when the budget is low to admit only a small
-number of workflows, the static procedure is able to more efficiently pack these
-workflow tasks onto the resources. This can be clearly seen for the LIGO,
-Epigenomics and SIPHT ensembles for small budgets and also for the same
-ensembles with large budgets but short deadlines. The exception are Montage and
-CyberShake ensembles, which consist of many fine-grained tasks that can be
-executed in parallel. For these cases, as well for the other ensembles with
-large budgets, the simple dynamic scheduling techniques perform equally well or
-better. The reason for that behavior is that the large number of tasks
-guarantees that resources are almost never idle, while the provisioner algorithm
-makes sure that the VM instances are most efficiently utilized before shutdown.
-We can also observe that the workflow-aware dynamic algorithm (WA-DPDS) performs
-better than the workflow-unaware version. This means that for the tested
-workflows the simple admission procedure based on estimation of workflow cost
-does not degrade the solution, but rather in many cases it allows rejecting
-larger workflows that would lead to budget overrun. Thus it can save the space
-for smaller workflows that can complete.
-
-
-
-
+large budget} (bottom). The small budgets permit the algorithms to complete 
+only a small number of workflows from the ensemble, while the larger budgets 
+enables the algorithms to finish almost all the workflows. In three of five 
+cases the SPSS algorithm performs better for tighter constraints: when the 
+budget is low, or the deadline is short, the static procedure is able to more 
+efficiently pack workflow tasks onto limited resources. This is the case for 
+the LIGO, Epigenomics and SIPHT ensembles for small budgets, and for large
+budgets with short deadlines. The exceptions are the Montage and CyberShake 
+ensembles,  which consist of many fine-grained tasks. In these applications, 
+as well for the other ensembles with large budgets and deadlines, the simple 
+dynamic scheduling techniques perform equally well or better. The reason for 
+this behavior is that the large number of tasks guarantees that resources 
+are almost never idle regardless of how the tasks are scheduled. We also 
+observe that WA-DPDS performs better than the workflow-unaware version, DPDS. 
+This means that for the tested workflows the simple admission procedure based 
+on estimation of workflow cost does not degrade the solution, but rather in 
+many cases it enables larger workflows that would lead to budget overrun to
+be rejected. Thus it can save the space for smaller workflows to complete.
 
 %Fig.~\ref{fig:score} shows the score $s$ as defined in Eq.~\ref{eq:score}
 %computed for two sample applications. Comparing
@@ -839,10 +833,6 @@ for smaller workflows that can complete.
 %Nevertheless we can see that the curves on both figures have a very similar
 %shape, which mens that our algorithms obey the priority rules and do not try to
 %admit lower-priority workflows at the cost of the more important ones.
-
-
-
-
 
 \begin{table}[tb]
 \centering
@@ -880,14 +870,12 @@ SPSS     &    31 &  18 &  170  & 75 &  42 & 336\tabularnewline
 \end{tabular}
 \medskip
 
-
 \caption{Summary table for Pareto-distributed workflows showing number of times
 each algorithm achieved the highest score over all budgets and deadlines. Data from a total of 525 runs on 
 Pareto-distributed ensembles for Montage (M), CyberShake (C), LIGO (L), 
 Epigenomics (E), SIPHT (S).
 \label{tab:num-dags-pareto}}
 \end{table}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -934,39 +922,39 @@ Epigenomics (E), SIPHT (S).
 \label{tab:num-dags-equal}}
 \end{table}
 
-
-
-
 Fig.~\ref{fig:total-time} presents the same results using the total computing
-time metric $T_C$. These plots confirm our previous observations about the
-algorithms performance, but they also allow to observe a more general property.
-For a given budget, when the deadline is tightened the number of work done
+time metric, $T_C$. These plots confirm our previous observations about the
+algorithms' performance, but they also allow us observe a more general property:
+for a given budget, when the deadline is tightened the amount of work done
 steeply decreases. Assigning a shorter deadline means that more VMs need to be
 provisioned to complete the work, but this leads to higher parallelism and thus
-to the lower parallel efficiency. E.g. running 2 VMs for 10 hours will be more
-efficient than running 10 VMs for 2 hours. Therefore, if deadline permits and
-costs are important, parallelism should be avoided when possible.
+to lower parallel efficiency. For example, running 2 VMs for 10 hours will tend
+to be more efficient than running 10 VMs for 2 hours. Similarly, the only way 
+to reduce cost when adding VMs is to achieve a super-linear speedup, which 
+is unlikely in practice. Therefore, if the deadline permits, and cost is 
+important, parallelism should be avoided when possible.
 
-These observations are further confirmed when examining the effective resource
+These observations are further confirmed when examining the effective computing
 cost, as shown in Fig.~\ref{fig:cost}. It can be seen that lower resource
 utilization and lower parallel efficiency for short deadlines lead to
-substantial increase of actual costs of computing. This increase reaches
-$\sim$20\%, which means that if we need to run e.g. a SIPHT workflow ensemble
-with a short deadline, $\sim$\$200 out of \$1000 is spent on idle resources.
+substantial increases in the effective computing cost. This increase can be 
+significant. For example, a SIPHT ensemble with short deadlines and a budget
+of \$1,000 has an effective computing cost $\sim$8--20\% higher than the 
+normal cost, depending on the algorithm used. That means that out of the 
+\$1,000 budget, \$80--\$200 is spent on idle resources.
 
 Another general conclusion can be drawn from Fig.~\ref{fig:cost}: despite some
 random fluctuations resulting mostly from the finite result space, all the
 curves for all the applications and budgets have a similar shape. This shape
 represents a trade-off curve between two conflicting objectives: time and cost.
-We can see that the selection of deadline and cost can be formulated as
-multi-criteria optimization problem and the curves presented in
+We observe that the selection of deadline and cost can be formulated as a
+multi-criteria optimization problem, and that the curves presented in 
 Fig.~\ref{fig:cost} are approximations of the Pareto front (or Pareto set) of
 solutions to this problem. In our case the solutions were achieved by maximizing
-the number of work done, which directly results in minimization of effective cost parameter for a given
-deadline. Therefore, the obtained results can be used to assist the decision in
-resource allocation planning, when both cost and time criteria are given not as
-constraints but as objectives.
-
+the amount of work done, which directly results in minimization of effective 
+computing cost metric for a given deadline. Therefore, the obtained results 
+can be used to aid in resource allocation planning, when both cost and time 
+criteria are given not as constraints but as objectives.
 
 % \begin{figure*}[htb] \centering
 % \includegraphics[width=0.19\textwidth]{figures/score2-MONTAGE-n-1000-8-dagh1-20m0.pdf}
@@ -989,25 +977,24 @@ amounts.}
 \label{fig:budgets}
 \end{figure}
                
-In order to compare efficiency of algorithms, we counted the number of times
-each algorithm achieved the best results for all tested applications, deadlines
-and budgets. If two or more algorithms achieve the same highest results, all are
-counted as highest. Table~\ref{tab:num-dags-pareto} shows these summary values
-for Pareto-distributed workflows. These results depend on the metric: number of
+In order to compare the efficiency of our algorithms, we counted the number of times
+each algorithm achieved the best result for all simulated applications, deadlines
+and budgets. Table~\ref{tab:num-dags-pareto} shows these summary values for 
+Pareto-distributed workflows. Note that all algorithms that achieve the best 
+result are credited, so the sum for a given application can be greater than the
+total number of scenarios. These results depend on the metric: number of
 workflows completed does not count the priorities or sizes of workflows, which
-means that it happens more often that all the algorithms achieve the same (best)
+means that it happens more often that all the algorithms achieve the same best
 result. However, it does not mean that all algorithms complete the same
-workflows: that is why values in the tables (a), (b) and (c) are different.
-Exponential score and total amount of computing time complete give the same
+workflows: that is why the values in (a), (b) and (c) are different. The 
+exponential score and total amount of computing time completed give the same
 rankings, since in our test ensembles larger workflows were given higher
-priorities. It can be observed that based on the sampled problem space the
+priorities. It can be observed based on the sampled problem space that the
 workflow-aware algorithms achieve highest score in $\sim$2--3 times more cases
-than the simple DPDS which does not take into account workflow structure or
-size. In average, SPSS performs better in $\sim$20--50\% more times than
-WA-DPDS. We have to note, that the sampled parameter space included the Montage
-and CyberShake workflows consisting of many small tasks, for which cases SPSS
-does not perform equally well.
-
+than the simple DPDS algorithm which does not take into account workflow 
+structure or size. SPSS performs the best in $\sim$20\% more cases than WA-DPDS,
+including the Montage and CyberShake ensembles, for which SPSS does not 
+perform as well as DPDS and WA-DPDS.
 
 Similar results were achieved for ensembles consisting of workflows of equal
 size. Summary of these results is shown in Table~\ref{tab:num-dags-equal}.
