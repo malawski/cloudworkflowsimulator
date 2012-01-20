@@ -533,8 +533,11 @@ many VMs in parallel.
 \end{figure}
 
 
+
 \section{Performance Evaluation}
 \label{sec:performance}
+
+
 
 \subsection{Simulator}
 
@@ -550,6 +553,8 @@ features, since we are interested mainly in the execution of tasks on VMs and hi
 workflow scheduling and provisioning. The simulator reads workflows in a modified version of
 the DAX format used by the Pegasus Workflow Management System~\cite{Deelman2005} that was
 created for the synthetic workflow generator developed by Bharathi, et al~\cite{Bharathi08}.
+
+
 
 \subsection{Scenarios}
 \label{sec:scenarios}
@@ -568,7 +573,6 @@ resource utilization. More interesting, however, are the cases where the deadlin
 is shorter than the serial schedule, since it forces the system to provision 
 multiple VMs to execute workflows in parallel.
 
-
 \begin{figure}[tb] 
 \centering
 \includegraphics[width=0.6\columnwidth]{figures/ensemble-pareto}
@@ -576,8 +580,6 @@ multiple VMs to execute workflows in parallel.
 measured in number of tasks.}
 \label{fig:ensemble-distribution}
 \end{figure}
-
-
 
 The number of workflows in an ensemble depends on the user's requirements, but
 we assume that ensemble sizes are on the order of between 10 and 100 workflows.
@@ -592,7 +594,6 @@ prevent many of the workflows from running, or the problem of efficiently
 allocating them to the resources becomes similar to the bag-of-tasks problem, 
 which is easier to solve efficiently.
 
-
 \begin{figure*}[t] 
 \centering
 \includegraphics[width=0.19\textwidth]{figures/pareto-MONTAGE-n-1000-8-dagh1-20m0.pdf}
@@ -606,7 +607,6 @@ algorithms on ensembles of 100 Pareto-distributed workflows, {\em small budget}
 \label{fig:number-complete-pareto}
 \end{figure*}
 
-
 %\begin{figure}[b!] 
 %\centering
 %\includegraphics[width=0.19\textwidth]{figures/pareto-score-MONTAGE-n-1000-8-dagh1-20m0.pdf}
@@ -619,7 +619,6 @@ algorithms on ensembles of 100 Pareto-distributed workflows, {\em small budget}
 %(0 means highest priority).}
 %\label{fig:score}
 %\end{figure}
-
 
 In order to evaluate the algorithms on a standard set of workflows, we used
 ensembles constructed from the workflows available\footnote{\url{https://confluence.pegasus.isi.edu/display/pegasus/WorkflowGenerator}}
@@ -645,7 +644,6 @@ assigned priorities according to their size so that the largest workflows are gi
 the highest priority. In future work we plan to explore other ensemble types such as
 uniform distributions.
 
-
 \begin{figure*}[t]  
 \centering
 \includegraphics[width=0.19\textwidth]{figures/pareto-size-MONTAGE-n-1000-8-dagh1-20m0.pdf}
@@ -658,7 +656,6 @@ tasks of completed workflows. Data computed for DPDS, AW-DPDS and SPSS
 algorithms on ensembles of 100 Pareto-distributed workflows}
 \label{fig:total-time}
 \end{figure*}
-
 
 In the experiments we assumed that all the VMs are homogeneous, have a
 processing speed of 1000 MIPS (million instructions per second), and a price of
@@ -689,70 +686,62 @@ efficient total utilization due to high levels of parallelism. Setting the
 scaling limit to 1.0, ensures that the shape of the resource provisioning 
 plan  is close to a rectangle (see Fig.~\ref{fig:spds-example}) and the VM 
 termination procedure (Algorithm~\ref{alg:prov}) allows maximum utilization 
-of VMs before shutdown.
-
+of VMs before shutdown. For the SPSS algorithm we set the $\alpha$ parameter
+for deadline distribution to be 0.7.
 
 
 
 \subsection{Metrics}
 
+There are many different ways to evaluate and compare the performance of 
+the algorithms. The set of ensemble performance metrics we have used to
+compare our algorithms includes:
 
-
-
-There are multiple ways to evaluate the algorithms and also different metrics
-are relevant to the application users that are needed to take the planning
-decisions. The set of metrics for each ensemble run we prepared includes:
 \begin{itemize}
-  \item number of workflows completed $N_c$,
-  \item user preference score (utility function) $s$,
-  \item total amount of computing time completed $T_C$,
-  \item effective cost of computing per hour $C_{eff}$, which includes
+  \item $N_c$: number of workflows completed,
+  \item $s$: user preference score (utility function),
+  \item $T_C$: total amount of computing time completed,
+  \item $C_{eff}$: effective cost of computing per hour, which includes
   overheads.
 \end{itemize}
 
-
-The number of workflows completed is a simplest metric and allows distinguishing
-which algorithm performs better. However, as the workflows have
-different priorities and sizes, a less efficient algorithm may schedule smaller
-low-priority workflows first, thus increasing the total number of workflows
-complete. It may also happen that too conservative admission algorithm may reject
-overestimate the costs of some large workflows, thus reject some high-priority
-ones which actually could fit into the schedule. Therefore we defined a user
-preference score as:
-
-%\begin{equation}
-%\label{eq:score}
-%s = \sum_{DAGs\ completed}(1/(p+1))
-%\end{equation}
-
+The number of workflows completed is a simple metric that can be used for
+comparison. However, because our ensembles contain workflows with different 
+priorities and sizes, a less efficient algorithm may schedule smaller
+workflows first, completing a large number of low-priority workflows. It may 
+also happen that a conservative admission algorithm may overestimate the cost 
+of a large workflow, thus rejecting high-priority workflows which actually 
+could fit into the schedule. Therefore, we defined the user preference score as:
 
 \begin{equation}
 \label{eq:score}
-s = \sum_{DAGs\ completed}2^{-p}
+s = \sum_{workflows\ completed}{2^{-d}}
 \end{equation}
 
+where $p$ is the priority of the workflow such that the highest-priority workflow 
+has $p=0$, the next highest workflow has $p=1$, and so on. This exponential scoring 
+function gives the highest priority workflow a score that is higher than all the 
+lower-priority workflows combined:
 
-where priorities of subsequent workflows in the ensemble are $p=0,1,2,\ldots$ (0
-means highest priority). This exponential scoring function gives a strong weight
-to the top priority workflows, since it has a property that a score for
-completing a single workflow with priority $p$ is higher that the score for
-completing all lower priority ones: 
 \begin{equation}
 \label{eq:score-property}
 2^{-p} > \sum_{i=p+1,\ldots}2^{-i}
 \end{equation}
 
-Another metric is the total actual computing time completed and it is calculated
-as the sum of all the runtimes of all the tasks of completed workflows. As in
-our study we assumed that the resource cost pre hour is equal to \$1, the total
-computing time can be easily compared to the allocated budget $b$. Their ratio
-$u = (T_C * \$1)/b$ is the resource utilization and its inverse is the effective
-resource cost: $C_{eff} = b/T_C$ in dollars per hour.
+This scoring is consistent with our definition of the problem, which is to 
+complete as many workflows as possible, according to their priorities, given 
+a budget and deadline.
+
+The total amount computing time completed, $T_C$, is calculated as the sum 
+of the runtimes of all tasks in all completed workflows. Because we assumed 
+that the resource cost per hour is equal to \$1, the total computing time 
+can be easily compared to the allocated budget $b$. Their ratio: 
+$u = (T_C * \$1)/b$, is the resource utilization, and its inverse: 
+$C_{eff} = b/T_C$, is the effective resource cost in dollars per hour.
+
+
 
 \subsection{Discussion of Results}
-
-
-
 
 We run the simulations for the constraint values ranging between the
 estimated limits as indicated in Section~\ref{sec:scenarios}, resulting in
