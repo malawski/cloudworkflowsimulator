@@ -100,16 +100,43 @@ The paper is organized as follows [\ldots]
 \section{Related Work}
 General policy and rule-based approaches to dynamic provisioning (e.g. Amazon
 Auto Scaling\footnote{\url{http://aws.amazon.com/autoscaling}} and
-RightScale\footnote{\url{http://www.rightscale.com}}).
+RightScale\footnote{\url{http://www.rightscale.com}}) allow adjusting the size
+of resource pool based on metrics related to infrastructure and application.
+Typical infrastructure-specific metric is system load, whereas
+application-specific metrics include response time and queue length. It is
+possible to set thresholds and limits to tune the behavior of these autoscaling
+systems, but no support for complex applications is provided.
 
-Policy-based approaches for scientific workloads (e.g. \cite{Marshall2010, Kim2011}). Our approach is different in that we consider workflows, while policy based approaches typically consider bags of independent tasks or unpredictable batch workloads. This enables us to take advantage of scheduling heuristics that cannot be applied to independent tasks.
+Policy-based approaches for scientific workloads (e.g. \cite{Marshall2010,
+Kim2011}) also allow to scale the the cloud resource pool or to extend the
+capabilities of clusters using cloud-burst techniqies. Our approach is different
+in that we consider workflows, while policy based approaches typically consider
+bags of independent tasks or unpredictable batch workloads. This enables us to
+take advantage of scheduling heuristics that cannot be applied to independent
+tasks.
 
-Deadline-constrained cost-minimization workflow scheduling. Our work is different from \cite{Yu2005, Abrishami2010} in that we consider ensembles of workflows in IaaS clouds, which allow one to provision resources on a per-hour billing model, rather than utility grids, which allow one to choose from a pool of existing resources with a per-job billing model. Our work is different from \cite{Mao2011} in that we consider ensembles of workflows rather than unpredictable workloads containing workflows. We also have budget constraints rather than cost minimization as a goal. In other words, we assume that there is more work to be done than the available budget, so some work must be rejected. Therefore cost is not something we optimize, but rather a constraint.
+Our work is related to the strategies for deadline-constrained cost-minimization
+workflow scheduling, developed for utility grid systems. However, our problem is
+different from \cite{Yu2005, Abrishami2010} in that we consider ensembles of workflows in
+IaaS clouds, which allow one to provision resources on a per-hour billing model,
+rather than utility grids, which allow one to choose from a pool of existing
+resources with a per-job billing model. Our work is also different from
+cloud-targeted autoscaling solution~\cite{Mao2011} in that we consider ensembles
+of workflows rather than unpredictable workloads containing workflows. We also have budget constraints
+rather than cost minimization as a goal. In other words, we assume that there is
+more work to be done than the available budget, so some work must be rejected.
+Therefore cost is not something we optimize, but rather a constraint.
 
-Budget-constrained workflow scheduling \cite{Sakellariou2007}.
-
-Bi-criteria scheduling and multi-criteria scheduling. These approaches are similar to ours in that we have two scheduling criteria: cost and makespan. The challenge in multi-criteria scheduling is to derive an objective function that takes into account all of the criteria. These approaches typically use metaheuristics that run for a long time before producing good results.
-
+We should refer to bi-criteria scheduling and multi-criteria scheduling of
+workflows~\cite{Wieczorek2009,Prodan10,Dongarra2007}. These approaches are
+similar to ours in that we have two scheduling criteria: cost and makespan. The
+challenge in multi-criteria scheduling is to derive an objective function that
+takes into account all of the criteria. In our case one objective (amount
+of work completed) is subject to optimization, whereas time and cost aretrated as constraints. Other approaches~\cite{Talukder2009,Pandey2010} usemetaheuristics that usually run for a long time before producing good results,which makes tham less useful in practical applications. Our work can be also
+regarded as extension of the budget-constrained workflow scheduling
+\cite{Sakellariou2007} in the sense that we are dealing with workflow ensembles
+and the deadline constraint is added.
+ 
 \section{Problem Description}
 \subsection{Resource Model}
 Describe the Amazon EC2 resource model. Instances are requested on-demand. Instance pricing is per-hour. Multiple VM types are available, but for this paper we focus on a single VM type because we assume that there will typically be one VM type with the best price/performance ratio for the application.
@@ -475,6 +502,21 @@ the dynamic algorithms tend to run one workflow at a time across many VMs.
 \section{Performance Evaluation}
 
 \subsection{Simulator}
+
+To evaluate our algorithms, we developed a cloud workflows simulator based on
+CloudSim~\cite{Calheiros11}. To represent our infrastructure model, we defined
+Cloud, VM and WorkflowEngine simulation entities. Cloud object is responsible
+for staring and terminating VMs using API similar to Amazon EC2. VM object is
+responsible for execution of individual tasks, while WorkflowEngine deals with
+management of ensembles and workflows. WorkflowEngine uses separate, although
+tightly coupled Scheduler and Provisioner modules. We assume that a single core
+of a VM executed submitted tasks sequentially and that a task is given exclusive
+access to allocated VM. Although CloudSim provides a more advanced
+infrastructure model which includes time-sharing and space-sharing policies and
+power consumption in a datacenter, we do not use these features, since we are
+interested mainly in execution of tasks on VMs and high-level worklow scheduling
+on top of that. The simulator relies on DAG and DAX format used by Pegasus
+project and workflow gallery.
 
 \subsection{Scenarios}
 \label{sec:scenarios}
