@@ -35,12 +35,15 @@ readExpScores <- function(prefix, dag, budgets, deadline, n_deadlines, max_scali
 			#print(score)
 			# we skip the first value since it contains a deadline
 			for (p in scores[2:n_scores]) {
-				score = score + 1/as.bigq(2^p)
+				#score = score + 1/as.bigq(2^p)
 				#score = score + 1/as.bigq(p+1)
+				score = score + as.bigq(2^(99-p))
 				
 			}                                                                                                                                           
 			#print(score)                                                                                                                               
-			s[i,deadline_id] = score                                                                                                            
+			#s[i,deadline_id] = score                                                                                                            
+			#s[i,deadline_id] = log2(as.double(2^100-score))
+			s[i,deadline_id] = 2^100-score
 			
 		}
 	}
@@ -263,11 +266,11 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
 
 
         # plot averaged results
-        pdf(file=paste(prefix, dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=7, width=3, bg="white")
-        par(mfrow=c(2,1))
+        #pdf(file=paste(prefix, dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=7, width=3, bg="white")
+        #par(mfrow=c(2,1))
 
-        #pdf(file=paste(prefix, dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=3, width=10, bg="white")
-        #par(mfrow=c(1,5))
+        pdf(file=paste(prefix, dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=3, width=10, bg="white")
+        par(mfrow=c(1,5))
 
 
         #title(main=paste(dag, " max scaling ", max_scaling), col.main="black", font.main=4)
@@ -343,8 +346,56 @@ dpdsStats <- function(title, prefix, dag, budgets, deadline, max_scaling, runIds
         dev.off()
 
 
+		# plot exponential scores
+		#pdf(file=paste(prefix, "escore-", dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=7, width=3, bg="white")
+		#par(mfrow=c(2,1))
+		
+		pdf(file=paste(prefix, "escore-", dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=3, width=10, bg="white")
+		par(mfrow=c(1,5))
+		
+		#title(main=paste(dag, " max scaling ", max_scaling), col.main="black", font.main=4)
+		
+		# normalize:
+		max_se = pmax(se,seA,seS)
+
+
+		for (i in 1:n_budgets) {
+			
+			
+			y_range = as.double(max(max(se[i,]),max(seA[i,]),max(seS[i,])))
+			y_min = as.double(min(min(se[i,]),min(seA[i,]),min(seS[i,])))
+			print(y_range)
+			
+			
+			plot(hours, seA[1,]*1.2, type="n", col="blue", axes=FALSE, ann=FALSE, xlim=c(0,x_range*1.2),  ylim=c(y_min,y_range))
+			lines(hours, se[i,], type="o", pch=1, lty=5, col="red")
+			lines(hours, seA[i,], type="o", pch=2, col="blue", ann=FALSE)
+			lines(hours, seS[i,], type="o", pch=3, col="green", ann=FALSE)
+			
+			title(main=paste("$",budgets[i]), col.main="black", font.main=4)
+			
+			legend(x_range*1.0, avg_s[i,length(hours)]+5, paste("$",budgets[i]), cex=1.2, bty="n");
+			
+			title(ylab="log exp penalty", cex.lab=1.2)
+			#title(ylab="score", cex.lab=1.2)
+			#title(ylab="total runtime in hours", cex.lab=1.2)
+			#title(ylab="computing cost in $/h", cex.lab=1.2)
+			
+			title(xlab="deadline in hours", cex.lab=1.2)
+			axis(2,cex.axis=1.2)
+			axis(1,cex.axis=1.2)
+			grid(col = "gray", lty = "dashed")
+			box()
+			
+		}
+		#legend("bottomright", c("DPDS", "WA-DPDS", "SPSS"), cex=0.8, col=c("red", "blue","green"), pch=1:3 );
+		legend("topright", c("DPDS", "WA-DPDS", "SPSS"), cex=0.8, col=c("red", "blue","green"), pch=1:3 );
+		mtext(title, side=3, outer=TRUE, line=-1.5) 
+		dev.off()
+		
+		
         # plot averaged results vs budgets
-        pdf(file=paste(prefix, "budget-", dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=10, width=10, bg="white")
+        #pdf(file=paste(prefix, "budget-", dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=10, width=10, bg="white")
 
         #par(mfrow=c(5,5))
         #title(main=paste(dag, " max scaling ", max_scaling), col.main="black", font.main=4)
@@ -480,9 +531,9 @@ dpdsStats("SIPHT", prefix, "SIPHT.n.1000.8.dag",  c(200.0, 400.0, 600.0, 800.0, 
 #prefix <- "constant-"
 #dpdsStats("Montage", prefix, "MONTAGE.n.1000.0.dag", c(40.0, 80.0, 120.0, 160.0, 200.0), '1-20', 0)
 #dpdsStats("CyberShake", prefix, "CYBERSHAKE.n.1000.0.dag", c(50.0, 150.0, 250.0, 350.0, 450.0), '1-20', 0)
-#pdsStats("LIGO", prefix, "LIGO.n.1000.0.dag", c(500.0, 1000.0, 1500.0, 2000.0, 2500.0), '1-40', 0)
-#dpdsStats("Epigenomics", prefix, "GENOME.n.1000.0.dag", c(4000.0, 6000.0, 8000.0, 10000.0, 12000.0), '100-1500', 0)
-#dpdsStats("SIPHT", prefix, "SIPHT.n.1000.0.dag",  c(500.0, 1000.0, 1500.0, 2000.0, 2500.0), '50-50', 0)
+#dpdsStats("LIGO", prefix, "LIGO.n.1000.0.dag", c(500.0, 1000.0, 1500.0, 2000.0, 2500.0), '1-40', 0)
+#dpdsStats("Epigenomics", prefix, "GENOME.n.1000.0.dag", c(5000.0, 10000.0, 15000.0, 20000.0, 25000.0), '100-1500', 0)
+#dpdsStats("SIPHT", prefix, "SIPHT.n.1000.0.dag",  c(500.0, 1000.0, 1500.0, 2000.0, 2500.0), '5-50', 0)
 
 
 
