@@ -538,36 +538,36 @@ many VMs in parallel.
 
 \subsection{Simulator}
 
-To evaluate our algorithms, we developed a cloud workflows simulator based on
-CloudSim~\cite{Calheiros11}. To represent our infrastructure model, we defined
-Cloud, VM and WorkflowEngine simulation entities. Cloud object is responsible
-for staring and terminating VMs using API similar to Amazon EC2. VM object is
-responsible for execution of individual tasks, while WorkflowEngine deals with
-management of ensembles and workflows. WorkflowEngine uses separate, although
-tightly coupled Scheduler and Provisioner modules. We assume that a single core
-of a VM executed submitted tasks sequentially and that a task is given exclusive
-access to allocated VM. Although CloudSim provides a more advanced
-infrastructure model which includes time-sharing and space-sharing policies and
-power consumption in a datacenter, we do not use these features, since we are
-interested mainly in execution of tasks on VMs and high-level workflow scheduling
-on top of that. The simulator relies on DAG and DAX format used by Pegasus
-project and workflow gallery.
+To evaluate and compare our algorithms, we developed a cloud workflow simulator based on
+CloudSim~\cite{Calheiros11}. Our simulation model consists of Cloud, VM and WorkflowEngine 
+entities. The Cloud entity is responsible for staring and terminating VM entities using 
+an API similar to Amazon EC2. VM entities simulate the execution of individual tasks,
+and the WorkflowEngine entity manages the scheduling of tasks and the provisioning of
+VMs. We assume that the VMs have a single core and execute tasks sequentially. Although 
+CloudSim provides a more advanced infrastructure model which includes time-sharing and 
+space-sharing policies, and power consumption in a datacenter, we do not use these 
+features, since we are interested mainly in the execution of tasks on VMs and high-level 
+workflow scheduling and provisioning. The simulator reads workflows in a modified version of
+the DAX format used by the Pegasus Workflow Management System~\cite{Deelman2005} that was
+created for the synthetic workflow generator developed by Bharathi, et al~\cite{Bharathi08}.
 
 \subsection{Scenarios}
 \label{sec:scenarios}
 
-We have prepared test scenarios to evaluate the proposed algorithms under
-such a range of parameters that allows to observe the interesting properties of
-algorithms for smaller and larger constraints. For a given ensemble we can
-expect in general that the number of work done (in terms of workflows completed)
-mainly depends on the budget constraint, which determines the number of
-machine-hours that can be provisioned. The ideal but trivial case is then a
-deadline long enough to allow running all the workflow tasks sequentially: this
-eliminates all the overheads of parallel execution and leads to the highest
-resource utilization. More interesting are the cases when the deadline is
-shorter, since it forces provisioning of multiple VMs and thus increases
-overheads due to parallel execution so the budget cannot be spent so
-efficiently.
+We have prepared test scenarios to evaluate the proposed algorithms under a 
+range of parameters that enables us to observe the interesting characteristics 
+of the different algorithms for smaller and larger constraints. For a given 
+ensemble we can expect, in general, that the amount of work done (in terms 
+of workflows completed) depends mainly on the budget constraint, which 
+determines the number of machine-hours that can be provisioned. The deadline, 
+although important in terms of scheduling, is assumed to be greater than the 
+critical path of every workflow. The ideal but trivial case, then, is a deadline 
+long enough to allow all the workflow tasks to be executed sequentially: this 
+eliminates all the overheads of parallel execution and leads to the highest 
+resource utilization. More interesting, however, are the cases where the deadline 
+is shorter than the serial schedule, since it forces the system to provision 
+multiple VMs to execute workflows in parallel.
+
 
 \begin{figure}[tb] 
 \centering
@@ -579,15 +579,18 @@ measured in number of tasks.}
 
 
 
-We assumed that the interesting number of workflows in ensemble should be in the
-order of between 10 and 100 workflows. This is motivated by several reasons:
-first, such numbers are typical for the real applications, e.g. the number of geographical sites for
-CyberShake workflow is in the order of 100. Second, the smaller ensembles
-consisting of just a few workflows can be aggregated in a single workflow so
-there is no need to treat them as ensembles. Similarly, when the number of
-workflows is larger that 100 and each workflow has a large number of parallel
-tasks, the problem of efficiently allocating them to the resources becomes much
-easier and similar to the bag-of-tasks problem.
+The number of workflows in an ensemble depends on the user's requirements, but
+we assume that ensemble sizes are on the order of between 10 and 100 workflows.
+This range is motivated by several reasons: First, such sizes are typical of the
+real applications we have examined. For example, the number of geographical 
+sites of interest to the users of the CyberShake application is on the order 
+of 100. Second, smaller ensembles consisting of just a few workflows can be 
+aggregated into a single workflow, so there is no need to treat them as an
+ensemble. Similarly, when the number of workflows is larger than 100, and each 
+workflow has a large number of tasks, either the constraints are low enough to
+prevent many of the workflows from running, or the problem of efficiently 
+allocating them to the resources becomes similar to the bag-of-tasks problem, 
+which is easier to solve efficiently.
 
 
 \begin{figure*}[t] 
@@ -618,29 +621,29 @@ algorithms on ensembles of 100 Pareto-distributed workflows, {\em small budget}
 %\end{figure}
 
 
-
-
 In order to evaluate the algorithms on a standard set of workflows, we used
-ensembles constructed from the DAGs available\footnote{\url{https://confluence.pegasus.isi.edu/display/pegasus/WorkflowGenerator}}
-in the workflow generator gallery~\cite{Bharathi08}. The gallery contains
-workflows of five applications from Pegasus as well as several other applications 
-from~\cite{Ramakrishnan08}. We constructed ensembles of 100 DAGs by sampling the
-workflows of different sizes based on a given distribution. By the size of the
-workflow means the number of jobs. Two distributions are considered:
+ensembles constructed from the workflows available\footnote{\url{https://confluence.pegasus.isi.edu/display/pegasus/WorkflowGenerator}}
+in the workflow generator gallery~\cite{Bharathi08}. The gallery contains synthetic
+workflows modeled on real applications. We used workflows from five applications 
+that were developed for the Pegasus Workflow Management System. We constructed 
+ensembles of 100 workflows by sampling collections of workflows of various sizes
+(number of tasks) based on a given distribution. Two distributions are considered:
+
 \begin{itemize}
-  \item ensemble of workflows of equal size (constant)
+  \item constant distribution
   \item Pareto-like distribution.
 \end{itemize}
 
-Pareto-like distribution gives a small number of workflows with large size and a
-large number of workflows with small size, as seen in
-Fig.~\ref{fig:ensemble-distribution}. The number of largest
-workflows (of size $\geq$ 900) is slightly increased to represent the
-``long-tail'', i.e. that there is a non-insignificant number of large workflows
-in the ensemble. The workflows are sorted according to their size and the largest workflows are
-given the highest priority. 
-
-
+The constant distribution produces ensembles containing of workflows of equal size, 
+while the Pareto-like distribution produces ensembles with a small number of larger 
+workflows and a large number of smaller workflows, as seen in 
+Fig.~\ref{fig:ensemble-distribution}. The number of large workflows (of size $\geq$ 900) 
+is slightly increased to represent the ``heavy-tail'', i.e. that there is a 
+not-insignificant number of large workflows in the ensemble. We assume that large
+workflows are more important to users, so in the Pareto ensembles the workflows are 
+assigned priorities according to their size so that the largest workflows are given 
+the highest priority. In future work we plan to explore other ensemble types such as
+uniform distributions.
 
 
 \begin{figure*}[t]  
@@ -657,35 +660,36 @@ algorithms on ensembles of 100 Pareto-distributed workflows}
 \end{figure*}
 
 
-In the tests we we assumed that all the VMs are homogeneous and have the
-processing speed of 1000 MIPS (million instructions per second), the price for
-one VM-hour is \$1 and that the sizes of tasks in the workflow gallery are given
-in seconds measured on 1000 MIPS machines. In this study we do not take into
-account the heterogeneity of the infrastructure since we assume that it is
-always possible to select a VM type that has the best price to performance ratio
-for a given application.
+In the experiments we assumed that all the VMs are homogeneous, have a
+processing speed of 1000 MIPS (million instructions per second), and a price of
+\$1 per VM-hour. We also assume that the sizes of tasks in the workflow gallery 
+are given in seconds measured on a 1000 MIPS machine. In this study we do not 
+take into account the heterogeneity of the infrastructure since we assume that 
+it is always possible to select a VM type that has the best price to performance 
+ratio for a given application.
 
-For each application type, we selected such ranges of constraints (deadline,
-budget) that it is possible to observe the possibly broad result space: from the
-tight constraints, when only a small number of workflows can finish to the
-liberal constraints when all or almost all the workflows can finish. These
-parameters vary among the applications. Montage and CyberShake benchmarks
-workflows required the budget in \$20 -- \$150 range and deadlines from 1 to
-20 hours to complete the ensemble. LIGO and SIPHT workflows have more long
-tasks, so they require budgets up to \$1,500 and deadlines extended to 40
-hours. The Epigenomics workflow is even more costly and needs approximately \$12,000
-and 1500 hours to complete the full ensemble.
+For each application, we selected ranges of constraints (deadline and budget) so
+that it is possible to observe the possibly broad result space: from tight 
+constraints, where only a small number of workflows can be completed, to 
+more liberal constraints where all, or almost all, of the workflows can be 
+completed. These parameters vary among the applications. Montage and CyberShake 
+ensembles required budgets in the \$20 -- \$150 range and deadlines from 1 to
+20 hours to be completed. The LIGO and SIPHT workflows have more long-running
+tasks, so their ensembles required budgets up to \$1,500 and deadlines up to 
+40 and 60 hours. The Epigenomics workflow is even more costly, requiring 
+approximately \$12,000 and 1500 hours to complete a full ensemble.
 
-We show the results for three algorithms: DPDS, WA-DPDS and
-SPSS. These tests were run with maximum autoscaling factor set to 1.0 for
-DPDS and WA-DPDS. After experimenting with DPDS and WA-DPDS we found that due to
-high parallelism of workflows the resource utilization remains high most of the time, 
-which leads to rapid provisioning of new resources at the beginning of ensemble
-execution. This in turn results in less efficient total utilization due to high
-level of parallelism. Setting the scaling limit to 1.0, ensures that the shape
-of resource provisioning plan is closest to a rectangle (see
-Fig.~\ref{fig:spds-example}) and the VM termination procedure
-(Algorithm~\ref{alg:prov}) allows maximum utilization of VMs before shutdown.
+We show the results for three algorithms: DPDS, WA-DPDS and SPSS. These 
+experiments were run with maximum autoscaling factor set to 1.0 for
+DPDS and WA-DPDS. After experimenting with DPDS and WA-DPDS we found that, 
+due to the high parallelism of workflows, the resource utilization remains 
+high most of the time, which leads to the rapid provisioning of new resources 
+at the beginning of ensemble execution. This, in turn, results in less 
+efficient total utilization due to high levels of parallelism. Setting the 
+scaling limit to 1.0, ensures that the shape of the resource provisioning 
+plan  is close to a rectangle (see Fig.~\ref{fig:spds-example}) and the VM 
+termination procedure (Algorithm~\ref{alg:prov}) allows maximum utilization 
+of VMs before shutdown.
 
 
 
