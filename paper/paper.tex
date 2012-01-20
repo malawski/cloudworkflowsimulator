@@ -144,20 +144,21 @@ regarded as extension of the budget-constrained workflow scheduling
 and the deadline constraint is added.
  
 \section{Problem Description}
+
 \subsection{Resource Model}
-Describe the Amazon EC2 resource model. Instances are requested on-demand. Instance pricing is per-hour. Multiple VM types are available, but for this paper we focus on a single VM type because we assume that there will typically be one VM type with the best price/performance ratio for the application.
+
+We assume a resource model similar to Amazon's Elastic Compute Cloud (EC2). In this model, virtual machine (VM) instances are requested on-demand. The VMs are billed by the hour, with partial hours being rounded up. Although there are multiple VM types with different amounts of CPU, memory, disk space, and I/O, for this paper we focus on a single VM type because we assume that for most applications there will typically be one VM type with the best price/performance ratio for the application.
 
 \subsection{Application Model}
-The target applications for this paper are scientific workflows that can be modeled as Directed Acyclic Graphs (DAGs).
+The target applications for this paper are scientific workflows that can be modeled as Directed Acyclic Graphs (DAGs), where the nodes in the graph represent computational tasks, and the edges represent data- or control-flow dependencies between the tasks.
 
-We assume that we have runtime estimates for each task in the workflow.
+We assume that we have runtime estimates for each task in the workflow based on either a performance model of the application, or historical data that can be mined.
 
-Currently we do not consider data sizes, but rather assume that data is stored in a shared cloud storage system such as Amazon S3 and that data transfer times are included in task runtime estimates. Further, data transfer times are equal across the VMs.
+Although scientific workflows are often data-intensive, we do not currently consider the size of input and output data when scheduling tasks. Instead we assume that all workflow data is stored in a shared cloud storage system, such as Amazon S3, and that data transfer times are included in task runtime estimates. We also assume that data transfer times between the shared storage and the VMs are equal for different VMs so that task placement decisions do not have an impact on the runtime of the tasks.
 
-An ensemble consists of several related workflows. Each workflow is given a priority.
+This paper focuses on scheduling and provisioning for workflow ensembles. An ensemble consists of several related workflows that a user wishes to run. Each workflow in an ensemble is given a priority that indicates how important the workflow is to the user.
 
-The goal is to complete as many workflows as possible given a budget and a deadline.
-
+The goal of this workflow ensemble scheduling and cloud provisioning problem is to complete as many high-priority workflows as possible given a fixed budget and deadline.
 
 \section{Algorithms}
 
