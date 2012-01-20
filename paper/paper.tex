@@ -422,13 +422,13 @@ assigned sub-deadline. The idea is that if each task can be completed by
 its deadline in the least expensive manner possible, then the cost of the
 entire workflow can be minimized without exceeding the ensemble deadline.
 
-SPSS assigns sub-deadlines to each task based on the \emph{float time}
-of the workflow. The float time is the amount of extra time that a workflow
+SPSS assigns sub-deadlines to each task based on the slack time of the
+workflow, which is defined as the amount of extra time that a workflow
 can extend its critical path and still be completed by the ensemble deadline.
-For a workflow $w$, the float time of $w$ is:
+For a workflow $w$, the slack time of $w$ is:
 
 $$
-FT(w) = d - CP(w)
+ST(w) = d - CP(w)
 $$
 
 where $d$ is the ensemble deadline and $CP(w)$ is the critical path of $w$.
@@ -436,30 +436,40 @@ We assume that $CP(w) \leq d$, otherwise the workflow cannot be completed
 by the deadline and must be rejected. For large ensembles we expect the 
 critical path of any individual workflow to be much less than the deadline.
 
-SPSS distributes the float time of the workflow by level, so that each level
-of the workflow gets a portion of the workflow's float time proportional to
+A task's level is the length of the longest path between the task and an entry
+task of the workflow:
+
+$$
+Level(t) = \begin{cases}
+0,&$if~$Pred(t) = \emptyset\cr
+\max_{p \in Pred(t)}Level(p)+1,&$otherwise.$
+\end{cases}
+$$
+
+SPSS distributes the slack time of the workflow by level, so that each level
+of the workflow gets a portion of the workflow's slack time proportional to
 the number of tasks in the level and the total runtime of tasks in the level.
 The idea is that levels containing many tasks and large runtimes should be given
-a larger portion of the float time so that tasks in those levels may be serialized.
+a larger portion of the slack time so that tasks in those levels may be serialized.
 Otherwise, many resources need to be allocated to run all of the tasks in 
 parallel, which may be more costly.
 
-The float time of a level $l$ in workflow $w$ is given by:
+The slack time of a level $l$ in workflow $w$ is given by:
 
 $$
-FT(l) = FT(w) \Biggl[\left({\alpha}\frac{N(l)}{N(w)}\right) + \left({(1 - \alpha)}\frac{R(l)}{R(w)} \right)\Biggr]
+ST(l) = ST(w) \Biggl[\left({\alpha}\frac{N(l)}{N(w)}\right) + \left({(1 - \alpha)}\frac{R(l)}{R(w)} \right)\Biggr]
 $$
 
 where $N(w)$ is the number of tasks in the workflow, $N(l)$ is the number of tasks 
 in level $l$, $R(w)$ is the total runtime of all tasks in the workflow, $R(w)$ is
 the total runtime of all tasks in level $l$, and $\alpha$ is a parameter between
-0 and 1 that causes more float time to be given to levels with more tasks (large 
-$\alpha$) or more runtime (small $\alpha$). We set $\alpha$ to be 0.7.
+0 and 1 that causes more slack time to be given to levels with more tasks (large 
+$\alpha$) or more runtime (small $\alpha$).
 
 The deadline of a task $t$ is then:
 
 $$
-DL(t) = LST(t) + RT(t) + FT(Level(t))
+DL(t) = LST(t) + RT(t) + ST(Level(t))
 $$
 
 where $Level(t)$ is the level of $t$, $RT(t)$ is the runtime of $t$, and $LST(t)$ 
@@ -467,8 +477,8 @@ is the latest start time of $t$ determined by:
 
 $$
 LST(t) = \begin{cases}
-0,&$if t is a root task$\cr
-\max_{p \in Pred(t)} DL(p),&$otherwise.$\cr
+0,&$if~$Pred(t) = \emptyset\cr
+\max_{p \in Pred(t)} DL(p),&$otherwise.$
 \end{cases}
 $$
 
@@ -482,9 +492,9 @@ task so that it can be completed by  its deadline. VMs are allocated in
 blocks of one billing cycle (one hour) regardless of the size of the task. 
 When computing the cost of scheduling a task on a given VM, the algorithm 
 considers idle slots in blocks that were allocated for previous tasks to be 
-free, while slots in new blocks cost the full price of the new block. For 
-example, if a task has a runtime of 10 minutes, and the price of a one-hour 
-billing cycle is \$1, then the algorithm will either schedule the task on 
+free, while slots in new blocks cost the full price of a billing cycle. For 
+example, if a task has a runtime of 10 minutes, and the price of a block is 
+\$1, then the algorithm will either schedule the task on 
 an existing VM that has an idle slot larger than 10 minutes for a cost of \$0, 
 or it will allocate a new block on an existing VM, or provision a new VM, for 
 a cost of \$1. If the cost of slots on two different VMs is equal, then the 
@@ -686,8 +696,8 @@ efficient total utilization due to high levels of parallelism. Setting the
 scaling limit to 1.0, ensures that the shape of the resource provisioning 
 plan  is close to a rectangle (see Fig.~\ref{fig:spds-example}) and the VM 
 termination procedure (Algorithm~\ref{alg:prov}) allows maximum utilization 
-of VMs before shutdown. For the SPSS algorithm we set the $\alpha$ parameter
-for deadline distribution to be 0.7.
+of VMs before shutdown. Based on experiments with different applications, 
+we set the $\alpha$ parameter for deadline distribution in SPSS to be 0.7.
 
 
 
@@ -745,14 +755,10 @@ $C_{eff} = b/T_C$, is the effective resource cost in dollars per hour.
 
 We run the simulations for the constraint values ranging between the
 estimated limits as indicated in Section~\ref{sec:scenarios}, resulting in
-ca. 50-150 (budget, deadline) points for each application. The runs were
+approximately 50-150 (budget, deadline) points for each application. The runs were
 repeated for Pareto-distributed and constant workflow sizes. From this result
 space we selected the most interesting plots which give the good overview  of
 the observed algorithm behavior.
-
-
-
-
 
 \begin{figure*}[htb] 
 \centering
@@ -766,8 +772,6 @@ task runtimes by the total budget. Higher cost results from lower resource utili
 Pareto-distributed workflows.}
 \label{fig:cost}
 \end{figure*}
-
-
 
 Fig.~\ref{fig:number-complete-pareto} shows the number of the workflows
 completed for two budget values per each application ensemble. The budget values
