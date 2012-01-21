@@ -990,32 +990,26 @@ workflows: that is why the values in (a), (b) and (c) are different. The
 exponential score and total amount of computing time completed give the same
 rankings, since in our test ensembles larger workflows were given higher
 priorities. It can be observed based on the sampled problem space that the
-workflow-aware algorithms achieve highest score in $\sim$2--3 times more cases
-than the simple DPDS algorithm which does not take into account workflow 
+workflow-aware algorithms achieve the highest score in $\sim$2--3 times more 
+cases than the simple DPDS algorithm, which does not take into account workflow 
 structure or size. SPSS performs the best in $\sim$20\% more cases than WA-DPDS,
 including the Montage and CyberShake ensembles, for which SPSS does not 
-perform as well as DPDS and WA-DPDS.
+perform as well as WA-DPDS.
 
 Similar results were achieved for ensembles consisting of workflows of equal
-size. Summary of these results is shown in Table~\ref{tab:num-dags-equal}.
-Again, we can see that static SPSS algorithm performed better for coarse-grained
+size. A summary of these results is shown in Table~\ref{tab:num-dags-equal}.
+Again, we can see that the static SPSS algorithm performed better for coarse-grained
 workflows (LIGO, Epigenomics, SIPHT). The differences between algorithm scores
-are smaller since the workflows have equal size thus rejecting one workflow
-does not help to complete more work in any case.
-               
-               
-Fig.~\ref{fig:budgets} shows the same data for SIPHT ensemble from another
-perspective. It helps answer the question: given a deadline, how many workflows
-can be finished when we increase the budget. In Fig.~\ref{fig:budgets}(a) the
-growth is super-linear, what results from the distribution of workflow sizes in
-the ensemble (see Fig.~\ref{fig:ensemble-distribution}). For ensemble of equal
-size workflows (see Fig.~\ref{fig:budgets}(b)) the growth is nearly linear. It
-can be also observed that static algorithms give better results for smaller
-budgets, while dynamic algorithms for larger ones.
+are smaller since the workflows have equal size, therefore rejecting a particular
+workflow does not enable the algorithms to complete any other workflows.
 
-
-
-
+Fig.~\ref{fig:budgets} shows the same data for the SIPHT ensemble from another
+perspective. It helps answer the question: Given a deadline, how many workflows
+can be finished when we increase the budget? In Fig.~\ref{fig:budgets}(a) the
+growth is super-linear, which results from the Pareto-like distribution of 
+workflow sizes in the ensemble (see Fig.~\ref{fig:ensemble-distribution}). 
+For ensembles of constant size workflows (see Fig.~\ref{fig:budgets}(b)) 
+the growth is nearly linear.
 
 
 
