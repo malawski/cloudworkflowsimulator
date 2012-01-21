@@ -1039,14 +1039,15 @@ according to the requirements of the application. Therefore the problem
 space becomes larger: it requires not only an efficient mapping of tasks
 to available resources, but also the selection of the best resource 
 provisioning plan. Formulating the problem as a maximization of the
-number of prioritized workflows completed from the ensemble also 
+number of prioritized workflows completed from the ensemble is also novel and  
 requires workflows to be admitted or rejected based on their estimated 
 resource demands. We believe that this bi-constrained problem is highly 
 relevant because such constraints are commonly imposed on many real-world 
-projects.
+projects. The approach is also directly applicable to grid environments 
+that provide resource reservations and charge service units for resource use.
 
 We have considered both static and dynamic scheduling approaches and 
-developed the SPDS, DPDS, WA-DPDS and SPSS algorithms based on these 
+developed the DPDS, WA-DPDS and SPSS algorithms based on these 
 strategies. The algorithms were evaluated on ensembles of synthetic 
 workflows, which were generated based on real scientific applications. For 
 the purposes of evaluation we have developed a simulator that models: the 
@@ -1059,7 +1060,7 @@ strategy (DPDS).
 
 During our work, several interesting lessons were learned about running 
 workflow ensembles on cloud infrastructures. One result is that the simple 
-strategy used by DPDS performs relatively well in terms of number of 
+strategy used by DPDS performs relatively well in terms of the number of 
 workflows completed and the high resource utilization it can achieve. However,
 the extra workflows may be of lower-priority, and the high utilization
 may be achieved by running tasks from workflows that cannot be completed
@@ -1075,11 +1076,11 @@ Another general observation is that although IaaS clouds provide elasticity
 and the illusion of unlimited resources, which makes it possible to provision
 more VMs to run workflows in parallel, it turns out that higher resource
 utilization and better cost effectiveness can be achieved by limiting 
-parallelism as much as possible. This observation comes from the fact that 
+parallelism. This observation comes from the fact that 
 starting and stopping VMs incurs overheads which can be amortized by running
 each VM for as long as possible. This effect was confirmed in the case of 
-the SPSS algorithm for Montage and CyberShake workflows with small budgets
-where SPSS opted to provision many VMs in parallel, and shut them down early,
+the SPSS algorithm for Montage and CyberShake workflows with small budgets.
+In these cases SPSS decided to provision many VMs in parallel, and shut them down early,
 so that tasks early in the ensemble workflows could be completed by their 
 deadlines. Similarly, a high degree of parallelization leads to lower 
 resource utilization and increased cost. This result, visible in 
@@ -1089,8 +1090,8 @@ the question how much time and money is required to actually complete all the
 workflows from the given ensemble.
 
 Another lesson learned from our studies is the effect of task granularity on 
-workflow ensembles. The benchmark workflows that we tested have relatively 
-large number of tasks (50--1000), but the Montage and CyberShake workflows have 
+workflow ensembles. All the benchmark workflows that we tested have an average 
+number of tasks (50--1000), but the Montage and CyberShake workflows have 
 fine-grained tasks with execution times on the order of seconds to minutes, 
 while LIGO, Epigenomics and SIPHT have coarser-grained tasks with runtimes 
 ranging from several minutes to hours. We observed that the dynamic 
@@ -1104,8 +1105,9 @@ Our current study suggests many areas for future work. One interesting
 issue that we plan to investigate is how the static and dynamic algorithms 
 perform with uncertain task runtimes and failures, which are known to have 
 an important influence on overall system performance~\cite{Sakellariou2010,Dongarra2007}. 
-We also plan to extend our application and infrastructure model to 
-include the various data storage options available on clouds. A previous 
+We also plan to extend our application and infrastructure model to explicitly 
+include the various data storage options available on clouds (right now we only 
+model data access as part of the task time and do not include data costs). A previous 
 experimental study on that subject~\cite{Juve2010} suggests that the data 
 demands of scientific workflows have a large impact on not only the 
 execution time, but also on the cost of workflows in commercial clouds. 
