@@ -710,7 +710,8 @@ results. Moreover, the absolute values of these parameters do not affect the
 relative comparison between the algorithms. In this study we do not take into
 account the heterogeneity of the infrastructure since we assume that it is
 always possible to select a VM type that has the best price to performance ratio
-for a given application.
+for a given application.
+
 
 For each application, we selected ranges of constraints (deadline and budget) so
 that it is possible to observe the possibly broad result space: from tight 
@@ -765,7 +766,7 @@ could fit into the schedule. Therefore, we defined the user preference score as:
 
 \begin{equation}
 \label{eq:score}
-s = \sum_{workflows\ completed}{2^{-d}}
+s = \sum_{workflows\ completed}{2^{-p}}
 \end{equation}
 
 where $p$ is the priority of the workflow such that the highest-priority workflow 
@@ -829,8 +830,8 @@ the LIGO, Epigenomics and SIPHT ensembles for small budgets, and for large
 budgets with short deadlines. The exceptions are the Montage and CyberShake 
 ensembles,  which consist of many fine-grained tasks. In these applications, 
 as well for the other ensembles with large budgets and deadlines, the simple 
-dynamic scheduling techniques perform equally well or better. The reason for 
-this behavior is that the large number of tasks guarantees that resources 
+dynamic scheduling techniques perform equally well or better. For these 
+applications the large number of small tasks guarantees that resources 
 are almost never idle regardless of how the tasks are scheduled. We also 
 observe that WA-DPDS performs better than the workflow-unaware version, DPDS. 
 This means that for the tested workflows the simple admission procedure based 
@@ -1029,82 +1030,88 @@ the growth is nearly linear.
 \section{Conclusion and Future Work}
 \label{sec:conclusions}
 
-In this paper we addressed a new interesting and important problem of scheduling
-and resource provisioning for scientific workflow ensembles on IaaS cloud
-infrastructures. The problem is different from previous work on grid or utility
-grid scheduling that cloud infrastructure gives more control over the resources,
-so the resource provisioning plan can be adjusted to the application
-requirements. Therefore the problem space becomes larger: it requires not
-only to select the best scheduling of tasks to available resources, but also
-select the best shape of resource provisioning plan. The formulation of a
-problem as maximization of the number of prioritized workflows completed from
-the ensemble requires also to take the decisions on admitting or rejecting workflows
-based on their estimated resource demands. We believe that such formulation of
-the bi-constrained problem is highly relevant since such
-constraints are typically imposed on many real-world projects.
+In this paper we addressed the interesting and important new problem of 
+scheduling and resource provisioning for scientific workflow ensembles 
+on IaaS clouds. The problem is different from previous work on grid and 
+utility grid scheduling in that cloud infrastructures provide more control 
+over the resources, so the resource provisioning plan can be adjusted 
+according to the requirements of the application. Therefore the problem 
+space becomes larger: it requires not only an efficient mapping of tasks
+to available resources, but also the selection of the best resource 
+provisioning plan. Formulating the problem as a maximization of the
+number of prioritized workflows completed from the ensemble also 
+requires workflows to be admitted or rejected based on their estimated 
+resource demands. We believe that this bi-constrained problem is highly 
+relevant because such constraints are commonly imposed on many real-world 
+projects.
 
-We have analyzed both static and dynamic scheduling approaches and
-developed the SPDS, DPDS, WA-DPDS and SPSS algorithms realizing these
-strategies. The algorithms were evaluated on ensembles of benchmark
-workflows which represent typical real scientific applications. For the
-purpose of evaluation we have developed a simulator that models the cloud
-infrastructure and the tightly-coupled scheduler and provisioner modules of
-workflow engine. The results of simulation studies indicate that the two algorithms (WA-DPDS and
-SPSD) that take into account the information about the workflow structure and
-estimation of task runtimes yield better results than the simple on-line
-priority-based scheduling strategy with static (constant) resource provisioning
-plan. 
+We have considered both static and dynamic scheduling approaches and 
+developed the SPDS, DPDS, WA-DPDS and SPSS algorithms based on these 
+strategies. The algorithms were evaluated on ensembles of synthetic 
+workflows, which were generated based on real scientific applications. For 
+the purposes of evaluation we have developed a simulator that models: the 
+cloud infrastructure, and a workflow engine with tightly-coupled scheduler 
+and provisioner modules. The results of our simulation studies indicate 
+that the two algorithms that take into account information about the 
+structure of the workflow and task runtime estimates (WA-DPDS and SPSS) 
+yield better results than the simple on-line priority-based scheduling 
+strategy (DPDS).
 
-During our work, several interesting lessons were learned about the workflow
-ensembles on cloud infrastructures. One result is that the simple strategy of
-SPDS performs relatively well in terms of number of workflows completed and the
-high resource utilization it can achieve. However, this method does not allow to
-give any advance prediction about the result, so to see its performance the
-whole ensemble needs to be simulated. On the other hand, the method may be
-the only choice in the case no estimates about the task runtimes are available
-in advance. It can be seen that the workflow-aware and static algorithms are
-able to find better quality solutions in terms of the defined metrics: this the
-result mainly of the admission algorithm implemented, which allow rejecting too
-large workflows and thus saving resources for completing the less costly ones.
+During our work, several interesting lessons were learned about running 
+workflow ensembles on cloud infrastructures. One result is that the simple 
+strategy used by DPDS performs relatively well in terms of number of 
+workflows completed and the high resource utilization it can achieve. However,
+the extra workflows may be of lower-priority, and the high utilization
+may be achieved by running tasks from workflows that cannot be completed
+given the constraints. On the other hand, DPDS may be the only choice when 
+estimates of task runtimes are not available in advance. We also observed
+that the WA-DPDS and SPSS algorithms are able to find better quality 
+solutions in terms of the target metrics: this is primarily a result of the 
+admission algorithms rejecting workflows that are too large to be completed 
+given the constraints, and accepting more smaller workflows that can be 
+completed.
 
-Another general observation is that although clouds provide such capabilities as
-dynamic adding and removing of resources at runtime and high parallelization due
-to illusion of unlimited resources, it turns out that is recommended to avoid
-using these capabilities when possible, in order to achieve high resource
-utilization and cost effectiveness. This observation comes from the fact that
-starting and stopping more VMs incurs a cost which can be amortized by running
-each started VM as long as possible before shutdown. This effect was confirmed
-in the case of SPSS algorithm for Montage and CyberShake workflows with small
-budgets. Similarly, high degree of parallelization (large number of nodes) leads
-also to less efficient resource utilization and in the case of clouds the drop
-in parallel efficiency means also the increase of cost. This result, clearly
-visible in Fig~\ref{fig:cost}, leads to multi-criteria decision problems and
-related trade-offs. E.g. our simulation results can be used as hints to answer
+Another general observation is that although IaaS clouds provide elasticity
+and the illusion of unlimited resources, which makes it possible to provision
+more VMs to run workflows in parallel, it turns out that higher resource
+utilization and better cost effectiveness can be achieved by limiting 
+parallelism as much as possible. This observation comes from the fact that 
+starting and stopping VMs incurs overheads which can be amortized by running
+each VM for as long as possible. This effect was confirmed in the case of 
+the SPSS algorithm for Montage and CyberShake workflows with small budgets
+where SPSS opted to provision many VMs in parallel, and shut them down early,
+so that tasks early in the ensemble workflows could be completed by their 
+deadlines. Similarly, a high degree of parallelization leads to lower 
+resource utilization and increased cost. This result, visible in 
+Fig~\ref{fig:cost}, leads to multi-criteria decision problems and related 
+trade-offs. E.g. our simulation results can be used as hints to answer
 the question how much time and money is required to actually complete all the
 workflows from the given ensemble.
 
-Another lesson learned from our studies is related to the shapes and granularity
-of the tasks of workflows in the ensembles. The benchmarks workflows that we
-tested have relatively large number of tasks (50--1000). Montage and CyberShake
-workflows have fine-grained tasks of short execution times, in the order of
-seconds and minutes. LIGO, Epigenomics and SIPHT have longer tasks: from minutes to hours.
-Therefore the dynamic algorithms achieved better results on the fine grained
-workflows, since the simple random-based allocation strategy leads to good
-load-balancing and high resource utilization. On the other hand, when tasks are
-longer, it becomes more beneficial to apply a static planning strategy of SPSS.
+Another lesson learned from our studies is the effect of task granularity on 
+workflow ensembles. The benchmark workflows that we tested have relatively 
+large number of tasks (50--1000), but the Montage and CyberShake workflows have 
+fine-grained tasks with execution times on the order of seconds to minutes, 
+while LIGO, Epigenomics and SIPHT have coarser-grained tasks with runtimes 
+ranging from several minutes to hours. We observed that the dynamic 
+algorithms achieved better results on the fine grained workflows since the 
+simple random scheduling strategy leads to good load-balancing and high 
+resource utilization for these ensembles. On the other hand, when tasks are
+longer, it becomes more beneficial to apply the more sophisticated static 
+scheduling strategy of SPSS.
 
-Our current study reveals multiple paths for future work. One interesting
-question would be to answer how the static and dynamic algorithms perform in the
-cases of increased uncertainties and failures, that have important influence
-on overall system performance~\cite{Sakellariou2010,Dongarra2007}. Second
-important goal would be to extend our application and infrastructure model to
-include various data storage options available on clouds. The experimental study
-on that subject~\cite{Juve2010} suggests that data demands of scientific
-workflows have a high impact not only on execution time but also on costs on
-commercial clouds. Finally, we would like to address the heterogeneity of the
-infrastructure, as multiple instance types and providers, including private
-and community clouds will make the problem more complex and
-challenging~\cite{Marshall2010,vockler11,Juve2010}.
+Our current study suggests many areas for future work. One interesting
+issue that we plan to investigate is how the static and dynamic algorithms 
+perform with uncertain task runtimes and failures, which are known to have 
+an important influence on overall system performance~\cite{Sakellariou2010,Dongarra2007}. 
+We also plan to extend our application and infrastructure model to 
+include the various data storage options available on clouds. A previous 
+experimental study on that subject~\cite{Juve2010} suggests that the data 
+demands of scientific workflows have a large impact on not only the 
+execution time, but also on the cost of workflows in commercial clouds. 
+Finally, we plan to investigate heterogeneous environments that include 
+multiple VM types and cloud providers, including private and community clouds, 
+which will make the problem even more complex and challenging~\cite{Marshall2010,vockler11,Juve2010}.
 
 
 %\section{Acknowledgments}
