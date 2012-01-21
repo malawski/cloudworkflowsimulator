@@ -800,9 +800,8 @@ limited and does not allow completing all the workflows from the ensemble.
 We ran simulations for constraint values ranging between the estimated 
 limits indicated in Section~\ref{sec:scenarios}, resulting in approximately 
 50-150 (budget, deadline) data points for each application. The runs were
-repeated for Pareto-distributed and constant workflow ensembles. From this result
-space we selected the most interesting plots that characterize the observed 
-behavior of the algorithms best.
+performed for Pareto-distributed and constant workflow ensembles. From this result
+space we selected representative plots. 
 
 \begin{figure*}[htb] 
 \centering
@@ -811,30 +810,30 @@ behavior of the algorithms best.
 \includegraphics[width=0.19\textwidth]{figures/pareto-cost-LIGO-n-1000-8-dagh1-40m0.pdf}
 \includegraphics[width=0.19\textwidth]{figures/pareto-cost-GENOME-n-1000-8-dagh100-1500m0.pdf}
 \includegraphics[width=0.19\textwidth]{figures/pareto-cost-SIPHT-n-1000-8-dagh5-50m0.pdf}
-\caption{Effective computing cost in \$ per hour calculated by dividing sum of
-task runtimes by the total budget. Higher cost results from lower resource utilization. Data based on DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
+\caption{Effective computing cost in \$ per hour calculated by dividing the sum of
+task runtimes by the total budget. Higher costs result from lower resource utilization. Data based on DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
 Pareto-distributed workflows.}
 \label{fig:cost}
 \end{figure*}
 
 Fig.~\ref{fig:number-complete-pareto} shows the number of the workflows
 completed for two budget values for each application ensemble. The budget values
-selected correspond to two opposite cases: {\em small budget} (top) and {\em
+selected correspond to two extreme cases: {\em small budget} (top) and {\em
 large budget} (bottom). The small budgets permit the algorithms to complete 
 only a small number of workflows from the ensemble, while the larger budgets 
-enables the algorithms to finish almost all the workflows. In three of five 
-cases the SPSS algorithm performs better for tighter constraints: when the 
+enable the algorithms to finish almost all the workflows. In three of five 
+cases the SPSS algorithm performs better for tighter constraints. When the 
 budget is low, or the deadline is short, the static procedure is able to more 
 efficiently pack workflow tasks onto limited resources. This is the case for 
 the LIGO, Epigenomics and SIPHT ensembles for small budgets, and for large
 budgets with short deadlines. The exceptions are the Montage and CyberShake 
 ensembles,  which consist of many fine-grained tasks. In these applications, 
 as well for the other ensembles with large budgets and deadlines, the simple 
-dynamic scheduling techniques perform equally well or better. For these 
-applications the large number of small tasks guarantees that resources 
+dynamic scheduling techniques perform equally well or better. The reason for 
+this behavior is that the large number of tasks guarantees that resources 
 are almost never idle regardless of how the tasks are scheduled. We also 
 observe that WA-DPDS performs better than the workflow-unaware version, DPDS. 
-This means that for the tested workflows the simple admission procedure based 
+This means that for the workflows we tested the simple admission procedure based 
 on estimation of workflow cost does not degrade the solution, but rather in 
 many cases it enables larger workflows that would lead to budget overrun to
 be rejected. Thus it can save the space for smaller workflows to complete.
@@ -941,12 +940,13 @@ time metric, $T_C$. These plots confirm our previous observations about the
 algorithms' performance, but they also allow us observe a more general property:
 for a given budget, when the deadline is tightened the amount of work done
 steeply decreases. Assigning a shorter deadline means that more VMs need to be
-provisioned to complete the work, but this leads to higher parallelism and thus
-to lower parallel efficiency. For example, running 2 VMs for 10 hours will tend
-to be more efficient than running 10 VMs for 2 hours. Similarly, the only way 
-to reduce cost when adding VMs is to achieve a super-linear speedup, which 
-is unlikely in practice. Therefore, if the deadline permits, and cost is 
-important, parallelism should be avoided when possible.
+provisioned to complete the work. However, because of the dependencies in the 
+workflows, many VMs will either be idle, or will be backfilled with tasks from 
+low-priority workflows that never finish, resulting in reduced resource 
+utilization. Similarly, the only way to reduce cost when adding VMs is to 
+achieve a super-linear speedup, which is unlikely in practice. Therefore, if 
+the deadline permits, and cost is important, parallelism should be kept to a 
+minimum.
 
 These observations are further confirmed when examining the effective computing
 cost, as shown in Fig.~\ref{fig:cost}. It can be seen that lower resource
