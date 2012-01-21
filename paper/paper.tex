@@ -175,8 +175,11 @@ dependencies between the tasks.
 
 We assume that we have runtime estimates for each task in the workflow based on
 either a performance model of the application, or historical data that can be
-mined. In particular, in this study we use workflows from the synthetic workflow
-generator~\cite{Bharathi08}.
+mined. In this study we use synthetic workflows that were generated using 
+historical data from real applications~\cite{Bharathi08}. These applications 
+come from a wide variety of domains including: bioinformatics (Epigenomics, 
+SIPHT), astronomy (Montage), earthquake science (CyberShake), and physics 
+(LIGO).
 
 
 Although scientific workflows are often data-intensive, we do not currently
@@ -191,12 +194,15 @@ have an impact on the runtime of the tasks.
 This paper focuses on scheduling and provisioning for workflow ensembles. A
 workflow ensemble consists of several related workflows that a user wishes to
 run. Each workflow in an ensemble is given a priority that indicates how
-important the workflow is to the user.
+important the workflow is to the user. These priorities are absolute in the 
+sense that completing a high priority workflow is more valuable than 
+completing all lower priority workflows combined.
 
 
 The goal of this workflow ensemble scheduling and cloud provisioning problem is
 to complete as many high-priority workflows as possible given a fixed budget and
-deadline.
+deadline. Only workflows for which all tasks are finished by the deadline are 
+considered to be complete---partial results are not usable in this model.
 
 
 \section{Algorithms}
@@ -954,7 +960,7 @@ utilization and lower parallel efficiency for short deadlines lead to
 substantial increases in the effective computing cost. This increase can be 
 significant. For example, a SIPHT ensemble with short deadlines and a budget
 of \$1,000 has an effective computing cost $\sim$8--20\% higher than the 
-normal cost, depending on the algorithm used. That means that out of the 
+minimum effective cost of \$1/hour, depending on the algorithm used. That means that out of the 
 \$1,000 budget, \$80--\$200 is spent on idle resources.
 
 Another general conclusion can be drawn from Fig.~\ref{fig:cost}: despite some
