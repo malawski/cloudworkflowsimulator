@@ -1069,15 +1069,15 @@ During our work, several interesting lessons were learned about running
 workflow ensembles on cloud infrastructures. One result is that the simple 
 strategy used by DPDS performs relatively well in terms of the number of 
 workflows completed and the high resource utilization it can achieve. However,
-the extra workflows may be of lower-priority, and the high utilization
+some of these workflows may be of lower priority, and the high utilization
 may be achieved by running tasks from workflows that cannot be completed
 given the constraints. On the other hand, DPDS may be the only choice when 
 estimates of task runtimes are not available in advance. We also observed
 that the WA-DPDS and SPSS algorithms are able to find better quality 
 solutions in terms of the target metrics: this is primarily a result of the 
-admission algorithms rejecting workflows that are too large to be completed 
-given the constraints, and accepting more smaller workflows that can be 
-completed.
+admission algorithms, which reject workflows that are too large to be 
+completed given the constraints, and accept more smaller workflows that 
+can be completed.
 
 Another lesson learned from our studies is the effect of task granularity on 
 workflow ensembles. All the benchmark workflows that we tested have an average 
@@ -1088,8 +1088,11 @@ ranging from several minutes to hours. We observed that the dynamic
 algorithms achieved better results on the fine grained workflows since the 
 simple random scheduling strategy leads to good load-balancing and high 
 resource utilization for these ensembles. On the other hand, when tasks are
-longer, it becomes more beneficial to apply the more sophisticated static 
-scheduling strategy of SPSS.
+longer, the dynamic algorithms tend to use up the budget by running tasks 
+from low-priority workflows while the more sophisticated static scheduling 
+strategy of SPSS is more circumspect. In the future we plan to investigate 
+the effects of task granularity on ensemble scheduling in a more systematic
+fashion.
 
 Our current study suggests many areas for future work. One interesting
 issue that we plan to investigate is how the static and dynamic algorithms 
