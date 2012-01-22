@@ -40,19 +40,21 @@
 
 Large-scale computational applications represented as scientific workflows, are
 often grouped into ensembles composed of several inter-related workflows. In
-this paper, we address a new important problem of maximizing the number of
-completed workflows from an ensemble under both budget and deadline constraints
-on the Infrastructure-as-a-Service (IaaS) clouds, characterized by dynamic
-resource provisioning capabilities and pay-per-use model.  We discuss, develop
-and assess algorithms based on static and dynamic strategies for both task
-scheduling and resource provisioning. We evaluate the algorithms via simulation
-using a set of scientific workflow ensembles with a broad range of budget and
-deadline parameters. This allows to identify the application scenarios and
-constraint ranges for which the algorithms perform better. We found that the key
-for algorithm performance is the decision which workflows should be admitted or
-rejected from the ensemble. The results show that the admission procedure based
-on worklfow structure and estimates of task runtimes can significantly improve
-the quality of solutions.
+this paper, we address a new important problem of efficiently managing such
+ensembles under both budget and deadline constraints on the
+Infrastructure-as-a-Service (IaaS) clouds. The latter are characterized by
+dynamic resource provisioning capabilities and a pay-per-use model.  We discuss,
+develop and assess algorithms based on static and dynamic strategies for both
+task scheduling and resource provisioning. We assume that the workflows within
+an ensemble are prioritized by the user. We evaluate the algorithms via
+simulation using a set of scientific workflow ensembles with a broad range of
+budget and deadline parameters. This allows to identify the application
+scenarios and constraint ranges for which the algorithms perform better. We
+found that the key for algorithm performance is the decision which workflows
+within an ensemble should be admitted or rejected for execution. The results
+show that the admission procedure based on workflow structure and estimates of
+task runtimes can significantly improve the quality of solutions.
+
 
 \end{abstract}
 
@@ -121,12 +123,12 @@ budget and deadline parameters.
 
 The main contributions of this paper are:
 \begin{itemize}
-  \item definition of the scheduling problem of priorotized workflows grouped in
+  \item the definition of the scheduling problem of prioritized workflows grouped in
   ensembles, under both budget and deadline constraints,
-  \item analysis of static and dynamic strategies for task scheduling and
+  \item an analysis of static and dynamic strategies for task scheduling and
   resource provisioning on clouds, together with the admission procedure to
   predict which workflows from the ensemble can be completed,
-  \item development of static and dynamic algorithms and of the simulator based
+  \item the development of static and dynamic algorithms and of the simulator based
   on the defined application and infrastructure model,
   \item performance evaluation of algorithms on the set of synthetic benchmark
   workflow ensembles representing important real scientific applications,
