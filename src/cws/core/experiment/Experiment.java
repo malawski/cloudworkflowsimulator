@@ -85,6 +85,8 @@ public class Experiment {
 			HashSet<VM> vms = new HashSet<VM>();
 			for (int i = 0; i < numVMs; i++) {
 				VM vm = new VM(1000, 1, 1.0, param.getPrice());
+	            vm.setProvisioningDelay(0.0);
+	            vm.setDeprovisioningDelay(0.0);
 				vms.add(vm);
 				CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
 			}	

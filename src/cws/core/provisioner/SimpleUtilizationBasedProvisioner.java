@@ -65,8 +65,8 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 			// seconds till next full hour
 			double secondsRemaining = vmHours*3600.0-vmRuntime;
 			
-			// we add "magic number" 11.0 to include also the deprovisioning time
-			if (secondsRemaining<PROVISIONER_INTERVAL+11.0) {
+			// we add "magic number" 1.0 to include also the deprovisioning time
+			if (secondsRemaining<PROVISIONER_INTERVAL+1.0) {
 				completingVMs.add(vm);
 			}
 		}
@@ -147,6 +147,8 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 		if (! finishing_phase && utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS <= getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 			
 			VM vm = new VM(1000, 1, 1.0, 1.0);
+            vm.setProvisioningDelay(0.0);
+            vm.setDeprovisioningDelay(0.0);
 			Log.printLine(CloudSim.clock() + " Starting VM: " + vm.getId());
 			CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
 			
@@ -202,7 +204,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 			double secondsRemaining = vmHours*3600.0-vmRuntime;
 			
 			//terminate only vms that have less seconds remaining than a defined threshold
-			if (secondsRemaining<PROVISIONER_INTERVAL+11.0) {
+			if (secondsRemaining<PROVISIONER_INTERVAL+1.0) {
 				vmIt.remove();
 				removed.add(vm);
 				Log.printLine(CloudSim.clock() + " Terminating VM: " + vm.getId());
