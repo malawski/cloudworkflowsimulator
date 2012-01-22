@@ -945,14 +945,14 @@ Fig.~\ref{fig:total-time} presents the same results using the total computing
 time metric, $T_C$. These plots confirm our previous observations about the
 algorithms' performance, but they also allow us observe a more general property:
 for a given budget, when the deadline is tightened the amount of work done
-steeply decreases. Assigning a shorter deadline means that more VMs need to be
+steeply decreases. This is partially due to the fact that fewer workflows can be
+completed given a short deadline because their critical paths are simply too long
+and they are squeezed out of early start times by high priority workflows.
+In addition, assigning a shorter deadline means that more VMs need to be
 provisioned to complete the work. However, because of the dependencies in the 
-workflows, many VMs will either be idle, or will be backfilled with tasks from 
-low-priority workflows that never finish, resulting in reduced resource 
-utilization. Similarly, the only way to reduce cost when adding VMs is to 
-achieve a super-linear speedup, which is unlikely in practice. Therefore, if 
-the deadline permits, and cost is important, parallelism should be kept to a 
-minimum.
+workflows, many of these VMs will either be idle, or will be backfilled with 
+tasks from low-priority workflows that never finish, resulting, effectively, 
+in reduced resource utilization and fewer completed workflows.
 
 These observations are further confirmed when examining the effective computing
 cost, as shown in Fig.~\ref{fig:cost}. It can be seen that lower resource
@@ -960,8 +960,8 @@ utilization and lower parallel efficiency for short deadlines lead to
 substantial increases in the effective computing cost. This increase can be 
 significant. For example, a SIPHT ensemble with short deadlines and a budget
 of \$1,000 has an effective computing cost $\sim$8--20\% higher than the 
-minimum effective cost of \$1/hour, depending on the algorithm used. That means that out of the 
-\$1,000 budget, \$80--\$200 is spent on idle resources.
+minimum effective cost of \$1/hour, depending on the algorithm used. This means 
+that out of the \$1,000 budget, \$80--\$200 is spent on idle resources.
 
 Another general conclusion can be drawn from Fig.~\ref{fig:cost}: despite some
 random fluctuations resulting mostly from the finite result space, all the
@@ -971,7 +971,7 @@ We observe that the selection of deadline and cost can be formulated as a
 multi-criteria optimization problem, and that the curves presented in 
 Fig.~\ref{fig:cost} are approximations of the Pareto front (or Pareto set) of
 solutions to this problem. In our case the solutions were achieved by maximizing
-the amount of work done, which directly results in minimization of effective 
+the amount of work done, which is the inverse of minimizing the effective 
 computing cost metric for a given deadline. Therefore, the obtained results 
 can be used to aid in resource allocation planning, when both cost and time 
 criteria are given not as constraints but as objectives.
@@ -1021,7 +1021,8 @@ size. A summary of these results is shown in Table~\ref{tab:num-dags-equal}.
 Again, we can see that the static SPSS algorithm performed better for coarse-grained
 workflows (LIGO, Epigenomics, SIPHT). The differences between algorithm scores
 are smaller since the workflows have equal size, therefore rejecting a particular
-workflow does not enable the algorithms to complete any other workflows.
+workflow does not make it any easier for the algorithms to complete any other 
+workflow.
 
 Fig.~\ref{fig:budgets} shows the same data for the SIPHT ensemble from another
 perspective. It helps answer the question: Given a deadline, how many workflows
@@ -1029,7 +1030,7 @@ can be finished when we increase the budget? In Fig.~\ref{fig:budgets}(a) the
 growth is super-linear, which results from the Pareto-like distribution of 
 workflow sizes in the ensemble (see Fig.~\ref{fig:ensemble-distribution}). 
 For ensembles of constant size workflows (see Fig.~\ref{fig:budgets}(b)) 
-the growth is nearly linear.
+the growth is linear.
 
 
 
@@ -1077,23 +1078,6 @@ solutions in terms of the target metrics: this is primarily a result of the
 admission algorithms rejecting workflows that are too large to be completed 
 given the constraints, and accepting more smaller workflows that can be 
 completed.
-
-Another general observation is that although IaaS clouds provide elasticity
-and the illusion of unlimited resources, which makes it possible to provision
-more VMs to run workflows in parallel, it turns out that higher resource
-utilization and better cost effectiveness can be achieved by limiting 
-parallelism. This observation comes from the fact that 
-starting and stopping VMs incurs overheads which can be amortized by running
-each VM for as long as possible. This effect was confirmed in the case of 
-the SPSS algorithm for Montage and CyberShake workflows with small budgets.
-In these cases SPSS decided to provision many VMs in parallel, and shut them down early,
-so that tasks early in the ensemble workflows could be completed by their 
-deadlines. Similarly, a high degree of parallelization leads to lower 
-resource utilization and increased cost. This result, visible in 
-Fig~\ref{fig:cost}, leads to multi-criteria decision problems and related 
-trade-offs. E.g. our simulation results can be used as hints to answer
-the question how much time and money is required to actually complete all the
-workflows from the given ensemble.
 
 Another lesson learned from our studies is the effect of task granularity on 
 workflow ensembles. All the benchmark workflows that we tested have an average 
