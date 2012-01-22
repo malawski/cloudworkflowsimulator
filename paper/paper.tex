@@ -163,7 +163,8 @@ multiple VM types with different amounts of CPU, memory, disk space, and I/O,
 for this paper we focus on a single VM type because we assume that for most
 applications there will typically be one VM type with the best price/performance
 ratio for the application~\cite{Juve2009}. We also assume that a submitted task
-has exclusive access to a VM instance and that there is no preemption.
+has exclusive access to a VM instance and that there is no preemption. For this
+study we assumed that there are no delays in VM start and terminate requests.
 
 
 \subsection{Application Model}
@@ -652,7 +653,8 @@ which is easier to solve efficiently.
 \includegraphics[width=0.19\textwidth]{figures/pareto-SIPHT-n-1000-8-dagh5-50m0.pdf}
 \caption{Number of workflows completed for DPDS, AW-DPDS and SPSS
 algorithms on ensembles of 100 Pareto-distributed workflows, {\em small budget}
-(top) and {\em large budget} (bottom).}
+(top) and {\em large budget} (bottom). The ranges on $y$ axis are chosen to 
+emphasize the differences the performance of the algorithms.}
 \label{fig:number-complete-pareto}
 \end{figure*}
 
@@ -691,8 +693,8 @@ is slightly increased to represent the ``heavy-tail'', i.e. that there is a
 not-insignificant number of large workflows in the ensemble. We assume that large
 workflows are more important to users, so in the Pareto ensembles the workflows are 
 assigned priorities according to their size so that the largest workflows are given 
-the highest priority. In future work we plan to explore other ensemble types such as
-uniform distributions.
+the highest priority. In
+future work we plan to explore other ensemble types such as uniform distributions.
 
 \begin{figure*}[t]  
 \centering
@@ -703,7 +705,8 @@ uniform distributions.
 \includegraphics[width=0.19\textwidth]{figures/pareto-size-SIPHT-n-1000-8-dagh5-50m0.pdf}
 \caption{ Total work completed expressed as the sum of runtimes (in hours) of
 tasks of completed workflows. Data computed for DPDS, AW-DPDS and SPSS
-algorithms on ensembles of 100 Pareto-distributed workflows}
+algorithms on ensembles of 100 Pareto-distributed workflows. The ranges on $y$ axis are chosen to 
+emphasize the differences between the performance of the algorithms.}
 \label{fig:total-time}
 \end{figure*}
 
@@ -818,7 +821,8 @@ space we selected representative plots.
 \includegraphics[width=0.19\textwidth]{figures/pareto-cost-SIPHT-n-1000-8-dagh5-50m0.pdf}
 \caption{Effective computing cost in \$ per hour calculated by dividing the sum of
 task runtimes by the total budget. Higher costs result from lower resource utilization. Data based on DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
-Pareto-distributed workflows.}
+Pareto-distributed workflows. The ranges on $y$ axis are chosen to 
+emphasize the differences the performance of the algorithms.}
 \label{fig:cost}
 \end{figure*}
 
@@ -827,8 +831,8 @@ completed for two budget values for each application ensemble. The budget values
 selected correspond to two extreme cases: {\em small budget} (top) and {\em
 large budget} (bottom). The small budgets permit the algorithms to complete 
 only a small number of workflows from the ensemble, while the larger budgets 
-enable the algorithms to finish almost all the workflows. In three of five 
-cases the SPSS algorithm performs better for tighter constraints. When the 
+enable the algorithms to finish almost all the workflows. The rangesIn three of
+five cases the SPSS algorithm performs better for tighter constraints. When the 
 budget is low, or the deadline is short, the static procedure is able to more 
 efficiently pack workflow tasks onto limited resources. This is the case for 
 the LIGO, Epigenomics and SIPHT ensembles for small budgets, and for large
@@ -986,9 +990,9 @@ criteria are given not as constraints but as objectives.
 % Pareto-distributed workflows. Score is computed as $\sum(2^(-p))$ where
 % priorities of subsequent workflows are $p=0,1,2,\ldots$ (0 means highest
 % priority).} \label{fig:} \end{figure*}
-       
+
 \begin{figure}[htb] \centering
-\includegraphics[width=0.7\columnwidth]{figures/pareto-budget-SIPHT-n-1000-8-dagh5-50h10m0.pdf}\\
+\includegraphics[width=0.7\columnwidth]{figures/pareto-budget-SIPHT-n-1000-8-dagh5-50h4m0.pdf}\\
 (a) ensemble of Pareto-distributed workflows
 \includegraphics[width=0.7\columnwidth]{figures/constant-budget-SIPHT-n-1000-0-dagh5-50h4m0.pdf}\\
 (b) ensemble of workflows of equal size \caption{Comparison of number of
@@ -1017,8 +1021,8 @@ including the Montage and CyberShake ensembles, for which SPSS does not
 perform as well as WA-DPDS.
 
 Similar results were achieved for ensembles consisting of workflows of equal
-size. A summary of these results is shown in Table~\ref{tab:num-dags-equal}.
-Again, we can see that the static SPSS algorithm performed better for coarse-grained
+size set to 1000. A summary of these results is shown in
+Table~\ref{tab:num-dags-equal}. Again, we can see that the static SPSS algorithm performed better for coarse-grained
 workflows (LIGO, Epigenomics, SIPHT). The differences between algorithm scores
 are smaller since the workflows have equal size, therefore rejecting a particular
 workflow does not make it any easier for the algorithms to complete any other 
@@ -1030,7 +1034,8 @@ can be finished when we increase the budget? In Fig.~\ref{fig:budgets}(a) the
 growth is super-linear, which results from the Pareto-like distribution of 
 workflow sizes in the ensemble (see Fig.~\ref{fig:ensemble-distribution}). 
 For ensembles of constant size workflows (see Fig.~\ref{fig:budgets}(b)) 
-the growth is linear.
+the growth is linear and the costs are higher, since all the worklfows in the
+test consisted of 1000 tasks.
 
 
 
