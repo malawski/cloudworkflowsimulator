@@ -22,16 +22,16 @@
        \affaddr{Center for Research Computing}\\
        \affaddr{111 ITC, Notre Dame, IN, USA}\\
        \email{mmalawsk@nd.edu}
-    \alignauthor Jarek Nabrzyski\\
-       \affaddr{University of Notre Dame}\\
-       \affaddr{Center for Research Computing}\\
-       \affaddr{111 ITC, Notre Dame, IN, USA}\\
-       \email{naber@nd.edu}
     \alignauthor Gideon Juve and Ewa Deelman\\
        \affaddr{USC Information Sciences Institute}\\
        \affaddr{4676 Admiralty Way}\\
        \affaddr{Marina del Rey, CA, USA}\\
        \email{\{gideon,deelman\}@isi.edu}
+    \alignauthor Jarek Nabrzyski\\
+       \affaddr{University of Notre Dame}\\
+       \affaddr{Center for Research Computing}\\
+       \affaddr{111 ITC, Notre Dame, IN, USA}\\
+       \email{naber@nd.edu}
 }
 
 \maketitle
@@ -57,12 +57,14 @@ task runtimes can significantly improve the quality of solutions.
 
 \end{abstract}
 
-%\category{H.4}{Information Systems Applications}{Miscellaneous}
-%\category{D.2.8}{Software Engineering}{Metrics}[complexity measures, performance measures]
+  
+\category{H.3.4}{Systems and Software}{Distributed systems}
+\category{D.4.8}{Performance}{Simulation}
 
-%\terms{Theory}
+\terms{DAG, Scheduling, Simulation}
 
-\keywords{Scientific workflows, cloud computing, DAG scheduling, simulation}
+\keywords{Scientific workflows, Workflow ensembles,
+Cloud computing, Infrastructure-as-a-Service}
 
 \section{Introduction}
 
@@ -501,6 +503,29 @@ assigned sub-deadline. The idea is that if each task can be completed by
 its deadline in the least expensive manner possible, then the cost of the
 entire workflow can be minimized without exceeding the ensemble deadline.
 
+\begin{algorithm}[tb]
+\caption{Workflow planning algorithm for SPSS}
+\label{alg:planworkflow}
+\begin{algorithmic}[1]
+\Require $w$: workflow; $P$: current plan; $d$: deadline
+\Ensure Create plan for $w$ that minimizes cost and meets deadline $d$
+\Procedure{PlanWorkflow}{$w,P,d$}
+    \State $P^\prime\gets$ copy of $P$
+    \State \Call{DeadlineDistribution}{w,d}
+    \For{$t\ in\ w\ sorted\ by\ DL(t)$}
+        \State $v \gets$ VM that minimizes cost and start time of t
+        \If{$FinishTime(t,v) < DL(t)$}
+            \State Schedule(t,v)
+        \Else
+            \State Provision a new VM v
+            \State Schedule(t,v)
+        \EndIf
+    \EndFor
+    \State \textbf{return} $P^\prime$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
 SPSS assigns sub-deadlines to each task based on the slack time of the
 workflow, which is defined as the amount of extra time that a workflow
 can extend its critical path and still be completed by the ensemble deadline.
@@ -561,35 +586,14 @@ LST(t) = \begin{cases}
 \end{cases}
 $$
 
-\begin{algorithm}[tb]
-\caption{Workflow planning algorithm for SPSS}
-\label{alg:planworkflow}
-\begin{algorithmic}[1]
-\Require $w$: workflow; $P$: current plan; $d$: deadline
-\Ensure Create plan for $w$ that minimizes cost and meets deadline $d$
-\Procedure{PlanWorkflow}{$w,P,d$}
-    \State $P^\prime\gets$ copy of $P$
-    \State \Call{DeadlineDistribution}{w,d}
-    \For{$t\ in\ w\ sorted\ by\ DL(t)$}
-        \State $v \gets$ VM that minimizes cost and start time of t
-        \If{$FinishTime(t,v) < DL(t)$}
-            \State Schedule(t,v)
-        \Else
-            \State Provision a new VM v
-            \State Schedule(t,v)
-        \EndIf
-    \EndFor
-    \State \textbf{return} $P^\prime$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 
 Algorithm~\ref{alg:planworkflow} shows how SPSS creates low-cost plans for
 each workflow. The \textsc{PlanWorkflow} procedure first calls 
 \textsc{DeadlineDistribution} to assign sub-deadlines to tasks according
 to the procedure described above. Then, the \textsc{PlanWorkflow} procedure
 schedules tasks onto VMs, allocating new VMs when necessary. For each task 
-in the workflow, the the least expensive slot is chosen to schedule the 
+in the workflow, the least expensive slot is chosen to schedule the 
 task so that it can be completed by  its deadline. VMs are allocated in 
 blocks of one billing cycle (one hour) regardless of the size of the task. 
 When computing the cost of scheduling a task on a given VM, the algorithm 
@@ -650,6 +654,15 @@ created for the synthetic workflow generator developed by Bharathi, et al~\cite{
 \subsection{Scenarios}
 \label{sec:scenarios}
 
+\begin{figure}[tb] 
+\centering
+\includegraphics[width=0.6\columnwidth]{figures/ensemble-pareto}
+\caption{Pareto-like distribution of workflow sizes in ensemble. Size is
+measured in number of tasks.}
+\label{fig:ensemble-distribution}
+\end{figure}
+
+
 We have prepared test scenarios to evaluate the proposed algorithms under a
 range of parameters that enables us to observe the interesting characteristics
 of the different algorithms for smaller and larger constraints. For a given
@@ -666,27 +679,6 @@ schedule, since it forces the system to provision multiple VMs to execute
 workflow tasks in parallel.
 
 
-\begin{figure}[tb] 
-\centering
-\includegraphics[width=0.6\columnwidth]{figures/ensemble-pareto}
-\caption{Pareto-like distribution of workflow sizes in ensemble. Size is
-measured in number of tasks.}
-\label{fig:ensemble-distribution}
-\end{figure}
-
-The number of workflows in an ensemble depends on the particular application, but
-we assume that ensemble sizes are on the order of between 10 and 100 workflows.
-This range is motivated by several reasons: First, such sizes are typical of the
-real applications we have examined. For example, the number of geographical 
-sites of interest to the users of the CyberShake application is on the order 
-of 100. Second, smaller ensembles consisting of just a few workflows can be 
-aggregated into a single workflow, so there is no need to treat them as an
-ensemble. Similarly, when the number of workflows is larger than 100, and each 
-workflow has a large number of tasks, either the constraints are low enough to
-prevent many of the workflows from running, or the problem of efficiently 
-allocating them to the resources becomes similar to the bag-of-tasks problem, 
-which is easier to solve efficiently.
-
 \begin{figure*}[t] 
 \centering
 \includegraphics[width=0.19\textwidth]{figures/pareto-MONTAGE-n-1000-8-dagh1-20m0.pdf}
@@ -701,18 +693,22 @@ emphasize the differences the performance of the algorithms.}
 \label{fig:number-complete-pareto}
 \end{figure*}
 
-%\begin{figure}[b!] 
-%\centering
-%\includegraphics[width=0.19\textwidth]{figures/pareto-score-MONTAGE-n-1000-8-dagh1-20m0.pdf}
-%\includegraphics[width=0.19\textwidth]{figures/pareto-score-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
-%\includegraphics[width=0.19\textwidth]{figures/pareto-score-LIGO-n-1000-8-dagh1-40m0.pdf}
-%\includegraphics[width=0.19\textwidth]{figures/pareto-score-GENOME-n-1000-8-dagh100-1500m0.pdf}
-%\includegraphics[width=0.19\textwidth]{figures/pareto-score-SIPHT-n-1000-8-dagh5-50m0.pdf}
-%\caption{Comparison of algorithms based on score, which  is computed as
-%$\sum(1/(p+1))$ where priorities of subsequent workflows are $p=0,1,2,\ldots$
-%(0 means highest priority).}
-%\label{fig:score}
-%\end{figure}
+
+The number of workflows in an ensemble depends on the particular application, but
+we assume that ensemble sizes are on the order of between 10 and 100 workflows.
+This range is motivated by several reasons: First, such sizes are typical of the
+real applications we have examined. For example, the number of geographical 
+sites of interest to the users of the CyberShake application is on the order 
+of 100. Second, smaller ensembles consisting of just a few workflows can be 
+aggregated into a single workflow, so there is no need to treat them as an
+ensemble. Similarly, when the number of workflows is larger than 100, and each 
+workflow has a large number of tasks, either the constraints are low enough to
+prevent many of the workflows from running, or the problem of efficiently 
+allocating them to the resources becomes similar to the bag-of-tasks problem, 
+which is easier to solve efficiently.
+
+
+
 
 In order to evaluate the algorithms on a standard set of workflows, we used
 ensembles constructed from the workflows available\footnote{\url{https://confluence.pegasus.isi.edu/display/pegasus/WorkflowGenerator}}
@@ -738,6 +734,9 @@ workflows are more important to users, so in the Pareto ensembles the workflows 
 assigned priorities according to their size so that the largest workflows are given 
 the highest priority. In
 future work we plan to explore other ensemble types such as uniform distributions.
+
+
+
 
 \begin{figure*}[t]  
 \centering
@@ -1127,20 +1126,18 @@ admission algorithms, which reject workflows that are too large to be
 completed given the constraints, and accept more smaller workflows that 
 can be completed.
 
-Another lesson learned from our studies is the effect of task granularity on 
-workflow ensembles. All the benchmark workflows that we tested have an average 
-number of tasks (50--1000), but the Montage and CyberShake workflows have 
-fine-grained tasks with execution times on the order of seconds to minutes, 
-while LIGO, Epigenomics and SIPHT have coarser-grained tasks with runtimes 
-ranging from several minutes to hours. We observed that the dynamic 
-algorithms achieved better results on the fine grained workflows since the 
-simple random scheduling strategy leads to good load-balancing and high 
-resource utilization for these ensembles. On the other hand, when tasks are
-longer, the dynamic algorithms tend to use up the budget by running tasks 
-from low-priority workflows while the more sophisticated static scheduling 
-strategy of SPSS is more circumspect. In the future we plan to investigate 
-the effects of task granularity on ensemble scheduling in a more systematic
-fashion.
+Another lesson learned from our studies is the effect of task granularity on
+workflow ensembles. The Montage and CyberShake workflows have fine-grained tasks
+with execution times on the order of seconds to minutes, while LIGO, Epigenomics
+and SIPHT have coarser-grained tasks with runtimes ranging from several minutes
+to hours. We observed that the dynamic algorithms achieved better results on the
+fine grained workflows since the simple random scheduling strategy leads to good
+load-balancing and high resource utilization for these ensembles. On the other
+hand, when tasks are longer, the dynamic algorithms tend to use up the budget by
+running tasks from low-priority workflows while the more sophisticated static
+scheduling strategy of SPSS is more circumspect. In the future we plan to
+investigate the effects of task granularity on ensemble scheduling in a more
+systematic fashion.
 
 Our current study suggests many areas for future work. One interesting
 issue that we plan to investigate is how the static and dynamic algorithms 
