@@ -48,8 +48,8 @@ develop, and assess algorithms based on static and dynamic strategies for both
 task scheduling and resource provisioning. We assume that the workflows within
 an ensemble are prioritized by the user. We evaluate the algorithms via
 simulation using a set of scientific workflow ensembles with a broad range of
-budget and deadline parameters, identifying which algorithm performs best for 
-different application scenarios and constraint ranges. We found that the key 
+budget and deadline parameters, identify which algorithm performs best for 
+different application scenarios and constraint ranges. We find that the key 
 factor determining the performance of an algorithm is its ability to decide which
 workflows in an ensemble to admit or reject for execution. The results
 show that the admission procedure based on workflow structure and estimates of
@@ -81,7 +81,7 @@ geographical location. In order to produce a hazard map for a region such as
 Southern California, many hazard curves need to be computed for a large number of 
 geographical sites, where each site requires running a single, complex scientific 
 workflow. Workflows for individual sites may differ not only in their parameters, 
-but also in their priority. For example, some sites may be heavily populated areas 
+but also in their priority. For example, some sites may be in heavily populated areas 
 or in strategic locations such as power plants, while others may be less important. 
 Other examples of workflow ensembles come from astronomical applications that create
 science-grade image mosaics~\cite{Deelman08} or search for extrasolar 
@@ -155,15 +155,15 @@ Auto Scaling\footnote{\url{http://aws.amazon.com/autoscaling}} and
 RightScale\footnote{\url{http://www.rightscale.com}}) allow adjusting the size
 of resource pool based on metrics related to infrastructure and application.
 A typical infrastruc\-ture-specific metric is system load, whereas
-application-speci\-fic metrics include response time and length of task or
-request queue. It is possible to set thresholds and limits to tune the behavior
+application-speci\-fic metrics include response time and length of a task or
+of a request queue. It is possible to set thresholds and limits to tune the behavior
 of these autoscaling systems, but no support for complex applications is provided.
 
 Policy-based approaches for scientific workloads (e.g. \cite{Marshall2010,
 Kim2011}) also allow to scale the cloud resource pool or to extend the
 capabilities of clusters using cloud-burst techniques. Our approach is different
 in that we consider workflows, while policy based approaches typically consider
-bags of independent tasks or unpredictable batch workloads. This enables us to
+bags of independent tasks or unpredictable batch workloads. Our approach enables us to
 take advantage of workflow-aware scheduling heuristics that cannot be applied to
 independent tasks.
 
@@ -207,7 +207,7 @@ for this paper we focus on a single VM type because we assume that for most
 applications there will typically be one VM type with the best price/performance
 ratio for the application~\cite{Juve2009}. We also assume that a submitted task
 has exclusive access to a VM instance and that there is no preemption. For this
-study we assumed that there are no delays in VM start and terminate requests.
+study we assumed that the delays in VM start and terminate requests are negligible.
 
 
 \subsection{Application Model}
@@ -268,7 +268,7 @@ the deadline:
 
 \begin{equation}
 \label{eq:static-plan}
-N_{VM} = \lceil b / d / p \rceil
+N_{VM} = \lceil b / (d * p) \rceil
 \end{equation}
 
 The SPDS algorithm statically provisions $N_{VM}$ VMs at the start of the ensemble execution 
@@ -331,7 +331,7 @@ priority workflows are not available.
 
 \subsection{Dynamic Provisioning Dynamic \\Scheduling (DPDS)}
  
-The static provisioning approach of SPDS may not be optimal when resource demand
+The static provisioning approach of SPDS may perform poorly when resource demand
 changes during ensemble execution. In those cases, SPDS may either over-provision, 
 wasting the budget on idle VMs, or under-provision, using up the deadline while starving 
 the application of usable VMs. One of the advantages of elasticity in cloud computing 
@@ -355,6 +355,8 @@ threshold; $v_{max}$: maximum number of VMs
 \Procedure{Provision}{}
 	\State $V_R\gets$ set of running VMs
     \State $V_C\gets$ set of VMs completing billing cycle
+    \State $V_T\gets \emptyset$ \Comment{set of VMs to terminate}
+    \State $n_T\gets 0$ \Comment{number of VMs to terminate}
     \If{$ b - c < |V_C| * p\ or\ t > d $ }
     	\State $n_T\gets |V_R| - \lfloor(b-c)/p\rfloor$
     	\State $V_T\gets$ select $n_T$ VMs to terminate from $V_C$
@@ -442,7 +444,8 @@ containing workflows of non-uniform sizes. It would also be possible to extend t
 admission procedure to check other constraints, such as whether the estimated 
 critical path of the new workflow exceeds the time remaining until the deadline.
 
-
+\medskip
+\medskip
 
 \subsection{Static Provisioning Static Scheduling \\(SPSS)}
 
@@ -455,7 +458,7 @@ be allowed by the dynamic algorithms.
 
 The approach used by SPSS is to plan each workflow in the ensemble in priority 
 order, rejecting any workflows that cannot be completed by the deadline or that 
-cause the cost of the plan to exceed the budget. Once the plan is complete, then 
+cause the cost of the plan to exceed the budget. Once the plan is complete, 
 the VMs are provisioned and tasks are executed according to the schedules given
 by the plan. However, in this paper we only consider a deterministic environment and task times.
 
@@ -669,8 +672,8 @@ of the different algorithms for smaller and larger constraints. For a given
 ensemble we can expect, in general, that the amount of work done (in terms of
 workflows completed) depends mainly on the budget constraint, which determines
 the number of machine-hours that can be provisioned. The deadline, although
-important in terms of scheduling, is assumed to be greater than the critical
-path of every workflow. We can then have a trivial but unrealistic solution
+important in terms of scheduling, is assumed to be greater than the longest critical
+path of all workflows in the ensemble. We can then have a trivial but unrealistic solution
 where the deadline  is long enough to allow all the workflow tasks to be
 executed sequentially: this eliminates all the overheads of parallel execution
 and leads to the highest resource utilization. More interesting and more
@@ -701,7 +704,7 @@ real applications we have examined. For example, the number of geographical
 sites of interest to the users of the CyberShake application is on the order 
 of 100. Second, smaller ensembles consisting of just a few workflows can be 
 aggregated into a single workflow, so there is no need to treat them as an
-ensemble. Similarly, when the number of workflows is larger than 100, and each 
+ensemble. Similarly, when the number of workflows grows, and each 
 workflow has a large number of tasks, either the constraints are low enough to
 prevent many of the workflows from running, or the problem of efficiently 
 allocating them to the resources becomes similar to the bag-of-tasks problem, 
@@ -724,12 +727,12 @@ Two distributions are considered:
   \item Pareto-like distribution.
 \end{itemize}
 
-The constant distribution produces ensembles containing of workflows with the same number of tasks per workflow, 
+The constant distribution produces ensembles containing workflows with the same number of tasks per workflow, 
 while the Pareto-like distribution produces ensembles with a small number of larger 
 workflows and a large number of smaller workflows, as seen in 
 Figure~\ref{fig:ensemble-distribution}. The number of large workflows (of size $\geq$ 900) 
 is slightly increased to represent the ``heavy-tail'', i.e. that there is a 
-not-insignificant number of large workflows in the ensemble. We assume that large
+significant number of large workflows in the ensemble. We assume that large
 workflows are more important to users, so in the Pareto ensembles the workflows are 
 assigned priorities according to their size so that the largest workflows are given 
 the highest priority. In
@@ -773,7 +776,7 @@ ensembles required budgets in the \$20 -- \$150 range and deadlines from 1 to
 20 hours to be completed. The LIGO and SIPHT workflows have more long-running
 tasks, so their ensembles required budgets up to \$1,500 and deadlines up to 
 40 and 60 hours. The Epigenomics workflow is even more costly, requiring 
-approximately \$12,000 and 1500 hours to complete a full ensemble. These
+approximately \$12,000 and 1,500 hours to complete a full ensemble. These
 differences in total runtime and cost come from the fact that we used the
 same workflow size distribution for all five applications, but
 the sizes of tasks vary between applications.
@@ -803,7 +806,7 @@ compare our algorithms includes:
   \item $s$: user preference score (utility function),
   \item $T_C$: total amount of computing time completed,
   \item $C_{eff}$: effective cost of computing per hour, which includes
-  overheads due to cost of idle resources.
+  overheads due to the cost of idle resources.
 \end{itemize}
 
 The number of workflows completed is a simple metric that can be used for
@@ -1112,7 +1115,7 @@ structure of the workflow and task runtime estimates (WA-DPDS and SPSS)
 yield better results than the simple on-line priority-based scheduling 
 strategy (DPDS).
 
-During our work, several interesting lessons were learned about running 
+During our work, several interesting lessons were learned from simulating the execution of
 workflow ensembles on cloud infrastructures. One result is that the simple 
 strategy used by DPDS performs relatively well in terms of the number of 
 workflows completed and the high resource utilization it can achieve. However,
@@ -1136,8 +1139,8 @@ load-balancing and high resource utilization for these ensembles. On the other
 hand, when tasks are longer, the dynamic algorithms tend to use up the budget by
 running tasks from low-priority workflows while the more sophisticated static
 scheduling strategy of SPSS is more circumspect. In the future we plan to
-investigate the effects of task granularity on ensemble scheduling in a more
-systematic fashion.
+investigate further the effects of task granularity on ensemble scheduling in a more
+systematic fashion.
 
 Our current study suggests many areas for future work. One interesting
 issue that we plan to investigate is how the static and dynamic algorithms 
@@ -1161,7 +1164,7 @@ runs, constitute valuable hints for the planning decisions and assessing the
 associated trade-offs. For this purpose our future work includes also further
 extension of our experimental studies~\cite{Juve2009,vockler11} of workflows on
 available cloud infrastructures to develop more accurate performance and cost
-models of the applications. This should lead to better understanding of theproblems and costs of doing science in the cloud.
+models of the applications. This should lead to better understanding of theproblems and costs of doing science in the cloud.
 
 
 %\section{Acknowledgments}
