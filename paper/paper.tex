@@ -152,8 +152,8 @@ General policy and rule-based approaches to dynamic provisioning (e.g. Amazon
 Auto Scaling\footnote{\url{http://aws.amazon.com/autoscaling}} and
 RightScale\footnote{\url{http://www.rightscale.com}}) allow adjusting the size
 of resource pool based on metrics related to infrastructure and application.
-A typical infrastructure-specific metric is system load, whereas
-application-specific metrics include response time and length of task or
+A typical infrastruc\-ture-specific metric is system load, whereas
+application-speci\-fic metrics include response time and length of task or
 request queue. It is possible to set thresholds and limits to tune the behavior
 of these autoscaling systems, but no support for complex applications is provided.
 
@@ -166,8 +166,8 @@ take advantage of workflow-aware scheduling heuristics that cannot be applied to
 independent tasks.
 
 
-Our work is related to the strategies for deadline-constrained cost-minimization
-workflow scheduling, developed for utility grid systems. However, our problem is
+Our work is related to the strategies for deadline-con\-strained
+cost-minimization workflow scheduling, developed for utility grid systems. However, our problem is
 different from \cite{Yu2005, Abrishami2010} in that we consider ensembles of workflows in
 IaaS clouds, which allow one to provision resources on a per-hour billing model,
 rather than utility grids, which allow one to choose from a pool of existing
@@ -277,7 +277,7 @@ and de-provisioning requests.
 Once the VMs are provisioned, the tasks are mapped onto idle VMs using the dynamic
 priority-based scheduling procedure shown in Algorithm~\ref{alg:ds}.
 
-\begin{algorithm}
+\begin{algorithm}[tb]
 \caption{Priority-based scheduling algorithm for SPDS}
 \label{alg:ds}
 \begin{algorithmic}[1]
@@ -343,7 +343,7 @@ Because it is assumed that VMs are billed by the hour, DPDS only considers VMs t
 approaching their hourly billing cycle when deciding which VMs to terminate. This process
 is described in Algorithm~\ref{alg:prov}.
 
-\begin{algorithm}
+\begin{algorithm}[tb]
 \caption{Dynamic provisioning algorithm for DPDS}
 \label{alg:prov}
 \begin{algorithmic}[1]
@@ -401,15 +401,15 @@ In order to address this issue, the Workflow-Aware DPDS (WA-DPDS) algorithm exte
 DPDS by introducing a workflow admission procedure. The admission procedure is
 invoked whenever WA-DPDS sees the first task of a new workflow at the head of the 
 priority queue (i.e. when no other tasks from the workflow have been scheduled yet). 
-The admission procedure---shown in Algorithm~\ref{alg:wa-dpds}---estimates whether there is 
-enough budget remaining to admit the new workflow; if there is not, then the 
+The admission procedure -- shown in Algorithm~\ref{alg:wa-dpds} -- estimates
+whether there is enough budget remaining to admit the new workflow; if there is not, then the 
 workflow is rejected and its tasks are removed from the queue. This algorithm 
 compares the current cost (consumed budget) and remaining budget, taking
 into account the cost of currently running VMs, and the cost of workflows 
 that have already been admitted. It adds a small safety margin to  avoid going over
 the budget.
 
-\begin{algorithm}
+\begin{algorithm}[tb]
 \caption{Workflow admission algorithm for WA-DPDS}
 \label{alg:wa-dpds}
 \begin{algorithmic}[1]
@@ -473,7 +473,7 @@ idea behind this algorithm is that, if each workflow can be completed by the
 deadline with the lowest possible cost, then the number of workflows that can 
 be completed within the given budget will be maximized.
 
-\begin{algorithm}
+\begin{algorithm}[tb]
 \caption{Ensemble planning algorithm for SPSS}
 \label{alg:admit}
 \begin{algorithmic}[1]
@@ -561,6 +561,28 @@ LST(t) = \begin{cases}
 \end{cases}
 $$
 
+\begin{algorithm}[tb]
+\caption{Workflow planning algorithm for SPSS}
+\label{alg:planworkflow}
+\begin{algorithmic}[1]
+\Require $w$: workflow; $P$: current plan; $d$: deadline
+\Ensure Create plan for $w$ that minimizes cost and meets deadline $d$
+\Procedure{PlanWorkflow}{$w,P,d$}
+    \State $P^\prime\gets$ copy of $P$
+    \State \Call{DeadlineDistribution}{w,d}
+    \For{$t\ in\ w\ sorted\ by\ DL(t)$}
+        \State $v \gets$ VM that minimizes cost and start time of t
+        \If{$FinishTime(t,v) < DL(t)$}
+            \State Schedule(t,v)
+        \Else
+            \State Provision a new VM v
+            \State Schedule(t,v)
+        \EndIf
+    \EndFor
+    \State \textbf{return} $P^\prime$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 Algorithm~\ref{alg:planworkflow} shows how SPSS creates low-cost plans for
 each workflow. The \textsc{PlanWorkflow} procedure first calls 
@@ -586,28 +608,7 @@ existing blocks large enough or early enough to complete the
 task by its deadline, and it will only allocate a new VM if it cannot add 
 a block to an existing VM to complete the task by its deadline.
 
-\begin{algorithm}
-\caption{Workflow planning algorithm for SPSS}
-\label{alg:planworkflow}
-\begin{algorithmic}[1]
-\Require $w$: workflow; $P$: current plan; $d$: deadline
-\Ensure Create plan for $w$ that minimizes cost and meets deadline $d$
-\Procedure{PlanWorkflow}{$w,P,d$}
-    \State $P^\prime\gets$ copy of $P$
-    \State \Call{DeadlineDistribution}{w,d}
-    \For{$t\ in\ w\ sorted\ by\ DL(t)$}
-        \State $v \gets$ VM that minimizes cost and start time of t
-        \If{$FinishTime(t,v) < DL(t)$}
-            \State Schedule(t,v)
-        \Else
-            \State Provision a new VM v
-            \State Schedule(t,v)
-        \EndIf
-    \EndFor
-    \State \textbf{return} $P^\prime$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+
 
 An example schedule generated by SPSS is shown in Figure.~\ref{fig:spss-example}.
 This example shows how SPSS tends to start many workflows in parallel, running
@@ -615,7 +616,7 @@ each workflow over a longer period of time on only a few VMs to minimize cost.
 In comparison, the dynamic algorithms tend to run one workflow at a time across 
 many VMs in parallel.
 
-\begin{figure}[htb] 
+\begin{figure}[tb] 
 \centering
 \includegraphics[width=1.0\columnwidth]{figures/spss-gantt}
  \caption{Example of schedule generated using SPSS algorithm. Tasks are colored by workflow. }
@@ -792,7 +793,6 @@ of VMs before shutdown. Based on experiments with different applications,
 we set the $\alpha$ parameter for deadline distribution in SPSS to be 0.7.
 
 
-
 \subsection{Metrics}
 
 There are many different ways to evaluate and compare the performance of 
@@ -873,7 +873,7 @@ completed for two budget values for each application ensemble. The budget values
 selected correspond to two extreme cases: {\em small budget} (top) and {\em
 large budget} (bottom). The small budgets permit the algorithms to complete 
 only a small number of workflows from the ensemble, while the larger budgets 
-enable the algorithms to finish almost all the workflows. The rangesIn three of
+enable the algorithms to finish almost all the workflows. In three of
 five cases the SPSS algorithm performs better for tighter constraints. When the 
 budget is low, or the deadline is short, the static procedure is able to more 
 efficiently pack workflow tasks onto limited resources. This is the case for 
@@ -1047,7 +1047,7 @@ amounts.}
 In order to compare the efficiency of our algorithms, we counted the number of times
 each algorithm achieved the best result for all simulated applications, deadlines
 and budgets. Table~\ref{tab:num-dags-pareto} shows these summary values for 
-Pareto-distributed workflows. Note that all algorithms that achieve the best 
+Pareto-distri\-buted workflows. Note that all algorithms that achieve the best 
 result are credited, so the sum for a given application can be greater than the
 total number of scenarios. These results depend on the metric: number of
 workflows completed does not count the priorities or sizes of workflows, which
@@ -1082,7 +1082,7 @@ test consisted of 1000 tasks.
 
 
 
-\section{Conclusion and Future Work}
+\section{Conclusions and Future Work}
 \label{sec:conclusions}
 
 In this paper we addressed the interesting and important new problem of 
@@ -1155,6 +1155,16 @@ execution time, but also on the cost of workflows in commercial clouds.
 Finally, we plan to investigate heterogeneous environments that include 
 multiple VM types and cloud providers, including private and community clouds, 
 which will make the problem even more complex and challenging~\cite{Marshall2010,vockler11,Juve2010}.
+
+We believe that the results of our study can be applied in practice to develop 
+tools that assist researchers in planning their large-scale computational
+experiments. The estimates of costs, runtimes and number of workflows completed
+that can be obtained from both the static algorithms and from the simulation
+runs, constitute valuable hints for the planning decisions and assessing the
+associated trade-offs. For this purpose our future work includes also further
+extension of our experimental studies~\cite{Juve2009,vockler11} of workflows on
+available cloud infrastructures to develop more accurate performance and cost
+models of the applications. This should lead to better understanding of theproblems and costs of doing science in the cloud.
 
 
 %\section{Acknowledgments}
