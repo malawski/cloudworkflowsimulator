@@ -377,8 +377,8 @@ provisioner interval, and the termination delay of the provider. This guarantees
 that VMs can be terminated before they start the next billing cycle and prevents the
 budget from being overrun. The VMs terminated in line \ref{l:terminate1} of Algorithm~\ref{alg:prov} are the ones 
 that would overrun the budget if not terminated in the current provisioning cycle. 
-The VMs terminated on line \ref{l:nT2} are chosen to increase the resource utilization
-to the desired threshold. In order to prevent instances from being
+The VMs terminated in line \ref{l:terminate2} are chosen to increase the resource
+utilization to the desired threshold. In order to prevent instances from being
 terminated too quickly, potentially wasting resources that have already been paid for
 but could be used later, no more than half of the idle resources are terminated during
 each provisioning cycle. To avoid an uncontrolled increase in the number of
