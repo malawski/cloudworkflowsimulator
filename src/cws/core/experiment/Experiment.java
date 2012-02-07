@@ -18,6 +18,7 @@ import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
+import cws.core.algorithms.Algorithm;
 import cws.core.algorithms.SPSS;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
@@ -35,98 +36,30 @@ public class Experiment {
 	 */
 	
 	public ExperimentResult runExperiment(ExperimentDescription param) {
-		
-		boolean useSPSS = false;
-		
+				
 		ExperimentResult result = new ExperimentResult();
 		
-		Provisioner prov = param.getProvisioner();
-		
-		Scheduler sched = param.getScheduler();
-		
-		if (sched.getClass().getName() == "cws.core.algorithms.SPSS") useSPSS = true;
-		
-		CloudSim.init(1, null, false);
 
+		Algorithm algorithm = AlgorithmFactory.createAlgorithm(param);
+				
+		String fName = "log-" + param.getAlgorithmName()+param.getDags()[0]+"x"+param.getDags().length+"d"+param.getDeadline()+"b"+param.getBudget()+"m"+param.getMax_scaling();
 		
-		Cloud cloud = new Cloud();
-		prov.setCloud(cloud);
+		algorithm.simulate(fName);
 		
-		WorkflowEngine engine;
-		
-		if (useSPSS)  engine = new WorkflowEngine(new SimpleJobFactory(1), prov, sched);
-		else engine = new WorkflowEngine(new SimpleJobFactory(1000), prov, sched);
-		
-		sched.setWorkflowEngine(engine);
-		
-		List<DAG> dags = new ArrayList<DAG>();
-		for (int i = 0; i < param.getDags().length; i++) {
-			DAG dag = parse(new File(param.getDagPath() + param.getDags()[i]));
-			dags.add(dag);
-		}
-		
-		EnsembleManager em = new EnsembleManager(dags, engine);
-		
-		engine.setDeadline(param.getDeadline());
-		engine.setBudget(param.getBudget());
-		
-		WorkflowLog wfLog = new WorkflowLog();
-		engine.addJobListener(wfLog);
-		cloud.addVMListener(wfLog);
-		em.addDAGJobListener(wfLog);
-		
-		// calculate estimated number of VMs to consume budget evenly before deadline
-		// ceiling is used to start more vms so that the budget is consumed just before deadline
-		int numVMs = (int) Math.ceil(param.getBudget() / (param.getDeadline() / (60 * 60)) / param.getPrice()); 
-		Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
-		Log.printLine(CloudSim.clock() + " Total budget " + param.getBudget());
-		
-		if (!useSPSS) { 
-			HashSet<VM> vms = new HashSet<VM>();
-			for (int i = 0; i < numVMs; i++) {
-				VM vm = new VM(1000, 1, 1.0, param.getPrice());
-	            vm.setProvisioningDelay(0.0);
-	            vm.setDeprovisioningDelay(0.0);
-				vms.add(vm);
-				CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
-			}	
-		}
-
-		if (useSPSS) {
-			((SPSS)sched).setEnsembleManager(em);
-			((SPSS)sched).plan();
-		}
-		
-		CloudSim.startSimulation();
-		
-		String fName = "test" + param.getProvisioner().getClass().getSimpleName()+param.getScheduler().getClass().getSimpleName()+param.getDags()[0]+"x"+param.getDags().length+"d"+param.getDeadline()+"b"+param.getBudget()+"m"+param.getMax_scaling();
-		
-		wfLog.printJobs(fName);
-		wfLog.printVmList(fName);
-		wfLog.printDAGJobs();
-		
-		Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
-		Log.printLine(CloudSim.clock() + " Total budget " + param.getBudget());
-		Log.printLine(CloudSim.clock() + " Total cost " + engine.getCost());
 		
 		result.setBudget(param.getBudget());
 		result.setDeadline(param.getDeadline());
-		result.setCost(engine.getCost());
-		result.setNumBusyVMs(engine.getBusyVMs().size());
-		result.setNumFreeVMs(engine.getFreeVMs().size());
+		result.setCost(algorithm.getActualCost());
 		
 		List<Integer> priorities = new LinkedList<Integer>();
 		List<Double> sizes = new LinkedList<Double>();
 
 		
-		int finished = 0;
-		for (DAGJob dj : engine.getAllDags()) {
-			if (dj.isFinished()) {
-				finished++;
-				priorities.add(dj.getPriority());
-				sizes.add(sumRuntime(dj.getDAG()));
-			}
+		int finished = algorithm.numCompletedDAGs();
+		for (DAG dag : algorithm.getCompletedDAGs()) {
+				sizes.add(sumRuntime(dag));
 		}
+		priorities = algorithm.completedDAGPriorities();
 		result.setNumFinishedDAGs(finished);
 		result.setPriorities(priorities);
 		result.setSizes(sizes);
@@ -148,7 +81,7 @@ public class Experiment {
 	
 	
 	/**
-	 * Helper method to read DAX or DAG dile format. 
+	 * Helper method to read DAX or DAG file format. 
 	 * XML-based DAX seems to be 10x slower.
 	 * @param file
 	 * @return DAG object
@@ -178,8 +111,58 @@ public class Experiment {
 	 * @param runID id of this series
 	 */
 	
-	public static void runSeries(String prefix, String dagPath, String[] dags, double budget, double price,
-			int N, int step, int start, double max_scaling, int runID) {
+	public static void generateSeries(String prefix, String dagPath, String[] dags, double budget, double price,
+			int N, int step, int start, double max_scaling, double alpha, int runID) {
+		
+		double deadline;
+		ExperimentResult resultsSPSS[] = new ExperimentResult[N+1];
+		ExperimentResult resultsAware[] = new ExperimentResult[N+1];
+		ExperimentResult resultsSimple[] = new ExperimentResult[N+1];
+		
+		String algorithms[] = {"SPSS", "DPDS", "WADPDS"};
+		
+		for (int i=start; i<= N; i+=step) {
+			deadline = 3600*i; //seconds
+			Experiment experiment = new Experiment();
+			
+			for (String a : algorithms) {
+				ExperimentDescription param = new ExperimentDescription(
+			        a, dagPath, dags, deadline, budget, price, max_scaling, alpha);
+				String fileName = "input-" + 
+					param.getAlgorithmName() + "-" + 
+					param.getDags()[0]+
+					"x" + param.getDags().length + 
+					"d" + param.getDeadline() + 
+					"b" + param.getBudget() + 
+					"m" + param.getMax_scaling() +
+					"a" + param.getAlpha() +
+					"r" + runID +
+					".properties"
+					
+					;
+				param.storeProperties("output/"+fileName);
+			}
+
+		}
+
+
+		
+	}
+	
+	
+	public static void main(String[] args) {
+		Experiment experiment = new Experiment();
+		ExperimentResult result = experiment.runExperiment(new ExperimentDescription(args[0]));
+		System.out.println(result.getNumFinishedDAGs());
+		System.out.println(result.formatPriorities());
+		System.out.println(result.formatSizes());
+		
+	}
+	
+	
+	
+	public static void runOldSeries(String prefix, String dagPath, String[] dags, double budget, double price,
+			int N, int step, int start, double max_scaling, double alpha, int runID) {
 		
 		double deadline;
 		ExperimentResult resultsSPSS[] = new ExperimentResult[N+1];
@@ -190,26 +173,13 @@ public class Experiment {
 			deadline = 3600*i; //seconds
 			Experiment experiment = new Experiment();
 			
-			//FIXME: align interfaces
-			List<DAG> dag_objects = new ArrayList<DAG>();
-			for (int j = 0; j < dags.length; j++) {
-				DAG dag = parse(new File(dagPath + dags[j]));
-				dag_objects.add(dag);
-			}
 			
-			SPSS spss = new SPSS(budget, deadline, dag_objects, 0.7);
-
 			resultsSPSS[i] = experiment.runExperiment(new ExperimentDescription(
-			        spss, spss, dagPath, dags,
-			        deadline, budget, price, max_scaling));
+			        "SPSS", dagPath, dags, deadline, budget, price, max_scaling, alpha));
 			resultsAware[i] = experiment.runExperiment(new ExperimentDescription(
-			        new SimpleUtilizationBasedProvisioner(max_scaling), 
-			        new WorkflowAwareEnsembleScheduler(), dagPath, dags,
-			        deadline, budget, price, max_scaling));
+			        "WADPDS", dagPath, dags, deadline, budget, price, max_scaling, alpha));
 			resultsSimple[i] = experiment.runExperiment(new ExperimentDescription(
-			        new SimpleUtilizationBasedProvisioner(max_scaling), 
-			        new EnsembleDynamicScheduler(), dagPath, dags,
-			        deadline, budget, price, max_scaling));
+			        "DPDS", dagPath, dags, deadline, budget, price, max_scaling, alpha));
 		}
 		
 		// write number of dags finished
@@ -264,6 +234,11 @@ public class Experiment {
 		
 	}
 	
+	
+	
+	
+	
+	
 	/** 
 	 * 
 	 * Rus a series of experiments, sets runID = 0
@@ -278,10 +253,10 @@ public class Experiment {
 	 * @param max_scaling
 	 */
 	
-	public static void runSeries(String prefix, String dagPath, String[] dags, double budget, double price,
-			 int N, int step, int start, double max_scaling) {
+	public static void generateSeries(String prefix, String dagPath, String[] dags, double budget, double price,
+			 int N, int step, int start, double max_scaling, double alpha) {
 		
-		runSeries(prefix, dagPath, dags, budget, price, N, step, start, max_scaling, 0);
+		generateSeries(prefix, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, 0);
 	}
 	
 	
@@ -301,14 +276,14 @@ public class Experiment {
 	 * @param runID
 	 */
 	
-	public static void runSeries(String prefix, String dagPath, String dagName, double budget, double price,
-			int numDAGs, int N, int step, int start, double max_scaling, int runID) {
+	public static void generateSeries(String prefix, String dagPath, String dagName, double budget, double price,
+			int numDAGs, int N, int step, int start, double max_scaling, double alpha, int runID) {
 		
 		String[] dags = new String[numDAGs];
 		
 		for (int i=0; i< numDAGs; i++) dags[i] = dagName;
 		
-		runSeries(prefix, dagPath, dags, budget, price, N, step, start, max_scaling, runID);
+		generateSeries(prefix, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, runID);
 
 	}
 	
@@ -327,9 +302,9 @@ public class Experiment {
 	 * @param max_scaling
 	 */
 	
-	public static void runSeries(String prefix, String dagPath, String dagName, double budget, double price,
-			int numDAGs, int N, int step, int start, double max_scaling) {
-		runSeries(prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, 0);
+	public static void generateConstantSeries(String prefix, String dagPath, String dagName, double budget, double price,
+			int numDAGs, int N, int step, int start,  double max_scaling, double alpha) {
+		generateSeries(prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, 0);
 	}
 	
 	/**
@@ -337,11 +312,11 @@ public class Experiment {
 	 * @param runs number of runs
 	 */
 	
-	public static void runSeriesRepeat(String prefix, String dagPath, String dagName, double budget, double price,
-			int numDAGs, int N, int step, int start, double max_scaling, int runs) {
+	public static void generateSeriesRepeat(String prefix, String dagPath, String dagName, double budget, double price,
+			int numDAGs, int N, int step, int start, double max_scaling, double alpha, int runs) {
 		
 		for (int i=0; i< runs; i++) {
-			runSeries(prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, i);
+			generateSeries(prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, i);
 		}	
 	}
 
@@ -351,12 +326,12 @@ public class Experiment {
 	 * @param runs number of runs
 	 */
 	
-	public static void runSeriesRepeat(String prefix, String dagPath, String[] dags,
+	public static void generateSeriesRepeat(String prefix, String dagPath, String[] dags,
 			double budget, double price, int N, int step, int start,
-			double max_scaling, int runs) {
+			double max_scaling, double alpha, int runs) {
 
 		for (int i=0; i< runs; i++) {
-			runSeries(prefix, dagPath, dags, budget, price, N, step, start, max_scaling, i);
+			generateSeries(prefix, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, i);
 		}
 	}
 
