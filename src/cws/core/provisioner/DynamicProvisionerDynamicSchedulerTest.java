@@ -143,7 +143,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 	@Test
 	public void testAwareDPDSEpigenomics() {
 		
-		String dagName = "Epigenomics_997.dag";
+		String dagName = "GENOME.n.1000.0.dag";
 		
 		double price = 1.0;
 		int numDAGs = 40;
@@ -232,7 +232,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 	@Test
 	public void testMaxScaling() {
 		
-		String dagName = "Epigenomics_997.dag";
+		String dagName = "GENOME.n.1000.0.dag";
 		
 		double price = 1.0;
 		int numDAGs = 40;
@@ -295,23 +295,23 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 	}
 	
 	private void runWAExperiment(String dagPath, String dagName, double deadline, double budget, double price, int numDAGs, double max_scaling) {
-        Scheduler sched = new WorkflowAwareEnsembleScheduler();
-        Provisioner prov = new SimpleUtilizationBasedProvisioner(max_scaling);
-        
-        ExperimentDescription param = new ExperimentDescription(
-                prov, sched, dagPath, dagName,
-                deadline, budget, price, numDAGs, max_scaling);
+
+		String dags[] = new String[numDAGs];
+		for (int i=0; i< numDAGs; i++) dags[i] = dagName;
+		
+        ExperimentDescription param = new ExperimentDescription("WADPDS", dagPath, dags,
+                deadline, budget, price, max_scaling, 0.7);
         
         runTestExperiment(param);
     }
 	
 	private void runNormalExperiment(String dagPath, String dagName, double deadline, double budget, double price, int numDAGs, double max_scaling) {
-	    Scheduler sched = new EnsembleDynamicScheduler();
-        Provisioner prov = new SimpleUtilizationBasedProvisioner(max_scaling);
-        
-        ExperimentDescription param = new ExperimentDescription(
-                prov, sched, dagPath, dagName,
-                deadline, budget, price, numDAGs, max_scaling);
+
+		String dags[] = new String[numDAGs];
+		for (int i=0; i< numDAGs; i++) dags[i] = dagName;
+		
+        ExperimentDescription param = new ExperimentDescription("DPDS", dagPath, dags,
+                deadline, budget, price, max_scaling, 0.7);
         
         runTestExperiment(param);
 	}
