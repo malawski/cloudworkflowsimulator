@@ -10,6 +10,7 @@ import cws.core.Provisioner;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
+import cws.core.experiment.VMFactory;
 
 public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements Provisioner, WorkflowEvent {
     
@@ -34,7 +35,7 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
 		
 		// add one VM if queue not empty		
 		if (queueLength>0) {
-			VM vm = new VM(1000, 1, 1.0, 1.0);
+			VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0);
 			Log.printLine(CloudSim.clock() + " Starting VM: " + vm.getId());
 			CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
 		} else { // terminate free VMs

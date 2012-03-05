@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.distributions.LognormalDistr;
 
 import cws.core.Cloud;
 import cws.core.DAGJob;
@@ -18,6 +19,7 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.dag.DAG;
+import cws.core.experiment.VMFactory;
 import cws.core.log.WorkflowLog;
 
 public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
@@ -99,10 +101,12 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
         Log.printLine(CloudSim.clock() + " Total budget " + getBudget());
         
+        
+        
         // Launch VMs
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numVMs; i++) {
-            VM vm = new VM(1000, 1, 1.0, price);
+            VM vm = VMFactory.createVM(1000, 1, 1.0, price);
             vms.add(vm);
             CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }

@@ -28,6 +28,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.experiment.VMFactory;
 import cws.core.log.WorkflowLog;
 
 public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent, Provisioner, Scheduler, VMListener, JobListener, DAGJobListener {
@@ -144,9 +145,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         for (Resource r : plan.resources) {
             // Create VM
             VMType type = r.vmtype;
-            VM vm = new VM(type.mips, 1, 1, type.price);
-            vm.setProvisioningDelay(0.0);
-            vm.setDeprovisioningDelay(0.0);
+            VM vm = VMFactory.createVM(type.mips, 1, 1, type.price);
             
             // Build task<->vm mappings
             LinkedList<Task> vmQueue = new LinkedList<Task>();

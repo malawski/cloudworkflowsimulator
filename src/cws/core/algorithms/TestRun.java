@@ -15,7 +15,7 @@ public class TestRun {
         
         String[] names = DAGListGenerator.generateDAGListPareto(
                 new Random(0), 
-                "/Volumes/HDD/SyntheticWorkflows/CyberShake/CYBERSHAKE", 
+                "../projects/pegasus/CyberShake/CYBERSHAKE", 
                 100);
         
         for (String name : names) {
@@ -31,23 +31,23 @@ public class TestRun {
             dags.add(dag);
         }
         
-        double deadline = 10*3600;
-        double budget = 50;
+        double deadline = 11*3600;
+        double budget = 150;
         double price = 1;
         
         double alpha = 0.7;
         
-        double maxScaling = 2.0;
+        double maxScaling = 0.0;
         
         Algorithm[] algos = new Algorithm[]{
                 /*
             
             new MaxMin(budget, deadline, dags),
             new MinMin(budget, deadline, dags),*/
-            new Wide(budget, deadline, dags),
-            new Backtrack(budget, deadline, dags),
+            //new Wide(budget, deadline, dags),
+            //new Backtrack(budget, deadline, dags),
             new SPSS(budget, deadline, dags, alpha),
-            new DPDS(budget, deadline, dags, price, maxScaling),
+            //new DPDS(budget, deadline, dags, price, maxScaling),
             new WADPDS(budget, deadline, dags, price, maxScaling)
         };
         
