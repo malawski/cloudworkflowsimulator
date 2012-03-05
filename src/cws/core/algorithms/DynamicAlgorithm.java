@@ -34,6 +34,9 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
     
     private double actualFinishTime = 0.0;
     
+    protected long simulationStartWallTime;
+    protected long simulationFinishWallTime;
+    
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, double price, Scheduler scheduler, Provisioner provisioner) {
         super(budget, deadline, dags);
         this.price = price;
@@ -104,7 +107,10 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
             CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
         
+        simulationStartWallTime = System.nanoTime();
+        
         CloudSim.startSimulation();
+        simulationFinishWallTime = System.nanoTime();
         
         wfLog.printJobs(logname);
         wfLog.printVmList(logname);
@@ -127,4 +133,15 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
             throw new RuntimeException("Exceeded deadline: "+actualFinishTime);
         }
     }
+
+	@Override
+	public long getSimulationWallTime() {
+		return simulationFinishWallTime - simulationStartWallTime;
+	}
+
+	@Override
+	public long getPlanningnWallTime() {
+		// planning is always 0 for dynamic algorithms
+		return 0;
+	}
 }

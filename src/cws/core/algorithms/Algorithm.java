@@ -38,6 +38,10 @@ public abstract class Algorithm {
     
     abstract public double getActualFinishTime();
     
+    abstract public long getSimulationWallTime();
+    
+    abstract public long getPlanningnWallTime();
+    
     abstract public List<DAG> getCompletedDAGs();
     
     public int numCompletedDAGs() {

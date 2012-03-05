@@ -62,6 +62,10 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     private int dagsFinished = 0;
     
     private double actualFinishTime = 0.0;
+
+    protected long planningStartWallTime;
+    protected long simulationStartWallTime;
+    protected long simulationFinishWallTime;
     
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags) {
         super(budget, deadline, dags);
@@ -333,7 +337,17 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         submitNextTaskFor(vm);
     }
     
-    private void submitNextTaskFor(VM vm) {
+    @Override
+	public long getSimulationWallTime() {
+		return simulationFinishWallTime - simulationStartWallTime;
+	}
+
+	@Override
+	public long getPlanningnWallTime() {
+		return simulationStartWallTime - planningStartWallTime;
+	}
+
+	private void submitNextTaskFor(VM vm) {
         // If the VM is busy, do nothing
         if (!idle.contains(vm))
             return;
@@ -416,10 +430,16 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         engine.addJobListener(log);
         cloud.addVMListener(log);
         manager.addDAGJobListener(log);
-        
+ 
+        planningStartWallTime = System.nanoTime();
+      
         plan();
+            
+        simulationStartWallTime = System.nanoTime();
         
         CloudSim.startSimulation();
+        
+        simulationFinishWallTime = System.nanoTime();
         
         // Sanity checks
         if (dagsFinished < numCompletedDAGs()) {
