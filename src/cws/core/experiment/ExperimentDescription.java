@@ -20,8 +20,12 @@ import cws.core.Scheduler;
 
 public class ExperimentDescription {
 
+	// name of group this experiment belongs to
+	private String group;
 	// name of algorithm to use
 	private String algorithmName;
+	// directory of input and output files for this experiment
+	private String runDirectory;
 	// path to DAG files
 	private String dagPath;
 	// array of dag file names
@@ -33,9 +37,13 @@ public class ExperimentDescription {
 	// VM hour price in $
 	private double price;
 	// max autoscaling factor for provisioner
-	private double max_scaling;
+	private double maxScaling;
 	// alpha parameter for SPSS
 	private double alpha;
+	// runID used to distinguish e.g. different random seeds
+	private int runID;
+	// task runtimes from the dag are multiplied by this factor; this parameter is useful to control the task granularity
+	private double taskDilatation;
 
 	
 	
@@ -50,22 +58,39 @@ public class ExperimentDescription {
 	 * @param price VM hour price in $
 	 * @param numDAGs number of times a DAG is repeated in the ensemble
 	 * @param max_scaling maximum autoscaling factor for provisioner
+	 * @param alpha alpha parameter for SPSS
+	 * @param runID runID used to distinguish e.g. different random seeds
+	 * @param taskDilatation task runtimes from the dag are multiplied by this factor; this parameter is useful to control the task granularity
 	 */
 	
-	public ExperimentDescription(String algorithmName, String dagPath, String[] dags, double deadline, double budget, double price,
-			double max_scaling, double alpha) {
+	public ExperimentDescription(String group, String algorithmName, String runDirectory, String dagPath, String[] dags, double deadline, double budget, double price,
+			double maxScaling, double alpha, double taskDilatation, int runID) {
+		this.group = group;
 		this.algorithmName = algorithmName;
+		this.runDirectory = runDirectory;
 		this.dags = dags;
 		this.deadline = deadline;
 		this.budget = budget;
 		this.price = price;
-		this.max_scaling = max_scaling;
+		this.maxScaling = maxScaling;
 		this.dagPath = dagPath;
 		this.alpha = alpha;
+		this.runID = runID;
+		this.taskDilatation = taskDilatation;
 	}
 	
 	public ExperimentDescription(String propertyFileName) {
 		readProperties(propertyFileName);
+	}
+
+	
+	
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
 	}
 
 	public String[] getDags() {
@@ -101,11 +126,11 @@ public class ExperimentDescription {
 	}
 
 	public void setMax_scaling(double max_scaling) {
-		this.max_scaling = max_scaling;
+		this.maxScaling = max_scaling;
 	}
 
 	public double getMax_scaling() {
-		return max_scaling;
+		return maxScaling;
 	}
 
 	public String getDagPath() {
@@ -122,8 +147,17 @@ public class ExperimentDescription {
 
 	public void setAlgorithmName(String algorithmName) {
 		this.algorithmName = algorithmName;
+		
 	}
 
+	public String getRunDirectory() {
+		return runDirectory;
+	}
+
+	public void setRunDirectory(String runDirectory) {
+		this.runDirectory = runDirectory;
+	}
+	
 	public double getAlpha() {
 		return alpha;
 	}
@@ -132,20 +166,50 @@ public class ExperimentDescription {
 		this.alpha = alpha;
 	}
 
+	public int getRunID() {
+		return runID;
+	}
+
+	public void setRunID(int runID) {
+		this.runID = runID;
+	}
+
+	public double getMaxScaling() {
+		return maxScaling;
+	}
+
+	public void setMaxScaling(double maxScaling) {
+		this.maxScaling = maxScaling;
+	}
+
+	public double getTaskDilatation() {
+		return taskDilatation;
+	}
+
+	public void setTaskDilatation(double taskDilatation) {
+		this.taskDilatation = taskDilatation;
+	}
+
 	public void storeProperties(String fileName) {
 		Properties p = new Properties();
+		p.setProperty("group", group);
 		p.setProperty("algorithmName", algorithmName);
+		p.setProperty("runDirectory", runDirectory);
 		p.setProperty("dagPath", dagPath);
 		p.setProperty("dags", dagsToString());
 		p.setProperty("deadline", "" + deadline);
 		p.setProperty("budget", "" + budget);
 		p.setProperty("price", "" + price);
-		p.setProperty("max_scaling", "" + max_scaling);
+		p.setProperty("maxScaling", "" + maxScaling);
 		p.setProperty("alpha", "" + alpha);
+		p.setProperty("runID", "" + runID);
+		p.setProperty("fileName", getFileName());
+		p.setProperty("taskDilatation", "" + taskDilatation);
 		FileOutputStream out;
 		try {
 			out = new FileOutputStream(fileName);
 			p.store(out, "");
+			out.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -165,14 +229,18 @@ public class ExperimentDescription {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		group = p.getProperty("group");
 		algorithmName = p.getProperty("algorithmName");
+		runDirectory = p.getProperty("runDirectory");
 		dagPath = p.getProperty("dagPath");
 		dags = dagsFromString(p.getProperty("dags"));
 		deadline = Double.parseDouble(p.getProperty("deadline"));
 		budget = Double.parseDouble(p.getProperty("budget"));
 		price = Double.parseDouble(p.getProperty("price"));
-		max_scaling = Double.parseDouble(p.getProperty("max_scaling"));
+		maxScaling = Double.parseDouble(p.getProperty("maxScaling"));
 		alpha = Double.parseDouble(p.getProperty("alpha"));
+		runID = Integer.parseInt(p.getProperty("runID"));
+		taskDilatation = Double.parseDouble(p.getProperty("taskDilatation"));
 		
 	}
 	
@@ -184,6 +252,27 @@ public class ExperimentDescription {
 		StringBuilder s = new StringBuilder();
 		for (String dag : dags) s.append(dag + " ");
 		return s.toString();
+	}
+	
+	
+	/*
+	 * Creates a unique file name based on the values of the properties
+	 */
+	public String getFileName() {
+		String fileName = 
+			group + "-" +
+			getAlgorithmName() + "-" + 
+			getDags()[0]+
+			"x" + getDags().length + 
+			"d" + getDeadline() + 
+			"b" + getBudget() + 
+			"m" + getMax_scaling() +
+			"a" + getAlpha() + 
+			"t" + getTaskDilatation() +
+			"r" + runID;
+		
+		return fileName;
+		
 	}
 	
 }

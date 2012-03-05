@@ -13,7 +13,13 @@ import cws.core.algorithms.WADPDS;
 import cws.core.algorithms.Wide;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
+import cws.core.dag.Task;
 
+/**
+ * Factory for creating algorithms based on experiment description.
+ * @author malawski
+ *
+ */
 public class AlgorithmFactory {
 	
 	public static Algorithm createAlgorithm(ExperimentDescription e) {
@@ -24,7 +30,17 @@ public class AlgorithmFactory {
         for (String dagName : e.getDags()) {
             DAG dag = DAGParser.parseDAG(new File(dagPath + "/" + dagName));
             dags.add(dag);
+            
+            // scale tasks size           
+            double dilatationFactor = e.getTaskDilatation();
+            for (String tid : dag.getTasks()) {
+                Task t = dag.getTask(tid);
+                t.size = t.size * dilatationFactor;
+            }         
         }
+        
+
+        
         double budget = e.getBudget();
 		double deadline = e.getDeadline();
 		double alpha = e.getAlpha();

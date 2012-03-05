@@ -36,20 +36,29 @@ public class Experiment {
 	 */
 	
 	public ExperimentResult runExperiment(ExperimentDescription param) {
+		
+		long startTime = System.nanoTime();
 				
 		ExperimentResult result = new ExperimentResult();
 		
 
 		Algorithm algorithm = AlgorithmFactory.createAlgorithm(param);
+		
+		String fileName = param.getRunDirectory() + File.separator + "output-" + param.getFileName();
 				
-		String fName = "log-" + param.getAlgorithmName()+param.getDags()[0]+"x"+param.getDags().length+"d"+param.getDeadline()+"b"+param.getBudget()+"m"+param.getMax_scaling();
+		//String fName = param.getRunDirectory() + File.separator + "result-" + param.getAlgorithmName()+"-"+param.getDags()[0]+"x"+param.getDags().length+"d"+param.getDeadline()+"b"+param.getBudget()+"m"+param.getMax_scaling();
 		
-		algorithm.simulate(fName);
+		long simulationStartTime = System.nanoTime();
+		algorithm.simulate(fileName);
 		
+		result.setInitWallTime(simulationStartTime - startTime);
+		result.setPlanningWallTime(algorithm.getPlanningnWallTime());
+		result.setSimulationWallTime(algorithm.getSimulationWallTime());
 		
 		result.setBudget(param.getBudget());
 		result.setDeadline(param.getDeadline());
 		result.setCost(algorithm.getActualCost());
+		result.setAlgorithm(param.getAlgorithmName());
 		
 		List<Integer> priorities = new LinkedList<Integer>();
 		List<Double> sizes = new LinkedList<Double>();
@@ -95,11 +104,9 @@ public class Experiment {
 	
 	
 	/**
-	 * Runs a series of experiments for varying deadlines
-	 * Uses two schedulers: workflow aware and unaware.
-	 * For each scheduler a text file is produced, containing number of workflows finished for a given deadline.
-	 * 
-	 * @param prefix prefix to append to generated output files
+	 * Generates a series of experiments for varying deadlines
+	 * @param runDirectory the directory with input and output files for this series
+	 * @param group prefix to prepend to generated output files
 	 * @param dagPath path to dags
 	 * @param dags array of file names
 	 * @param budget budget in $
@@ -111,36 +118,23 @@ public class Experiment {
 	 * @param runID id of this series
 	 */
 	
-	public static void generateSeries(String prefix, String dagPath, String[] dags, double budget, double price,
-			int N, int step, int start, double max_scaling, double alpha, int runID) {
+	public static void generateSeries(String runDirectory, String group, String dagPath, String[] dags, double budget, double price,
+			int N, int step, int start, double max_scaling, double alpha, double taskDilatation, int runID) {
 		
 		double deadline;
-		ExperimentResult resultsSPSS[] = new ExperimentResult[N+1];
-		ExperimentResult resultsAware[] = new ExperimentResult[N+1];
-		ExperimentResult resultsSimple[] = new ExperimentResult[N+1];
+				 
+		new File(runDirectory).mkdir();
 		
-		String algorithms[] = {"SPSS", "DPDS", "WADPDS"};
+		String algorithms[] = {"SPSS", "DPDS", "WADPDS", "MaxMin", "Wide", "Backtrack"};
 		
 		for (int i=start; i<= N; i+=step) {
 			deadline = 3600*i; //seconds
-			Experiment experiment = new Experiment();
 			
-			for (String a : algorithms) {
-				ExperimentDescription param = new ExperimentDescription(
-			        a, dagPath, dags, deadline, budget, price, max_scaling, alpha);
-				String fileName = "input-" + 
-					param.getAlgorithmName() + "-" + 
-					param.getDags()[0]+
-					"x" + param.getDags().length + 
-					"d" + param.getDeadline() + 
-					"b" + param.getBudget() + 
-					"m" + param.getMax_scaling() +
-					"a" + param.getAlpha() +
-					"r" + runID +
-					".properties"
-					
-					;
-				param.storeProperties("output/"+fileName);
+			for (String alg : algorithms) {
+				ExperimentDescription param = new ExperimentDescription(group,
+			        alg, runDirectory, dagPath, dags, deadline, budget, price, max_scaling, alpha, taskDilatation, runID);
+				String fileName = "input-" +  param.getFileName() + ".properties";
+				param.storeProperties(runDirectory + File.separator + fileName);
 			}
 
 		}
@@ -150,18 +144,41 @@ public class Experiment {
 	}
 	
 	
+	/**
+	 * Runs a single experiment given its description in property file. 
+	 * Result is saved in corresponding result file in the same directory.
+	 * @param args
+	 */
+	
 	public static void main(String[] args) {
 		Experiment experiment = new Experiment();
-		ExperimentResult result = experiment.runExperiment(new ExperimentDescription(args[0]));
-		System.out.println(result.getNumFinishedDAGs());
-		System.out.println(result.formatPriorities());
-		System.out.println(result.formatSizes());
+		ExperimentDescription param = new ExperimentDescription(args[0]);
+		ExperimentResult result = experiment.runExperiment(param);
+		System.out.println(result.formatResult());
+		
+		String fileName = "result-" + param.getFileName() + "-result.txt";
+		
+		WorkflowLog.stringToFile(result.formatResult(), param.getRunDirectory() + File.separator + fileName);
 		
 	}
 	
 	
 	
-	public static void runOldSeries(String prefix, String dagPath, String[] dags, double budget, double price,
+	/**
+	 * This was the previously used method for running a series of experiments in a single execution.
+	 * @param group
+	 * @param dagPath
+	 * @param dags
+	 * @param budget
+	 * @param price
+	 * @param N
+	 * @param step
+	 * @param start
+	 * @param max_scaling
+	 * @param alpha
+	 * @param runID
+	 */
+	public static void runOldSeries(String group, String dagPath, String[] dags, double budget, double price,
 			int N, int step, int start, double max_scaling, double alpha, int runID) {
 		
 		double deadline;
@@ -174,12 +191,12 @@ public class Experiment {
 			Experiment experiment = new Experiment();
 			
 			
-			resultsSPSS[i] = experiment.runExperiment(new ExperimentDescription(
-			        "SPSS", dagPath, dags, deadline, budget, price, max_scaling, alpha));
-			resultsAware[i] = experiment.runExperiment(new ExperimentDescription(
-			        "WADPDS", dagPath, dags, deadline, budget, price, max_scaling, alpha));
-			resultsSimple[i] = experiment.runExperiment(new ExperimentDescription(
-			        "DPDS", dagPath, dags, deadline, budget, price, max_scaling, alpha));
+			resultsSPSS[i] = experiment.runExperiment(new ExperimentDescription(group,
+			        "SPSS", "output", dagPath, dags, deadline, budget, price, max_scaling, alpha, 1.0, runID));
+			resultsAware[i] = experiment.runExperiment(new ExperimentDescription(group,
+			        "WADPDS", "output", dagPath, dags, deadline, budget, price, max_scaling, alpha, 1.0, runID));
+			resultsSimple[i] = experiment.runExperiment(new ExperimentDescription(group,
+			        "DPDS", "output", dagPath, dags, deadline, budget, price, max_scaling, alpha, 1.0, runID));
 		}
 		
 		// write number of dags finished
@@ -195,9 +212,9 @@ public class Experiment {
 			
 		}
 
-		WorkflowLog.stringToFile(outSPSS.toString(), prefix + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputSPSS.txt");
-		WorkflowLog.stringToFile(outAware.toString(), prefix + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputAware.txt");
-		WorkflowLog.stringToFile(outSimple.toString(), prefix + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputSimple.txt");			
+		WorkflowLog.stringToFile(outSPSS.toString(), group + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputSPSS.txt");
+		WorkflowLog.stringToFile(outAware.toString(), group + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputAware.txt");
+		WorkflowLog.stringToFile(outSimple.toString(), group + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-outputSimple.txt");			
 
 		// write priorities of dags finished
 		
@@ -211,9 +228,9 @@ public class Experiment {
 			prioritiesSimple.append(resultsSimple[i].formatPriorities());			
 		}
 
-		WorkflowLog.stringToFile(prioritiesSPSS.toString(), prefix + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-prioritiesSPSS.txt");
-		WorkflowLog.stringToFile(prioritiesAware.toString(), prefix + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-prioritiesAware.txt");
-		WorkflowLog.stringToFile(prioritiesSimple.toString(), prefix + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-prioritiesSimple.txt");			
+		WorkflowLog.stringToFile(prioritiesSPSS.toString(), group + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-prioritiesSPSS.txt");
+		WorkflowLog.stringToFile(prioritiesAware.toString(), group + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-prioritiesAware.txt");
+		WorkflowLog.stringToFile(prioritiesSimple.toString(), group + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-prioritiesSimple.txt");			
 
 		// write sizes of dags finished
 
@@ -227,9 +244,9 @@ public class Experiment {
 			sizesSimple.append(resultsSimple[i].formatSizes());			
 		}
 
-		WorkflowLog.stringToFile(sizesSPSS.toString(), prefix + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-sizesSPSS.txt");
-		WorkflowLog.stringToFile(sizesAware.toString(), prefix + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-sizesAware.txt");
-		WorkflowLog.stringToFile(sizesSimple.toString(), prefix + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-sizesSimple.txt");			
+		WorkflowLog.stringToFile(sizesSPSS.toString(), group + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-sizesSPSS.txt");
+		WorkflowLog.stringToFile(sizesAware.toString(), group + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-sizesAware.txt");
+		WorkflowLog.stringToFile(sizesSimple.toString(), group + dags[0] + "b" + budget + "h" +start + "-" + N + "m" + max_scaling + "run" + runID + "-sizesSimple.txt");			
 
 		
 	}
@@ -241,7 +258,7 @@ public class Experiment {
 	
 	/** 
 	 * 
-	 * Rus a series of experiments, sets runID = 0
+	 * Generates a series of experiments, sets runID = 0
 	 * 
 	 * @param dagPath
 	 * @param dags
@@ -253,16 +270,16 @@ public class Experiment {
 	 * @param max_scaling
 	 */
 	
-	public static void generateSeries(String prefix, String dagPath, String[] dags, double budget, double price,
-			 int N, int step, int start, double max_scaling, double alpha) {
-		
-		generateSeries(prefix, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, 0);
-	}
+//	public static void generateSeries(String runDirectory, String group, String dagPath, String[] dags, double budget, double price,
+//			 int N, int step, int start, double max_scaling, double alpha, double taskDilatation) {
+//		
+//		generateSeries(runDirectory, group, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, taskDilatation, 0);
+//	}
 	
 	
 	/** 
 	 * 
-	 * Runs a series constructing dags array by repeating the same DAG file numDAGs times.
+	 * Generates a series constructing dags array by repeating the same DAG file numDAGs times.
 	 * 
 	 * @param dagPath
 	 * @param dagName
@@ -276,19 +293,19 @@ public class Experiment {
 	 * @param runID
 	 */
 	
-	public static void generateSeries(String prefix, String dagPath, String dagName, double budget, double price,
-			int numDAGs, int N, int step, int start, double max_scaling, double alpha, int runID) {
+	public static void generateSeries(String runDirectory, String group, String dagPath, String dagName, double budget, double price,
+			int numDAGs, int N, int step, int start, double max_scaling, double alpha, double taskDilatation, int runID) {
 		
 		String[] dags = new String[numDAGs];
 		
 		for (int i=0; i< numDAGs; i++) dags[i] = dagName;
 		
-		generateSeries(prefix, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, runID);
+		generateSeries(runDirectory, group, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, taskDilatation, runID);
 
 	}
 	
 	/**
-	 * Runs a series constructing dags array by repeating the same DAG file numDAGs times.
+	 * Generates a series constructing dags array by repeating the same DAG file numDAGs times.
 	 * Sets runID to 0.
 	 * 
 	 * @param dagPath
@@ -302,37 +319,24 @@ public class Experiment {
 	 * @param max_scaling
 	 */
 	
-	public static void generateConstantSeries(String prefix, String dagPath, String dagName, double budget, double price,
-			int numDAGs, int N, int step, int start,  double max_scaling, double alpha) {
-		generateSeries(prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, 0);
+	public static void generateConstantSeries(String runDirectory, String group, String dagPath, String dagName, double budget, double price,
+			int numDAGs, int N, int step, int start,  double max_scaling, double taskDilatation, double alpha) {
+		generateSeries(runDirectory, group, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, taskDilatation, 0);
 	}
 	
 	/**
-	 * Repeats a series runs times, increasing runID from 0 to runs-1
+	 * Generates a series "runs" times, increasing runID from 0 to runs-1
 	 * @param runs number of runs
 	 */
 	
-	public static void generateSeriesRepeat(String prefix, String dagPath, String dagName, double budget, double price,
-			int numDAGs, int N, int step, int start, double max_scaling, double alpha, int runs) {
+	public static void generateSeriesRepeat(String runDirectory, String group, String dagPath, String dagName, double budget, double price,
+			int numDAGs, int N, int step, int start, double max_scaling, double alpha, double taskDilatation, int runs) {
 		
 		for (int i=0; i< runs; i++) {
-			generateSeries(prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, i);
+			generateSeries(runDirectory, group, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, taskDilatation, i);
 		}	
 	}
 
 
-	/**
-	 * Repeats a series runs times, increasing runID from 0 to runs-1
-	 * @param runs number of runs
-	 */
-	
-	public static void generateSeriesRepeat(String prefix, String dagPath, String[] dags,
-			double budget, double price, int N, int step, int start,
-			double max_scaling, double alpha, int runs) {
-
-		for (int i=0; i< runs; i++) {
-			generateSeries(prefix, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, i);
-		}
-	}
 
 }

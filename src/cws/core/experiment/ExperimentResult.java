@@ -2,8 +2,16 @@ package cws.core.experiment;
 
 import java.util.List;
 
+
+
+/**
+ * Class for storing the experiment results and storing them in a text format.
+ * @author malawski
+ *
+ */
 public class ExperimentResult {
 	
+	private String algorithm;
 	private double cost;
 	private double budget;
 	private int numFreeVMs;
@@ -13,9 +21,18 @@ public class ExperimentResult {
 	private double deadline;
 	private List<Integer> priorities;
 	private List<Double> sizes;
+	private long planningWallTime;
+	private long simulationWallTime;
+	private long initWallTime;
 	
 
 
+	public String getAlgorithm() {
+		return algorithm;
+	}
+	public void setAlgorithm(String algorithm) {
+		this.algorithm = algorithm;
+	}
 	public double getCost() {
 		return cost;
 	}
@@ -70,22 +87,39 @@ public class ExperimentResult {
 	public void setSizes(List<Double> sizes) {
 		this.sizes = sizes;
 	}
-	
+	public long getPlanningWallTime() {
+		return planningWallTime;
+	}
+	public void setPlanningWallTime(long planningWallTime) {
+		this.planningWallTime = planningWallTime;
+	}
+	public long getSimulationWallTime() {
+		return simulationWallTime;
+	}
+	public void setSimulationWallTime(long simulationWallTime) {
+		this.simulationWallTime = simulationWallTime;
+	}
+	public long getInitWallTime() {
+		return initWallTime;
+	}
+	public void setInitWallTime(long initWallTime) {
+		this.initWallTime = initWallTime;
+	}	
 	/**
 	 * Format the list of priorities of completed DAGs as a string
-	 * @return the string containing: deadline and space separated priorities
+	 * @return the string containing space separated priorities
 	 */
 	
 	public String formatPriorities() {
 		
 		StringBuffer prioritiesBuffer = new StringBuffer();
-
-		prioritiesBuffer.append(getDeadline());
 		
 		for (int priority : getPriorities()) {
-			prioritiesBuffer.append(" " + priority);
+			prioritiesBuffer.append(priority + " ");
 		}
 		
+		//remove trailing space
+		prioritiesBuffer.deleteCharAt(prioritiesBuffer.length()-1);
 		prioritiesBuffer.append("\n");
 		
 		return prioritiesBuffer.toString();
@@ -93,23 +127,37 @@ public class ExperimentResult {
 	
 	/**
 	 * Format the list of sizes of completed DAGs as a string
-	 * @return the string containing: deadline and space separated sizes
+	 * @return the string containing space separated sizes
 	 */
 	
 	public String formatSizes() {
 		
 		StringBuffer sizesBuffer = new StringBuffer();
-
-		sizesBuffer.append(getDeadline());
 		
 		for (double size : getSizes()) {
-			sizesBuffer.append(" " + size);
+			sizesBuffer.append(size + " ");
 		}
-		
+		sizesBuffer.deleteCharAt(sizesBuffer.length()-1);
 		sizesBuffer.append("\n");
 		
 		return sizesBuffer.toString();
 	}
+	
+	public String formatResult() {
+		StringBuilder result = new StringBuilder();
+		result.append("algorithm " + algorithm + "\n");
+		result.append("budget " + budget + "\n");
+		result.append("deadline " + deadline + "\n");
+		result.append("cost " + cost + "\n");
+		result.append("finished " + numFinishedDAGs + "\n");
+		result.append("priorities " + formatPriorities());
+		result.append("sizes " + formatSizes());
+		result.append("initWallTime " + initWallTime + "\n");
+		result.append("planningWallTime " + planningWallTime + "\n");
+		result.append("simulationWallTime " + simulationWallTime + "\n");
+		return result.toString();
+	}
+
 	
 
 }
