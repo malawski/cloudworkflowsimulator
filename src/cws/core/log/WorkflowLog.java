@@ -1,7 +1,6 @@
 package cws.core.log;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -21,7 +20,6 @@ import cws.core.VMListener;
 
 public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 	
-	private static String OUTPUT_PATH = "output";
 	
 	Set<Job> jobs = new HashSet<Job>();
 	Set<VM> vms = new HashSet<VM>();
@@ -165,7 +163,7 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 	public static void stringToFile(String s, String fileName) {
 		BufferedWriter out;
 		try {
-			out = new BufferedWriter(new FileWriter(OUTPUT_PATH + File.separator + fileName));
+			out = new BufferedWriter(new FileWriter(fileName));
 			out.write(s);
 			out.close();
 		} catch (IOException e) {
