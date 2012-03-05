@@ -30,5 +30,6 @@
 #cp pareto-score-GENOME.n.1000.8.dagh100-1500m0.pdf ../paper/figures/pareto-size-GENOME-n-1000-8-dagh100-1500m0.pdf
 #cp pareto-score-SIPHT.n.1000.8.dagh5-50m0.pdf ../paper/figures/pareto-size-SIPHT-n-1000-8-dagh5-50m0.pdf
 
-cp pareto-budget-SIPHT.n.1000.8.dagh5-50h10m0.pdf ../paper/figures/pareto-budget-SIPHT-n-1000-8-dagh5-50h10m0.pdf
+#cp pareto-budget-SIPHT.n.1000.8.dagh5-50h10m0.pdf ../paper/figures/pareto-budget-SIPHT-n-1000-8-dagh5-50h10m0.pdf
+cp constant-budget-SIPHT.n.1000.0.dagh5-50h4m0.pdf ../paper/figures/constant-budget-SIPHT-n-1000-0-dagh5-50h4m0.pdf
 #cp ensemble-pareto.pdf ../paper/figures
