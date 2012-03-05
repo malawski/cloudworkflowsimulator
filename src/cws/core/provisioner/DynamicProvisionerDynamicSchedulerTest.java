@@ -299,8 +299,8 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		String dags[] = new String[numDAGs];
 		for (int i=0; i< numDAGs; i++) dags[i] = dagName;
 		
-        ExperimentDescription param = new ExperimentDescription("WADPDS", dagPath, dags,
-                deadline, budget, price, max_scaling, 0.7);
+        ExperimentDescription param = new ExperimentDescription("test", "WADPDS", "output", dagPath, dags,
+                deadline, budget, price, max_scaling, 0.7, 1, 0);
         
         runTestExperiment(param);
     }
@@ -310,8 +310,8 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 		String dags[] = new String[numDAGs];
 		for (int i=0; i< numDAGs; i++) dags[i] = dagName;
 		
-        ExperimentDescription param = new ExperimentDescription("DPDS", dagPath, dags,
-                deadline, budget, price, max_scaling, 0.7);
+        ExperimentDescription param = new ExperimentDescription("test", "DPDS", "output", dagPath, dags,
+                deadline, budget, price, max_scaling, 0.7, 1, 0);
         
         runTestExperiment(param);
 	}
