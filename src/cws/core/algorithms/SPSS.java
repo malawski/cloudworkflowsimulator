@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.HashMap;
 
+import org.cloudbus.cloudsim.Log;
+
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -51,14 +53,14 @@ public class SPSS extends StaticAlgorithm {
             totalRuntime += runtime;
         }
         
-        System.out.println(" Min Cost: "+minCost);
-        System.out.println(" Total Runtime: "+totalRuntime);
+        Log.printLine(" Min Cost: "+minCost);
+        Log.printLine(" Total Runtime: "+totalRuntime);
         
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = new CriticalPath(order, runtimes);
         double criticalPath = path.getCriticalPathLength();
-        System.out.println(" Critical path: "+criticalPath);
+        Log.printLine(" Critical path: "+criticalPath);
         if (criticalPath > getDeadline()) {
             throw new NoFeasiblePlan(
                     "Best critical path ("+criticalPath+") " +

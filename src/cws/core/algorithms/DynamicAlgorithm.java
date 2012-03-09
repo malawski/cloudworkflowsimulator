@@ -84,10 +84,13 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         
         EnsembleManager em = new EnsembleManager(getDAGs(), engine);
         
-        WorkflowLog wfLog = new WorkflowLog();
-        engine.addJobListener(wfLog);
-        cloud.addVMListener(wfLog);
-        em.addDAGJobListener(wfLog);
+        WorkflowLog log = null;
+        if (shouldGenerateLog()) {
+            log = new WorkflowLog();
+            engine.addJobListener(log);
+            cloud.addVMListener(log);
+            em.addDAGJobListener(log);
+        }
         
         // Calculate estimated number of VMs to consume budget evenly before deadline
         // ceiling is used to start more vms so that the budget is consumed just before deadline
@@ -112,9 +115,11 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         CloudSim.startSimulation();
         simulationFinishWallTime = System.nanoTime();
         
-        wfLog.printJobs(logname);
-        wfLog.printVmList(logname);
-        wfLog.printDAGJobs();
+        if (shouldGenerateLog()) {
+            log.printJobs(logname);
+            log.printVmList(logname);
+            log.printDAGJobs();
+        }
         
         Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
         Log.printLine(CloudSim.clock() + " Total budget " + getBudget());

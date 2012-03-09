@@ -9,6 +9,7 @@ import java.util.Queue;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
+import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 
 import cws.core.Cloud;
@@ -132,12 +133,12 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
                 if (newPlan.getCost() <= getBudget()) {
                     admittedDAGs.add(dag);
                     plan = newPlan;
-                    System.out.println("Admitting DAG. Cost of new plan: "+plan.getCost());
+                    Log.printLine("Admitting DAG. Cost of new plan: "+plan.getCost());
                 } else {
-                    System.out.println("Rejecting DAG: New plan exceeds budget: "+newPlan.getCost());
+                    Log.printLine("Rejecting DAG: New plan exceeds budget: "+newPlan.getCost());
                 }
             } catch (NoFeasiblePlan m) {
-                System.out.println("Rejecting DAG: "+m.getMessage());
+                Log.printLine("Rejecting DAG: "+m.getMessage());
             }
         }
         
@@ -163,9 +164,11 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         }
         
         // Sanity check
+        /*
         if (admittedDAGs.size() == 0) {
             throw new RuntimeException("No DAGs admitted");
         }
+        */
         
         // Submit admitted DAGs
         for (DAG dag : admittedDAGs) {
@@ -426,10 +429,13 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         setEnsembleManager(manager);
         setWorkflowEngine(engine);
         
-        WorkflowLog log = new WorkflowLog();
-        engine.addJobListener(log);
-        cloud.addVMListener(log);
-        manager.addDAGJobListener(log);
+        WorkflowLog log = null;
+        if (shouldGenerateLog()) {
+            log = new WorkflowLog();
+            engine.addJobListener(log);
+            cloud.addVMListener(log);
+            manager.addDAGJobListener(log);
+        }
  
         planningStartWallTime = System.nanoTime();
       
@@ -450,9 +456,11 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             throw new RuntimeException("Runtime exceeded deadline: "+actualFinishTime);
         }
         
-        log.printJobs(logname);
-        log.printVmList(logname);
-        log.printDAGJobs();
+        if (shouldGenerateLog()) {
+            log.printJobs(logname);
+            log.printVmList(logname);
+            log.printDAGJobs();
+        }
     }
     
     enum VMType {
