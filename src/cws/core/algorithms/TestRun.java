@@ -1,78 +1,187 @@
 package cws.core.algorithms;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import org.cloudbus.cloudsim.Log;
+
 import cws.core.dag.DAG;
+import cws.core.dag.Task;
 import cws.core.dag.DAGParser;
+import cws.core.dag.algorithms.CriticalPath;
+import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.experiment.DAGListGenerator;
 
 public class TestRun {
-    public static void main(String[] args) throws Exception {
-        List<DAG> dags = new ArrayList<DAG>();
+    
+    static class DAGStats {
+        public double minCost;
+        public double criticalPath;
+        public double totalRuntime;
         
-        String[] names = DAGListGenerator.generateDAGListPareto(
-                new Random(0), 
-                "/Volumes/HDD/SyntheticWorkflows/CyberShake/CYBERSHAKE", 
-                100);
-        
-        for (String name : names) {
-            DAG dag = DAGParser.parseDAG(new File(name));
+        public DAGStats(DAG dag, double mips, double price) {
+            TopologicalOrder order = new TopologicalOrder(dag);
             
-            // LARGER TASKS
-            /*
-            for (String tid : dag.getTasks()) {
-                Task t = dag.getTask(tid);
-                t.size = t.size * 100;
+            minCost = 0.0;
+            totalRuntime = 0.0;
+            
+            HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
+            for (Task t : order) {
+                
+                // The runtime is just the size of the task (MI) divided by the
+                // MIPS of the VM
+                double runtime = t.size / mips;
+                runtimes.put(t, runtime);
+                
+                // Compute the minimum cost of running this workflow
+                minCost += (runtime/(60*60)) * price;
+                totalRuntime += runtime;
             }
-            */
-            dags.add(dag);
+            
+            // Make sure a plan is feasible given the deadline and available VMs
+            CriticalPath path = new CriticalPath(order, runtimes);
+            criticalPath = path.getCriticalPathLength();
         }
+    }
+    
+    public static void usage() {
+        System.err.printf("Usage: %s application inputdir outputdir distribution ensembleSize scalingFactor algorithm\n\n", TestRun.class.getName());
+        System.exit(1);
+    }
+    
+    public static void main(String[] args) throws Exception {
+        // These parameters are consistent with previous experiments
+        int seed = 0;
+        double alpha = 0.7;
+        double maxScaling = 1.0;
         
-        double deadline = 10*3600;
-        double budget = 50;
+        // WARNING: These parameters are fixed in the algorithm! Don't change here only!
+        double mips = 1;
         double price = 1;
         
-        double alpha = 0.7;
+        if (args.length != 7) {
+            usage();
+        }
         
-        double maxScaling = 2.0;
+        /*
+        String application = "SIPHT";
+        File inputdir = new File("/Volumes/HDD/SyntheticWorkflows/SIPHT");
+        File outputdir = new File("/tmp");
+        String distribution = "uniform_unsorted";
+        int ensembleSize = 50;
+        double scalingFactor = 1.0;
+        String algorithm = "SPSS";
+        */
         
-        Algorithm[] algos = new Algorithm[]{
-                /*
+        // Disable cloudsim logging
+        Log.disable();
+        
+        String application = args[0];
+        File inputdir = new File(args[1]);
+        File outputdir = new File(args[2]);
+        String distribution = args[3];
+        int ensembleSize = Integer.parseInt(args[4]);
+        double scalingFactor = Double.parseDouble(args[5]);
+        String algorithm = args[6];
+        
+        File outfile = new File(outputdir, 
+                String.format("%s_%s_%d_%.1f_%s.dat", 
+                        application, distribution, ensembleSize, scalingFactor, algorithm));
+        
+        // Determine the distribution
+        String[] names = null;
+        if ("uniform_unsorted".equals(distribution)) {
+            names = DAGListGenerator.generateDAGListUniformUnsorted(
+                    new Random(seed), inputdir.getAbsolutePath() + "/" + application, ensembleSize);
+        } else if ("uniform_sorted".equals(distribution)) {
+            names = DAGListGenerator.generateDAGListUniform(
+                    new Random(seed), inputdir.getAbsolutePath() + "/" + application, ensembleSize);
+        } else if ("pareto_unsorted".equals(distribution)) {
+            names = DAGListGenerator.generateDAGListParetoUnsorted(
+                    new Random(seed), inputdir.getAbsolutePath() + "/" + application, ensembleSize);
+        } else if ("pareto_sorted".equals(distribution)) {
+            names = DAGListGenerator.generateDAGListPareto(
+                    new Random(seed), inputdir.getAbsolutePath() + "/" + application, ensembleSize);
+        } else {
+            System.err.println("Unrecognized distribution: "+distribution);
+            System.exit(1);
+        }
+        
+        double minTime = Double.MAX_VALUE;
+        double minCost = Double.MAX_VALUE;
+        double maxCost = 0.0;
+        double maxTime = 0.0;
+        
+        List<DAG> dags = new ArrayList<DAG>();
+        for (String name : names) {
+            System.out.println(name);
+            DAG dag = DAGParser.parseDAG(new File(name));
+            dags.add(dag);
             
-            new MaxMin(budget, deadline, dags),
-            new MinMin(budget, deadline, dags),*/
-            new Wide(budget, deadline, dags),
-            new Backtrack(budget, deadline, dags),
-            new SPSS(budget, deadline, dags, alpha),
-            new DPDS(budget, deadline, dags, price, maxScaling),
-            new WADPDS(budget, deadline, dags, price, maxScaling)
-        };
-        
-        for (Algorithm a : algos) {
-            a.simulate(a.getName());
+            if (scalingFactor > 1.0) {
+                for (String tid : dag.getTasks()) {
+                    Task t = dag.getTask(tid);
+                    t.size *= scalingFactor;
+                }
+            }
+            
+            DAGStats s = new DAGStats(dag, mips, price);
+            
+            minTime = Math.min(minTime, s.totalRuntime);
+            minCost = Math.min(minCost, s.minCost);
+            
+            maxTime += s.criticalPath;
+            maxCost += s.minCost;
         }
         
-        System.out.println("DAGs Completed:");
-        for (Algorithm a : algos) {
-            System.out.printf("    %10s: %s\n", a.getName(), a.completedDAGPriorityString());
+        // Add 10 percent
+        minTime *= 1.1;
+        minCost *= 1.1;
+        
+        int nbudgets = 10;
+        int ndeadlines = 10;
+        
+        double minBudget = Math.ceil(minCost);
+        double maxBudget = Math.ceil(maxCost);
+        double budgetStep = (maxBudget - minBudget) / (nbudgets - 1);
+        
+        double minDeadline = Math.ceil(minTime);
+        double maxDeadline = Math.ceil(maxTime);
+        double deadlineStep = (maxDeadline - minDeadline) / (ndeadlines - 1);
+        
+        System.out.printf("Budget: %f %f %f\n", minBudget, maxBudget, budgetStep);
+        System.out.printf("Deadline: %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
+        
+        PrintStream out = new PrintStream(new FileOutputStream(outfile));
+        
+        out.println("application,distribution,seed,ensemble_size,scaling,budget,deadline,algorithm,finished,expo_score,linear_score");
+        
+        for (double budget = minBudget; budget <= maxBudget; budget += budgetStep) {
+            for (double deadline = minDeadline; deadline <= maxDeadline; deadline+= deadlineStep) {
+                Algorithm a = null;
+                if ("SPSS".equals(algorithm)) {
+                    a = new SPSS(budget, deadline, dags, alpha);
+                } else if ("DPDS".equals(algorithm)) {    
+                    a = new DPDS(budget, deadline, dags, price, maxScaling);
+                } else if ("WADPDS".equals(algorithm)) {
+                    a = new WADPDS(budget, deadline, dags, price, maxScaling);
+                } else {
+                    throw new RuntimeException("Unknown algorithm: "+algorithm);
+                }
+                
+                a.simulate(algorithm);
+                
+                out.printf("%s,%s,%d,%d,%f,%.10f,%.10f,%s,%d,%.10f,%.10f\n", 
+                        application, distribution, seed, ensembleSize, scalingFactor, budget, deadline, 
+                        a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore());
+            }
         }
         
-        System.out.println("Num DAGs Completed:");
-        for (Algorithm a : algos) {
-            System.out.printf("    %10s: %d\n", a.getName(), a.numCompletedDAGs());
-        }
-        
-        System.out.println("Exponential score:");
-        for (Algorithm a : algos) {
-            System.out.printf("    %10s: %.10f\n", a.getName(), a.getExponentialScore());
-        }
-        
-        System.out.println("Linear score:");
-        for (Algorithm a : algos) {
-            System.out.printf("    %10s: %.10f\n", a.getName(), a.getLinearScore());
-        }
+        out.close();
     }
 }
