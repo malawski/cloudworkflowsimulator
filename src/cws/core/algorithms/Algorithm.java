@@ -1,6 +1,7 @@
 package cws.core.algorithms;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -104,5 +105,24 @@ public abstract class Algorithm {
             score += 1.0 / (priority+1);
         }
         return score;
+    }
+    
+    public String getScoreBitString() {
+        HashSet<Integer> priorities = new HashSet<Integer>(
+                completedDAGPriorities());
+        
+        int ensembleSize = getDAGs().size();
+        
+        StringBuilder b = new StringBuilder();
+        
+        for (int p=0; p<ensembleSize; p++) {
+            if (priorities.contains(p)) {
+                b.append("1");
+            } else {
+                b.append("0");
+            }
+        }
+        
+        return b.toString();
     }
 }
