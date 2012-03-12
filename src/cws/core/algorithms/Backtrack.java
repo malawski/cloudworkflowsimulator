@@ -52,7 +52,7 @@ public class Backtrack extends StaticAlgorithm {
         CriticalPath path = new CriticalPath(order, runtimes);
         double criticalPath = path.getCriticalPathLength();
         System.out.println(" Critical path: "+criticalPath);
-        if (criticalPath > getDeadline()) {
+        if (criticalPath > getDeadline() + getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay()) {
             throw new NoFeasiblePlan(
                     "Best critical path ("+criticalPath+") " +
                     "> deadline ("+getDeadline()+")");
@@ -70,6 +70,7 @@ public class Backtrack extends StaticAlgorithm {
         HashMap<Task, Double> deadlines = new HashMap<Task, Double>();
         for (Task t : order.reverse()) {
             double deadline = getDeadline();
+            deadline = deadline - (getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay());
             for (Task c : t.children) {
                 deadline = Math.min(deadline, deadlines.get(c)-runtimes.get(c));
             }

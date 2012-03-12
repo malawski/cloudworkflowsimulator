@@ -40,6 +40,8 @@ public class DAGDynamicSchedulerTest implements WorkflowEvent {
 		HashSet<VM> vms = new HashSet<VM>();
 		for (int i = 0; i < 10; i++) {
 			VM vm = new VM(1000, 1, 1.0, 1.0);
+            vm.setProvisioningDelay(0.0);
+            vm.setDeprovisioningDelay(0.0);
 			vms.add(vm);
 			CloudSim.send(engine.getId(), cloud.getId(), 0.1, VM_LAUNCH, vm);
 		}

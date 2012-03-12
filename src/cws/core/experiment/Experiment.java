@@ -1,31 +1,16 @@
 package cws.core.experiment;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
+import org.cloudbus.cloudsim.distributions.LognormalDistr;
 
-import cws.core.Cloud;
-import cws.core.DAGJob;
-import cws.core.EnsembleManager;
-import cws.core.Provisioner;
-import cws.core.Scheduler;
-import cws.core.SimpleJobFactory;
-import cws.core.VM;
-import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
 import cws.core.algorithms.Algorithm;
-import cws.core.algorithms.SPSS;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.log.WorkflowLog;
-import cws.core.provisioner.SimpleUtilizationBasedProvisioner;
-import cws.core.scheduler.EnsembleDynamicScheduler;
-import cws.core.scheduler.WorkflowAwareEnsembleScheduler;
 
 public class Experiment {
 	
@@ -41,6 +26,19 @@ public class Experiment {
 				
 		ExperimentResult result = new ExperimentResult();
 		
+		// initialize distributions
+		
+        // To get mean m and stddev s, use:
+        // sigma = sqrt(log(1+s^2/m^2))
+        // mu = log(m)-0.5*log(1+s^2/m^2)
+        // For mean = 60 and stddev = 10:  mu = 4.080645 sigma = 0.1655264        
+        // For mean = 20 and stddev = 5:  mu = 2.96542, sigma = 0.09975135
+
+		ContinuousDistribution provisioningDelayDistribution = new LognormalDistr(new java.util.Random(param.getRunID()),4.080645, 0.1655264);
+		ContinuousDistribution deprovisioningDelayDistribution = new LognormalDistr(new java.util.Random(param.getRunID()), 2.96542, 0.09975135);
+		
+		VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
+		VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
 		Algorithm algorithm = AlgorithmFactory.createAlgorithm(param);
 		

@@ -31,7 +31,7 @@ public class GenerateExperimentPareto {
 		String dagName;
 		double price = 1.0;
 		double maxScaling = 2.0;
-		String group = "pareto";
+		String group = "delays-ignore";
 		double alpha = 0.7;
 		String[] dags;
 		double[] budgets;

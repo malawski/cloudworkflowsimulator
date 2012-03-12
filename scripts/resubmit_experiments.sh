@@ -2,7 +2,7 @@
 # create SGE array job
 
 if [ $# -lt 1 ]; then
-	echo "Usage: $0 INPUT_DIR"
+	echo "Usage: $0 INPUT_LIST"
 	exit 1
 fi
 
