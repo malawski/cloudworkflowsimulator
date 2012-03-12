@@ -51,6 +51,18 @@ public class DAGListGenerator {
 		return dags;
 	}
 	
+	public static String[] generateDAGListConstant(Random seed, String name, int length) {
+	    int size = SIZES[seed.nextInt(SIZES.length)];
+	    
+	    String dags[] = new String[length];
+        for (int i=0; i<length; i++) {
+            int index = seed.nextInt(20);
+            dags[i] = name + ".n." + size + "." + index + ".dag";
+        }
+        
+        return dags;
+	}
+	
 	private static int[] generateUniformSizesArray(Random seed, int length) {
 	    int[] sizes = new int[length];
         
