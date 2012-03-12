@@ -59,7 +59,7 @@ public class SPSS extends StaticAlgorithm {
         CriticalPath path = new CriticalPath(order, runtimes);
         double criticalPath = path.getCriticalPathLength();
         System.out.println(" Critical path: "+criticalPath);
-        if (criticalPath > getDeadline()) {
+        if (criticalPath > getDeadline()+getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay()) {
             throw new NoFeasiblePlan(
                     "Best critical path ("+criticalPath+") " +
                     "> deadline ("+getDeadline()+")");

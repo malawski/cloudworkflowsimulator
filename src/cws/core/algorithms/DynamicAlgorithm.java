@@ -134,7 +134,11 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         }
         
         if (actualFinishTime > getDeadline()) {
-            throw new RuntimeException("Exceeded deadline: "+actualFinishTime);
+            //throw new RuntimeException("Exceeded deadline: "+actualFinishTime);
+        }
+        
+        if (getActualCost() > getBudget()) {
+            //throw new RuntimeException("Cost exceeded budget: "+getActualCost());
         }
     }
 
