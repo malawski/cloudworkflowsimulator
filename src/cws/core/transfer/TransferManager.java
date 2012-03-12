@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
@@ -133,6 +134,8 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
     
     /** Update progress of active transfers */
     private void updateProgress() {
+		//Log.printLine(CloudSim.clock() + " Transfer manager: updating progress, active transfers: " + activeTransfers.size());
+
         LinkedList<Transfer> completedTransfers = new LinkedList<Transfer>();
         
         // Update the progress of all transfers

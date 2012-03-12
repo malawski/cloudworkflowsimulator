@@ -1,5 +1,7 @@
 package cws.core.algorithms;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,6 +11,7 @@ public abstract class Algorithm {
     private double budget;
     private double deadline;
     private List<DAG> dags;
+    private boolean generateLog = false;
     
     public Algorithm(double budget, double deadline, List<DAG> dags) {
         this.budget = budget;
@@ -30,6 +33,14 @@ public abstract class Algorithm {
     
     public String getName() {
         return this.getClass().getSimpleName();
+    }
+    
+    public boolean shouldGenerateLog() {
+        return this.generateLog;
+    }
+    
+    public void setGenerateLog(boolean generateLog) {
+        this.generateLog = generateLog;
     }
     
     abstract public void simulate(String logname);
@@ -75,11 +86,16 @@ public abstract class Algorithm {
     
     /** score = sum[ 1 / 2^priority ] */
     public double getExponentialScore() {
-        double score = 0.0;
+        BigDecimal one = BigDecimal.ONE;
+        BigDecimal two = new BigDecimal(2.0);
+        
+        BigDecimal score = new BigDecimal(0.0);
         for (int priority : completedDAGPriorities()) {
-            score += 1.0 / Math.pow(2.0, priority);
+            BigDecimal divisor = two.pow(priority);
+            BigDecimal increment = one.divide(divisor);
+            score = score.add(increment);
         }
-        return score;
+        return score.doubleValue();
     }
     
     /** score = sum[ 1 / priority ] */
@@ -89,5 +105,24 @@ public abstract class Algorithm {
             score += 1.0 / (priority+1);
         }
         return score;
+    }
+    
+    public String getScoreBitString() {
+        HashSet<Integer> priorities = new HashSet<Integer>(
+                completedDAGPriorities());
+        
+        int ensembleSize = getDAGs().size();
+        
+        StringBuilder b = new StringBuilder();
+        
+        for (int p=0; p<ensembleSize; p++) {
+            if (priorities.contains(p)) {
+                b.append("1");
+            } else {
+                b.append("0");
+            }
+        }
+        
+        return b.toString();
     }
 }
