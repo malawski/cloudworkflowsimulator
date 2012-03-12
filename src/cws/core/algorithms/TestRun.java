@@ -50,13 +50,12 @@ public class TestRun {
     }
     
     public static void usage() {
-        System.err.printf("Usage: %s application inputdir outputdir distribution ensembleSize scalingFactor algorithm\n\n", TestRun.class.getName());
+        System.err.printf("Usage: %s application inputdir outputdir distribution ensembleSize scalingFactor algorithm seed\n\n", TestRun.class.getName());
         System.exit(1);
     }
     
     public static void main(String[] args) throws Exception {
         // These parameters are consistent with previous experiments
-        int seed = 0;
         double alpha = 0.7;
         double maxScaling = 1.0;
         
@@ -64,7 +63,7 @@ public class TestRun {
         double mips = 1;
         double price = 1;
         
-        if (args.length != 7) {
+        if (args.length != 8) {
             usage();
         }
         
@@ -76,6 +75,7 @@ public class TestRun {
         int ensembleSize = 50;
         double scalingFactor = 1.0;
         String algorithm = "SPSS";
+        int seed = 0;
         */
         
         // Disable cloudsim logging
@@ -88,25 +88,50 @@ public class TestRun {
         int ensembleSize = Integer.parseInt(args[4]);
         double scalingFactor = Double.parseDouble(args[5]);
         String algorithm = args[6];
+        int seed = Integer.parseInt(args[7]);
+        
+        System.out.printf("application = %s\n", application);
+        System.out.printf("inputdir = %s\n", inputdir);
+        System.out.printf("outputdir = %s\n", outputdir);
+        System.out.printf("distribution = %s\n", distribution);
+        System.out.printf("ensembleSize = %d\n", ensembleSize);
+        System.out.printf("scalingFactor = %f\n", scalingFactor);
+        System.out.printf("algorithm = %s\n", algorithm);
+        System.out.printf("seed = %d\n", seed);
         
         File outfile = new File(outputdir, 
-                String.format("%s_%s_%d_%.1f_%s.dat", 
-                        application, distribution, ensembleSize, scalingFactor, algorithm));
+                String.format("%s_%s_size%d_scale%.1f_%s_seed%d.dat", 
+                        application, distribution, ensembleSize, scalingFactor, algorithm, seed));
         
         // Determine the distribution
         String[] names = null;
+        
+        String inputname = inputdir.getAbsolutePath() + "/" + application;
         if ("uniform_unsorted".equals(distribution)) {
-            names = DAGListGenerator.generateDAGListUniformUnsorted(
-                    new Random(seed), inputdir.getAbsolutePath() + "/" + application, ensembleSize);
+            
+            names = DAGListGenerator.generateDAGListUniformUnsorted(new Random(seed), inputname, ensembleSize);
+            
         } else if ("uniform_sorted".equals(distribution)) {
-            names = DAGListGenerator.generateDAGListUniform(
-                    new Random(seed), inputdir.getAbsolutePath() + "/" + application, ensembleSize);
+            
+            names = DAGListGenerator.generateDAGListUniform(new Random(seed), inputname, ensembleSize);
+            
         } else if ("pareto_unsorted".equals(distribution)) {
-            names = DAGListGenerator.generateDAGListParetoUnsorted(
-                    new Random(seed), inputdir.getAbsolutePath() + "/" + application, ensembleSize);
+            
+            names = DAGListGenerator.generateDAGListParetoUnsorted(new Random(seed), inputname, ensembleSize);
+            
         } else if ("pareto_sorted".equals(distribution)) {
-            names = DAGListGenerator.generateDAGListPareto(
-                    new Random(seed), inputdir.getAbsolutePath() + "/" + application, ensembleSize);
+            
+            names = DAGListGenerator.generateDAGListPareto(new Random(seed), inputname, ensembleSize);
+            
+        } else if ("constant".equals(distribution)){
+            
+            names = DAGListGenerator.generateDAGListConstant(new Random(seed), inputname, ensembleSize);
+            
+        } else if (distribution.startsWith("fixed")) {
+            
+            int size = Integer.parseInt(distribution.substring(5));
+            names = DAGListGenerator.generateDAGListConstant(inputname, size, ensembleSize);
+            
         } else {
             System.err.println("Unrecognized distribution: "+distribution);
             System.exit(1);
@@ -154,12 +179,12 @@ public class TestRun {
         double maxDeadline = Math.ceil(maxTime);
         double deadlineStep = (maxDeadline - minDeadline) / (ndeadlines - 1);
         
-        System.out.printf("Budget: %f %f %f\n", minBudget, maxBudget, budgetStep);
-        System.out.printf("Deadline: %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
+        System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
+        System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
         
         PrintStream out = new PrintStream(new FileOutputStream(outfile));
         
-        out.println("application,distribution,seed,ensemble_size,scaling,budget,deadline,algorithm,finished,expo_score,linear_score");
+        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan");
         
         for (double budget = minBudget; budget <= maxBudget; budget += budgetStep) {
             for (double deadline = minDeadline; deadline <= maxDeadline; deadline+= deadlineStep) {
@@ -176,9 +201,14 @@ public class TestRun {
                 
                 a.simulate(algorithm);
                 
-                out.printf("%s,%s,%d,%d,%f,%.10f,%.10f,%s,%d,%.10f,%.10f\n", 
+                double planningTime = a.getPlanningnWallTime() / 1.0e9;
+                double simulationTime = a.getSimulationWallTime() / 1.0e9;
+                
+                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f\n", 
                         application, distribution, seed, ensembleSize, scalingFactor, budget, deadline, 
-                        a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore());
+                        a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
+                        planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(), 
+                        a.getActualFinishTime());
             }
         }
         
