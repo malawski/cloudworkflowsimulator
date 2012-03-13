@@ -190,7 +190,7 @@ public class TestRun {
                 Algorithm a = null;
                 if ("SPSS".equals(algorithm)) {
                     a = new SPSS(budget, deadline, dags, alpha);
-                } else if ("DPDS".equals(algorithm)) {    
+                } else if ("DPDS".equals(algorithm)) {
                     a = new DPDS(budget, deadline, dags, price, maxScaling);
                 } else if ("WADPDS".equals(algorithm)) {
                     a = new WADPDS(budget, deadline, dags, price, maxScaling);

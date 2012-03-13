@@ -29,6 +29,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.experiment.VMFactory;
 import cws.core.log.WorkflowLog;
 
 public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent, Provisioner, Scheduler, VMListener, JobListener, DAGJobListener {
@@ -121,6 +122,16 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         return actualFinishTime;
     }
     
+    public double getEstimatedProvisioningDelay() {
+    	//return 70.0;
+    	return 0.0;
+    }
+    
+    public double getEstimatedDeprovisioningDelay() {
+    	//return 25.0;
+    	return 0.0;
+    }
+    
     /**
      * Develop a plan for running as many DAGs as we can
      */
@@ -145,9 +156,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         for (Resource r : plan.resources) {
             // Create VM
             VMType type = r.vmtype;
-            VM vm = new VM(type.mips, 1, 1, type.price);
-            vm.setProvisioningDelay(0.0);
-            vm.setDeprovisioningDelay(0.0);
+            VM vm = VMFactory.createVM(type.mips, 1, 1, type.price);
             
             // Build task<->vm mappings
             LinkedList<Task> vmQueue = new LinkedList<Task>();
@@ -161,6 +170,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             
             // Launch the VM at its appointed time
             launchVM(vm, r.getStart());
+
         }
         
         // Sanity check
@@ -244,6 +254,8 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         CriticalPath path = new CriticalPath(order, runtimes);
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
+        // subtract estimates for provisioning and deprovisioning delays
+        spare = spare - (getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay()); 
         for (int i=0; i<numlevels; i++) {
             
             double taskPart = alpha * (totalTasksByLevel[i]/totalTasks);
@@ -325,7 +337,9 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         if (job.getResult() != Result.SUCCESS) {
             // FIXME What if the job failed?
             // We need to re-queue the task
-            throw new RuntimeException("Job failed!");
+            // currently we do nothing - probably we are past the deadline 
+        	//return;
+        	throw new RuntimeException("Job failed!");
         }
         
         // Sanity check
@@ -380,6 +394,12 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     
     private void terminateVM(VM vm) {
         CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
+    }
+    
+    private void terminateVM(VM vm, double end) {
+        double now = CloudSim.clock();
+        double delay = end - now;
+        CloudSim.send(engine.getId(), cloud.getId(), delay, VM_TERMINATE, vm);
     }
     
     private void submitJob(VM vm, Job job) {
@@ -453,7 +473,11 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         }
         
         if (actualFinishTime > getDeadline()) {
-            throw new RuntimeException("Runtime exceeded deadline: "+actualFinishTime);
+            //throw new RuntimeException("Runtime exceeded deadline: "+actualFinishTime);
+        }
+
+        if (getActualCost() > getBudget()) {
+            //throw new RuntimeException("Cost exceeded budget: "+getActualCost());
         }
         
         if (shouldGenerateLog()) {
@@ -525,7 +549,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             }
             double last = schedule.lastKey();
             Slot lastSlot = schedule.get(last);
-            return last + lastSlot.duration;
+            return last + lastSlot.duration + getEstimatedDeprovisioningDelay(); // add estimate of deprovisioning time
         }
         
         public int getHours() {

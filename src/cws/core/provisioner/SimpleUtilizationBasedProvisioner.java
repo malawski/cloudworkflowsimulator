@@ -11,6 +11,7 @@ import cws.core.Provisioner;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
+import cws.core.experiment.VMFactory;
 
 public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner implements Provisioner, WorkflowEvent {
 
@@ -18,6 +19,12 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 	private static final double UPPER_THRESHOLD = 0.90;
 	// below this utilization threshold we start deprovisioning vms
 	private static final double LOWER_THRESHOLD = 0.70;
+	
+	// conservative estimate of deprovisioning delay
+	//private static final double DEPROVISIONING_DELAY_ESTIMATE = 25.0;
+	// optimistic estimate of deprovisioning delay
+	private static final double DEPROVISIONING_DELAY_ESTIMATE = 1.0;
+	
 	
 	// number of initially provisioned VMs to be used for setting limits for autoscaling
 	private int initialNumVMs = 0;
@@ -65,8 +72,8 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 			// seconds till next full hour
 			double secondsRemaining = vmHours*3600.0-vmRuntime;
 			
-			// we add "magic number" 1.0 to include also the deprovisioning time
-			if (secondsRemaining<PROVISIONER_INTERVAL+1.0) {
+			// we add delay estimate to include also the deprovisioning time
+			if (secondsRemaining<PROVISIONER_INTERVAL+DEPROVISIONING_DELAY_ESTIMATE) {
 				completingVMs.add(vm);
 			}
 		}
@@ -146,9 +153,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 		// then: deploy new instance
 		if (! finishing_phase && utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS <= getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 			
-			VM vm = new VM(1000, 1, 1.0, 1.0);
-            vm.setProvisioningDelay(0.0);
-            vm.setDeprovisioningDelay(0.0);
+			VM vm =VMFactory.createVM(1000, 1, 1.0, 1.0);
 			Log.printLine(CloudSim.clock() + " Starting VM: " + vm.getId());
 			CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
 			
@@ -204,7 +209,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 			double secondsRemaining = vmHours*3600.0-vmRuntime;
 			
 			//terminate only vms that have less seconds remaining than a defined threshold
-			if (secondsRemaining<PROVISIONER_INTERVAL+1.0) {
+			if (secondsRemaining<PROVISIONER_INTERVAL+DEPROVISIONING_DELAY_ESTIMATE) {
 				vmIt.remove();
 				removed.add(vm);
 				Log.printLine(CloudSim.clock() + " Terminating VM: " + vm.getId());

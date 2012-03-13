@@ -60,8 +60,8 @@ public class SPSS extends StaticAlgorithm {
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = new CriticalPath(order, runtimes);
         double criticalPath = path.getCriticalPathLength();
-        Log.printLine(" Critical path: "+criticalPath);
-        if (criticalPath > getDeadline()) {
+		Log.printLine(" Critical path: "+criticalPath);
+        if (criticalPath > getDeadline()+getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay()) {
             throw new NoFeasiblePlan(
                     "Best critical path ("+criticalPath+") " +
                     "> deadline ("+getDeadline()+")");
