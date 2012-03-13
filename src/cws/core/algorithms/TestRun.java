@@ -10,6 +10,7 @@ import java.util.Random;
 
 import org.cloudbus.cloudsim.Log;
 
+import cws.core.UniformRuntimeDistribution;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.DAGParser;
@@ -50,7 +51,7 @@ public class TestRun {
     }
     
     public static void usage() {
-        System.err.printf("Usage: %s application inputdir outputdir distribution ensembleSize scalingFactor algorithm seed\n\n", TestRun.class.getName());
+        System.err.printf("Usage: %s application inputdir outputfile distribution ensembleSize scalingFactor algorithm seed runtimeVariance\n\n", TestRun.class.getName());
         System.exit(1);
     }
     
@@ -63,7 +64,7 @@ public class TestRun {
         double mips = 1;
         double price = 1;
         
-        if (args.length != 8) {
+        if (args.length != 9) {
             usage();
         }
         
@@ -76,6 +77,7 @@ public class TestRun {
         double scalingFactor = 1.0;
         String algorithm = "SPSS";
         int seed = 0;
+        double runtimeVariance = 0.0;
         */
         
         // Disable cloudsim logging
@@ -83,29 +85,26 @@ public class TestRun {
         
         String application = args[0];
         File inputdir = new File(args[1]);
-        File outputdir = new File(args[2]);
+        File outputfile = new File(args[2]);
         String distribution = args[3];
         int ensembleSize = Integer.parseInt(args[4]);
         double scalingFactor = Double.parseDouble(args[5]);
         String algorithm = args[6];
         int seed = Integer.parseInt(args[7]);
+        double runtimeVariance = Double.parseDouble(args[8]);
         
         System.out.printf("application = %s\n", application);
         System.out.printf("inputdir = %s\n", inputdir);
-        System.out.printf("outputdir = %s\n", outputdir);
+        System.out.printf("outputfile = %s\n", outputfile);
         System.out.printf("distribution = %s\n", distribution);
         System.out.printf("ensembleSize = %d\n", ensembleSize);
         System.out.printf("scalingFactor = %f\n", scalingFactor);
         System.out.printf("algorithm = %s\n", algorithm);
         System.out.printf("seed = %d\n", seed);
-        
-        File outfile = new File(outputdir, 
-                String.format("%s_%s_size%d_scale%.1f_%s_seed%d.dat", 
-                        application, distribution, ensembleSize, scalingFactor, algorithm, seed));
+        System.out.printf("runtimeVariance = %f\n", runtimeVariance);
         
         // Determine the distribution
         String[] names = null;
-        
         String inputname = inputdir.getAbsolutePath() + "/" + application;
         if ("uniform_unsorted".equals(distribution)) {
             
@@ -182,9 +181,9 @@ public class TestRun {
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
         
-        PrintStream out = new PrintStream(new FileOutputStream(outfile));
+        PrintStream out = new PrintStream(new FileOutputStream(outputfile));
         
-        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan");
+        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan,runtimeVariance");
         
         for (double budget = minBudget; budget <= maxBudget; budget += budgetStep) {
             for (double deadline = minDeadline; deadline <= maxDeadline; deadline+= deadlineStep) {
@@ -199,16 +198,21 @@ public class TestRun {
                     throw new RuntimeException("Unknown algorithm: "+algorithm);
                 }
                 
+                if (runtimeVariance > 0.0) {
+                    a.getVmFactory().setRuntimeDistribution(
+                            new UniformRuntimeDistribution(seed, runtimeVariance));
+                }
+                
                 a.simulate(algorithm);
                 
                 double planningTime = a.getPlanningnWallTime() / 1.0e9;
                 double simulationTime = a.getSimulationWallTime() / 1.0e9;
                 
-                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f\n", 
+                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f\n", 
                         application, distribution, seed, ensembleSize, scalingFactor, budget, deadline, 
                         a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
                         planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(), 
-                        a.getActualFinishTime());
+                        a.getActualFinishTime(), runtimeVariance);
             }
         }
         
