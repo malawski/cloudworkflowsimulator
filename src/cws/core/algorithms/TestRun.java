@@ -17,6 +17,7 @@ import cws.core.dag.DAGParser;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.experiment.DAGListGenerator;
+import cws.core.experiment.VMFactory;
 
 public class TestRun {
     
@@ -199,7 +200,7 @@ public class TestRun {
                 }
                 
                 if (runtimeVariance > 0.0) {
-                    a.getVmFactory().setRuntimeDistribution(
+                    VMFactory.setRuntimeDistribution(
                             new UniformRuntimeDistribution(seed, runtimeVariance));
                 }
                 

@@ -174,11 +174,9 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         }
         
         // Sanity check
-        /*
         if (admittedDAGs.size() == 0) {
-            throw new RuntimeException("No DAGs admitted");
+            System.err.println("WARNING: No DAGs admitted");
         }
-        */
         
         // Submit admitted DAGs
         for (DAG dag : admittedDAGs) {
@@ -336,10 +334,9 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     public void jobFinished(Job job) {
         if (job.getResult() != Result.SUCCESS) {
             // FIXME What if the job failed?
-            // We need to re-queue the task
-            // currently we do nothing - probably we are past the deadline 
-        	//return;
-        	throw new RuntimeException("Job failed!");
+            // We need to re-queue the task currently we do nothing - probably 
+            // we are past the deadline 
+            throw new RuntimeException("Job failed!");
         }
         
         // Sanity check
@@ -394,12 +391,6 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     
     private void terminateVM(VM vm) {
         CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
-    }
-    
-    private void terminateVM(VM vm, double end) {
-        double now = CloudSim.clock();
-        double delay = end - now;
-        CloudSim.send(engine.getId(), cloud.getId(), delay, VM_TERMINATE, vm);
     }
     
     private void submitJob(VM vm, Job job) {
@@ -473,11 +464,11 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         }
         
         if (actualFinishTime > getDeadline()) {
-            //throw new RuntimeException("Runtime exceeded deadline: "+actualFinishTime);
+            System.err.println("WARNING: Exceeded deadline: "+actualFinishTime+">"+getDeadline());
         }
-
+        
         if (getActualCost() > getBudget()) {
-            //throw new RuntimeException("Cost exceeded budget: "+getActualCost());
+            System.err.println("WARNING: Cost exceeded budget: "+getActualCost()+">"+getBudget());
         }
         
         if (shouldGenerateLog()) {

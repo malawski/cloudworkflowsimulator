@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.distributions.LognormalDistr;
 
 import cws.core.Cloud;
 import cws.core.DAGJob;
@@ -85,6 +84,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         scheduler.setWorkflowEngine(engine);
         
         EnsembleManager em = new EnsembleManager(getDAGs(), engine);
+        em.addDAGJobListener(this);
         
         WorkflowLog log = null;
         if (shouldGenerateLog()) {
@@ -104,8 +104,6 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
         Log.printLine(CloudSim.clock() + " Total budget " + getBudget());
         
-        
-        
         // Launch VMs
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numVMs; i++) {
@@ -117,6 +115,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         simulationStartWallTime = System.nanoTime();
         
         CloudSim.startSimulation();
+        
         simulationFinishWallTime = System.nanoTime();
         
         if (shouldGenerateLog()) {
@@ -139,11 +138,11 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         }
         
         if (actualFinishTime > getDeadline()) {
-            //throw new RuntimeException("Exceeded deadline: "+actualFinishTime);
+            System.err.println("WARNING: Exceeded deadline: "+actualFinishTime+">"+getDeadline());
         }
         
         if (getActualCost() > getBudget()) {
-            //throw new RuntimeException("Cost exceeded budget: "+getActualCost());
+            System.err.println("WARNING: Cost exceeded budget: "+getActualCost()+">"+getBudget());
         }
     }
 

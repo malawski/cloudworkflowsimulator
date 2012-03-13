@@ -95,6 +95,9 @@ public class VM extends SimEntity implements WorkflowEvent {
     /** Delay from when the VM is terminated until it is no longer charged */
     private double deprovisioningDelay = DEFAULT_DEPROVISIONING_DELAY;
     
+    /** Varies the actual runtime of tasks according to the specified distribution */
+    private RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
+    
     public VM(int mips, int cores, double bandwidth, double price) {
         super("VM"+(next_id++));
         this.mips = mips;
@@ -194,6 +197,14 @@ public class VM extends SimEntity implements WorkflowEvent {
     
     public double getPrice() {
         return price;
+    }
+    
+    public RuntimeDistribution getRuntimeDistribution() {
+        return runtimeDistribution;
+    }
+    
+    public void setRuntimeDistribution(RuntimeDistribution runtimeDistribution) {
+        this.runtimeDistribution = runtimeDistribution;
     }
     
     /** 
@@ -330,9 +341,13 @@ public class VM extends SimEntity implements WorkflowEvent {
         
         // Compute the duration of the job on this VM
         double size = job.getSize();
-        double duration = size / mips;
-        send(getId(), duration, JOB_FINISHED, job);
-        Log.printLine(CloudSim.clock() + " Starting job " + job.getID() + " on VM " + job.getVM().getId() + " duration " + duration);
+        double runtime = size / mips;
+        
+        // Compute actual runtime
+        double actualRuntime = this.runtimeDistribution.getActualRuntime(runtime);
+        
+        send(getId(), actualRuntime, JOB_FINISHED, job);
+        Log.printLine(CloudSim.clock() + " Starting job " + job.getID() + " on VM " + job.getVM().getId() + " duration " + actualRuntime);
 
         
         // One core is now busy running the job
