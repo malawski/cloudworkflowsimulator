@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.UniformRuntimeDistribution;
 import cws.core.dag.DAG;
@@ -51,8 +52,21 @@ public class TestRun {
         }
     }
     
+    static class ConstantDistribution implements ContinuousDistribution {
+        private double delay;
+        
+        public ConstantDistribution(double delay) {
+            this.delay = delay;
+        }
+        
+        @Override
+        public double sample() {
+            return this.delay;
+        }
+    }
+    
     public static void usage() {
-        System.err.printf("Usage: %s application inputdir outputfile distribution ensembleSize scalingFactor algorithm seed runtimeVariance\n\n", TestRun.class.getName());
+        System.err.printf("Usage: %s application inputdir outputfile distribution ensembleSize scalingFactor algorithm seed runtimeVariance delay\n\n", TestRun.class.getName());
         System.exit(1);
     }
     
@@ -65,7 +79,7 @@ public class TestRun {
         double mips = 1;
         double price = 1;
         
-        if (args.length != 9) {
+        if (args.length != 10) {
             usage();
         }
         
@@ -79,6 +93,7 @@ public class TestRun {
         String algorithm = "SPSS";
         int seed = 0;
         double runtimeVariance = 0.0;
+        double delay = 0.0;
         */
         
         // Disable cloudsim logging
@@ -93,6 +108,7 @@ public class TestRun {
         String algorithm = args[6];
         int seed = Integer.parseInt(args[7]);
         double runtimeVariance = Double.parseDouble(args[8]);
+        double delay = Double.parseDouble(args[9]);
         
         System.out.printf("application = %s\n", application);
         System.out.printf("inputdir = %s\n", inputdir);
@@ -103,6 +119,7 @@ public class TestRun {
         System.out.printf("algorithm = %s\n", algorithm);
         System.out.printf("seed = %d\n", seed);
         System.out.printf("runtimeVariance = %f\n", runtimeVariance);
+        System.out.printf("delay = %f\n", delay);
         
         // Determine the distribution
         String[] names = null;
@@ -164,14 +181,10 @@ public class TestRun {
             maxCost += s.minCost;
         }
         
-        // Add 10 percent
-        minTime *= 1.1;
-        minCost *= 1.1;
-        
         int nbudgets = 10;
         int ndeadlines = 10;
         
-        double minBudget = Math.ceil(minCost);
+        double minBudget =Math.ceil(minCost);
         double maxBudget = Math.ceil(maxCost);
         double budgetStep = (maxBudget - minBudget) / (nbudgets - 1);
         
@@ -204,7 +217,16 @@ public class TestRun {
                             new UniformRuntimeDistribution(seed, runtimeVariance));
                 }
                 
+                if (delay > 0.0) {
+                    VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(delay));
+                }
+                
+                System.out.println("\nBudget="+budget);
+                System.out.println("Deadline="+deadline);
                 a.simulate(algorithm);
+                System.out.println("Cost="+a.getActualCost());
+                System.out.println("Makespan="+a.getActualFinishTime());
+                System.out.println("Complete="+a.getScoreBitString());
                 
                 double planningTime = a.getPlanningnWallTime() / 1.0e9;
                 double simulationTime = a.getSimulationWallTime() / 1.0e9;
