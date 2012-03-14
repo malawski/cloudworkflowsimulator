@@ -34,11 +34,11 @@ public class Experiment {
         // For mean = 60 and stddev = 10:  mu = 4.080645 sigma = 0.1655264        
         // For mean = 20 and stddev = 5:  mu = 2.96542, sigma = 0.09975135
 
-		ContinuousDistribution provisioningDelayDistribution = new LognormalDistr(new java.util.Random(param.getRunID()),4.080645, 0.1655264);
-		ContinuousDistribution deprovisioningDelayDistribution = new LognormalDistr(new java.util.Random(param.getRunID()), 2.96542, 0.09975135);
+		//ContinuousDistribution provisioningDelayDistribution = new LognormalDistr(new java.util.Random(param.getRunID()),4.080645, 0.1655264);
+		//ContinuousDistribution deprovisioningDelayDistribution = new LognormalDistr(new java.util.Random(param.getRunID()), 2.96542, 0.09975135);
 		
-		VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
-		VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
+		//VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
+		//VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
 		Algorithm algorithm = AlgorithmFactory.createAlgorithm(param);
 		
@@ -117,15 +117,16 @@ public class Experiment {
 	 */
 	
 	public static void generateSeries(String runDirectory, String group, String dagPath, String[] dags, double budget, double price,
-			int N, int step, int start, double max_scaling, double alpha, double taskDilatation, int runID) {
+			double N, double step, double start, double max_scaling, double alpha, double taskDilatation, int runID) {
 		
 		double deadline;
 				 
 		new File(runDirectory).mkdir();
 		
-		String algorithms[] = {"SPSS", "DPDS", "WADPDS", "MaxMin", "Wide", "Backtrack"};
+//		String algorithms[] = {"SPSS", "DPDS", "WADPDS", "MaxMin", "Wide", "Backtrack"};
+		String algorithms[] = {"DPDS", "WADPDS"};
 		
-		for (int i=start; i<= N; i+=step) {
+		for (double i=start; i<= N; i+=step) {
 			deadline = 3600*i; //seconds
 			
 			for (String alg : algorithms) {
@@ -292,7 +293,7 @@ public class Experiment {
 	 */
 	
 	public static void generateSeries(String runDirectory, String group, String dagPath, String dagName, double budget, double price,
-			int numDAGs, int N, int step, int start, double max_scaling, double alpha, double taskDilatation, int runID) {
+			int numDAGs, double N, double step, double start, double max_scaling, double alpha, double taskDilatation, int runID) {
 		
 		String[] dags = new String[numDAGs];
 		
@@ -318,7 +319,7 @@ public class Experiment {
 	 */
 	
 	public static void generateConstantSeries(String runDirectory, String group, String dagPath, String dagName, double budget, double price,
-			int numDAGs, int N, int step, int start,  double max_scaling, double taskDilatation, double alpha) {
+			int numDAGs, double N, double step, double start,  double max_scaling, double taskDilatation, double alpha) {
 		generateSeries(runDirectory, group, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, taskDilatation, 0);
 	}
 	
@@ -328,7 +329,7 @@ public class Experiment {
 	 */
 	
 	public static void generateSeriesRepeat(String runDirectory, String group, String dagPath, String dagName, double budget, double price,
-			int numDAGs, int N, int step, int start, double max_scaling, double alpha, double taskDilatation, int runs) {
+			int numDAGs, double N, double step, double start, double max_scaling, double alpha, double taskDilatation, int runs) {
 		
 		for (int i=0; i< runs; i++) {
 			generateSeries(runDirectory, group, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, taskDilatation, i);

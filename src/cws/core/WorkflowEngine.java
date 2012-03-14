@@ -251,7 +251,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         Task t = j.getTask();
         
         // If the job succeeded
-        if (j.getResult() == Job.Result.SUCCESS) {
+        if (j.getResult() == Job.Result.SUCCESS && CloudSim.clock() <= deadline) {
             
             // Mark the task as complete in the DAG
             dj.completeTask(t);

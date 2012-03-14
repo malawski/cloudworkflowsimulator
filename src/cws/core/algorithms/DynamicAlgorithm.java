@@ -154,7 +154,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         }
         
         if (getActualCost() > getBudget()) {
-            System.err.println("WARNING: Cost exceeded budget: "+getActualCost()+">"+getBudget());
+            System.err.println("WARNING: Cost exceeded budget: "+getActualCost()+">"+getBudget() + " deadline: " +getDeadline()+ " Estimated num of VMs " + numVMs);
         }
     }
 

@@ -119,7 +119,7 @@ public class ExperimentResult {
 		}
 		
 		//remove trailing space
-		prioritiesBuffer.deleteCharAt(prioritiesBuffer.length()-1);
+		if (prioritiesBuffer.length() >0) prioritiesBuffer.deleteCharAt(prioritiesBuffer.length()-1);
 		prioritiesBuffer.append("\n");
 		
 		return prioritiesBuffer.toString();
@@ -137,7 +137,7 @@ public class ExperimentResult {
 		for (double size : getSizes()) {
 			sizesBuffer.append(size + " ");
 		}
-		sizesBuffer.deleteCharAt(sizesBuffer.length()-1);
+		if (sizesBuffer.length()>0) sizesBuffer.deleteCharAt(sizesBuffer.length()-1);
 		sizesBuffer.append("\n");
 		
 		return sizesBuffer.toString();
