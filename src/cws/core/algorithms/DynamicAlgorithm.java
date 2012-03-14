@@ -94,9 +94,21 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
             em.addDAGJobListener(log);
         }
         
-        // Calculate estimated number of VMs to consume budget evenly before deadline
-        // ceiling is used to start more vms so that the budget is consumed just before deadline
-        int numVMs = (int) Math.ceil(getBudget() / (getDeadline() / (60 * 60)) / price);
+        // Calculate estimated number of VMs to consume budget before deadline
+        double wallHours = getDeadline() / (60*60);
+        double cpuHours = getBudget() / price;
+        int numVMs;
+        if (wallHours < 1.0) {
+            // floor is used to prevent the initial provisioning from going over 
+            // budget for short deadlines
+            numVMs = (int) Math.floor(cpuHours);
+        } else {
+            // ceiling is used to start more vms so that the budget is consumed 
+            // just before deadline for longer deadlines
+            numVMs = (int) Math.ceil(cpuHours / wallHours);
+        }
+        
+        System.out.println("NumVMs: "+numVMs);
         
         // Check if we can afford at least one VM
         if (getBudget()<price) numVMs = 0;
