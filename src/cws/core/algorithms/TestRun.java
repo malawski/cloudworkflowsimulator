@@ -221,12 +221,7 @@ public class TestRun {
                     VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(delay));
                 }
                 
-                System.out.println("\nBudget="+budget);
-                System.out.println("Deadline="+deadline);
                 a.simulate(algorithm);
-                System.out.println("Cost="+a.getActualCost());
-                System.out.println("Makespan="+a.getActualFinishTime());
-                System.out.println("Complete="+a.getScoreBitString());
                 
                 double planningTime = a.getPlanningnWallTime() / 1.0e9;
                 double simulationTime = a.getSimulationWallTime() / 1.0e9;
