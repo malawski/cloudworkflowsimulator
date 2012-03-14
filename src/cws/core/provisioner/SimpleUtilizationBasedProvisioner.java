@@ -21,9 +21,9 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 	private static final double LOWER_THRESHOLD = 0.70;
 	
 	// conservative estimate of deprovisioning delay
-	private static final double DEPROVISIONING_DELAY_ESTIMATE = 25.0;
+	//private static final double DEPROVISIONING_DELAY_ESTIMATE = 25.0;
 	// optimistic estimate of deprovisioning delay
-	//private static final double DEPROVISIONING_DELAY_ESTIMATE = 1.0;
+	private static final double DEPROVISIONING_DELAY_ESTIMATE = 1.0;
 	
 	
 	// number of initially provisioned VMs to be used for setting limits for autoscaling
