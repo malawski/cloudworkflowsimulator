@@ -138,22 +138,22 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         }
         
         if (actualFinishTime > getDeadline()) {
-            System.err.println("WARNING: Exceeded deadline: "+actualFinishTime+">"+getDeadline());
+            System.err.println("WARNING: Exceeded deadline: "+actualFinishTime+">"+getDeadline()+" budget: "+getBudget()+" Estimated num of VMs "+numVMs);
         }
         
         if (getActualCost() > getBudget()) {
-            System.err.println("WARNING: Cost exceeded budget: "+getActualCost()+">"+getBudget() + " deadline: " +getDeadline()+ " Estimated num of VMs " + numVMs);
+            System.err.println("WARNING: Cost exceeded budget: "+getActualCost()+">"+getBudget()+" deadline: "+getDeadline()+" Estimated num of VMs "+numVMs);
         }
     }
 
-	@Override
-	public long getSimulationWallTime() {
-		return simulationFinishWallTime - simulationStartWallTime;
-	}
+    @Override
+    public long getSimulationWallTime() {
+        return simulationFinishWallTime - simulationStartWallTime;
+    }
 
-	@Override
-	public long getPlanningnWallTime() {
-		// planning is always 0 for dynamic algorithms
-		return 0;
-	}
+    @Override
+    public long getPlanningnWallTime() {
+        // planning is always 0 for dynamic algorithms
+        return 0;
+    }
 }
