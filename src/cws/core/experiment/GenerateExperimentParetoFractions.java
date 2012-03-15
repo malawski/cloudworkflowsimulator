@@ -56,8 +56,8 @@ public class GenerateExperimentParetoFractions {
 			dags = DAGListGenerator.generateDAGListPareto(new Random(runID), dagName, 50);
 	        int ndeadlines = 10;
 
-			maxHours = 4858;
-			startHours = 559;
+			maxHours = 4858/3600.0;
+			startHours = 559/3600.0;
 			stepHours = (maxHours-startHours) / (ndeadlines -1);
 			maxScaling = 0;
 
