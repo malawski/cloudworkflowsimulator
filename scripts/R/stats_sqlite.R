@@ -81,7 +81,9 @@ plot_series <- function(prefix, plot_title, application, budgets, algorithms, li
 
 
 driver<-dbDriver("SQLite")
-connect<-dbConnect(driver, dbname = "test3.sqlite")
+connect<-dbConnect(driver, dbname = "fractions-nodelays.sqlite")
+#connect<-dbConnect(driver, dbname = "pareto-nodelays-all.sqlite")
+#connect<-dbConnect(driver, dbname = "test3.sqlite")
 dbListTables(connect)
 
 q <- dbSendQuery(connect, statement = "PRAGMA synchronous = OFF")
@@ -142,7 +144,7 @@ for(app in 1:n_applications) {
 	print(n_deadlines)
 	
 	
-	q <- dbSendQuery(connect, statement = "SELECT DISTINCT algorithmName as algorithm FROM experiment ")
+	q <- dbSendQuery(connect, statement = "SELECT DISTINCT algorithmName as algorithm FROM experiment WHERE algorithm LIKE '%P%S' ")
 	algorithms <- fetch(q)$algorithm
 	print(algorithms)
 	
@@ -192,21 +194,21 @@ for(app in 1:n_applications) {
 	}
 	
 	# read priorities and compute score
-	for(alg in 1:n_algorithms){
-		statement = sprintf("SELECT group_concat(priority) as priorities FROM priorities JOIN experiment ON experiment.id = priorities.experiment_id WHERE application = '%s' AND algorithmName = '%s' GROUP by deadline, budget, runId", 
-				application,
-				algorithms[[alg]])
-		print(statement)
-		q <- dbSendQuery(connect, statement = statement)
-		priorities = fetch(q,-1)$priorities
-		scores = matrix.bigq(nrow=1, ncol=length(priorities))
-		for(i in 1:length(priorities)) {
-			scores[1,i] <- sum(as.bigq(2^as.numeric(unlist(strsplit(priorities[i], ",")))))
-		}
-		scores = scores/2^(max_priority)
-		list_e[[alg]] = array(scores,  dim=c(n_runIds, n_budgets, n_deadlines))
-		list_d[[alg]] = array(as.double(scores),  dim=c(n_runIds, n_budgets, n_deadlines))
-	}
+#	for(alg in 1:n_algorithms){
+#		statement = sprintf("SELECT group_concat(priority) as priorities FROM priorities JOIN experiment ON experiment.id = priorities.experiment_id WHERE application = '%s' AND algorithmName = '%s' GROUP by deadline, budget, runId", 
+#				application,
+#				algorithms[[alg]])
+#		print(statement)
+#		q <- dbSendQuery(connect, statement = statement)
+#		priorities = fetch(q,-1)$priorities
+#		scores = matrix.bigq(nrow=1, ncol=length(priorities))
+#		for(i in 1:length(priorities)) {
+#			scores[1,i] <- sum(as.bigq(2^as.numeric(unlist(strsplit(priorities[i], ",")))))
+#		}
+#		scores = scores/2^(max_priority)
+#		list_e[[alg]] = array(scores,  dim=c(n_runIds, n_budgets, n_deadlines))
+#		list_d[[alg]] = array(as.double(scores),  dim=c(n_runIds, n_budgets, n_deadlines))
+#	}
 	
 	
 	# create lists of averaged matrices
@@ -246,12 +248,12 @@ for(app in 1:n_applications) {
 }
 
 
-print(global_titles)
-print(global_rankings_m)
-print(global_rankings_s)
+#print(global_titles)
+#print(global_rankings_m)
+#print(global_rankings_s)
 # does not make sense, should reverse the condition to min
 #print(global_rankings_c)
-print(global_rankings_d)
+#print(global_rankings_d)
 
 
 #"DPDS"      400 267 227 134 65

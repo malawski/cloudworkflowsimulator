@@ -75,7 +75,8 @@ plot_series <- function(prefix, plot_title, application, budgets, algorithms, li
 
 
 driver<-dbDriver("SQLite")
-connect<-dbConnect(driver, dbname = "pareto-dilated4.sqlite")
+connect<-dbConnect(driver, dbname = "pareto-dilated-nodelays.sqlite")
+#connect<-dbConnect(driver, dbname = "pareto-dilated4.sqlite")
 dbListTables(connect)
 
 q <- dbSendQuery(connect, statement = "PRAGMA synchronous = OFF")
@@ -174,7 +175,7 @@ for(app in 1:n_applications) {
 	print(n_deadlines)
 	
 	
-	q <- dbSendQuery(connect, statement = "SELECT DISTINCT algorithmName as algorithm FROM experiment ")
+	q <- dbSendQuery(connect, statement = "SELECT DISTINCT algorithmName as algorithm FROM experiment WHERE algorithm LIKE '%P%S' ORDER BY algorithm")
 	algorithms <- fetch(q)$algorithm
 	print(algorithms)
 	
