@@ -44,6 +44,12 @@ public class ExperimentDescription {
 	private int runID;
 	// task runtimes from the dag are multiplied by this factor; this parameter is useful to control the task granularity
 	private double taskDilatation;
+	// defines the maximum relative difference between estimated and actual task runtime, e.g. 0.50 means that task can run 50% longer than a given estimate
+	private double runtimeVariation;
+	// provisioning delay in seconds
+	private double delay;
+	// distribution of ensembles
+	private String distribution;
 
 	
 	
@@ -64,7 +70,7 @@ public class ExperimentDescription {
 	 */
 	
 	public ExperimentDescription(String group, String algorithmName, String runDirectory, String dagPath, String[] dags, double deadline, double budget, double price,
-			double maxScaling, double alpha, double taskDilatation, int runID) {
+			double maxScaling, double alpha, double taskDilatation, double runtimeVariation, double delay, String distribution, int runID) {
 		this.group = group;
 		this.algorithmName = algorithmName;
 		this.runDirectory = runDirectory;
@@ -77,6 +83,9 @@ public class ExperimentDescription {
 		this.alpha = alpha;
 		this.runID = runID;
 		this.taskDilatation = taskDilatation;
+		this.runtimeVariation = runtimeVariation;
+		this.delay = delay;
+		this.distribution = distribution;
 	}
 	
 	public ExperimentDescription(String propertyFileName) {
@@ -189,6 +198,30 @@ public class ExperimentDescription {
 	public void setTaskDilatation(double taskDilatation) {
 		this.taskDilatation = taskDilatation;
 	}
+	
+	public double getRuntimeVariation() {
+		return runtimeVariation;
+	}
+
+	public void setRuntimeVariation(double runtimeVariation) {
+		this.runtimeVariation = runtimeVariation;
+	}
+
+	public double getDelay() {
+		return delay;
+	}
+
+	public void setDelay(double delay) {
+		this.delay = delay;
+	}
+	
+	public String getDistribution() {
+		return distribution;
+	}
+
+	public void setDistribution(String distribution) {
+		this.distribution = distribution;
+	}
 
 	public void storeProperties(String fileName) {
 		Properties p = new Properties();
@@ -205,6 +238,9 @@ public class ExperimentDescription {
 		p.setProperty("runID", "" + runID);
 		p.setProperty("fileName", getFileName());
 		p.setProperty("taskDilatation", "" + taskDilatation);
+		p.setProperty("runtimeVariation", "" + runtimeVariation);
+		p.setProperty("delay", "" + delay);
+		p.setProperty("distribution", getDistribution());
 		FileOutputStream out;
 		try {
 			out = new FileOutputStream(fileName);
@@ -241,6 +277,9 @@ public class ExperimentDescription {
 		alpha = Double.parseDouble(p.getProperty("alpha"));
 		runID = Integer.parseInt(p.getProperty("runID"));
 		taskDilatation = Double.parseDouble(p.getProperty("taskDilatation"));
+		runtimeVariation = Double.parseDouble(p.getProperty("runtimeVariation"));
+		delay = Double.parseDouble(p.getProperty("delay"));
+		distribution = p.getProperty("distribution");
 		
 	}
 	
@@ -262,6 +301,7 @@ public class ExperimentDescription {
 		String fileName = 
 			group + "-" +
 			getAlgorithmName() + "-" + 
+			getDistribution() + "-" + 
 			getDags()[0]+
 			"x" + getDags().length + 
 			"d" + getDeadline() + 
@@ -269,6 +309,8 @@ public class ExperimentDescription {
 			"m" + getMax_scaling() +
 			"a" + getAlpha() + 
 			"t" + getTaskDilatation() +
+			"v" + getRuntimeVariation() +
+			"l" + getDelay() +
 			"r" + runID;
 		
 		return fileName;

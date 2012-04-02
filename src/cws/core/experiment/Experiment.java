@@ -1,8 +1,12 @@
 package cws.core.experiment;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 import org.cloudbus.cloudsim.distributions.LognormalDistr;
@@ -10,7 +14,9 @@ import org.cloudbus.cloudsim.distributions.LognormalDistr;
 import cws.core.algorithms.Algorithm;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
+import cws.core.dag.Task;
 import cws.core.log.WorkflowLog;
+import cws.core.dag.DAGStats;
 
 public class Experiment {
 	
@@ -41,6 +47,7 @@ public class Experiment {
 		//VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
 		Algorithm algorithm = AlgorithmFactory.createAlgorithm(param);
+		algorithm.setGenerateLog(true);
 		
 		String fileName = param.getRunDirectory() + File.separator + "output-" + param.getFileName();
 				
@@ -70,6 +77,9 @@ public class Experiment {
 		result.setNumFinishedDAGs(finished);
 		result.setPriorities(priorities);
 		result.setSizes(sizes);
+		
+		result.setActualFinishTime(algorithm.getActualFinishTime());
+		result.setScoreBitString(algorithm.getScoreBitString());
 		
 		return result;
 	}
@@ -117,30 +127,145 @@ public class Experiment {
 	 */
 	
 	public static void generateSeries(String runDirectory, String group, String dagPath, String[] dags, double budget, double price,
-			double N, double step, double start, double max_scaling, double alpha, double taskDilatation, int runID) {
+			double N, double step, double start, double max_scaling, double alpha, double taskDilatation, double runtimeVariation, double delay, String distribution, int runID) {
 		
 		double deadline;
 				 
 		new File(runDirectory).mkdir();
 		
 //		String algorithms[] = {"SPSS", "DPDS", "WADPDS", "MaxMin", "Wide", "Backtrack"};
-		String algorithms[] = {"DPDS", "WADPDS"};
+		String algorithms[] = {"SPSS", "DPDS", "WADPDS"};
 		
 		for (double i=start; i<= N; i+=step) {
 			deadline = 3600*i; //seconds
 			
 			for (String alg : algorithms) {
 				ExperimentDescription param = new ExperimentDescription(group,
-			        alg, runDirectory, dagPath, dags, deadline, budget, price, max_scaling, alpha, taskDilatation, runID);
+			        alg, runDirectory, dagPath, dags, deadline, budget, price, max_scaling, alpha, taskDilatation, runtimeVariation,  delay, distribution, runID);
 				String fileName = "input-" +  param.getFileName() + ".properties";
 				param.storeProperties(runDirectory + File.separator + fileName);
 			}
 
 		}
-
-
 		
 	}
+	
+	/**
+	 * Generates a series of experiments , calculates deadlines and budgets based on estimated cost and critical path of ensemble
+	 * @param runDirectory the directory with input and output files for this series
+	 * @param group prefix to prepend to generated output files
+	 * @param dagPath path to dags
+	 * @param dags array of file names
+	 * @param price VM hour price in $
+	 * @param max_scaling max autoscaling factor
+	 * @param runID id of this series
+	 */
+	
+	public static void generateSeries(String runDirectory, String group, String dagPath, String dagName, int ensembleSize, String distribution, String algorithms[], double price,
+			 double max_scaling, double alpha, double taskDilatation, double runtimeVariation, double delay, int runID) {
+		
+        // WARNING: These parameters are fixed in the algorithm! Don't change here only!
+        double mips = 1;
+        				 
+		new File(runDirectory).mkdir();
+		
+//		String algorithms[] = {"SPSS", "DPDS", "WADPDS", "MaxMin", "Wide", "Backtrack"};
+//		String algorithms[] = {"SPSS", "DPDS", "WADPDS"};
+		
+		String[] dagNames = null;
+		
+        if ("uniform_unsorted".equals(distribution)) {
+            
+            dagNames = DAGListGenerator.generateDAGListUniformUnsorted(new Random(runID), dagName, ensembleSize);
+            
+        } else if ("uniform_sorted".equals(distribution)) {
+            
+        	dagNames = DAGListGenerator.generateDAGListUniform(new Random(runID), dagName, ensembleSize);
+            
+        } else if ("pareto_unsorted".equals(distribution)) {
+            
+        	dagNames = DAGListGenerator.generateDAGListParetoUnsorted(new Random(runID), dagName, ensembleSize);
+            
+        } else if ("pareto_sorted".equals(distribution)) {
+            
+        	dagNames = DAGListGenerator.generateDAGListPareto(new Random(runID), dagName, ensembleSize);
+            
+        } else if ("constant".equals(distribution)){
+            
+        	dagNames = DAGListGenerator.generateDAGListConstant(new Random(runID), dagName, ensembleSize);
+            
+        } else if (distribution.startsWith("fixed")) {
+            
+            int size = Integer.parseInt(distribution.substring(5));
+            dagNames = DAGListGenerator.generateDAGListConstant(dagName, size, ensembleSize);
+            
+        } else {
+            System.err.println("Unrecognized distribution: "+distribution);
+            System.exit(1);
+        }
+		
+		
+        double minTime = Double.MAX_VALUE;
+        double minCost = Double.MAX_VALUE;
+        double maxCost = 0.0;
+        double maxTime = 0.0;
+       
+        
+        List<DAG> dags = new ArrayList<DAG>();
+        for (String name : dagNames) {
+        	String fileName = dagPath + File.separator + name;
+            //System.out.println(fileName);
+            DAG dag = DAGParser.parseDAG(new File(fileName));
+            dags.add(dag);
+            
+            if (taskDilatation > 1.0) {
+                for (String tid : dag.getTasks()) {
+                    Task t = dag.getTask(tid);
+                    t.size *= taskDilatation;
+                }
+            }
+            
+            DAGStats s = new DAGStats(dag, mips, price);
+            
+            minTime = Math.min(minTime, s.getCriticalPath());
+            minCost = Math.min(minCost, s.getMinCost());
+            
+            maxTime += s.getCriticalPath();
+            maxCost += s.getMinCost();
+        }
+        
+        int nbudgets = 10;
+        int ndeadlines = 10;
+        
+        double minBudget =Math.ceil(minCost);
+        double maxBudget = Math.ceil(maxCost);
+        double budgetStep = (maxBudget - minBudget) / (nbudgets - 1);
+        
+        double minDeadline = Math.ceil(minTime);
+        double maxDeadline = Math.ceil(maxTime);
+        double deadlineStep = (maxDeadline - minDeadline) / (ndeadlines - 1);
+        
+        System.out.printf("application = %s, distribution = %s\n", dagName, distribution );
+        System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
+        System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
+
+    	// we add 0.00001 as epsilon to avoid rounding errors
+
+        for (double budget = minBudget; budget <= maxBudget + 0.00001; budget += budgetStep) {
+            for (double deadline = minDeadline; deadline <= maxDeadline + 0.00001; deadline+= deadlineStep) {
+		
+			
+            	for (String alg : algorithms) {
+            		ExperimentDescription param = new ExperimentDescription(group,
+            				alg, runDirectory, dagPath, dagNames, deadline, budget, price, max_scaling, alpha, taskDilatation, runtimeVariation,  delay, distribution, runID);
+            		String fileName = "input-" +  param.getFileName() + ".properties";
+            			param.storeProperties(runDirectory + File.separator + fileName);
+            	}
+            }
+		}
+		
+	}
+	
 	
 	
 	/**
@@ -191,11 +316,11 @@ public class Experiment {
 			
 			
 			resultsSPSS[i] = experiment.runExperiment(new ExperimentDescription(group,
-			        "SPSS", "output", dagPath, dags, deadline, budget, price, max_scaling, alpha, 1.0, runID));
+			        "SPSS", "output", dagPath, dags, deadline, budget, price, max_scaling, alpha, 1.0, 0.0, 0.0, "pareto-sorted", runID));
 			resultsAware[i] = experiment.runExperiment(new ExperimentDescription(group,
-			        "WADPDS", "output", dagPath, dags, deadline, budget, price, max_scaling, alpha, 1.0, runID));
+			        "WADPDS", "output", dagPath, dags, deadline, budget, price, max_scaling, alpha, 1.0, 0.0, 0.0, "pareto-sorted", runID));
 			resultsSimple[i] = experiment.runExperiment(new ExperimentDescription(group,
-			        "DPDS", "output", dagPath, dags, deadline, budget, price, max_scaling, alpha, 1.0, runID));
+			        "DPDS", "output", dagPath, dags, deadline, budget, price, max_scaling, alpha, 1.0, 0.0, 0.0, "pareto-sorted", runID));
 		}
 		
 		// write number of dags finished
@@ -293,13 +418,13 @@ public class Experiment {
 	 */
 	
 	public static void generateSeries(String runDirectory, String group, String dagPath, String dagName, double budget, double price,
-			int numDAGs, double N, double step, double start, double max_scaling, double alpha, double taskDilatation, int runID) {
+			int numDAGs, double N, double step, double start, double max_scaling, double alpha, double taskDilatation, double runtimeVariation, double delay, String distribution, int runID) {
 		
 		String[] dags = new String[numDAGs];
 		
 		for (int i=0; i< numDAGs; i++) dags[i] = dagName;
 		
-		generateSeries(runDirectory, group, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, taskDilatation, runID);
+		generateSeries(runDirectory, group, dagPath, dags, budget, price, N, step, start, max_scaling, alpha, taskDilatation, runtimeVariation, delay, distribution, runID);
 
 	}
 	
@@ -319,8 +444,8 @@ public class Experiment {
 	 */
 	
 	public static void generateConstantSeries(String runDirectory, String group, String dagPath, String dagName, double budget, double price,
-			int numDAGs, double N, double step, double start,  double max_scaling, double taskDilatation, double alpha) {
-		generateSeries(runDirectory, group, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, taskDilatation, 0);
+			int numDAGs, double N, double step, double start,  double max_scaling, double taskDilatation, double runtimeVariation, double delay, double alpha) {
+		generateSeries(runDirectory, group, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, taskDilatation, runtimeVariation, delay, "constant", 0);
 	}
 	
 	/**
@@ -329,10 +454,10 @@ public class Experiment {
 	 */
 	
 	public static void generateSeriesRepeat(String runDirectory, String group, String dagPath, String dagName, double budget, double price,
-			int numDAGs, double N, double step, double start, double max_scaling, double alpha, double taskDilatation, int runs) {
+			int numDAGs, double N, double step, double start, double max_scaling, double alpha, double taskDilatation, double runtimeVariation, double delay,   int runs) {
 		
 		for (int i=0; i< runs; i++) {
-			generateSeries(runDirectory, group, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, taskDilatation, i);
+			generateSeries(runDirectory, group, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha, taskDilatation, runtimeVariation, delay, "constant",  i);
 		}	
 	}
 

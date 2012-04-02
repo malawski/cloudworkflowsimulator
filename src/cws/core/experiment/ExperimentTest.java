@@ -22,6 +22,8 @@ public class ExperimentTest {
 	double alpha = 0.7;
 	String runDirectory = "output";
 	double taskDilatation = 1.0;
+	double runtimeVariation = 0.0;
+	double delay = 0.0;
 
 	
 	int N;
@@ -49,7 +51,7 @@ public class ExperimentTest {
 		double[] budgets= {80.0, 160.0, 240.0, 320.0, 400.0};
 		
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, taskDilatation, runtimeVariation, delay, alpha);			
 		}		
 		
 	}
@@ -68,7 +70,7 @@ public class ExperimentTest {
 		double[] budgets= {80.0, 160.0, 240.0, 320.0, 400.0};
 		
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -87,7 +89,7 @@ public class ExperimentTest {
 		double[] budgets= {400.0, 800.0, 1200.0, 1600.0, 2000.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -107,7 +109,7 @@ public class ExperimentTest {
 		double[] budgets= {8000.0, 16000.0, 24000.0, 32000.0, 40000.0};
 		
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 			
 	}
@@ -126,7 +128,7 @@ public class ExperimentTest {
 		double[] budgets= {200.0, 400.0, 600.0, 800.0, 1000.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, taskDilatation,  alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, taskDilatation,  runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -145,7 +147,7 @@ public class ExperimentTest {
 		double[] budgets= {200.0, 400.0, 600.0, 800.0, 1000.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, taskDilatation,  alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, taskDilatation,  runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -164,7 +166,7 @@ public class ExperimentTest {
 		double[] budgets= {20.0, 40.0, 60.0, 80.0, 100.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -184,7 +186,7 @@ public class ExperimentTest {
 		double[] budgets= {2000.0, 4000.0, 6000.0, 8000.0, 10000.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -210,7 +212,7 @@ public class ExperimentTest {
 		double[] budgets= {80.0, 160.0, 240.0, 320.0, 400.0};
 		
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}		
 		
 	}
@@ -228,7 +230,7 @@ public class ExperimentTest {
 		double[] budgets= {80.0, 160.0, 240.0, 320.0, 400.0};
 		
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay,  alpha);			
 		}
 		
 	}
@@ -246,7 +248,7 @@ public class ExperimentTest {
 		double[] budgets= {400.0, 800.0, 1200.0, 1600.0, 2000.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -265,7 +267,7 @@ public class ExperimentTest {
 		double[] budgets= {8000.0, 16000.0, 24000.0, 32000.0, 40000.0};
 		
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 			
 	}
@@ -283,7 +285,7 @@ public class ExperimentTest {
 		double[] budgets= {200.0, 400.0, 600.0, 800.0, 1000.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -302,7 +304,7 @@ public class ExperimentTest {
 		double[] budgets= {200.0, 400.0, 600.0, 800.0, 1000.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -321,7 +323,7 @@ public class ExperimentTest {
 		double[] budgets= {20.0, 40.0, 60.0, 80.0, 100.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling,  taskDilatation, runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -341,7 +343,7 @@ public class ExperimentTest {
 		double[] budgets= {2000.0, 4000.0, 6000.0, 8000.0, 10000.0};
 
 		for (double budget : budgets) {
-			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, taskDilatation,  alpha);			
+			Experiment.generateConstantSeries(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, taskDilatation,  runtimeVariation, delay, alpha);			
 		}
 		
 	}
@@ -360,7 +362,7 @@ public class ExperimentTest {
 		double[] budgets= {2000.0, 4000.0, 6000.0, 8000.0, 10000.0};
 
 		for (double budget : budgets) {
-			Experiment.generateSeriesRepeat(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha,  taskDilatation, 10);			
+			Experiment.generateSeriesRepeat(runDirectory, prefix, dagPath, dagName, budget, price, numDAGs, N, step, start, max_scaling, alpha,  taskDilatation, runtimeVariation, delay, 10);			
 		}
 		
 	}
