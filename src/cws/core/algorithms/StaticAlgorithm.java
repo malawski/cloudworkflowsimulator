@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
@@ -56,7 +55,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     private HashMap<Task, VM> taskMap = new HashMap<Task, VM>();
     
     /** Schedule of tasks for each VM */
-    private HashMap<VM, Queue<Task>> vmQueues = new HashMap<VM, Queue<Task>>();
+    private HashMap<VM, LinkedList<Task>> vmQueues = new HashMap<VM, LinkedList<Task>>();
     
     /** Set of idle VMs */
     private HashSet<VM> idle = new HashSet<VM>();
@@ -332,12 +331,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
 
     @Override
     public void jobFinished(Job job) {
-        if (job.getResult() != Result.SUCCESS) {
-            // FIXME What if the job failed?
-            // We need to re-queue the task currently we do nothing - probably 
-            // we are past the deadline 
-            throw new RuntimeException("Job failed!");
-        }
+        VM vm = job.getVM();
         
         // Sanity check
         DAG dag = job.getDAGJob().getDAG();
@@ -345,28 +339,36 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             throw new RuntimeException("Running DAG that wasn't accepted");
         }
         
-        VM vm = job.getVM();
+        // If the task failed, retry it on the same VM
+        if (job.getResult() == Result.FAILURE) {
+            // We need to re-add the task to the VM's queue here.
+            // The workflow engine will take care of releasing a new Job
+            // for the task, we just have to be ready for it when the next
+            // task for this VM is submitted at the end of this method.
+            LinkedList<Task> queue = vmQueues.get(vm);
+            queue.addFirst(job.getTask());
+        }
         
         idle.add(vm);
         submitNextTaskFor(vm);
     }
     
     @Override
-	public long getSimulationWallTime() {
-		return simulationFinishWallTime - simulationStartWallTime;
-	}
+    public long getSimulationWallTime() {
+        return simulationFinishWallTime - simulationStartWallTime;
+    }
 
-	@Override
-	public long getPlanningnWallTime() {
-		return simulationStartWallTime - planningStartWallTime;
-	}
+    @Override
+    public long getPlanningnWallTime() {
+        return simulationStartWallTime - planningStartWallTime;
+    }
 
-	private void submitNextTaskFor(VM vm) {
+    private void submitNextTaskFor(VM vm) {
         // If the VM is busy, do nothing
         if (!idle.contains(vm))
             return;
         
-        Queue<Task> vmqueue = vmQueues.get(vm);
+        LinkedList<Task> vmqueue = vmQueues.get(vm);
         
         // Get next task for VM
         Task task = vmqueue.peek();
@@ -397,7 +399,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         Task task = job.getTask();
         
         // Advance queue
-        Queue<Task> vmqueue = vmQueues.get(vm);
+        LinkedList<Task> vmqueue = vmQueues.get(vm);
         Task next = vmqueue.poll();
         if (next != task) {
             throw new RuntimeException("Not next task");

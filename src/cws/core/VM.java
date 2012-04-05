@@ -98,6 +98,9 @@ public class VM extends SimEntity implements WorkflowEvent {
     /** Varies the actual runtime of tasks according to the specified distribution */
     private RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
     
+    /** Varies the failure rate of tasks according to a specified distribution */
+    private FailureModel failureModel = new FailureModel(0, 0.0);
+    
     public VM(int mips, int cores, double bandwidth, double price) {
         super("VM"+(next_id++));
         this.mips = mips;
@@ -205,6 +208,14 @@ public class VM extends SimEntity implements WorkflowEvent {
     
     public void setRuntimeDistribution(RuntimeDistribution runtimeDistribution) {
         this.runtimeDistribution = runtimeDistribution;
+    }
+    
+    public FailureModel getFailureModel() {
+        return failureModel;
+    }
+    
+    public void setFailureModel(FailureModel failureModel) {
+        this.failureModel = failureModel;
     }
     
     /** 
@@ -342,14 +353,23 @@ public class VM extends SimEntity implements WorkflowEvent {
         
         // Compute the duration of the job on this VM
         double size = job.getSize();
-        double runtime = size / mips;
+        double predictedRuntime = size / mips;
         
         // Compute actual runtime
-        double actualRuntime = this.runtimeDistribution.getActualRuntime(runtime);
+        double actualRuntime = this.runtimeDistribution.getActualRuntime(predictedRuntime);
+        
+        // Decide whether the job succeeded or failed
+        if (failureModel.failureOccurred()) {
+            job.setResult(Job.Result.FAILURE);
+            
+            // How long did it take to fail?
+            actualRuntime = failureModel.runtimeBeforeFailure(actualRuntime);
+        } else {
+            job.setResult(Job.Result.SUCCESS);
+        }
         
         send(getId(), actualRuntime, JOB_FINISHED, job);
         Log.printLine(CloudSim.clock() + " Starting job " + job.getID() + " on VM " + job.getVM().getId() + " duration " + actualRuntime);
-
         
         // One core is now busy running the job
         idleCores--;
@@ -368,7 +388,6 @@ public class VM extends SimEntity implements WorkflowEvent {
         // Complete the job
         job.setFinishTime(CloudSim.clock());
         job.setState(Job.State.TERMINATED);
-        job.setResult(Job.Result.SUCCESS);
         
         // Increment the usage
         cpuSecondsConsumed += job.getDuration();

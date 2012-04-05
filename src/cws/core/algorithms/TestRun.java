@@ -4,53 +4,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
+import cws.core.FailureModel;
 import cws.core.UniformRuntimeDistribution;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGStats;
 import cws.core.dag.Task;
 import cws.core.dag.DAGParser;
-import cws.core.dag.algorithms.CriticalPath;
-import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
 import java.lang.Math;
+
 public class TestRun {
-    
-    static class DAGStats {
-        public double minCost;
-        public double criticalPath;
-        public double totalRuntime;
-        
-        public DAGStats(DAG dag, double mips, double price) {
-            TopologicalOrder order = new TopologicalOrder(dag);
-            
-            minCost = 0.0;
-            totalRuntime = 0.0;
-            
-            HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
-            for (Task t : order) {
-                
-                // The runtime is just the size of the task (MI) divided by the
-                // MIPS of the VM
-                double runtime = t.size / mips;
-                runtimes.put(t, runtime);
-                
-                // Compute the minimum cost of running this workflow
-                minCost += (runtime/(60*60)) * price;
-                totalRuntime += runtime;
-            }
-            
-            // Make sure a plan is feasible given the deadline and available VMs
-            CriticalPath path = new CriticalPath(order, runtimes);
-            criticalPath = path.getCriticalPathLength();
-        }
-    }
     
     static class ConstantDistribution implements ContinuousDistribution {
         private double delay;
@@ -66,7 +36,7 @@ public class TestRun {
     }
     
     public static void usage() {
-        System.err.printf("Usage: %s application inputdir outputfile distribution ensembleSize scalingFactor algorithm seed runtimeVariance delay\n\n", TestRun.class.getName());
+        System.err.printf("Usage: %s -application APP -inputdir DIR \n\t-outputfile FILE -distribution DIST -ensembleSize SIZE \n\t-algorithm ALGO [-scalingFactor FACTOR] [-seed SEED] \n\t[-runtimeVariance VAR] [-delay DELAY] [-failureRate RATE]\n\n", TestRun.class.getName());
         System.exit(1);
     }
     
@@ -79,37 +49,88 @@ public class TestRun {
         double mips = 1;
         double price = 1;
         
-        if (args.length != 10) {
+        // Arguments with no defaults
+        String algorithm = null; //"SPSS";
+        String application = null; //"SIPHT";
+        File inputdir = null; //new File("/Volumes/HDD/SyntheticWorkflows/SIPHT");
+        File outputfile = null; //new File("TestRun.dat");
+        String distribution = null; //"uniform_unsorted";
+        
+        // Arguments with defaults
+        Integer ensembleSize = 50;
+        Double scalingFactor = 1.0;
+        Long seed = System.currentTimeMillis();
+        Double runtimeVariance = 0.0;
+        Double delay = 0.0;
+        Double failureRate = 0.0;
+        
+        try {
+            for (int i = 0; i<args.length; ) {
+                String arg = args[i++];
+                String next = args[i++];
+                
+                if ("-application".equals(arg)) {
+                    application = next;
+                } else if ("-inputdir".equals(arg)) {
+                    inputdir = new File(next);
+                    if (!inputdir.isDirectory()) {
+                        System.err.println("-inputdir not found");
+                        System.exit(1);
+                    }
+                } else if ("-outputfile".equals(arg)) {
+                    outputfile = new File(next);
+                } else if ("-distribution".equals(arg)) {
+                    distribution = next;
+                } else if ("-ensembleSize".equals(arg)) {
+                    ensembleSize = Integer.parseInt(next);
+                } else if ("-scalingFactor".equals(arg)) {
+                    scalingFactor = Double.parseDouble(next); 
+                } else if ("-algorithm".equals(arg)) {
+                    algorithm = next;
+                } else if ("-seed".equals(arg)) {
+                    seed = Long.parseLong(next);
+                } else if ("-runtimeVariance".equals(arg)) {
+                    runtimeVariance = Double.parseDouble(next);
+                } else if ("-delay".equals(arg)) {
+                    delay = Double.parseDouble(next);
+                } else if ("-failureRate".equals(arg)) {
+                    failureRate = Double.parseDouble(next);
+                } else {
+                    System.err.println("Illegal argument "+arg);
+                    usage();
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.err.println("Invalid argument");
             usage();
         }
         
-        /*
-        String application = "SIPHT";
-        File inputdir = new File("/Volumes/HDD/SyntheticWorkflows/SIPHT");
-        File outputdir = new File("/tmp");
-        String distribution = "uniform_unsorted";
-        int ensembleSize = 50;
-        double scalingFactor = 1.0;
-        String algorithm = "SPSS";
-        int seed = 0;
-        double runtimeVariance = 0.0;
-        double delay = 0.0;
-        */
+        if (application == null) {
+            System.err.println("-application required");
+            usage();
+        }
         
-        // Disable cloudsim logging
-        Log.disable();
+        if (inputdir == null) {
+            System.err.println("-inputdir required");
+            usage();
+        }
         
-        String application = args[0];
-        File inputdir = new File(args[1]);
-        File outputfile = new File(args[2]);
-        String distribution = args[3];
-        int ensembleSize = Integer.parseInt(args[4]);
-        double scalingFactor = Double.parseDouble(args[5]);
-        String algorithm = args[6];
-        int seed = Integer.parseInt(args[7]);
-        double runtimeVariance = Double.parseDouble(args[8]);
-        double delay = Double.parseDouble(args[9]);
+        if (outputfile == null) {
+            System.err.println("-outputfile required");
+            usage();
+        }
         
+        if (distribution == null) {
+            System.err.println("-distribution required");
+            usage();
+        }
+        
+        if (ensembleSize == null) {
+            System.err.println("-ensembleSize required");
+            usage();
+        }
+        
+        // Echo the simulation parameters
         System.out.printf("application = %s\n", application);
         System.out.printf("inputdir = %s\n", inputdir);
         System.out.printf("outputfile = %s\n", outputfile);
@@ -120,6 +141,10 @@ public class TestRun {
         System.out.printf("seed = %d\n", seed);
         System.out.printf("runtimeVariance = %f\n", runtimeVariance);
         System.out.printf("delay = %f\n", delay);
+        System.out.printf("failureRate = %f\n", failureRate);
+        
+        // Disable cloudsim logging
+        Log.disable();
         
         // Determine the distribution
         String[] names = null;
@@ -174,11 +199,11 @@ public class TestRun {
             
             DAGStats s = new DAGStats(dag, mips, price);
             
-            minTime = Math.min(minTime, s.criticalPath);
-            minCost = Math.min(minCost, s.minCost);
+            minTime = Math.min(minTime, s.getCriticalPath());
+            minCost = Math.min(minCost, s.getMinCost());
             
-            maxTime += s.criticalPath;
-            maxCost += s.minCost;
+            maxTime += s.getCriticalPath();
+            maxCost += s.getMinCost();
         }
         
         int nbudgets = 10;
@@ -197,7 +222,7 @@ public class TestRun {
         
         PrintStream out = new PrintStream(new FileOutputStream(outputfile));
         
-        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan,runtimeVariance,delay");
+        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan,runtimeVariance,delay,failureRate");
         
         for (double budget = minBudget; budget <= maxBudget+.001; budget += budgetStep) {
             System.out.println();
@@ -223,16 +248,20 @@ public class TestRun {
                     VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(delay));
                 }
                 
+                if (failureRate > 0.0) {
+                    VMFactory.setFailureModel(new FailureModel(seed, failureRate));
+                }
+                
                 a.simulate(algorithm);
                 
                 double planningTime = a.getPlanningnWallTime() / 1.0e9;
                 double simulationTime = a.getSimulationWallTime() / 1.0e9;
                 
-                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f\n", 
+                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f\n", 
                         application, distribution, seed, ensembleSize, scalingFactor, budget, deadline, 
                         a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
                         planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(), 
-                        a.getActualFinishTime(), runtimeVariance, delay);
+                        a.getActualFinishTime(), runtimeVariance, delay, failureRate);
             }
         }
         
