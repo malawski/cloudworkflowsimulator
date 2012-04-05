@@ -19,7 +19,7 @@ import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
-
+import java.lang.Math;
 public class TestRun {
     
     static class DAGStats {
@@ -174,7 +174,7 @@ public class TestRun {
             
             DAGStats s = new DAGStats(dag, mips, price);
             
-            minTime = Math.min(minTime, s.totalRuntime);
+            minTime = Math.min(minTime, s.criticalPath);
             minCost = Math.min(minCost, s.minCost);
             
             maxTime += s.criticalPath;
@@ -184,7 +184,7 @@ public class TestRun {
         int nbudgets = 10;
         int ndeadlines = 10;
         
-        double minBudget =Math.ceil(minCost);
+        double minBudget = Math.ceil(minCost);
         double maxBudget = Math.ceil(maxCost);
         double budgetStep = (maxBudget - minBudget) / (nbudgets - 1);
         
@@ -197,10 +197,12 @@ public class TestRun {
         
         PrintStream out = new PrintStream(new FileOutputStream(outputfile));
         
-        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan,runtimeVariance");
+        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan,runtimeVariance,delay");
         
-        for (double budget = minBudget; budget <= maxBudget; budget += budgetStep) {
-            for (double deadline = minDeadline; deadline <= maxDeadline; deadline+= deadlineStep) {
+        for (double budget = minBudget; budget <= maxBudget+.001; budget += budgetStep) {
+            System.out.println();
+            for (double deadline = minDeadline; deadline <= maxDeadline+.001; deadline+= deadlineStep) {
+                System.out.print(".");
                 Algorithm a = null;
                 if ("SPSS".equals(algorithm)) {
                     a = new SPSS(budget, deadline, dags, alpha);
@@ -226,11 +228,11 @@ public class TestRun {
                 double planningTime = a.getPlanningnWallTime() / 1.0e9;
                 double simulationTime = a.getSimulationWallTime() / 1.0e9;
                 
-                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f\n", 
+                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f\n", 
                         application, distribution, seed, ensembleSize, scalingFactor, budget, deadline, 
                         a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
                         planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(), 
-                        a.getActualFinishTime(), runtimeVariance);
+                        a.getActualFinishTime(), runtimeVariance, delay);
             }
         }
         
