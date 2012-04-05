@@ -222,11 +222,11 @@ public class TestRun {
         
         PrintStream out = new PrintStream(new FileOutputStream(outputfile));
         
-        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan,runtimeVariance,delay,failureRate");
+        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline");
         
-        for (double budget = minBudget; budget <= maxBudget+.001; budget += budgetStep) {
+        for (double budget = minBudget; budget < maxBudget+(budgetStep/2.0); budget += budgetStep) {
             System.out.println();
-            for (double deadline = minDeadline; deadline <= maxDeadline+.001; deadline+= deadlineStep) {
+            for (double deadline = minDeadline; deadline < maxDeadline+(deadlineStep/2.0); deadline+= deadlineStep) {
                 System.out.print(".");
                 Algorithm a = null;
                 if ("SPSS".equals(algorithm)) {
@@ -261,7 +261,8 @@ public class TestRun {
                         application, distribution, seed, ensembleSize, scalingFactor, budget, deadline, 
                         a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
                         planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(), 
-                        a.getActualFinishTime(), runtimeVariance, delay, failureRate);
+                        a.getActualFinishTime(), runtimeVariance, delay, failureRate, minBudget, maxBudget,
+                        minDeadline, maxDeadline);
             }
         }
         
