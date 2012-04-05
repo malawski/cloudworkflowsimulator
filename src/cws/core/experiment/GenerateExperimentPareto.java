@@ -3,7 +3,6 @@ package cws.core.experiment;
 
 import java.util.Random;
 
-import org.junit.Test;
 
 
 /**
@@ -31,19 +30,22 @@ public class GenerateExperimentPareto {
 		String dagName;
 		double price = 1.0;
 		double maxScaling = 2.0;
-		String group = "delays-ignore";
+		String group = "pareto-nodelays-logs";
 		double alpha = 0.7;
 		String[] dags;
 		double[] budgets;
 		String runDirectory = "run-01-pareto"; 
 		int runID = 0;
 		double taskDilatation = 1.0;
+		double runtimeVariation = 0.0;
+		double delay = 0.0;
+		String distribution = "pareto-sorted";
 		
 		int maxHours;
 		int stepHours;
 		int startHours;
 		
-		int numRunIDs = 10;
+		int numRunIDs = 1;
 		
 		for (runID = 0; runID < numRunIDs; runID++) {
 			
@@ -63,7 +65,7 @@ public class GenerateExperimentPareto {
 			budgets = new double[] {20.0, 30.0, 50.0, 60.0, 80.0};
 
 			for (double budget : budgets) {
-				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runID);			
+				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution, runID);			
 			}		
 
 			dagPath = "../projects/pegasus/CyberShake/";
@@ -81,7 +83,7 @@ public class GenerateExperimentPareto {
 			budgets= new double[] {30.0, 50.0, 80.0, 100.0, 140.0};
 
 			for (double budget : budgets) {
-				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runID);			
+				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution,runID);			
 			}
 
 
@@ -101,7 +103,7 @@ public class GenerateExperimentPareto {
 			budgets= new double[] {400.0, 600.0, 800.0, 1000.0, 1200.0};
 
 			for (double budget : budgets) {
-				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runID);			
+				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution,runID);			
 			}
 
 
@@ -121,7 +123,7 @@ public class GenerateExperimentPareto {
 
 
 			for (double budget : budgets) {
-				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runID);			
+				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution,runID);			
 			}
 
 
@@ -140,7 +142,7 @@ public class GenerateExperimentPareto {
 			budgets= new double[] {200.0, 400.0, 600.0, 800.0, 1000.0};
 
 			for (double budget : budgets) {
-				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runID);			
+				Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution,runID);			
 			}
 
 

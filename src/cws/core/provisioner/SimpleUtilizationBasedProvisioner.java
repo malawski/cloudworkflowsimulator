@@ -90,6 +90,9 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 			// compute number of vms to terminate
 			// it is the number that would overrun the budget if not terminated
 			int numToTerminate = numVMsRunning - (int) Math.floor(((budget - cost)/vmPrice));
+			
+			// even if we have some budget left we should terminate all the instances past the deadline.
+			if (time > deadline) numToTerminate = numVMsRunning;
 		
 			Log.printLine(CloudSim.clock() + " Provisioner: number of instances to terminate: " + numToTerminate);
 

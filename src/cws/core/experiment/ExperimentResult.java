@@ -21,6 +21,8 @@ public class ExperimentResult {
 	private double deadline;
 	private List<Integer> priorities;
 	private List<Double> sizes;
+	private String scoreBitString;
+	private double actualFinishTime;
 	private long planningWallTime;
 	private long simulationWallTime;
 	private long initWallTime;
@@ -105,6 +107,19 @@ public class ExperimentResult {
 	public void setInitWallTime(long initWallTime) {
 		this.initWallTime = initWallTime;
 	}	
+	public double getActualFinishTime() {
+		return actualFinishTime;
+	}
+	public void setActualFinishTime(double actualFinishTime) {
+		this.actualFinishTime = actualFinishTime;
+	}
+	public String getScoreBitString() {
+		return scoreBitString;
+	}
+	public void setScoreBitString(String scoreBitString) {
+		this.scoreBitString = scoreBitString;
+	}
+	
 	/**
 	 * Format the list of priorities of completed DAGs as a string
 	 * @return the string containing space separated priorities
@@ -152,6 +167,8 @@ public class ExperimentResult {
 		result.append("finished " + numFinishedDAGs + "\n");
 		result.append("priorities " + formatPriorities());
 		result.append("sizes " + formatSizes());
+		result.append("actualFinishTime " + actualFinishTime + "\n");
+		result.append("scoreBitString " + scoreBitString + "\n");
 		result.append("initWallTime " + initWallTime + "\n");
 		result.append("planningWallTime " + planningWallTime + "\n");
 		result.append("simulationWallTime " + simulationWallTime + "\n");

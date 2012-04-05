@@ -33,13 +33,17 @@ public class GenerateExperimentParetoDilated {
 		String dagName;
 		double price = 1.0;
 		double maxScaling = 2.0;
-		String group = "pareto-dilated";
+		String group = "pareto-dilated-nodelays";
 		double alpha = 0.7;
 		String[] dags;
 		double[] budgets;
 		String runDirectory = ""; 
 		int runID = 0;
 		int taskDilatation = 1;
+		double runtimeVariation = 0.0;
+		double delay = 0.0;
+		String distribution = "pareto-sorted";
+
 		
 		int maxHours;
 		int stepHours;
@@ -47,7 +51,7 @@ public class GenerateExperimentParetoDilated {
 		
 		int numRunIDs = 2;
 		
-		for (taskDilatation=16; taskDilatation<=1024; taskDilatation*=2) {
+		for (taskDilatation=1; taskDilatation<=1024; taskDilatation*=2) {
 
 			for (runID = 0; runID < numRunIDs; runID++) {
 
@@ -67,7 +71,7 @@ public class GenerateExperimentParetoDilated {
 				budgets = new double[] {20.0, 30.0, 50.0, 60.0, 80.0};
 
 				for (double budget : budgets) {
-					Experiment.generateSeries(runDirectory, group, dagPath, dags, budget * taskDilatation, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runID);			
+					Experiment.generateSeries(runDirectory, group, dagPath, dags, budget * taskDilatation, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution, runID);			
 				}		
 
 				dagPath = "../projects/pegasus/CyberShake/";
@@ -85,7 +89,7 @@ public class GenerateExperimentParetoDilated {
 				budgets= new double[] {30.0, 50.0, 80.0, 100.0, 140.0};
 
 				for (double budget : budgets) {
-					Experiment.generateSeries(runDirectory, group, dagPath, dags, budget * taskDilatation, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runID);			
+					Experiment.generateSeries(runDirectory, group, dagPath, dags, budget * taskDilatation, price, maxHours, stepHours, startHours, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution, runID);			
 				}
 
 

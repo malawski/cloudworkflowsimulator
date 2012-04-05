@@ -33,6 +33,10 @@ public class GenerateExperimentConstant {
 	int start;
 	int runID = 0;
 	double taskDilatation = 1.0;
+	double runtimeVariation = 0.0;
+	double delay = 0.0;
+	String distribution = "constant";
+
 	
 
 
@@ -49,7 +53,7 @@ public class GenerateExperimentConstant {
 		double[] budgets= {40.0, 80.0, 120.0, 160.0, 200.0};
 		
 		for (double budget : budgets) {
-			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runID);			
+			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution, runID);			
 		}		
 		
 
@@ -68,7 +72,7 @@ public class GenerateExperimentConstant {
 		budgets = new double[] {50.0, 150.0, 250.0, 350.0, 450.0};
 		
 		for (double budget : budgets) {
-			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runID);			
+			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution, runID);			
 		}
 		
 
@@ -88,7 +92,7 @@ public class GenerateExperimentConstant {
 		budgets = new double[] {500.0, 1000.0, 1500.0, 2000.0, 2500.0};
 
 		for (double budget : budgets) {
-			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runID);			
+			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution, runID);			
 		}
 		
 		
@@ -108,7 +112,7 @@ public class GenerateExperimentConstant {
 
 		
 		for (double budget : budgets) {
-			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runID);			
+			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution, runID);			
 		}
 			
 
@@ -128,7 +132,7 @@ public class GenerateExperimentConstant {
 		budgets = new double[] {500.0, 1000.0, 1500.0, 2000.0, 2500.0};
 
 		for (double budget : budgets) {
-			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runID);			
+			Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start, maxScaling, alpha,  taskDilatation, runtimeVariation, delay, distribution, runID);			
 		}
 		
 	}
