@@ -241,7 +241,7 @@ public class VM extends SimEntity implements WorkflowEvent {
     public double getCost() {
         double hours = getRuntime() / SECONDS_PER_HOUR;
         hours = Math.ceil(hours);
-        Log.printLine(CloudSim.clock() + " VM " + getId() + " cost " + hours * price);
+        //Log.printLine(CloudSim.clock() + " VM " + getId() + " cost " + hours * price);
         return hours * price;
     }
     
