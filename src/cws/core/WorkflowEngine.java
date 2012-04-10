@@ -276,6 +276,9 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
             // Retry the job
             Log.printLine(CloudSim.clock() + " Job " + j.getID() + " failed on VM " + j.getVM().getId() + " resubmitting...");
             Job retry = jobFactory.createJob(dj, t, getId());
+            VM vm = j.getVM();
+            // add to free if contained in busy set
+            if (busyVMs.remove(vm)) freeVMs.add(vm);
             jobReleased(retry);
         }
         
