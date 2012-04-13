@@ -154,7 +154,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 		// and we are below max limit
 		// and we have money left for one instance more
 		// then: deploy new instance
-		if (! finishing_phase && utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS <= getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
+		if (! finishing_phase && utilization > UPPER_THRESHOLD && numBusyVMs+numFreeVMS < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 			
 			VM vm =VMFactory.createVM(1000, 1, 1.0, 1.0);
 			Log.printLine(CloudSim.clock() + " Starting VM: " + vm.getId());
