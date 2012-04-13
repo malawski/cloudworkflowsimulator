@@ -62,7 +62,9 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     
     private int dagsFinished = 0;
     
-    private double actualFinishTime = 0.0;
+    protected double actualDagFinishTime = 0.0;
+    protected double actualJobFinishTime = 0.0;
+    
 
     protected long planningStartWallTime;
     protected long simulationStartWallTime;
@@ -93,7 +95,8 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         manager.addDAGJobListener(this);
     }
     
-    public double getActualFinish() {
+    @Override
+    public double getActualVMFinishTime() {
         double finish = 0.0;
         for (VM vm : vmQueues.keySet()) {
             finish = Math.max(finish, vm.getTerminateTime());
@@ -117,8 +120,8 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         return this.admittedDAGs;
     }
     
-    public double getActualFinishTime() {
-        return actualFinishTime;
+    public double getActualDagFinishTime() {
+        return actualDagFinishTime;
     }
     
     public double getEstimatedProvisioningDelay() {
@@ -339,6 +342,9 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             throw new RuntimeException("Running DAG that wasn't accepted");
         }
         
+        if (job.getResult() == Result.SUCCESS) actualJobFinishTime = job.getFinishTime();
+
+        
         // If the task failed, retry it on the same VM
         if (job.getResult() == Result.FAILURE) {
             // We need to re-add the task to the VM's queue here.
@@ -362,6 +368,11 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     public long getPlanningnWallTime() {
         return simulationStartWallTime - planningStartWallTime;
     }
+    
+	@Override
+	public double getActualJobFinishTime() {
+		return actualJobFinishTime;
+	}
 
     private void submitNextTaskFor(VM vm) {
         // If the VM is busy, do nothing
@@ -428,7 +439,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             throw new RuntimeException("DAG not finished");
         }
         dagsFinished += 1;
-        actualFinishTime = Math.max(CloudSim.clock(), actualFinishTime);
+        actualDagFinishTime = Math.max(CloudSim.clock(), actualDagFinishTime);
     }
     
     public void simulate(String logname) {
@@ -465,8 +476,8 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             throw new RuntimeException("Not all DAGs completed");
         }
         
-        if (actualFinishTime > getDeadline()) {
-            System.err.println("WARNING: Exceeded deadline: "+actualFinishTime+">"+getDeadline());
+        if (actualDagFinishTime > getDeadline()) {
+            System.err.println("WARNING: Exceeded deadline: "+actualDagFinishTime+">"+getDeadline());
         }
         
         if (getActualCost() > getBudget()) {

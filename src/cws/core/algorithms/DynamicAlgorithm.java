@@ -3,6 +3,7 @@ package cws.core.algorithms;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -11,17 +12,21 @@ import cws.core.Cloud;
 import cws.core.DAGJob;
 import cws.core.DAGJobListener;
 import cws.core.EnsembleManager;
+import cws.core.Job;
+import cws.core.JobListener;
 import cws.core.Provisioner;
 import cws.core.Scheduler;
 import cws.core.SimpleJobFactory;
 import cws.core.VM;
+import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
+import cws.core.Job.Result;
 import cws.core.dag.DAG;
 import cws.core.experiment.VMFactory;
 import cws.core.log.WorkflowLog;
 
-public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
+public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMListener, JobListener {
     
     private double price;
     
@@ -33,7 +38,9 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
     
     private double actualCost = 0.0;
     
-    private double actualFinishTime = 0.0;
+    private double actualDagFinishTime = 0.0;
+    private double actualVMFinishTime = 0.0;
+    private double actualJobFinishTime = 0.0;
     
     protected long simulationStartWallTime;
     protected long simulationFinishWallTime;
@@ -57,12 +64,12 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
     
     @Override
     public void dagFinished(DAGJob dagJob) {
-        actualFinishTime = Math.max(actualFinishTime, CloudSim.clock());
+        actualDagFinishTime = Math.max(actualDagFinishTime, CloudSim.clock());
     }
 
     @Override
-    public double getActualFinishTime() {
-        return actualFinishTime;
+    public double getActualDagFinishTime() {
+        return actualDagFinishTime;
     }
     
     @Override
@@ -74,12 +81,15 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         CloudSim.init(1, null, false);
         
         Cloud cloud = new Cloud();
+        cloud.addVMListener(this);
         provisioner.setCloud(cloud);
         
         WorkflowEngine engine = new WorkflowEngine(
                 new SimpleJobFactory(1000), provisioner, scheduler);
         engine.setDeadline(getDeadline());
         engine.setBudget(getBudget());
+        
+        engine.addJobListener(this);
         
         scheduler.setWorkflowEngine(engine);
         
@@ -137,8 +147,10 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
             }
         }
         
-        if (actualFinishTime > getDeadline()) {
-            System.err.println("WARNING: Exceeded deadline: "+actualFinishTime+">"+getDeadline()+" budget: "+getBudget()+" Estimated num of VMs "+numVMs);
+        
+        
+        if (actualDagFinishTime > getDeadline()) {
+            System.err.println("WARNING: Exceeded deadline: "+actualDagFinishTime+">"+getDeadline()+" budget: "+getBudget()+" Estimated num of VMs "+numVMs);
         }
         
         if (getActualCost() > getBudget()) {
@@ -156,4 +168,38 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener {
         // planning is always 0 for dynamic algorithms
         return 0;
     }
+
+	@Override
+	public double getActualJobFinishTime() {
+		return actualJobFinishTime;
+	}
+
+	@Override
+	public double getActualVMFinishTime() {
+		return actualVMFinishTime;
+	}
+
+	@Override
+	public void vmLaunched(VM vm) {
+		
+	}
+
+	@Override
+	public void vmTerminated(VM vm) {
+		actualVMFinishTime = vm.getTerminateTime();		
+	}
+
+	@Override
+	public void jobReleased(Job job) {}
+
+	@Override
+	public void jobSubmitted(Job job) {}
+
+	@Override
+	public void jobStarted(Job job) {}
+
+	@Override
+	public void jobFinished(Job job) {
+		if (job.getResult() == Result.SUCCESS) actualJobFinishTime = job.getFinishTime();		
+	}
 }

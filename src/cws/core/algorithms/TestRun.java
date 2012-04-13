@@ -222,7 +222,7 @@ public class TestRun {
         
         PrintStream out = new PrintStream(new FileOutputStream(outputfile));
         
-        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,makespan,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline");
+        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,jobfinish,dagfinish,vmfinish,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline");
         
         for (double budget = minBudget; budget < maxBudget+(budgetStep/2.0); budget += budgetStep) {
             System.out.println();
@@ -257,11 +257,12 @@ public class TestRun {
                 double planningTime = a.getPlanningnWallTime() / 1.0e9;
                 double simulationTime = a.getSimulationWallTime() / 1.0e9;
                 
-                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f\n", 
+                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", 
                         application, distribution, seed, ensembleSize, scalingFactor, budget, deadline, 
                         a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
                         planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(), 
-                        a.getActualFinishTime(), runtimeVariance, delay, failureRate, minBudget, maxBudget,
+                        a.getActualJobFinishTime(), a.getActualDagFinishTime(), a.getActualVMFinishTime(), 
+                        runtimeVariance, delay, failureRate, minBudget, maxBudget,
                         minDeadline, maxDeadline);
             }
         }
