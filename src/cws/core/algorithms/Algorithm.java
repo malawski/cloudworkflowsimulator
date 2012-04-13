@@ -51,15 +51,16 @@ public abstract class Algorithm {
      * @return Finish time of the last completed dag
      */
     abstract public double getActualDagFinishTime();
+    
     /**
      * @return Finish time of the last successfully completed job
      */
     abstract public double getActualJobFinishTime();
+    
     /**
      * @return Termination time of the last VM
      */
     abstract public double getActualVMFinishTime();
-
     
     abstract public long getSimulationWallTime();
     

@@ -65,7 +65,6 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     protected double actualDagFinishTime = 0.0;
     protected double actualJobFinishTime = 0.0;
     
-
     protected long planningStartWallTime;
     protected long simulationStartWallTime;
     protected long simulationFinishWallTime;
@@ -95,6 +94,24 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         manager.addDAGJobListener(this);
     }
     
+    public Plan getPlan() {
+        return plan;
+    }
+    
+    public double getPlanCost() {
+        return plan.getCost();
+    }
+    
+    @Override
+    public double getActualCost() {
+        return engine.getCost();
+    }
+    
+    @Override
+    public List<DAG> getCompletedDAGs() {
+        return this.admittedDAGs;
+    }
+    
     @Override
     public double getActualVMFinishTime() {
         double finish = 0.0;
@@ -104,34 +121,32 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         return finish;
     }
     
-    public Plan getPlan() {
-        return plan;
-    }
-    
-    public double getPlanCost() {
-        return plan.getCost();
-    }
-    
-    public double getActualCost() {
-        return engine.getCost();
-    }
-    
-    public List<DAG> getCompletedDAGs() {
-        return this.admittedDAGs;
-    }
-    
+    @Override
     public double getActualDagFinishTime() {
         return actualDagFinishTime;
     }
     
+    @Override
+    public double getActualJobFinishTime() {
+        return actualJobFinishTime;
+    }
+    
     public double getEstimatedProvisioningDelay() {
-    	//return 70.0;
-    	return 0.0;
+        return 0.0;
     }
     
     public double getEstimatedDeprovisioningDelay() {
-    	//return 25.0;
-    	return 0.0;
+        return 0.0;
+    }
+    
+    @Override
+    public long getSimulationWallTime() {
+        return simulationFinishWallTime - simulationStartWallTime;
+    }
+
+    @Override
+    public long getPlanningnWallTime() {
+        return simulationStartWallTime - planningStartWallTime;
     }
     
     /**
@@ -359,21 +374,6 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         submitNextTaskFor(vm);
     }
     
-    @Override
-    public long getSimulationWallTime() {
-        return simulationFinishWallTime - simulationStartWallTime;
-    }
-
-    @Override
-    public long getPlanningnWallTime() {
-        return simulationStartWallTime - planningStartWallTime;
-    }
-    
-	@Override
-	public double getActualJobFinishTime() {
-		return actualJobFinishTime;
-	}
-
     private void submitNextTaskFor(VM vm) {
         // If the VM is busy, do nothing
         if (!idle.contains(vm))
