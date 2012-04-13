@@ -3,7 +3,6 @@ package cws.core.algorithms;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -186,7 +185,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
 	@Override
 	public void vmTerminated(VM vm) {
-		actualVMFinishTime = vm.getTerminateTime();		
+	    actualVMFinishTime = Math.max(actualVMFinishTime, vm.getTerminateTime());
 	}
 
 	@Override
@@ -200,6 +199,8 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
 	@Override
 	public void jobFinished(Job job) {
-		if (job.getResult() == Result.SUCCESS) actualJobFinishTime = job.getFinishTime();		
+		if (job.getResult() == Result.SUCCESS) {
+		    actualJobFinishTime = Math.max(actualJobFinishTime, job.getFinishTime());
+		}
 	}
 }

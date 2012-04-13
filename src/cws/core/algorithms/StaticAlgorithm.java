@@ -357,8 +357,10 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             throw new RuntimeException("Running DAG that wasn't accepted");
         }
         
-        if (job.getResult() == Result.SUCCESS) actualJobFinishTime = job.getFinishTime();
-
+        // Update the finish time
+        if (job.getResult() == Result.SUCCESS) {
+            actualJobFinishTime = Math.max(actualJobFinishTime, job.getFinishTime());
+        }
         
         // If the task failed, retry it on the same VM
         if (job.getResult() == Result.FAILURE) {
