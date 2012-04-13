@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
+
+import cws.core.UniformRuntimeDistribution;
 import cws.core.algorithms.Algorithm;
 import cws.core.algorithms.Backtrack;
 import cws.core.algorithms.DPDS;
@@ -39,7 +42,18 @@ public class AlgorithmFactory {
             }         
         }
         
-
+        int runId = e.getRunID();
+        
+        double runtimeVariation = e.getRuntimeVariation();
+        if (runtimeVariation > 0.0) {
+            VMFactory.setRuntimeDistribution(
+                    new UniformRuntimeDistribution(runId, runtimeVariation));
+        }
+        
+        double delay = e.getDelay();
+        if (delay > 0.0) {
+            VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(delay));
+        }
         
         double budget = e.getBudget();
 		double deadline = e.getDeadline();
@@ -63,4 +77,22 @@ public class AlgorithmFactory {
 	
 		
 	}
+	
+	/**
+	 * 
+	 * FIXME create a separate class 
+	 *
+	 */
+    static class ConstantDistribution implements ContinuousDistribution {
+        private double delay;
+        
+        public ConstantDistribution(double delay) {
+            this.delay = delay;
+        }
+        
+        @Override
+        public double sample() {
+            return this.delay;
+        }
+    }
 }

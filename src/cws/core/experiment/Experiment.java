@@ -11,6 +11,7 @@ import java.util.Random;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 import org.cloudbus.cloudsim.distributions.LognormalDistr;
 
+import cws.core.UniformRuntimeDistribution;
 import cws.core.algorithms.Algorithm;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
@@ -47,7 +48,8 @@ public class Experiment {
 		//VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
 		Algorithm algorithm = AlgorithmFactory.createAlgorithm(param);
-		algorithm.setGenerateLog(true);
+
+		algorithm.setGenerateLog(false);
 		
 		String fileName = param.getRunDirectory() + File.separator + "output-" + param.getFileName();
 				
@@ -78,7 +80,7 @@ public class Experiment {
 		result.setPriorities(priorities);
 		result.setSizes(sizes);
 		
-		result.setActualFinishTime(algorithm.getActualFinishTime());
+		result.setActualFinishTime(algorithm.getActualDagFinishTime());
 		result.setScoreBitString(algorithm.getScoreBitString());
 		
 		return result;
