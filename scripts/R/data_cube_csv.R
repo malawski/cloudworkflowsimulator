@@ -8,47 +8,41 @@ library(cwhmisc)
 # Start
 ############################################################################################################################
 
+#csv_filename = "run-failures-test-0-output.dat"
+#csv_filename = "run-scaling-failures-test-0-output.dat"
+#csv_filename = "run-scaling-1-failures-test-0-output.dat"
+#csv_filename = "run-finish-failures-test-0-output.dat"
+csv_filename = "run-finish-variations-test-0-output.dat"
 
 
-db_filename = "fractions-nodelays-50-2.sqlite"
-driver<-dbDriver("SQLite")
-connect<-dbConnect(driver, dbname = db_filename)
-#connect<-dbConnect(driver, dbname = "pareto-nodelays-all.sqlite")
-#connect<-dbConnect(driver, dbname = "test3.sqlite")
-dbListTables(connect)
+data = read.csv(csv_filename, colClasses=c("scorebits"="character"))
+#data = data[data$failureRate==0,]
+data = data[data$runtimeVariance==0,]
 
-q <- dbSendQuery(connect, statement = "PRAGMA synchronous = OFF")
-fetch(q)
-q <- dbSendQuery(connect, statement = "PRAGMA journal_mode = MEMORY")
-fetch(q)
-#q <- dbSendQuery(connect, statement = "SELECT load_extension('/home/malawski/projects/sqlite/libsqlitefunctions.so')")
-#fetch(q)
+failureRates = unique(data$failureRate)
 
-q <- dbSendQuery(connect, statement = "SELECT COUNT(DISTINCT runID) AS n_runIds FROM experiment ")
-d <- fetch(q)
-n_runIds=d$n_runIds
+runIds = unique(data$seed)
+n_runIds=length(runIds)
 
-q <- dbSendQuery(connect, statement = "SELECT max(finished) AS n_DAGs FROM experiment")
-d <- fetch(q)
-n_DAGs=d$n_DAGs
-max_priority = n_DAGs-1
+#q <- dbSendQuery(connect, statement = "SELECT max(finished) AS n_DAGs FROM experiment")
+#d <- fetch(q)
+#n_DAGs=d$n_DAGs
+#max_priority = n_DAGs-1
 
 # n_runIds=1 #use this to select only the first runId
 
 print(n_runIds)
 
-q <- dbSendQuery(connect, statement = "SELECT DISTINCT application FROM experiment ORDER BY application")
-applications <- fetch(q)$application
-print(applications)
+
+applications = levels(unique(data$application))
+
 n_applications = length(applications)
 
-q <- dbSendQuery(connect, statement = "SELECT DISTINCT distribution FROM experiment ORDER BY distribution")
-distributions <- fetch(q)$distribution
+distributions = levels(unique(data$distribution))
 print(distributions)
 n_distributions = length(distributions)
 
-q <- dbSendQuery(connect, statement = "SELECT DISTINCT algorithmName as algorithm FROM experiment ORDER BY algorithm")
-algorithms <- fetch(q)$algorithm
+algorithms = levels(unique(data$algorithm))
 print(algorithms)
 
 n_algorithms = length(algorithms)
@@ -57,12 +51,14 @@ n_budgets = 10
 n_deadlines = 10
 
 
-statement = sprintf("SELECT scoreBitString FROM experiment ORDER BY application, distribution, budget, deadline, runID, algorithmName")
-print(statement)
-q <- dbSendQuery(connect, statement = statement)
-scoreBitString = fetch(q,-1)
+
+#statement = sprintf("SELECT scoreBitString FROM experiment ORDER BY application, distribution, budget, deadline, runID, algorithmName")
+#print(statement)
+#q <- dbSendQuery(connect, statement = statement)
+#scoreBitString = fetch(q,-1)
 # create 6-dimensional matrix
-scoreBitStrings = array(scoreBitString$scoreBitString,  dim=c(n_algorithms, n_runIds, n_deadlines, n_budgets, n_distributions, n_applications))
+scoreBitString = data[order(data$application, data$distribution, data$budget, data$deadline, data$seed, data$algorithm),]$scorebits
+scoreBitStrings = array(scoreBitString,  dim=c(n_algorithms, n_runIds, n_deadlines, n_budgets, n_distributions, n_applications))
 
 
 maxScores = apply(scoreBitStrings, 2:6, max)
@@ -140,7 +136,7 @@ sumCutScores = apply(cutScores,c(1,5,6),sum)
 
 
 
-pdf(file=paste(db_filename, "-distributions.pdf", sep=""), height=4, width=6, bg="white")
+pdf(file=paste(csv_filename, "-distributions.pdf", sep=""), height=4, width=6, bg="white")
 par(mfrow=c(2,3))
 
 for (i in 1:n_applications) {
@@ -162,7 +158,7 @@ dev.off()
 
 
 
-pdf(file=paste(db_filename, "-distributions-N.pdf", sep=""), height=4, width=6, bg="white")
+pdf(file=paste(csv_filename, "-distributions-N.pdf", sep=""), height=4, width=6, bg="white")
 par(mfrow=c(2,3))
 
 for (i in 1:n_applications) {
@@ -185,7 +181,7 @@ dev.off()
 
 
 
-pdf(file=paste(db_filename, "-distributions-cut.pdf", sep=""), height=4, width=6, bg="white")
+pdf(file=paste(csv_filename, "-distributions-cut.pdf", sep=""), height=4, width=6, bg="white")
 par(mfrow=c(2,3))
 
 for (i in 1:n_applications) {
