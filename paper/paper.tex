@@ -1,14 +1,13 @@
 \documentclass[conference]{IEEEtran}
 
 \usepackage[pdftex]{graphicx}
-% declare the path(s) where your graphic files are
 \graphicspath{{./figures/}}
-% and their extensions so you won't have to specify these with
-% every instance of \includegraphics
 \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
 \usepackage[cmex10]{amsmath}
 \usepackage{algorithm,algpseudocode}
+\usepackage{hyperref} % must come before url
 \usepackage{url}
+
 
 \begin{document}
 
@@ -16,7 +15,7 @@
 \title{Cost- and Deadline-constrained Scheduling of Scientific Workflow Ensembles in IaaS Clouds}
 
 
-% IEE Format
+% IEEE Format
 \author{
   \IEEEauthorblockN{Maciej Malawski}
   \IEEEauthorblockA{AGH University of Science and Technology\\
