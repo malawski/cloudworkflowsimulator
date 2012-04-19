@@ -1,38 +1,63 @@
-\documentclass{sig-alternate}
+\documentclass[conference]{IEEEtran}
+
+\usepackage[pdftex]{graphicx}
+% declare the path(s) where your graphic files are
+\graphicspath{{./figures/}}
+% and their extensions so you won't have to specify these with
+% every instance of \includegraphics
+\DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\usepackage[cmex10]{amsmath}
 \usepackage{algorithm,algpseudocode}
 \usepackage{url}
 
 \begin{document}
 
-\conferenceinfo{HPDC}{'12 Delft, The Netherlands}
-% \CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden
-% - IF NEED BE. \crdata{0-12345-67-8/90/01}  % Allows default copyright data
-% (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
-
+% can use linebreaks \\ within to get better formatting as desired
 \title{Cost- and Deadline-constrained Scheduling of Scientific Workflow Ensembles in IaaS Clouds}
-% \subtitle{[Extended Abstract]}
 
-\numberofauthors{3}
-\author{
-    \alignauthor Maciej Malawski\\
-       \affaddr{AGH University of Science and Technology}\\
-       \affaddr{Dept. of Computer Science}\\
-       \affaddr{Krakow, Poland; and}\\
-       \affaddr{University of Notre Dame}\\
-       \affaddr{Center for Research Computing}\\
-       \affaddr{111 ITC, Notre Dame, IN, USA}\\
-       \email{mmalawsk@nd.edu}
-    \alignauthor Gideon Juve and Ewa Deelman\\
-       \affaddr{USC Information Sciences Institute}\\
-       \affaddr{4676 Admiralty Way}\\
-       \affaddr{Marina del Rey, CA, USA}\\
-       \email{\{gideon,deelman\}@isi.edu}
-    \alignauthor Jarek Nabrzyski\\
-       \affaddr{University of Notre Dame}\\
-       \affaddr{Center for Research Computing}\\
-       \affaddr{111 ITC, Notre Dame, IN, USA}\\
-       \email{naber@nd.edu}
-}
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+\author{\IEEEauthorblockN{Michael Shell}
+  \IEEEauthorblockA{School of Electrical and\\Computer Engineering\\
+Georgia Institute of Technology\\
+Atlanta, Georgia 30332--0250\\
+Email: http://www.michaelshell.org/contact.html}
+\and
+\IEEEauthorblockN{Homer Simpson}
+\IEEEauthorblockA{Twentieth Century Fox\\
+Springfield, USA\\
+Email: homer@thesimpsons.com}
+\and
+\IEEEauthorblockN{James Kirk\\ and Montgomery Scott}
+\IEEEauthorblockA{Starfleet Academy\\
+San Francisco, California 96678-2391\\
+Telephone: (800) 555--1212\\
+Fax: (888) 555--1212}}
+
+% ACM Format
+%\numberofauthors{3}
+%\author{
+%    \alignauthor Maciej Malawski\\
+%       \affaddr{AGH University of Science and Technology}\\
+%       \affaddr{Dept. of Computer Science}\\
+%       \affaddr{Krakow, Poland; and}\\
+%       \affaddr{University of Notre Dame}\\
+%       \affaddr{Center for Research Computing}\\
+%       \affaddr{111 ITC, Notre Dame, IN, USA}\\
+%       \email{mmalawsk@nd.edu}
+%    \alignauthor Gideon Juve and Ewa Deelman\\
+%       \affaddr{USC Information Sciences Institute}\\
+%       \affaddr{4676 Admiralty Way}\\
+%       \affaddr{Marina del Rey, CA, USA}\\
+%       \email{\{gideon,deelman\}@isi.edu}
+%    \alignauthor Jarek Nabrzyski\\
+%       \affaddr{University of Notre Dame}\\
+%       \affaddr{Center for Research Computing}\\
+%       \affaddr{111 ITC, Notre Dame, IN, USA}\\
+%       \email{naber@nd.edu}
+%}
 
 \maketitle
  
@@ -57,14 +82,11 @@ task runtimes can significantly improve the quality of solutions.
 
 \end{abstract}
 
-  
-\category{H.3.4}{Systems and Software}{Distributed systems}
-\category{D.4.8}{Performance}{Simulation}
-
-\terms{DAG, Scheduling, Simulation}
-
-\keywords{Scientific workflows, Workflow ensembles,
-Cloud computing, Infrastructure-as-a-Service}
+% IEEE does not have these
+%\category{H.3.4}{Systems and Software}{Distributed systems}
+%\category{D.4.8}{Performance}{Simulation}
+%\terms{DAG, Scheduling, Simulation}
+%\keywords{Scientific workflows, Workflow ensembles, Cloud computing, Infrastructure-as-a-Service}
 
 \section{Introduction}
 
@@ -248,7 +270,8 @@ The goal of the workflow ensemble scheduling and cloud provisioning problem
 considered in this paper is to complete as many high-priority workflows as
 possible given a fixed budget and deadline. Only workflows for which all tasks
 are finished by the deadline are considered to be complete---partial results are
-not usable in this model.
+not usable in this model.
+
 
 
 \section{Algorithms}
@@ -1169,10 +1192,14 @@ models of the applications. This should lead to better understanding of the
 problems and costs of doing science in the cloud.
 
 
-%\section{Acknowledgments}
+%\section*{Acknowledgments}
 %Acknowledgements go here.
 
-\bibliographystyle{abbrv}
+% ACM style
+%\bibliographystyle{abbrv}
+% IEEE style
+\bibliographystyle{IEEEtran}
+
 \bibliography{paper}
 
 %\appendix
