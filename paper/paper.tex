@@ -350,7 +350,7 @@ priority workflows are not available.
 
 \begin{figure}[htb] 
 \centering
-\includegraphics[width=1.0\columnwidth]{figures/spds-gantt}
+\includegraphics[width=1.0\columnwidth]{spds-gantt}
  \caption{Example schedule generated using SPDS algorithm. The colors indicate how various tasks from different workflows are scheduled onto Virtual Machines. }
 \label{fig:spds-example}
 \end{figure}
@@ -651,7 +651,7 @@ many VMs in parallel.
 
 \begin{figure}[tb] 
 \centering
-\includegraphics[width=1.0\columnwidth]{figures/spss-gantt}
+\includegraphics[width=1.0\columnwidth]{spss-gantt}
  \caption{Example of schedule generated using SPSS algorithm. Tasks are colored by workflow. }
 \label{fig:spss-example}
 \end{figure}
@@ -685,7 +685,7 @@ created for the synthetic workflow generator developed by Bharathi, et al~\cite{
 
 \begin{figure}[tb] 
 \centering
-\includegraphics[width=0.6\columnwidth]{figures/ensemble-pareto}
+\includegraphics[width=0.6\columnwidth]{ensemble-pareto}
 \caption{Pareto-like distribution of workflow sizes in ensemble. Size is
 measured in number of tasks.}
 \label{fig:ensemble-distribution}
@@ -710,11 +710,11 @@ workflow tasks in parallel.
 
 \begin{figure*}[t] 
 \centering
-\includegraphics[width=0.19\textwidth]{figures/pareto-MONTAGE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-LIGO-n-1000-8-dagh1-40m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-GENOME-n-1000-8-dagh100-1500m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\includegraphics[width=0.19\textwidth]{pareto-MONTAGE-n-1000-8-dagh1-20m0}
+\includegraphics[width=0.19\textwidth]{pareto-CYBERSHAKE-n-1000-8-dagh1-20m0}
+\includegraphics[width=0.19\textwidth]{pareto-LIGO-n-1000-8-dagh1-40m0}
+\includegraphics[width=0.19\textwidth]{pareto-GENOME-n-1000-8-dagh100-1500m0}
+\includegraphics[width=0.19\textwidth]{pareto-SIPHT-n-1000-8-dagh5-50m0}
 \caption{Number of workflows completed for DPDS, AW-DPDS and SPSS
 algorithms on ensembles of 100 Pareto-distributed workflows, {\em small budget}
 (top) and {\em large budget} (bottom). The ranges on $y$ axis are chosen to 
@@ -769,11 +769,11 @@ future work we plan to explore other ensemble types such as uniform distribution
 
 \begin{figure*}[t]  
 \centering
-\includegraphics[width=0.19\textwidth]{figures/pareto-size-MONTAGE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-size-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-size-LIGO-n-1000-8-dagh1-40m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-size-GENOME-n-1000-8-dagh100-1500m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-size-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\includegraphics[width=0.19\textwidth]{pareto-size-MONTAGE-n-1000-8-dagh1-20m0}
+\includegraphics[width=0.19\textwidth]{pareto-size-CYBERSHAKE-n-1000-8-dagh1-20m0}
+\includegraphics[width=0.19\textwidth]{pareto-size-LIGO-n-1000-8-dagh1-40m0}
+\includegraphics[width=0.19\textwidth]{pareto-size-GENOME-n-1000-8-dagh100-1500m0}
+\includegraphics[width=0.19\textwidth]{pareto-size-SIPHT-n-1000-8-dagh5-50m0}
 \caption{ Total work completed expressed as the sum of runtimes (in hours) of
 tasks of completed workflows. Data computed for DPDS, AW-DPDS and SPSS
 algorithms on ensembles of 100 Pareto-distributed workflows. The ranges on $y$ axis are chosen to 
@@ -884,11 +884,11 @@ space we selected representative plots.
 
 \begin{figure*}[htb] 
 \centering
-\includegraphics[width=0.19\textwidth]{figures/pareto-cost-MONTAGE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-cost-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-cost-LIGO-n-1000-8-dagh1-40m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-cost-GENOME-n-1000-8-dagh100-1500m0.pdf}
-\includegraphics[width=0.19\textwidth]{figures/pareto-cost-SIPHT-n-1000-8-dagh5-50m0.pdf}
+\includegraphics[width=0.19\textwidth]{pareto-cost-MONTAGE-n-1000-8-dagh1-20m0}
+\includegraphics[width=0.19\textwidth]{pareto-cost-CYBERSHAKE-n-1000-8-dagh1-20m0}
+\includegraphics[width=0.19\textwidth]{pareto-cost-LIGO-n-1000-8-dagh1-40m0}
+\includegraphics[width=0.19\textwidth]{pareto-cost-GENOME-n-1000-8-dagh100-1500m0}
+\includegraphics[width=0.19\textwidth]{pareto-cost-SIPHT-n-1000-8-dagh5-50m0}
 \caption{Effective computing cost in \$ per hour calculated by dividing the sum of
 task runtimes by the total budget. Higher costs result from lower resource utilization. Data based on DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
 Pareto-distributed workflows. The ranges on $y$ axis are chosen to 
@@ -1051,20 +1051,20 @@ can be used to aid in resource allocation planning, when both cost and time
 criteria are given not as constraints but as objectives.
 
 % \begin{figure*}[htb] \centering
-% \includegraphics[width=0.19\textwidth]{figures/score2-MONTAGE-n-1000-8-dagh1-20m0.pdf}
-% \includegraphics[width=0.19\textwidth]{figures/score2-CYBERSHAKE-n-1000-8-dagh1-20m0.pdf}
-% \includegraphics[width=0.19\textwidth]{figures/score2-LIGO-n-1000-8-dagh1-40m0.pdf}
-% \includegraphics[width=0.19\textwidth]{figures/score2-GENOME-n-1000-8-dagh100-1500m0.pdf}
-% \includegraphics[width=0.19\textwidth]{figures/score2-SIPHT-n-1000-8-dagh5-50m0.pdf}
+% \includegraphics[width=0.19\textwidth]{score2-MONTAGE-n-1000-8-dagh1-20m0}
+% \includegraphics[width=0.19\textwidth]{score2-CYBERSHAKE-n-1000-8-dagh1-20m0}
+% \includegraphics[width=0.19\textwidth]{score2-LIGO-n-1000-8-dagh1-40m0}
+% \includegraphics[width=0.19\textwidth]{score2-GENOME-n-1000-8-dagh100-1500m0}
+% \includegraphics[width=0.19\textwidth]{score2-SIPHT-n-1000-8-dagh5-50m0}
 % \caption{Comparison of DPDS, AW-DPDS and SPSS algorithms for ensembles of 100
 % Pareto-distributed workflows. Score is computed as $\sum(2^(-p))$ where
 % priorities of subsequent workflows are $p=0,1,2,\ldots$ (0 means highest
 % priority).} \label{fig:} \end{figure*}
 
 \begin{figure}[htb] \centering
-\includegraphics[width=0.7\columnwidth]{figures/pareto-budget-SIPHT-n-1000-8-dagh5-50h4m0.pdf}\\
+\includegraphics[width=0.7\columnwidth]{pareto-budget-SIPHT-n-1000-8-dagh5-50h4m0}\\
 (a) ensemble of Pareto-distributed workflows
-\includegraphics[width=0.7\columnwidth]{figures/constant-budget-SIPHT-n-1000-0-dagh5-50h4m0.pdf}\\
+\includegraphics[width=0.7\columnwidth]{constant-budget-SIPHT-n-1000-0-dagh5-50h4m0}\\
 (b) ensemble of workflows of equal size \caption{Comparison of number of
 workflows completed for a given deadline, plotted versus different budget
 amounts.}
