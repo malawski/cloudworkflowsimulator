@@ -995,6 +995,20 @@ test consisted of 1000 tasks.
 
 
 
+\begin{figure}[htb]
+    \centering
+    \subfloat[size]{
+        \includegraphics[width=0.75\columnwidth]{size-selected-LIGO}
+        }\\
+    \subfloat[cost]{
+        \includegraphics[width=0.75\columnwidth]{cost-selectedLIGO}
+        }
+    \caption{Example performance of algorithms expressed in
+    sum of dag sizes and effective cost, data for LIGO application, Pareto
+    Sorted ensemble of 100 workflows.}
+    \label{fig:size-cost}
+\end{figure}
+
 \subsection{Relative Performance of Algorithms}
 
 The goal of the first experiment is to characterize the relative performance of the DPDS, WA-DPDS, and SPSS algorithms. This was done by simulating the algorithms on many different ensembles and comparing the scores computed using the technique described in Section~\ref{sec:perf_metric}. The algorithm that achieves the largest number of high scores is judged to have the best performance.
@@ -1003,7 +1017,7 @@ Figure~\ref{fig:distributions} shows the percentage of simulations for which eac
 
 \begin{figure*}[ht]
     \centering
-    \includegraphics[width=0.75\textwidth]{distributions}
+    \includegraphics[width=0.75\textwidth]{run-finish-variations-test-0-output-distributions}
     \caption[Percentage of high scores achieved by each algorithm on different ensemble types for all five applications.]{Percentage of high scores achieved by each algorithm on different ensemble types for all five applications. C = Constant ensembles, PS = Pareto Sorted ensembles, PU = Pareto Unsorted ensembles, US = Uniform Sorted ensembles, and UU = Uniform Unsorted ensembles.}
     \label{fig:distributions}
 \end{figure*}
@@ -1055,17 +1069,17 @@ Figure~\ref{fig:variances}.a shows the ratio of actual cost to budget. These res
 
 Figure~\ref{fig:variances}.b shows the ratio of actual makespan to budget. The interesting thing to notice about this figure is that, for all three algorithms, the deadline constraint is rarely exceeded, even in cases with very poor quality estimates. For the dynamic algorithms this is a result of the fact that they can adapt at runtime to changing circumstances to avoid exceeding the deadline. For the static algorithm this is a result of the way that SPSS schedules workflows and not of a particularly clever optimization. The SPSS algorithm tends to schedule workflows early, using up the budget long before the deadline is reached. This is a consequence of the deadline distribution function in SPSS, which prevents workflows from starting late. This is shown by the gantt chart in Figure~\ref{fig:spss-example}, which illustrates how SPSS tends to pile up workflows at the beginning of the timeline. In comparison, the dynamic algorithms tend to spread out workflow starts over the entire duration as shown in Figure~\ref{fig:spds-example}. The consequence of this behavior is that SPSS plans tend to use up the budget but leave plenty of time before the deadline. So when the runtime of the plan is increased by introducing errors, the SPSS plan has some room to expand without exceeding the deadline.
 
-Figure~\ref{fig:variances_scores} shows relative performance as a percentage of the number of high scores achieved by each algorithm as the error increases. The figure shows that, for this experiment, the scores remain the same as the error increases. This is a result of the way the error is applied. Since the error is selected uniformly from $-p\%$ to $+p\%$ it is equally likely that the error will be positive as negative. In other words, it is equally likely that a task will take longer as it is that the task will be shorter. Because the application used in this experiment, Montage, has a low task runtime variance, applying the error leaves the total runtime of the tasks in the workflow unchanged---the total number of CPU hours in each workflow remains the same regardless of the error. The end result is that the dynamic algorithms are able to achieve the same score without exceeding the constraints by using a different schedule that finishes the same total amount of work using the same budget and deadline. If we had applied a skewed error, for example, an error that was more likely to be positive than negative, then the scores for the dynamic algorithms would decrease relative to the static algorithm as the error increased.
+% Figure~\ref{fig:variances_scores} shows relative performance as a percentage of the number of high scores achieved by each algorithm as the error increases. The figure shows that, for this experiment, the scores remain the same as the error increases. This is a result of the way the error is applied. Since the error is selected uniformly from $-p\%$ to $+p\%$ it is equally likely that the error will be positive as negative. In other words, it is equally likely that a task will take longer as it is that the task will be shorter. Because the application used in this experiment, Montage, has a low task runtime variance, applying the error leaves the total runtime of the tasks in the workflow unchanged---the total number of CPU hours in each workflow remains the same regardless of the error. The end result is that the dynamic algorithms are able to achieve the same score without exceeding the constraints by using a different schedule that finishes the same total amount of work using the same budget and deadline. If we had applied a skewed error, for example, an error that was more likely to be positive than negative, then the scores for the dynamic algorithms would decrease relative to the static algorithm as the error increased.
 
 The behavior of these algorithms indicate that, when the quality of runtime estimates is low, the dynamic algorithms do a much better job of adapting to the changing circumstances to meet their obligations. In comparison, the static algorithm performs better with good information, but fails to meet the constraints when the quality of information is poor. It is possible that the static algorithm could be modified to add more breathing room in the schedule to account for situations where the runtime estimates may be inaccurate. Such a modification would result in slightly worse scores when the estimates are good, but would improve scores when the estimates are bad. Alternatively, the SPSS algorithm could be modified to generate a plan that specifies when to provision and deprovision each VM. In that case the workflow engine could be prevented from exceeding the budget and deadline constraints, but would prevent some workflows from finishing, which may significantly decrease the score. These two modifications are subjects for future work.
 
-\begin{figure*}[p]
+\begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
-        \includegraphics[width=\textwidth]{variances_budget}
-    }\\
+        \includegraphics[width=0.45\textwidth]{run-finish-variations-test-0-output-cost-all}
+        }
     \subfloat[Ratio of Actual Makespan to Deadline]{
-        \includegraphics[width=\textwidth]{variances_deadline}
-    }
+        \includegraphics[width=0.45\textwidth]{run-finish-variations-test-0-output-makespan-all}
+        }
     \caption[Boxplots for budget and deadline ratios when runtime estimates are inaccurate]{Boxplots for budget and deadline ratios when runtime estimate error varies from $\pm$0\% to $\pm$50\% for all three algorithms. A value of 1 indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
     \label{fig:variances}
 \end{figure*}
@@ -1080,34 +1094,36 @@ Recall that it is assumed that resources are billed from the minute that they ar
 
 Figure~\ref{fig:delays} shows the ratios of actual values to constraints when the provisioning delay is increased from 0 seconds up to 15 minutes. The simulations were done using uniform unsorted ensembles of 50 workflows from the Montage application. Each plot in the figure contains three boxes: one for each algorithm. Each box summarizes the results of 10 budgets, 10 deadlines, and 10 random seeds for a total of 1000 simulations per algorithm and provisioning delay (3000 simulations per plot). As in Figure~\ref{fig:variances}, the y-axis in each plot represents the ratio of the actual simulated value to the constraint value for the budget constraint (actual cost) or the deadline constraint (actual makespan). These ratios indicate how frequently and by how much the actual simulated values exceeded (or did not exceed) the constraints.
 
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.5\textwidth]{variances_scores}
-  \caption{Percentage of high scores achieved by each algorithm on Montage with uniform unsorted ensembles when runtime estimate error varies from $\pm$0\% to $\pm$50\%.}
-  \label{fig:variances_scores}
-\end{figure}
+%\begin{figure}[ht]
+%  \centering
+%  \includegraphics[width=0.5\textwidth]{variances_scores}
+%  \caption{Percentage of high scores achieved by each algorithm on Montage with
+%  uniform unsorted ensembles when runtime estimate error varies from $\pm$0\%
+%  to $\pm$50\%.}
+%  \label{fig:variances_scores}
+%\end{figure}
 
-\begin{figure*}[p]
+\begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
-        \includegraphics[width=\textwidth]{delays_budget}
-    }\\
+        \includegraphics[width=0.45\textwidth]{run-finish-delays-test-0-output-cost-montage-uniform_unsorted}
+        }
     \subfloat[Ratio of Actual Makespan to Deadline]{
-        \includegraphics[width=\textwidth]{delays_deadline}
-    }
+        \includegraphics[width=0.45\textwidth]{run-finish-delays-test-0-output-dagfinish-montage-uniform_unsorted}
+        }
     \caption[Boxplots for budget and deadline ratios when provisioning delays occur]{Boxplots for budget and deadline ratios when provisioning delay varies from 0 seconds to 15 minutes for all three algorithms. A value of 1 indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
     \label{fig:delays}
 \end{figure*}
 
 The effect of provisioning delays on workflow performance is similar to that of inaccurate runtime estimates: when the delays are small, all algorithms are able to produce results within the constraints, but when the delays are larger, the dynamic algorithms are able to adapt to avoid exceeding the constraints while the static algorithm is not. The explanation for this behavior is also similar. The difference is that, a very small error in runtime estimates has little impact on the budget, while a very small provisioning delay has a large impact on the budget. Figure~\ref{fig:delays}.a shows that even for an impossibly short provisioning delay of 30 seconds (usually it takes more than than 30 seconds just to boot a VM), the SPSS algorithm exceeds the budget by as much as a factor of 2, and has a distribution with an upper quartile of 1.5 times the budget. In the case of delays more than 5 minutes, which is more typical of what has been observed on academic infrastructure clouds~\cite{Juve2011} such as Magellan~\cite{Magellan} and FutureGrid~\cite{FutureGrid}, fully three quarters of the simulations exceeded the budget. With the exception of a few outliers for 10 and 15 minute delays, the dynamic algorithms consistently met the budget and deadline constraints.
 
-Figure~\ref{fig:delays_scores} shows the relative performance as a percentage of the number of high scores achieved by each algorithm as the provisioning delay increases. This figure shows that, as the delay increases, the relative performance of the static algorithm increases as well. This behavior is a result of the fact that the static algorithm is, in essence, cheating by using more time and money than the dynamic algorithms. In the previous section we showed how the relative performance of the algorithms remains the same when a uniform error is applied to the runtime constraints. In that case, the dynamic algorithms adapted to the error by rearranging the schedule to accomplish the same amount of work given the same deadline and budget. In this case, the dynamic algorithms adapt by performing less work (executing fewer workflows) to remain within the constraints while accounting for the delays. In both cases, the static algorithm completed the same amount of work, but did so by exceeding the constraints.
+% Figure~\ref{fig:delays_scores} shows the relative performance as a percentage of the number of high scores achieved by each algorithm as the provisioning delay increases. This figure shows that, as the delay increases, the relative performance of the static algorithm increases as well. This behavior is a result of the fact that the static algorithm is, in essence, cheating by using more time and money than the dynamic algorithms. In the previous section we showed how the relative performance of the algorithms remains the same when a uniform error is applied to the runtime constraints. In that case, the dynamic algorithms adapted to the error by rearranging the schedule to accomplish the same amount of work given the same deadline and budget. In this case, the dynamic algorithms adapt by performing less work (executing fewer workflows) to remain within the constraints while accounting for the delays. In both cases, the static algorithm completed the same amount of work, but did so by exceeding the constraints.
 
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.5\textwidth]{delays_scores}
-  \caption{Percentage of high scores achieved by each algorithm on Montage with uniform unsorted ensembles when provisioning delay varies from 0 seconds to 15 minutes.}
-  \label{fig:delays_scores}
-\end{figure}
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.5\textwidth]{delays_scores}
+%   \caption{Percentage of high scores achieved by each algorithm on Montage with uniform unsorted ensembles when provisioning delay varies from 0 seconds to 15 minutes.}
+%   \label{fig:delays_scores}
+% \end{figure}
 
 This behavior suggests that SPSS is far too sensitive to provisioning delays in its current form to be of practical use in real systems. It is likely, as was the case for inaccurate runtime estimates, that modifying the SPSS algorithm would improve its performance for provisioning delays. In fact, since provisioning operations are infrequent (because all the algorithms tend to provision resources for a long time), it is likely that the performance of SPSS could be improved significantly by simply adding an estimate of the provisioning delay to its scheduling function. Such an estimate may not have to be particularly accurate to get good results, and developing an estimate from historical data should be relatively simple. Testing this idea is left for future work.
 
