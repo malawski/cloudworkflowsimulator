@@ -780,7 +780,7 @@ The effect of provisioning delays on workflow performance is similar to that of 
 
 This behavior suggests that SPSS is far too sensitive to provisioning delays in its current form to be of practical use in real systems. It is likely, as was the case for inaccurate runtime estimates, that modifying the SPSS algorithm would improve its performance for provisioning delays. In fact, since provisioning operations are infrequent (because all the algorithms tend to provision resources for a long time), it is likely that the performance of SPSS could be improved significantly by simply adding an estimate of the provisioning delay to its scheduling function. Such an estimate may not have to be particularly accurate to get good results, and developing an estimate from historical data should be relatively simple. Testing this idea is left for future work.
 
-\subsection{Failures}
+\subsection{Task Failures}
 \label{sec:failures}
 
 Running workflows consisting of large numbers of tasks on distributed systems
@@ -826,15 +826,16 @@ failures by resubmission (as is the case of Pegasus and Condor DAGMan).
 
 Unlike the dynamic algorithms, which execute their scheduling and provisioning logic at runtime, the SPSS algorithm plans out its provisioning and scheduling decisions ahead of workflow execution. Because SPSS involves more complicated logic than the dynamic algorithms, it is important to understand what impact this has on execution time.
 
-Figure~\ref{fig:spss_planning_time} shows the SPSS planning time for three different ensemble sizes (50, 100, 200), and five different workflow sizes (50, 200, 400, 600, 800). The ensembles were generated using a constant distribution equal to the workflow size desired. Two different applications were used: SIPHT and CyberShake. Each box summarizes the results of 2 applications, 10 random seeds, 10 budgets and 10 deadlines, or 2000 simulations per box. For ensemble size 200, the results for workflow size 800 are omitted because the simulations took too long to get a representative sample.
+Figure~\ref{fig:spss_planning_time} shows the SPSS planning time for ensembles of 100 workflows with five different workflow sizes: 50, 200, 400, 600, and 800 tasks. The ensembles were generated using a constant distribution equal to the workflow size desired. Two different applications were used: SIPHT and CyberShake. Each box summarizes the results of 2 applications, 10 random seeds, 10 budgets and 10 deadlines, or 2000 simulations per box.
 
-Figure~\ref{fig:spss_planning_time} shows that, for small ensembles and small workflows, the SPSS planning time is reasonable, taking on the order of tens of seconds to a few minutes. For larger ensembles of large workflows, however, the SPSS planning time can easily reach 10-15 minutes. Considering that the largest workflows used in this experiment are rather small (maximum of 800 tasks), and that real workflows are often much larger (workflows with tens of thousands of tasks are common, and workflows with hundreds of thousands or millions of tasks are rare but do exist), it is unlikely that SPSS will be practical for ensembles of very large workflows.
+Figure~\ref{fig:spss_planning_time} shows that, for small workflows, the SPSS planning time is reasonable, taking on the order of tens of seconds to a few minutes. For larger ensembles of large workflows, however, the SPSS planning time can easily reach 10 minutes. Considering that the largest workflows used in this experiment are still relatively small (maximum of 800 tasks), and that real workflows are often much larger (workflows with tens of thousands of tasks are common, and workflows with hundreds of thousands or millions of tasks are not impossible), it is unlikely that SPSS will be practical for ensembles of very large workflows.
 
-\begin{figure*}[t]
-    \includegraphics[width=\textwidth]{spss_planning_time}
-    \caption{Planning time of SPSS algorithm for different ensemble and workflow sizes.}
+\begin{figure}[tb]
+    \centering
+    \includegraphics[width=0.4\textwidth]{spss_planning_time}
+    \caption{Planning time of SPSS algorithm for ensembles of 100 workflows and different workflow sizes.}
     \label{fig:spss_planning_time}
-\end{figure*}
+\end{figure}
 
 The algorithmic complexity of SPSS is $O(n^2)$, where $n$ is the number of tasks in the ensemble. This derives from the fact that, for each task, SPSS considers scheduling the task on the cheapest available slot, which involves scanning all of the available slots on all the VMs. Since the number of available slots, in the worst case, is proportional to the number of tasks scheduled (because scheduling a task splits an existing slot into at most two slots), the complexity of SPSS is $O(n^2)$. In comparison, the dynamic algorithms all have a more scalable complexity of $O(n)$. DPDS only examines the tasks in the workflow once when they are scheduled, and WA-DPDS examines them twice: once in the admissions algorithm, and once when they are scheduled. This makes the dynamic algorithms a better fit for larger workflows and ensembles even though they may not produce results that are as good as SPSS.
 
