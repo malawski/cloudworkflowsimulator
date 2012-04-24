@@ -540,12 +540,25 @@ The number of workflows in an ensemble depends on the particular application, bu
 \subsection{Performance Metrics}
 \label{sec:perf_metric}
 
-In order to assess the relative performance of our algorithms it is necessary to define a metric that can be used to score the performance of the different algorithms on a given problem (ensemble, budget, and deadline). The simplest approach is to simply count the number of workflows in the ensemble that each algorithm is able to complete within the budget before the deadline. The problem with this approach is that it does not account for the priority-based utility function specified by the user. Using the counting approach, a less efficient algorithm may be able to complete a large number of low-priority workflows by executing the smallest workflows first.
+In order to assess the relative performance of our algorithms, we have defined the following metrics:
 
-In order to account for the user's priority, we used an exponential scoring approach where the score for an ensemble $e$ is:
+\begin{itemize}
+  \item $N_c$: number of workflows completed,
+  \item $T_C$: total amount of computing time completed,
+  \item $C_{eff}$: effective cost of computing per hour, which includes overheads due to the cost of idle resources.
+  \item $s$: user preference score (utility function),
+\end{itemize}
+
+These metrics measure the relative performance of the different algorithms on a given problem (ensemble, budget, and deadline).
+
+The simplest approach is to simply count the number of workflows in the ensemble that each algorithm is able to complete within the budget, before the deadline, $N_c$.
+
+The total amount of computing time completed, $T_C$, is the sum of the runtimes of all tasks in all completed workflows. Because we assumed that the resource cost per hour is equal to \$1, the total computing time can be easily compared to the allocated budget $b$. Their ratio: $u = (T_C * \$1)/b$, is the resource utilization, and its inverse: $C_{eff} = b/T_C$, is the effective resource cost in dollars per hour. To calculate $C_{eff}$ and $u$ we use the value of allocated budget $b$, not the actual total cost, since we are interested in the scenarios when the budget is limited and does not allow completing all the workflows from the ensemble.
+
+The $N_c$, $T_C$ and $C_{eff}$ metrics do not account for the priority-based utility function specified by the user. Using $N_c$, for example, a less efficient algorithm may be able to complete a large number of low-priority workflows by executing the smallest workflows first. In order to account for the user's priority, we used an exponential scoring approach where the score $s$ for an ensemble $e$ is:
 %
 $$
-Score(e) = \sum_{w~\in~Completed(e)}{2^{-Priority(w)}}
+s = \sum_{w~\in~Completed(e)}{2^{-Priority(w)}}
 $$
 %
 where $Completed(e)$ is the set of workflows in ensemble $e$ that was completed by the algorithm, and $Priority(w)$ is the priority of workflow $w$ such that the highest-priority workflow has $Priority(w)=0$, the next highest workflow has $Priority(w)=1$, and so on. This exponential scoring function gives the highest priority workflow a score that is higher than all the lower-priority workflows combined:
@@ -554,30 +567,7 @@ $$
 2^{-p} > \sum_{i~=~p+1,~\ldots}2^{-i}
 $$
 %
-This scoring is consistent with our definition of the problem, which is to complete as many workflows as possible, according to their priorities, given a set budget and deadline.
-
-
-\subsection{Metrics}
-
-\TODO{Merge this with Section \ref{sec:perf_metric}}
-
-\begin{itemize}
-  \item $N_c$: number of workflows completed,
-  \item $s$: user preference score (utility function),
-  \item $T_C$: total amount of computing time completed,
-  \item $C_{eff}$: effective cost of computing per hour, which includes
-  overheads due to the cost of idle resources.
-\end{itemize}
-
-The total amount of computing time completed, $T_C$, is calculated as the sum 
-of the runtimes of all tasks in all completed workflows. Because we assumed 
-that the resource cost per hour is equal to \$1, the total computing time 
-can be easily compared to the allocated budget $b$. Their ratio: 
-$u = (T_C * \$1)/b$, is the resource utilization, and its inverse: 
-$C_{eff} = b/T_C$, is the effective resource cost in dollars per hour. To
-calculate $C_{eff}$ and $u$ we use the value of allocated budget $b$, not the
-actual total cost, since we are interested in the scenarios when the budget is
-limited and does not allow completing all the workflows from the ensemble.
+This metric is consistent with our definition of the problem, which is to complete as many workflows as possible, according to their priorities, given a set budget and deadline.
 
 
 \subsection{Experimental Parameters}
