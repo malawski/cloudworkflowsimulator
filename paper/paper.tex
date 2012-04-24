@@ -650,28 +650,28 @@ of 75000 we selected representative plots.
 Fig.~\ref{fig:size-cost}a shows example of a performance curve using the total computing
 time metric, $T_C$ for LIGO application with pareto Sorted distribution of
 workflows. It can be seen that SPSS gives the best performance and WA-DPDS
-performs better than the workflow-unaware version, DPDS. 
-This means that for the workflows we tested the simple admission procedure based 
-on estimation of workflow cost does not degrade the solution, but rather in 
+performs better than the workflow-unaware version, DPDS.
+This means that for the workflows we tested the simple admission procedure based
+on estimation of workflow cost does not degrade the solution, but rather in
 many cases it enables larger workflows that would lead to budget overrun to
 be rejected. Thus it can save the space for smaller workflows to complete.
 
 
 This plot allows us observe a more general property: for a given budget,
-when the deadline is tightened the amount of work done steeply decreases. 
+when the deadline is tightened the amount of work done steeply decreases.
 This is partially due to the fact that fewer workflows can be
 completed given a short deadline because their critical paths are simply too long
 and they are squeezed out of early start times by high priority workflows.
 In addition, assigning a shorter deadline means that more VMs need to be
-provisioned to complete the work. However, because of the dependencies in the 
-workflows, many of these VMs will either be idle, or will be backfilled with 
-tasks from low-priority workflows that never finish, resulting, effectively, 
+provisioned to complete the work. However, because of the dependencies in the
+workflows, many of these VMs will either be idle, or will be backfilled with
+tasks from low-priority workflows that never finish, resulting, effectively,
 in reduced resource utilization and fewer completed workflows.
 
 These observations are further confirmed when examining the effective computing
 cost, as shown in Figure~\ref{fig:size-cost}b. It can be seen that lower
 resource utilization and lower parallel efficiency for short deadlines lead to
-substantial increases in the effective computing cost. This increase can be 
+substantial increases in the effective computing cost. This increase can be
 significant. For example, for short deadlines an effective computing cost
 is $\sim$10--40\% higher than the minimum effective cost of \$1/hour, depending
 on the algorithm used. This means that out of the \$1,000 budget, \$100--\$400
@@ -681,11 +681,11 @@ Another general conclusion can be drawn from Figure~\ref{fig:size-cost}b:
 all the curves for all the applications and budgets have a similar shape. This
 shape represents a trade-off curve between two conflicting objectives: time and cost.
 We observe that the selection of deadline and cost can be formulated as a
-multi-criteria optimization problem, and that the curves presented in 
+multi-criteria optimization problem, and that the curves presented in
 Figure~\ref{fig:size-cost}b are approximations of the Pareto front (or Pareto
 set) of solutions to this problem. In our case the solutions were achieved by maximizing
-the amount of work done, which is the inverse of minimizing the effective 
-computing cost metric for a given deadline. Therefore, the obtained results 
+the amount of work done, which is the inverse of minimizing the effective
+computing cost metric for a given deadline. Therefore, the obtained results
 can be used to aid in multi-criteria resource allocation planning, when both
 cost and time criteria are given not as constraints but as objectives.
 
@@ -807,6 +807,47 @@ The effect of provisioning delays on workflow performance is similar to that of 
 
 This behavior suggests that SPSS is far too sensitive to provisioning delays in its current form to be of practical use in real systems. It is likely, as was the case for inaccurate runtime estimates, that modifying the SPSS algorithm would improve its performance for provisioning delays. In fact, since provisioning operations are infrequent (because all the algorithms tend to provision resources for a long time), it is likely that the performance of SPSS could be improved significantly by simply adding an estimate of the provisioning delay to its scheduling function. Such an estimate may not have to be particularly accurate to get good results, and developing an estimate from historical data should be relatively simple. Testing this idea is left for future work.
 
+\subsection{Failures}
+\label{sec:failures}
+
+Running workflows consisting of large numbers of tasks on distributed systems
+almost always faces different types of failures. The goal of this experiment was
+to asses the behaviour of the algorithms in the presence of task execution
+failures by introducing a failure model into the simulator. The model is
+characterized by a failure rate $f$ that defines the probability that a task
+will fail. The failure time of the task is determined by randomly sampling a
+time between task start and finish time. If the task fails, it is reported to
+the workflow engine, which then resubmits the task for execution. Dynamic algorithms
+add the task again to the priority queue (queue $P$ in Algorithm~\ref{alg:ds})
+so that it can be resubmitted by the scheduler. Static algorithm resubmits the
+failed task on the same VM that was selected in the plan.
+
+\begin{figure*}[tb]
+    \subfloat[Ratio of Actual Cost to Budget]{
+        \includegraphics[width=0.45\textwidth]{run-finish-failures-test-0-output-cost-all}
+        }
+    \subfloat[Ratio of Actual Makespan to Deadline]{
+        \includegraphics[width=0.45\textwidth]{run-finish-failures-test-0-output-makespan-all}
+        }
+    \caption{Boxplots for budget and deadline ratios when failure rate varies
+    from 0 seconds to 50 \% for all three algorithms. A value of 1
+    indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
+    \label{fig:failures}
+\end{figure*}
+
+Fig.~\ref{fig:failures} shows the ratios of actual values to constraints when
+the failures are introduced. The high failure rates have a high impact on the
+performance of the static algorithm and can degrade the solution considerably.
+Comparing Fig.~\ref{fig:failures} to Figs.~\ref{fig:variances}
+and~\ref{fig:delays} one may conclude that failures are worse than
+provisioning delays and runtime estimate errors, since their impact is larger.
+However, small failure rates (below 10\%) do not cause constraint overruns
+larger than 10\%. We consider higher failure rates as rare events that suggest
+some significant system malfunction or improper resource selection
+process. It is thus more important that all the algorithms can handle task
+failures by resubmission (as is the case of Pegasus and Condor DAGMan).
+
+
 
 \subsection{SPSS Planning Time}
 
@@ -830,46 +871,46 @@ It may be possible to optimize SPSS to reduce its runtime by, for example, clust
 \section{Conclusions and Future Work}
 \label{sec:conclusions}
 
-In this paper we addressed the interesting and important new problem of 
-scheduling and resource provisioning for scientific workflow ensembles 
-on IaaS clouds. The problem is different from previous work on grid and 
-utility grid scheduling in that cloud infrastructures provide more control 
-over the resources, so the resource provisioning plan can be adjusted 
-according to the requirements of the application. Therefore the problem 
+In this paper we addressed the interesting and important new problem of
+scheduling and resource provisioning for scientific workflow ensembles
+on IaaS clouds. The problem is different from previous work on grid and
+utility grid scheduling in that cloud infrastructures provide more control
+over the resources, so the resource provisioning plan can be adjusted
+according to the requirements of the application. Therefore the problem
 space becomes larger: it requires not only an efficient mapping of tasks
-to available resources, but also the selection of the best resource 
+to available resources, but also the selection of the best resource
 provisioning plan. Formulating the problem as a maximization of the
 number of prioritized workflows completed from the ensemble is also novel and  
-requires workflows to be admitted or rejected based on their estimated 
-resource demands. We believe that this bi-constrained problem is highly 
-relevant because such constraints are commonly imposed on many real-world 
-projects. The approach is also directly applicable to grid environments 
+requires workflows to be admitted or rejected based on their estimated
+resource demands. We believe that this bi-constrained problem is highly
+relevant because such constraints are commonly imposed on many real-world
+projects. The approach is also directly applicable to grid environments
 that provide resource reservations and charge service units for resource use.
 
-We have considered both static and dynamic scheduling approaches and 
-developed the DPDS, WA-DPDS and SPSS algorithms based on these 
-strategies. The algorithms were evaluated on ensembles of synthetic 
-workflows, which were generated based on real scientific applications. For 
-the purposes of evaluation we have developed a simulator that models: the 
-cloud infrastructure, and a workflow engine with tightly-coupled scheduler 
-and provisioner modules. The results of our simulation studies indicate 
-that the two algorithms that take into account information about the 
-structure of the workflow and task runtime estimates (WA-DPDS and SPSS) 
-yield better results than the simple on-line priority-based scheduling 
+We have considered both static and dynamic scheduling approaches and
+developed the DPDS, WA-DPDS and SPSS algorithms based on these
+strategies. The algorithms were evaluated on ensembles of synthetic
+workflows, which were generated based on real scientific applications. For
+the purposes of evaluation we have developed a simulator that models: the
+cloud infrastructure, and a workflow engine with tightly-coupled scheduler
+and provisioner modules. The results of our simulation studies indicate
+that the two algorithms that take into account information about the
+structure of the workflow and task runtime estimates (WA-DPDS and SPSS)
+yield better results than the simple on-line priority-based scheduling
 strategy (DPDS).
 
 During our work, several interesting lessons were learned from simulating the execution of
-workflow ensembles on cloud infrastructures. One result is that the simple 
-strategy used by DPDS performs relatively well in terms of the number of 
+workflow ensembles on cloud infrastructures. One result is that the simple
+strategy used by DPDS performs relatively well in terms of the number of
 workflows completed and the high resource utilization it can achieve. However,
 some of these workflows may be of lower priority, and the high utilization
 may be achieved by running tasks from workflows that cannot be completed
-given the constraints. On the other hand, DPDS may be the only choice when 
+given the constraints. On the other hand, DPDS may be the only choice when
 estimates of task runtimes are not available in advance. We also observed
-that the WA-DPDS and SPSS algorithms are able to find better quality 
-solutions in terms of the target metrics: this is primarily a result of the 
-admission algorithms, which reject workflows that are too large to be 
-completed given the constraints, and accept more smaller workflows that 
+that the WA-DPDS and SPSS algorithms are able to find better quality
+solutions in terms of the target metrics: this is primarily a result of the
+admission algorithms, which reject workflows that are too large to be
+completed given the constraints, and accept more smaller workflows that
 can be completed.
 
 Another lesson learned from our studies is the effect of task granularity on
@@ -886,20 +927,20 @@ investigate further the effects of task granularity on ensemble scheduling in a 
 systematic fashion.
 
 Our current study suggests many areas for future work. One interesting
-issue that we plan to investigate is how the static and dynamic algorithms 
-perform with uncertain task runtimes and failures, which are known to have 
-an important influence on overall system performance~\cite{Sakellariou2010,Dongarra2007}. 
-We also plan to extend our application and infrastructure model to explicitly 
-include the various data storage options available on clouds (right now we only 
-model data access as part of the task time and do not include data costs). A previous 
-experimental study on that subject~\cite{Juve2010} suggests that the data 
-demands of scientific workflows have a large impact on not only the 
-execution time, but also on the cost of workflows in commercial clouds. 
-Finally, we plan to investigate heterogeneous environments that include 
-multiple VM types and cloud providers, including private and community clouds, 
+issue that we plan to investigate is how the static and dynamic algorithms
+perform with uncertain task runtimes and failures, which are known to have
+an important influence on overall system performance~\cite{Sakellariou2010,Dongarra2007}.
+We also plan to extend our application and infrastructure model to explicitly
+include the various data storage options available on clouds (right now we only
+model data access as part of the task time and do not include data costs). A previous
+experimental study on that subject~\cite{Juve2010} suggests that the data
+demands of scientific workflows have a large impact on not only the
+execution time, but also on the cost of workflows in commercial clouds.
+Finally, we plan to investigate heterogeneous environments that include
+multiple VM types and cloud providers, including private and community clouds,
 which will make the problem even more complex and challenging~\cite{Marshall2010, Vockler2011, Juve2010}.
 
-We believe that the results of our study can be applied in practice to develop 
+We believe that the results of our study can be applied in practice to develop
 tools that assist researchers in planning their large-scale computational
 experiments. The estimates of costs, runtimes and number of workflows completed
 that can be obtained from both the static algorithms and from the simulation
