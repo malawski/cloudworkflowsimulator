@@ -728,11 +728,11 @@ The behavior of these algorithms indicate that, when the quality of runtime esti
 
 \begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
-        \includegraphics[width=0.45\textwidth]{run-finish-variations-test-0-output-cost-all}
+        \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-cost-all}
         }
     \subfloat[Ratio of Actual Makespan to Deadline]{
-        \includegraphics[width=0.45\textwidth]{run-finish-variations-test-0-output-makespan-all}
-        }
+    \hspace{2cm}
+        \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-makespan-all} }
     \caption[Boxplots for budget and deadline ratios when runtime estimates are inaccurate]{Boxplots for budget and deadline ratios when runtime estimate error varies from $\pm$0\% to $\pm$50\% for all three algorithms. A value of 1 indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
     \label{fig:variances}
 \end{figure*}
@@ -758,10 +758,11 @@ Figure~\ref{fig:delays} shows the ratios of actual values to constraints when th
 
 \begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
-        \includegraphics[width=0.45\textwidth]{run-finish-delays-test-0-output-cost-montage-uniform_unsorted}
+        \includegraphics[width=0.4\textwidth]{run-finish-delays-test-0-output-cost-montage-uniform_unsorted}
         }
     \subfloat[Ratio of Actual Makespan to Deadline]{
-        \includegraphics[width=0.45\textwidth]{run-finish-delays-test-0-output-dagfinish-montage-uniform_unsorted}
+        \hspace{2cm}
+        \includegraphics[width=0.4\textwidth]{run-finish-delays-test-0-output-dagfinish-montage-uniform_unsorted}
         }
     \caption[Boxplots for budget and deadline ratios when provisioning delays occur]{Boxplots for budget and deadline ratios when provisioning delay varies from 0 seconds to 15 minutes for all three algorithms. A value of 1 indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
     \label{fig:delays}
@@ -797,10 +798,11 @@ failed task on the same VM that was selected in the plan.
 
 \begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
-        \includegraphics[width=0.45\textwidth]{run-finish-failures-test-0-output-cost-all}
+        \includegraphics[width=0.4\textwidth]{run-finish-failures-test-0-output-cost-all}
         }
     \subfloat[Ratio of Actual Makespan to Deadline]{
-        \includegraphics[width=0.45\textwidth]{run-finish-failures-test-0-output-makespan-all}
+        \hspace{2cm}
+        \includegraphics[width=0.4\textwidth]{run-finish-failures-test-0-output-makespan-all}
         }
     \caption{Boxplots for budget and deadline ratios when failure rate varies
     from 0 seconds to 50 \% for all three algorithms. A value of 1
