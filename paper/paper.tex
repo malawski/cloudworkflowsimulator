@@ -598,39 +598,41 @@ $$
 This metric is consistent with our definition of the problem, which is to complete as many workflows as possible, according to their priorities, given a set budget and deadline.
 
 
-\subsection{Discussion of Results}
+\subsection{Example of Results}
 
 % New rewritten text for section ``discussion of Results'' starts here
 
-\begin{figure}[htb]
+\begin{figure}[tb]
     \centering
     \subfloat[size]{
-        \includegraphics[width=0.75\columnwidth]{size-selected-LIGO}
+        \includegraphics[width=0.6\columnwidth]{size-selected-LIGO}
         }\\
     \subfloat[cost]{
-        \includegraphics[width=0.75\columnwidth]{cost-selectedLIGO}
+        \includegraphics[width=0.6\columnwidth]{cost-selectedLIGO}
         }
     \caption{Example performance of algorithms expressed in
     sum of dag sizes and effective cost, data for LIGO application, Pareto
-    Sorted ensemble of 100 workflows.}
+    Sorted ensemble of 100 workflows, budget = \$600}
     \label{fig:size-cost}
 \end{figure}
 
-To analyze the behaviour of algorithms we ran simulations for constraint values
-ranging between the estimated limits indicated in Section~\ref{sec:exp-parameters},
-resulting in $10 * 10 = 100$ (budget, deadline) data points for each of 5 applications, 3 algorithms and
-using 5 ensemble size distributions and 10 random seeds. From this result space
-of 75000 we selected representative plots.
+%To analyze the behaviour of algorithms we ran simulations for constraint values
+%ranging between the estimated limits indicated in
+%Section~\ref{sec:exp-parameters}, resulting in $10 * 10 = 100$ (budget,
+%deadline) data points for each of 5 applications, 3 algorithms and using 5
+%ensemble size distributions and 10 random seeds. From this result space of
+%75000 we selected representative plots.
 
-Fig.~\ref{fig:size-cost}a shows example of a performance curve using the total computing
-time metric, $T_C$ for LIGO application with pareto Sorted distribution of
-workflows. It can be seen that SPSS gives the best performance and WA-DPDS
-performs better than the workflow-unaware version, DPDS.
-This means that for the workflows we tested the simple admission procedure based
-on estimation of workflow cost does not degrade the solution, but rather in
-many cases it enables larger workflows that would lead to budget overrun to
-be rejected. Thus it can save the space for smaller workflows to complete.
-
+To illustrate the behavior of the algorithms we show here examples of
+performance curves obtained for selected sample parameters.
+Fig.~\ref{fig:size-cost}a uses the total computing time metric, $T_C$ for LIGO
+application with pareto Sorted distribution of workflows. It can be seen that
+SPSS gives the best performance and WA-DPDS performs better than the
+workflow-unaware version, DPDS. This means that for the workflows we tested the
+simple admission procedure based on estimation of workflow cost does not degrade
+the solution, but rather in many cases it enables larger workflows that would
+lead to budget overrun to be rejected. Thus it can save the space for smaller
+workflows to complete.
 
 This plot allows us observe a more general property: for a given budget,
 when the deadline is tightened the amount of work done steeply decreases.
@@ -649,8 +651,8 @@ resource utilization and lower parallel efficiency for short deadlines lead to
 substantial increases in the effective computing cost. This increase can be
 significant. For example, for short deadlines an effective computing cost
 is $\sim$10--40\% higher than the minimum effective cost of \$1/hour, depending
-on the algorithm used. This means that out of the \$1,000 budget, \$100--\$400
-is spent on idle resources.
+on the algorithm used. This means that out of the \$600 budget,
+$\sim$\$60--\$240 is spent on idle resources.
 
 Another general conclusion can be drawn from Figure~\ref{fig:size-cost}b:
 all the curves for all the applications and budgets have a similar shape. This
