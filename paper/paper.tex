@@ -537,6 +537,34 @@ Pareto ensembles contain a small number of larger workflows and a large number o
 The number of workflows in an ensemble depends on the particular application, but we assume that ensemble sizes are on the order of between 10 and 100 workflows. This range is motivated by several reasons: First, such sizes are typical of the real applications we have examined. For example, the number of geographical sites of interest to the users of the CyberShake application in the past has been on the order of 100. Second, smaller ensembles consisting of just a few workflows can be aggregated into a single workflow, so there is no need to treat them as an ensemble. Similarly, when the number of workflows grows, and each workflow has a large number of tasks, either the deadline and budget constraints are low enough to prevent many of the workflows from running, or the problem of efficiently allocating them to the resources becomes similar to a bag-of-tasks problem, which is easier to solve efficiently.
 
 
+\subsection{Experimental Parameters}
+\label{sec:exp-parameters}
+
+In order to observe the interesting characteristics of the proposed algorithms, we evaluated them using a broad range of constraint values. For each ensemble, we selected ranges for deadline and budget that cover a broad parameter space: from tight constraints, where only a small number of workflows can be completed, to more liberal constraints where all, or almost all, of the workflows can be completed. Because the interesting parameter space varies among the applications, ensemble types and sizes, we computed constraint ranges based on the characteristics of each ensemble. The budget constraints are calculated by identifying the smallest budget required to execute one of the workflows in the ensemble (MinBudget), and the smallest budget required to execute all workflows in the ensemble (MaxBudget): 
+%
+$$
+MinBudget = \min_{w\ \in\ e}{Cost(w)}
+$$
+$$
+MaxBudget = \sum_{w\ \in\ e}{Cost(w)}
+$$
+%
+This range---$[MinBudget, MaxBudget]$---is then divided into equal intervals to determine the budgets to use in each experiment. Similarly, the deadline constraints for each ensemble are calculated by identifying the smallest amount of time required to execute a single workflow in the ensemble (MinDeadline), which is the length of the critical path for the workflow with the shortest critical path, and by identifying the smallest amount of time required to execute all workflows (MaxDeadline), which is the sum of the critical paths of all the workflows:
+%
+$$
+MinDeadline = \min_{w\ \in\ e}{CriticalPath(w)}
+$$
+$$
+MaxDeadline = \sum_{w\ \in\ e}{CriticalPath(w)}
+$$
+%
+This range---$[MinDeadline, MaxDeadline]$---is then divided into equal intervals to determine the deadlines to use in each experiment. By computing the budget and deadline constraits in this way we ensure that the experiments for each ensemble cover the most interesting area of the parameter space for the ensemble.
+
+In all the experiments we assumed that the VMs have a price of \$1 per VM-hour. This price was chosen to simplify interpretation of results and should not affect the relative performance of the different algorithms. In this study we do not take into account the heterogeneity of the infrastructure since we assume that it is always possible to select a VM type that has the best price to performance ratio for a given application.
+
+All the experiments were run with maximum autoscaling factor ($v_{max}$) set to 1.0 for DPDS and WA-DPDS. After experimenting with DPDS and WA-DPDS we found that, due to the high parallelism of workflows used, the resource utilization remains high enough without adjusting the autoscaling rate. Based on experiments with the target applications, we set the SPSS $\alpha$ parameter for deadline distribution to be 0.7, which allocates slightly more time to levels with many tasks.
+
+
 \subsection{Performance Metrics}
 \label{sec:perf_metric}
 
@@ -569,49 +597,6 @@ $$
 %
 This metric is consistent with our definition of the problem, which is to complete as many workflows as possible, according to their priorities, given a set budget and deadline.
 
-
-\subsection{Experimental Parameters}
-\label{sec:exp-parameters}
-\TODO{Edit this first paragraph, which was moved from the old Scenarios section}
-
-We have prepared test scenarios to evaluate the proposed algorithms under a
-range of parameters that enables us to observe the interesting characteristics
-of the different algorithms for smaller and larger constraints. For a given
-ensemble we can expect, in general, that the amount of work done (in terms of
-workflows completed) depends mainly on the budget constraint, which determines
-the number of machine-hours that can be provisioned. The deadline, although
-important in terms of scheduling, is assumed to be greater than the longest critical
-path of all workflows in the ensemble. We can then have a trivial but unrealistic solution
-where the deadline  is long enough to allow all the workflow tasks to be
-executed sequentially: this eliminates all the overheads of parallel execution
-and leads to the highest resource utilization. More interesting and more
-realistic, however, are the cases where the deadline is shorter than the serial
-schedule, since it forces the system to provision multiple VMs to execute
-workflow tasks in parallel.
-
-For each application, we selected ranges of constraints (deadline and budget) to cover a broad parameter space: from tight constraints, where only a small number of workflows can be completed, to more liberal constraints where all, or almost all, of the workflows can be completed. These parameters vary among the applications and ensemble types and sizes. The budget constraints for each ensemble are calculated by identifying the smallest budget required to execute one of the workflows in the ensemble (MinBudget), and the smallest budget required to execute all workflows in the ensemble (MaxBudget): 
-%
-$$
-MinBudget = \min_{w\ \in\ e}{Cost(w)}
-$$
-$$
-MaxBudget = \sum_{w\ \in\ e}{Cost(w)}
-$$
-%
-This range---$[MinBudget, MaxBudget]$---is then divided into equal intervals to determine the budgets to use in each experiment. Similarly, the deadline constraints for each ensemble are calculated by identifying the smallest amount of time required to execute a single workflow in the ensemble (MinDeadline), which is the length of the critical path for the workflow with the shortest critical path, and by identifying the smallest amount of time required to execute all workflows (MaxDeadline), which is the sum of the critical paths of all the workflows:
-%
-$$
-MinDeadline = \min_{w\ \in\ e}{CriticalPath(w)}
-$$
-$$
-MaxDeadline = \sum_{w\ \in\ e}{CriticalPath(w)}
-$$
-%
-This range---$[MinDeadline, MaxDeadline]$---is then divided into equal intervals to determine the deadlines to use in each experiment. By computing the budget and deadline constraits in this way we ensure that the experiments for each ensemble cover the most interesting area of the parameter space for the ensemble.
-
-In all the experiments we assumed that the VMs have a price of \$1 per VM-hour. This price was chosen to simplify interpretation of results and should not affect the relative performance of the different algorithms. In this study we do not take into account the heterogeneity of the infrastructure since we assume that it is always possible to select a VM type that has the best price to performance ratio for a given application.
-
-All the experiments were run with maximum autoscaling factor ($v_{max}$) set to 1.0 for DPDS and WA-DPDS. After experimenting with DPDS and WA-DPDS we found that, due to the high parallelism of workflows used, the resource utilization remains high enough without adjusting the autoscaling rate. Based on experiments with the target applications, we set the SPSS $\alpha$ parameter for deadline distribution to be 0.7, which allocates slightly more time to levels with many tasks.
 
 \subsection{Discussion of Results}
 
@@ -678,6 +663,7 @@ the amount of work done, which is the inverse of minimizing the effective
 computing cost metric for a given deadline. Therefore, the obtained results
 can be used to aid in multi-criteria resource allocation planning, when both
 cost and time criteria are given not as constraints but as objectives.
+
 
 \subsection{Relative Performance of Algorithms}
 
