@@ -136,9 +136,9 @@ sumCutScores = apply(cutScores,c(1,5,6),sum)
 
 
 
-pdf(file=paste(csv_filename, "-distributions.pdf", sep=""), height=4, width=6, bg="white")
-par(mfrow=c(2,3))
-
+pdf(file=paste(csv_filename, "-distributions.pdf", sep=""), height=2, width=12, bg="white")
+par(mfrow=c(1,6))
+par(mar=c(4,4,2,0))
 for (i in 1:n_applications) {
 	print(applications[i])
 	bar_data = sumScores[,,i]
@@ -148,12 +148,14 @@ for (i in 1:n_applications) {
 	# reorder algorithms and change to %
 	bar_data = bar_data[c(1,3,2),]/10.0
 	print(bar_data)	
-	barplot(as.table(bar_data), beside = TRUE, xlab="Distribution", ylab = "Best Scores (%)", main = applications[i], col=gray( c(0.1,0.4,0.8) ),
-	ylim = c(0,100), cex.names=0.8)
+	barplot(as.table(bar_data), beside = TRUE, xlab="Distribution",  main = applications[i], 
+			col=gray( c(0.1,0.4,0.8) ),
+	ylim = c(0,100), cex.names=1.0)
+	if (i==1) {title(ylab="Best Scores (%)")}
 }
-plot.new() 
+plot.new()
 plot.window(c(0,1), c(0,1))
-legend("center", algorithms[c(1,3,2)], fill=gray( c(0.1,0.4,0.8) ))
+legend("left", algorithms[c(1,3,2)], fill=gray( c(0.1,0.4,0.8) ))
 dev.off()
 
 

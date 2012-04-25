@@ -71,6 +71,56 @@ plot_series <- function(prefix, plot_title, application, budgets, algorithms, li
 	dev.off()
 }
 
+# Plot selected column from the series
+plot_selected <- function(prefix, plot_title, application, budget_id, algorithms, list_avg, hours, legend_position) {
+	pdf(file=paste(prefix, application, ".pdf", sep=""), height=4, width=5, bg="white")
+#	par(mfrow=c(1,5))	
+	par(mar=c(4,4,0.5,0.1))
+	#pdf(file=paste(prefix, dag, "h", deadline, "m", max_scaling, ".pdf", sep=""), height=3, width=10, bg="white")
+	#par(mfrow=c(2,1))
+	x_max = hours[length(hours)]
+	# create vectors for max and min values
+	list_max = 1:n_algorithms
+	list_min = 1:n_algorithms
+	
+	i = budget_id	
+	
+	for(alg in 1:length(algorithms)) {
+		list_max[alg]=max(list_avg[[alg]][i,])
+		list_min[alg]=min(list_avg[[alg]][i,])
+	}
+	y_max = max(list_max)
+	y_min = min(list_min)
+	# print(y_max)
+	# print(y_min)
+	
+	plot(hours, list_avg[[1]][1,]*1.2, type="n", col="blue", axes=FALSE, ann=FALSE, xlim=c(0,x_max*1.2), ylim=c(y_min,y_max))
+	for(alg in 1:length(algorithms)){	
+		lines(hours, list_avg[[alg]][i,], type="o", pch=alg, lty=5, col=alg)
+	}
+	
+	#title(main=paste("budget = $",budgets[i]), col.main="black", font.main=4)
+	legend(legend_position, c("SPSS","WADPDS","DPDS"), cex=1, col=c(2,1,3), pch=c(2,1,3) )
+	
+	
+	#legend(x_range*1.0, avg_m[i,length(hours)]+5, paste("$",budgets[i]), cex=1.2, bty="n");
+	
+	title(ylab=plot_title, cex.lab=1.2)
+	title(xlab="deadline in hours", cex.lab=1.2)
+	axis(2,cex.axis=1.2)
+	axis(1,cex.axis=1.2)
+	grid(col = "gray", lty = "dashed")
+	box()
+	
+	
+	
+	#legend("topright", c(algorithms$algorithm[1:6]), cex=1, col=1:6, pch=1:6 )
+#	mtext(application, side=3, outer=TRUE, line=-1.5) 
+	dev.off()
+}
+
+
+
 
 
 ############################################################################################################################
@@ -81,14 +131,15 @@ plot_series <- function(prefix, plot_title, application, budgets, algorithms, li
 
 
 driver<-dbDriver("SQLite")
-connect<-dbConnect(driver, dbname = "fractions-nodelays.sqlite")
-#connect<-dbConnect(driver, dbname = "pareto-nodelays-all.sqlite")
+#connect<-dbConnect(driver, dbname = "fractions-nodelays-50-2.sqlite")
+#connect<-dbConnect(driver, dbname = "fractions-nodelays.sqlite")
+connect<-dbConnect(driver, dbname = "pareto-nodelays-all.sqlite")
 #connect<-dbConnect(driver, dbname = "test3.sqlite")
 dbListTables(connect)
 
-q <- dbSendQuery(connect, statement = "PRAGMA synchronous = OFF")
-fetch(q)
-q <- dbSendQuery(connect, statement = "PRAGMA journal_mode = MEMORY")
+#q <- dbSendQuery(connect, statement = "PRAGMA synchronous = OFF")
+#fetch(q)
+#q <- dbSendQuery(connect, statement = "PRAGMA journal_mode = MEMORY")
 fetch(q)
 #q <- dbSendQuery(connect, statement = "SELECT load_extension('/home/malawski/projects/sqlite/libsqlitefunctions.so')")
 #fetch(q)
@@ -215,12 +266,12 @@ for(app in 1:n_applications) {
 	list_avg_m <- vector("list", n_algorithms) # list of number of workflows finished
 	list_avg_s <- vector("list", n_algorithms) # list of sum of runtimes (sizes)
 	list_avg_c <- vector("list", n_algorithms) # list of costs
-	list_avg_e <- vector("list", n_algorithms) # list of exponential scores
+#	list_avg_e <- vector("list", n_algorithms) # list of exponential scores
 	for(i in 1:n_algorithms){
 		list_avg_m[[i]] <- apply(list_m[[i]],c(2,3),mean)
 		list_avg_s[[i]] <- apply(list_s[[i]],c(2,3),mean)
 		list_avg_c[[i]] <- apply(list_c[[i]],c(2,3),mean)
-		list_avg_e[[i]] <- apply(list_d[[i]],c(2,3),mean) # use list in double for average values
+#		list_avg_e[[i]] <- apply(list_d[[i]],c(2,3),mean) # use list in double for average values
 	}
 	
 	# plot averaged results
@@ -233,12 +284,18 @@ for(app in 1:n_applications) {
 	plot_series("cost", "computing cost in $/h", application, budgets, algorithms, list_avg_c, hours, "topright" )
 	
 	# plot averaged exponential scores
-	plot_series("score", "exponential score", application, budgets, algorithms, list_avg_e, hours, "bottomright" )
+#	plot_series("score", "exponential score", application, budgets, algorithms, list_avg_e, hours, "bottomright" )
 	
 	# compute table with rankings
 	#list_max = pmax(list_d[[1]],list_d[[2]],list_d[[3]],list_d[[4]],list_d[[5]],list_d[[6]])
 	
+
+	# plot selected images, etc. 2nd budget for LIGO
+	plot_selected("size-selected-", "total runtime in hours", application, 2, algorithms, list_avg_s, hours, "bottomright" )
+	plot_selected("cost-selected", "computing cost in $/h", application, 2, algorithms, list_avg_c, hours, "topright" )
 	
+
+
 	global_rankings_m <<-cbind(global_rankings_m, algorithms_top(list_m))
 	global_rankings_s <<-cbind(global_rankings_s, algorithms_top(list_s))
 	global_rankings_c <<-cbind(global_rankings_c, algorithms_top(list_c))	
@@ -259,5 +316,6 @@ for(app in 1:n_applications) {
 #"DPDS"      400 267 227 134 65
 #"WADPDS"    561 302 292 322 65 
 #"SPSS"      288 522 226 350 213
+
 
 
