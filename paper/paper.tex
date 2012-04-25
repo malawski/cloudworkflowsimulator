@@ -9,6 +9,7 @@
 \usepackage{url}
 \usepackage{color} % for \textcolor
 \usepackage{subfig} % for \subfloat
+\usepackage{verbatim}
 
 \newcommand{\TODO}[1]{
   {\Large \textcolor{red}{\textbf{TODO: }#1}}
@@ -557,25 +558,12 @@ All the experiments were run with maximum autoscaling factor ($v_{max}$) set to 
 \subsection{Performance Metrics}
 \label{sec:perf_metric}
 
-In order to assess the relative performance of our algorithms, we have defined the following metrics:
+In order to assess the relative performance of our algorithms it is necessary to define a metric that can be used to score the performance of the different algorithms on a given problem (ensemble, budget, and deadline). The simplest approach is to simply count the number of workflows in the ensemble that each algorithm is able to complete within the budget before the deadline. The problem with this approach is that it does not account for the priority-based utility function specified by the user. Using the counting approach, a less efficient algorithm may be able to complete a large number of low-priority workflows by executing the smallest workflows first.
 
-\begin{itemize}
-  \item $N_c$: number of workflows completed,
-  \item $T_C$: total amount of computing time completed,
-  \item $C_{eff}$: effective cost of computing per hour, which includes overheads due to the cost of idle resources.
-  \item $s$: user preference score (utility function),
-\end{itemize}
-
-These metrics measure the relative performance of the different algorithms on a given problem (ensemble, budget, and deadline).
-
-The simplest approach is to simply count the number of workflows in the ensemble that each algorithm is able to complete within the budget, before the deadline, $N_c$.
-
-The total amount of computing time completed, $T_C$, is the sum of the runtimes of all tasks in all completed workflows. Because we assumed that the resource cost per hour is equal to \$1, the total computing time can be easily compared to the allocated budget $b$. Their ratio: $u = (T_C * \$1)/b$, is the resource utilization, and its inverse: $C_{eff} = b/T_C$, is the effective resource cost in dollars per hour. To calculate $C_{eff}$ and $u$ we use the value of allocated budget $b$, not the actual total cost, since we are interested in the scenarios when the budget is limited and does not allow completing all the workflows from the ensemble.
-
-The $N_c$, $T_C$ and $C_{eff}$ metrics do not account for the priority-based utility function specified by the user. Using $N_c$, for example, a less efficient algorithm may be able to complete a large number of low-priority workflows by executing the smallest workflows first. In order to account for the user's priority, we used an exponential scoring approach where the score $s$ for an ensemble $e$ is:
+In order to account for the user's priority, we used an exponential scoring approach where the score for an ensemble $e$ is:
 %
 $$
-s = \sum_{w~\in~Completed(e)}{2^{-Priority(w)}}
+Score(e) = \sum_{w~\in~Completed(e)}{2^{-Priority(w)}}
 $$
 %
 where $Completed(e)$ is the set of workflows in ensemble $e$ that was completed by the algorithm, and $Priority(w)$ is the priority of workflow $w$ such that the highest-priority workflow has $Priority(w)=0$, the next highest workflow has $Priority(w)=1$, and so on. This exponential scoring function gives the highest priority workflow a score that is higher than all the lower-priority workflows combined:
@@ -584,8 +572,7 @@ $$
 2^{-p} > \sum_{i~=~p+1,~\ldots}2^{-i}
 $$
 %
-This metric is consistent with our definition of the problem, which is to complete as many workflows as possible, according to their priorities, given a set budget and deadline.
-
+This scoring is consistent with our definition of the problem, which is to complete as many workflows as possible, according to their priorities, given a set budget and deadline.
 
 
 
@@ -605,6 +592,10 @@ This metric is consistent with our definition of the problem, which is to comple
 
 \section{Discussion of Results}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment} % Remove the Results Example section
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Results Example}
 
@@ -630,10 +621,14 @@ These observations are further confirmed when examining the effective computing 
 
 Another general conclusion can be drawn from Figure~\ref{fig:size-cost}b: all the curves for all the applications and budgets have a similar shape. This shape represents a trade-off curve between two conflicting objectives: time and cost. We observe that the selection of deadline and cost can be formulated as a multi-criteria optimization problem, and that the curves presented in Figure~\ref{fig:size-cost}b are approximations of the Pareto front (or Pareto set) of solutions to this problem. In our case the solutions were achieved by maximizing the amount of work done, which is the inverse of minimizing the effective computing cost metric for a given deadline. Therefore, the obtained results can be used to aid in multi-criteria resource allocation planning, when both cost and time criteria are given not as constraints but as objectives.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \subsection{Relative Performance of Algorithms}
 
-The goal of the the next experiment is to characterize the relative performance of the proposed algorithms. This was done by simulating the algorithms on many different ensembles and comparing the scores computed using the exponential scoring technique described in Section~\ref{sec:perf_metric}. The algorithm that achieves the largest number of high scores is judged to have the best performance.
+The goal of the first experiment is to characterize the relative performance of the proposed algorithms. This was done by simulating the algorithms on many different ensembles and comparing the scores computed using the exponential scoring technique described in Section~\ref{sec:perf_metric}. In this experiment, the algorithm that achieves the largest number of high scores has the best performance.
 
 Figure~\ref{fig:distributions} shows the percentage of simulations for which each algorithm achieved the highest score for a given ensemble type. This experiment was conducted using all five applications, with all five types of ensembles. For each application, ensembles of 50 workflows were created using 10 different random seeds. Each ensemble was simulated with all three algorithms using 10 budgets and 10 deadlines. The total number of simulations to produce each bar in the figure is: $10 * 10 * 10 = 1000$. The best scores percentage is computed by counting the number of times that a given algorithm achieved the highest score and dividing by 1000. Note that it is possible for multiple algorithms to get the same high score (to tie), so the numbers do not necessarily add up to 100\%. The sum is much higher than 100\% in cases where the dynamic algorithms perform relatively well because DPDS and WA-DPDS, which are very similar algorithms, often get the same high score.
 
