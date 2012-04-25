@@ -9,7 +9,6 @@
 \usepackage{url}
 \usepackage{color} % for \textcolor
 \usepackage{subfig} % for \subfloat
-\usepackage{verbatim}
 
 \newcommand{\TODO}[1]{
   {\Large \textcolor{red}{\textbf{TODO: }#1}}
@@ -555,7 +554,7 @@ In all the experiments we assumed that the VMs have a price of \$1 per VM-hour. 
 All the experiments were run with maximum autoscaling factor ($v_{max}$) set to 1.0 for DPDS and WA-DPDS. After experimenting with DPDS and WA-DPDS we found that, due to the high parallelism of workflows used, the resource utilization remains high enough without adjusting the autoscaling rate. Based on experiments with the target applications, we set the SPSS $\alpha$ parameter for deadline distribution to be 0.7, which allocates slightly more time to levels with many tasks.
 
 
-\subsection{Performance Metrics}
+\subsection{Performance Metric}
 \label{sec:perf_metric}
 
 In order to assess the relative performance of our algorithms it is necessary to define a metric that can be used to score the performance of the different algorithms on a given problem (ensemble, budget, and deadline). The simplest approach is to simply count the number of workflows in the ensemble that each algorithm is able to complete within the budget before the deadline. The problem with this approach is that it does not account for the priority-based utility function specified by the user. Using the counting approach, a less efficient algorithm may be able to complete a large number of low-priority workflows by executing the smallest workflows first.
@@ -591,39 +590,6 @@ This scoring is consistent with our definition of the problem, which is to compl
 
 
 \section{Discussion of Results}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{comment} % Remove the Results Example section
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\subsection{Results Example}
-
-\begin{figure}[tb]
-    \centering
-    \subfloat[size]{
-        \includegraphics[width=0.6\columnwidth]{size-selected-LIGO}
-    }\\
-    \subfloat[cost]{
-        \includegraphics[width=0.6\columnwidth]{cost-selectedLIGO}
-    }
-    \caption{Example performance of algorithms expressed in sum of workflow sizes and effective cost, data for LIGO application, Pareto Sorted ensemble of 100 workflows, budget = \$600}
-    \label{fig:size-cost}
-\end{figure}
-
-%To analyze the behavior of the algorithms we ran simulations for constraint values ranging between the estimated limits indicated in Section~\ref{sec:exp-parameters}, resulting in $10 * 10 = 100$ (budget, deadline) data points for each of 5 applications, 3 algorithms and using 5 ensemble size distributions and 10 random seeds. From this result space of 75,000 we selected representative plots.
-
-To illustrate the behavior of the algorithms we show here examples of performance curves obtained for selected sample parameters. Fig.~\ref{fig:size-cost}a uses the total computing time metric, $T_C$ for LIGO application with Pareto Sorted distribution of workflows. It can be seen that SPSS gives the best performance and WA-DPDS performs better than the workflow-unaware version, DPDS. This means that for the workflows we tested the simple admission procedure based on estimation of workflow cost does not degrade the solution, but rather in many cases it enables larger workflows that would lead to budget overrun to be rejected. Thus it can save the space for smaller workflows to complete.
-
-This plot allows us observe a more general property: for a given budget, when the deadline is tightened the amount of work done steeply decreases. This is partially due to the fact that fewer workflows can be completed given a short deadline because their critical paths are simply too long and they are squeezed out of early start times by high priority workflows. In addition, assigning a shorter deadline means that more VMs need to be provisioned to complete the work. However, because of the dependencies in the workflows, many of these VMs will either be idle, or will be backfilled with tasks from low-priority workflows that never finish, resulting, effectively, in reduced resource utilization and fewer completed workflows.
-
-These observations are further confirmed when examining the effective computing cost, as shown in Figure~\ref{fig:size-cost}b. It can be seen that lower resource utilization and lower parallel efficiency for short deadlines lead to substantial increases in the effective computing cost. This increase can be significant. For example, for short deadlines an effective computing cost is $\sim$10--40\% higher than the minimum effective cost of \$1/hour, depending on the algorithm used. This means that out of the \$600 budget, $\sim$\$60--\$240 is spent on idle resources.
-
-Another general conclusion can be drawn from Figure~\ref{fig:size-cost}b: all the curves for all the applications and budgets have a similar shape. This shape represents a trade-off curve between two conflicting objectives: time and cost. We observe that the selection of deadline and cost can be formulated as a multi-criteria optimization problem, and that the curves presented in Figure~\ref{fig:size-cost}b are approximations of the Pareto front (or Pareto set) of solutions to this problem. In our case the solutions were achieved by maximizing the amount of work done, which is the inverse of minimizing the effective computing cost metric for a given deadline. Therefore, the obtained results can be used to aid in multi-criteria resource allocation planning, when both cost and time criteria are given not as constraints but as objectives.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\end{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \subsection{Relative Performance of Algorithms}
