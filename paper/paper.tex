@@ -996,7 +996,7 @@ suggests that, in general, for fine-grained workflows the dynamic algorithms
 will produce better scores, and for coarse-grained workflows SPSS will produce
 better scores.
 
-\begin{figure}[htb]
+\begin{figure}[tb]
     \centering
     \includegraphics[width=0.3\textwidth]{stretching_cybershake}
     \caption{Percentage of high scores achieved by each algorithm for pareto 
@@ -1100,6 +1100,7 @@ able to stay within the constraints given inaccurate task runtime estimates.
 %subjects for future work.
 
 \begin{figure*}[tb]
+    \centering
     \subfloat[Ratio of Actual Cost to Budget]{
         \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-cost-all}
     }
@@ -1108,10 +1109,8 @@ able to stay within the constraints given inaccurate task runtime estimates.
         \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-makespan-all}
     }
     \caption{Boxplots for budget and deadline ratios when runtime estimate 
-    error varies from $\pm$0\% to $\pm$50\% for all three algorithms. A 
-    value of 1 indicates that the actual cost is equal to the budget, or 
-    the actual makespan is equal to the deadline, respectively. Values 
-    greater than 1 indicate that the constraint has been exceeded.}
+    error varies from $\pm$0\% to $\pm$50\% for all three algorithms. Values 
+    greater than 1 indicate that the budget/deadline constraint was exceeded.}
     \label{fig:variances}
 \end{figure*}
 
@@ -1119,22 +1118,31 @@ able to stay within the constraints given inaccurate task runtime estimates.
 \subsection{Provisioning Delays}
 \label{sec:delays}
 
-One important issue to consider when provisioning resources in the cloud is the amount of time between when a resource is requested, and when it becomes available to the application. Typically these provisioning delays are on the order of a few minutes, and are highly dependent upon the architecture of the cloud system and/or the size of the user's VM image~\cite{Nurmi2008b}.
+One important issue to consider when provisioning resources in the cloud is
+the amount of time between when a resource is requested, and when it actually
+becomes available to the application. Typically these provisioning delays are
+on the order of a few minutes, and are highly dependent upon the architecture
+of the cloud system and/or the size of the user's VM image~\cite{Nurmi2008b}.
 
-Recall that it is assumed that resources are billed from the minute that they are requested until they are terminated, and not from the moment that they become available. As a result, provisioning delays have an impact on both the cost (budget constraint) and makespan (deadline constraint) of the ensemble.
+We assume that resources are billed from the minute that they are requested
+until they are terminated, and not from the moment that they become available.
+As a result, provisioning delays have an impact on both the cost (budget
+constraint) and makespan (deadline constraint) of the ensemble.
 
-Figure~\ref{fig:delays} shows the ratios of actual values to constraints when the provisioning delay is increased from 0 seconds up to 15 minutes. The simulations were done using uniform unsorted ensembles of 50 workflows from the Montage application. Each plot in the figure contains three boxes: one for each algorithm. Each box summarizes the results of 10 budgets, 10 deadlines, and 10 random seeds for a total of 1000 simulations per algorithm and provisioning delay (3000 simulations per plot). As in Figure~\ref{fig:variances}, the y-axis in each plot represents the ratio of the actual simulated value to the constraint value for the budget constraint (actual cost) or the deadline constraint (actual makespan). These ratios indicate how frequently and by how much the actual simulated values exceeded (or did not exceed) the constraints.
+\TODO{Update the following paragraph depending on what results Maciek included}
 
-%\begin{figure}[ht]
-%  \centering
-%  \includegraphics[width=0.5\textwidth]{variances_scores}
-%  \caption{Percentage of high scores achieved by each algorithm on Montage with
-%  uniform unsorted ensembles when runtime estimate error varies from $\pm$0\%
-%  to $\pm$50\%.}
-%  \label{fig:variances_scores}
-%\end{figure}
+Figure~\ref{fig:delays} shows the ratios of actual values to constraints when
+the provisioning delay is increased from 0 seconds up to 15 minutes. These
+simulations were done using 10 uniform unsorted ensembles of 50 workflows from
+the Montage application, using 10 deadlines (1000 simulations per algorithm
+and provisioning delay). As in Figure~\ref{fig:variances}, the y-axis in each
+plot represents the ratio of the actual simulated value to the constraint
+value for the budget constraint (actual cost) or the deadline constraint
+(actual makespan). These ratios indicate how frequently and by how much the
+actual simulated values exceeded (or did not exceed) the constraints.
 
 \begin{figure*}[tb]
+    \centering
     \subfloat[Ratio of Actual Cost to Budget]{
         \includegraphics[width=0.4\textwidth]{run-finish-delays-test-0-output-cost-montage}
     }
@@ -1142,20 +1150,42 @@ Figure~\ref{fig:delays} shows the ratios of actual values to constraints when th
     \subfloat[Ratio of Actual Makespan to Deadline]{    
         \includegraphics[width=0.4\textwidth]{run-finish-delays-test-0-output-dagfinish-montage}
     }
-    \caption[Boxplots for budget and deadline ratios when provisioning delays occur]{Boxplots for budget and deadline ratios when provisioning delay varies from 0 seconds to 15 minutes for all three algorithms. A value of 1 indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
+    \caption{Boxplots for budget and deadline ratios when provisioning delay 
+    varies from 0 seconds to 15 minutes for all three algorithms. Values 
+    greater than 1 indicate that the budget/deadline constraint was exceeded.}
     \label{fig:delays}
 \end{figure*}
 
-The effect of provisioning delays on workflow performance is similar to that of inaccurate runtime estimates: when the delays are small, all algorithms are able to produce results within the constraints, but when the delays are larger, the dynamic algorithms are able to adapt to avoid exceeding the constraints while the static algorithm is not. The explanation for this behavior is also similar. The difference is that, a very small error in runtime estimates has little impact on the budget, while a very small provisioning delay has a large impact on the budget. Figure~\ref{fig:delays}.a shows that even for an impossibly short provisioning delay of 30 seconds (usually it takes more than than 30 seconds just to boot a VM), the SPSS algorithm exceeds the budget by as much as a factor of 2, and has a distribution with an upper quartile of 1.5 times the budget. In the case of delays more than 5 minutes, which is more typical of what has been observed on academic infrastructure clouds~\cite{Juve2011} such as Magellan~\cite{Magellan} and FutureGrid~\cite{FutureGrid}, fully three quarters of the simulations exceeded the budget. With the exception of a few outliers for 10 and 15 minute delays, the dynamic algorithms consistently met the budget and deadline constraints.
+\TODO{Update this next paragraph depending on what Maciek included in the figure. The results seem to have changed.}
 
-% Figure~\ref{fig:delays_scores} shows the relative performance as a percentage of the number of high scores achieved by each algorithm as the provisioning delay increases. This figure shows that, as the delay increases, the relative performance of the static algorithm increases as well. This behavior is a result of the fact that the static algorithm is, in essence, cheating by using more time and money than the dynamic algorithms. In the previous section we showed how the relative performance of the algorithms remains the same when a uniform error is applied to the runtime constraints. In that case, the dynamic algorithms adapted to the error by rearranging the schedule to accomplish the same amount of work given the same deadline and budget. In this case, the dynamic algorithms adapt by performing less work (executing fewer workflows) to remain within the constraints while accounting for the delays. In both cases, the static algorithm completed the same amount of work, but did so by exceeding the constraints.
+The effect of provisioning delays on workflow performance is similar to that of inaccurate runtime estimates: when the delays are small, all algorithms are able to produce results within the constraints, but when the delays are larger, the dynamic algorithms are able to adapt to avoid exceeding the constraints while the static algorithm is not. The explanation for this behavior is also similar. The difference is that, a very small error in runtime estimates has little impact on the budget, while a very small provisioning delay has a large impact on the budget. Figure~\ref{fig:delays}.a shows that even for a very short provisioning delay of 30 seconds (usually it takes more than than 30 seconds just to boot a VM), the SPSS algorithm exceeds the budget by as much as a factor of 2, and has a distribution with an upper quartile of 1.5 times the budget. In the case of delays more than 5 minutes, which is more typical of what has been observed on academic infrastructure clouds~\cite{Juve2011} such as Magellan~\cite{Magellan} and FutureGrid~\cite{FutureGrid}, fully three quarters of the simulations exceeded the budget. With the exception of a few outliers for 10 and 15 minute delays, the dynamic algorithms consistently met the budget and deadline constraints.
+
+% Figure~\ref{fig:delays_scores} shows the relative performance as a
+% percentage of the number of high scores achieved by each algorithm as the
+% provisioning delay increases. This figure shows that, as the delay
+% increases, the relative performance of the static algorithm increases as
+% well. This behavior is a result of the fact that the static algorithm is, in
+% essence, cheating by using more time and money than the dynamic algorithms.
+% In the previous section we showed how the relative performance of the
+% algorithms remains the same when a uniform error is applied to the runtime
+% constraints. In that case, the dynamic algorithms adapted to the error by
+% rearranging the schedule to accomplish the same amount of work given the
+% same deadline and budget. In this case, the dynamic algorithms adapt by
+% performing less work (executing fewer workflows) to remain within the
+% constraints while accounting for the delays. In both cases, the static
+% algorithm completed the same amount of work, but did so by exceeding the
+% constraints.
 
 % \begin{figure}[ht]
 %   \centering
 %   \includegraphics[width=0.5\textwidth]{delays_scores}
-%   \caption{Percentage of high scores achieved by each algorithm on Montage with uniform unsorted ensembles when provisioning delay varies from 0 seconds to 15 minutes.}
+%   \caption{Percentage of high scores achieved by each algorithm on Montage 
+%   with uniform unsorted ensembles when provisioning delay varies from 0 
+%   seconds to 15 minutes.}
 %   \label{fig:delays_scores}
 % \end{figure}
+
+\TODO{Update this paragraph when Maciek explains what was included in the plot.}
 
 This behavior suggests that SPSS is far too sensitive to provisioning delays in its current form to be of practical use in real systems. It is likely, as was the case for inaccurate runtime estimates, that modifying the SPSS algorithm would improve its performance for provisioning delays. In fact, since provisioning operations are infrequent (because all the algorithms tend to provision resources for a long time), it is likely that the performance of SPSS could be improved significantly by simply adding an estimate of the provisioning delay to its scheduling function. Such an estimate may not have to be particularly accurate to get good results, and developing an estimate from historical data should be relatively simple. Testing this idea is left for future work.
 
@@ -1184,8 +1214,8 @@ failed task on the same VM that was selected in the plan.
         \includegraphics[width=0.4\textwidth]{run-finish-failures-test-0-output-makespan-all}
     }
     \caption{Boxplots for budget and deadline ratios when failure rate varies
-    from 0 seconds to 50 \% for all three algorithms. A value of 1
-    indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
+    from 0\% to 50\% for all three algorithms. Values greater than 1 indicate 
+    that the budget/deadline constraint was exceeded.}
     \label{fig:failures}
 \end{figure*}
 
@@ -1258,7 +1288,7 @@ This study suggests several areas for future work. Our current approach models d
 \bibliographystyle{IEEEtran}
 
 % This balances the columns by inserting a column break at the given reference
-\IEEEtriggeratref{23}
+\IEEEtriggeratref{19}
 
 \bibliography{paper}
 
