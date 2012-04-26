@@ -906,24 +906,69 @@ This scoring is consistent with our definition of the problem, which is to compl
 
 \subsection{Relative Performance of Algorithms}
 
-The goal of the first experiment is to characterize the relative performance of the proposed algorithms. This was done by simulating the algorithms on many different ensembles and comparing the scores computed using the exponential scoring technique described in Section~\ref{sec:perf_metric}. In this experiment, the algorithm that achieves the largest number of high scores has the best performance.
+The goal of the first experiment is to characterize the relative performance
+of the proposed algorithms. This was done by simulating the algorithms on many
+different ensembles and comparing the scores computed using the exponential
+scoring technique described in Section~\ref{sec:perf_metric}.
 
-Figure~\ref{fig:distributions} shows the percentage of simulations for which each algorithm achieved the highest score for a given ensemble type. This experiment was conducted using all five applications, with all five types of ensembles. For each application, ensembles of 50 workflows were created using 10 different random seeds. Each ensemble was simulated with all three algorithms using 10 budgets and 10 deadlines. The total number of simulations to produce each bar in the figure is: $10 * 10 * 10 = 1000$. The best scores percentage is computed by counting the number of times that a given algorithm achieved the highest score and dividing by 1000. Note that it is possible for multiple algorithms to get the same high score (to tie), so the numbers do not necessarily add up to 100\%. The sum is much higher than 100\% in cases where the dynamic algorithms perform relatively well because DPDS and WA-DPDS, which are very similar algorithms, often get the same high score.
+Figure~\ref{fig:distributions} shows the percentage of simulations for which
+each algorithm achieved the highest score for a given ensemble type. This
+experiment was conducted using all five applications, with all five types of
+ensembles. For each application and ensemble type, 10 random ensembles of 50
+workflows each were created. Each ensemble was simulated with all three
+algorithms using 10 budgets and 10 deadlines (1000 simulations per
+application, ensemble type, and algorithm). The best scores percentage is
+computed by counting the number of times that a given algorithm achieved the
+highest score and dividing by 1000. Note that it is possible for multiple
+algorithms to get the same high score (to tie), so the numbers do not
+necessarily add up to 100\%. The sum is much higher than 100\% in cases where
+the dynamic algorithms perform relatively well because DPDS and WA-DPDS, which
+are very similar algorithms, often get the same high score.
 
 \begin{figure*}[ht]
     \centering
-    \includegraphics[width=1.06\textwidth]{run-finish-variations-test-0-output-distributions}
-    \caption[Percentage of high scores achieved by each algorithm on different ensemble types for all five applications.]{Percentage of high scores achieved by each algorithm on different ensemble types for all five applications. C = Constant ensembles, PS = Pareto Sorted ensembles, PU = Pareto Unsorted ensembles, US = Uniform Sorted ensembles, and UU = Uniform Unsorted ensembles.}
+    \includegraphics[width=\textwidth]{run-finish-variations-test-0-output-distributions}
+    \caption{Percentage of high scores achieved by each algorithm on different ensemble types for all five applications. C = Constant ensembles, PS = Pareto Sorted ensembles, PU = Pareto Unsorted ensembles, US = Uniform Sorted ensembles, and UU = Uniform Unsorted ensembles.} 
     \label{fig:distributions}
 \end{figure*}
 
-There are several interesting things to notice about Figure~\ref{fig:distributions}. The first is that, in most cases, SPSS significantly outperforms the dynamic algorithms (DPDS and WA-DPDS). This is attributed to the fact that SPSS is able to make more intelligent scheduling and provisioning decisions because it has the opportunity to compare different decisions and choose the one that results in the best outcome. In comparison, the dynamic algorithms are online algorithms and are not able to project into the future to weigh the outcomes of their choices.
+There are several interesting things to notice about
+Figure~\ref{fig:distributions}. The first is that, in most cases, SPSS
+significantly outperforms both dynamic algorithms (DPDS and WA-DPDS). This is
+attributed to the fact that SPSS is able to make more intelligent scheduling
+and provisioning decisions because it has the opportunity to compare different
+options and choose the one that results in the best outcome. In comparison,
+the dynamic algorithms are online algorithms and are not able to project into
+the future to weigh the outcomes of their choices.
 
-The second thing to notice about the figure is that, for constant ensembles, the dynamic algorithms perform significantly better relative to SPSS than for other ensemble types. This is a result of the fact that, since all of the workflows are of approximately the same size and shape, the choice of which workflow to execute next is arbitrary.
+The second thing to notice about the figure is that, for constant ensembles,
+the dynamic algorithms perform significantly better relative to SPSS than for
+other ensemble types. This is a result of the fact that, since all of the
+workflows are of approximately the same size and shape, the choice of which
+workflow to execute next has little impact on the final result.
 
-Another thing to notice about these results is that the workflow-aware algorithms (WA-DPDS and SPSS) both perform better in most cases than the simple online algorithm that uses resource utilization alone to make provisioning decisions. This suggests that there is a significant value in having information about the structure and estimated runtime of a workflow when making scheduling and provisioning decisions.
+Another thing to notice about this experiment is that the workflow-aware
+algorithms (WA-DPDS and SPSS) both perform better in most cases than the
+simple online algorithm that uses resource utilization alone to make
+provisioning decisions (DPDS). This suggests that there is a significant value
+in having information about the structure and estimated runtime of a workflow
+when making scheduling and provisioning decisions.
 
-Finally, it is interesting to see that, for Montage and CyberShake, the relative performance of SPSS compared to the dynamic algorithms is significantly less than it is for other applications. We attribute this to the structure of Montage and CyberShake. The workflows for both applications are very wide relative to their height, and both have very short-running tasks. As a result of these two characteristics, the Montage and CyberShake applications have very short critical paths and look more like bag-of-tasks applications, which are easier to execute than more structured applications. DPDS and WA-DPDS are able to pack more of the tasks into the available budget and deadline because there are a) more choices for where to place the tasks, and b) the different choices have a smaller impact on the algorithms' ability to execute the workflow within the constraints. In addition, the short critical paths put SPSS at a disadvantage. Because of the way SPSS assigns deadlines to individual tasks, it is prevented from starting workflows late, which prevents it from packing tasks into the idle VM slots at the end of the schedule.
+Finally, it is interesting to see that, for Montage and CyberShake, the
+relative performance of SPSS is significantly less than it is for other
+applications. We attribute this to the structure of Montage and CyberShake.
+The workflows for both applications are very wide relative to their height,
+and both have very short-running tasks. As a result of these two
+characteristics, the Montage and CyberShake applications have very short
+critical paths and look more like bag-of-tasks applications, which are easier
+to execute than more structured applications. DPDS and WA-DPDS are able to
+pack more of the tasks into the available budget and deadline because there
+are a) more choices for where to place the tasks, and b) the different choices
+have a smaller impact on the algorithms' ability to execute the workflow
+within the constraints. In addition, the short critical paths put SPSS at a
+disadvantage. Because of the way SPSS assigns deadlines to individual tasks,
+it is prevented from starting workflows late, which prevents it from packing
+tasks into the idle VM slots at the end of the schedule.
 
 
 \subsection{Task Granularity}
