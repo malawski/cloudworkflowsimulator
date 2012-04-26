@@ -247,7 +247,8 @@ preemption. We assume that there is a delay between the time that a new VM
 instance is requested and when it becomes available to execute tasks. In
 practice this delay is typically on the order of tens of seconds to a few
 minutes, and is highly dependent upon the cloud platform and the VM image
-size~\cite{Nurmi2008b}.
+size~\cite{Nurmi2008b}.
+
 
 
 \subsection{Application Model}
@@ -259,7 +260,8 @@ dependencies between the tasks. We assume that there are runtime estimates for
 each task in the workflow based on either a performance model of the
 application, or historical data that can be mined. Additionally, we assume that
 the runtime estimates for individual workflow tasks are not perfect, but may
-vary based on a uniform distribution of $\pm p\%$.
+vary based on a uniform distribution of $\pm p\%$.
+
 
 This study uses synthetic workflows that were generated using historical data
 from real applications~\cite{Bharathi2008}. The applications come from a wide
@@ -268,7 +270,8 @@ identification protocol using high-throughput technology), astronomy (Montage),
 earthquake science (CyberShake), and physics (LIGO). The runtimes used to
 generate the synthetic workflows are based on distributions gathered from
 running real workflows. The synthetic workflows were generated using code
-developed by Bharathi, et al~\cite{WorkflowGenerator}.
+developed by Bharathi, et al~\cite{WorkflowGenerator}.
+
 
 Although scientific workflows are often data-intensive, the algorithms described
 in the next section do not currently consider the size of input and output data
@@ -277,7 +280,8 @@ a shared cloud storage system, such as Amazon S3, and that intermediate data
 transfer times are included in task runtime estimates. It is also assumed that
 data transfer times between the shared storage and the VMs are equal for
 different VMs so that task placement decisions do not have an impact on the
-runtime of the tasks.
+runtime of the tasks.
+
 
 A workflow ensemble consists of several related workflows that a user wishes to
 run. Each workflow in an ensemble is given a numeric priority that indicates how
@@ -289,7 +293,8 @@ priorities combined. The goal of the workflow ensemble scheduling and cloud
 provisioning problem is to complete as many high-priority workflows as possible
 given a fixed budget and deadline. Only workflows for which all tasks are
 finished by the deadline are considered to be complete---partial results are not
-usable in this model.
+usable in this model.
+
 
 
 \section{Algorithms}
@@ -302,12 +307,14 @@ This section describes three algorithms were developed to schedule and provision
 
 DPDS is an online algorithm that provisions resources and schedules tasks at
 runtime. It consists of two main parts: a provisioning procedure, and a
-scheduling procedure.
+scheduling procedure.
+
 
 DPDS' provisioning procedure is based on resource utilization. DPDS starts with
 a fixed number of resources calculated based on the available time and budget,
 and adjusts the number of resources according to how well they are utilized by
-the application.Given a budget in dollars $b$, deadline in hours $d$, and the hourly price of a
+the application.
+Given a budget in dollars $b$, deadline in hours $d$, and the hourly price of a
 VM in dollars $p$, it is easy to calculate the number of VMs, $N_{VM}$, to
 provision so that the entire budget is consumed before the deadline:
 \begin{equation}
@@ -315,14 +322,16 @@ provision so that the entire budget is consumed before the deadline:
 N_{VM} = \lceil b / (d * p) \rceil
 \end{equation}
 %
-The DPDS algorithm provisions $N_{VM}$ VMs at the start of the ensemble execution.
+The DPDS algorithm provisions $N_{VM}$ VMs at the start of the ensemble execution.
+
 
 The DPDS algorithm periodically computes resource
 utilization using the percentage of idle VMs over time, and adjusts the number
 of VMs if the utilization is above or below given thresholds. Because it is
 assumed that VMs are billed by the hour, DPDS only considers VMs that are
 approaching their hourly billing cycle when deciding which VMs to terminate.
-This dynamic provisioning algorithm is shown in Algorithm~\ref{alg:prov}.
+This dynamic provisioning algorithm is shown in Algorithm~\ref{alg:prov}.
+
 
 \begin{algorithm}[tb]
 \caption{Dynamic provisioning algorithm for DPDS}
@@ -371,7 +380,8 @@ uncontrolled increase in the number of instances, which may happen in the case
 of highly parallel workflows, the provisioner will not start a new VM if the
 number of running VMs is greater than the product of $N_{VM}$ (from
 Equation~\ref{eq:static-plan}) and an autoscaling parameter, $v_{max}$. Unless
-otherwise specified, $v_{max}$ is assumed to be 1.
+otherwise specified, $v_{max}$ is assumed to be 1.
+
 
 In order to schedule individual workflow tasks onto available VMs, DPDS uses the
 dynamic, priority-based scheduling procedure shown in Algorithm~\ref{alg:ds}.
@@ -382,7 +392,8 @@ from the priority queue is submitted to an arbitrarily chosen idle VM. The
 process is repeated until there are no idle VMs or the priority queue is empty.
 The scheduler then waits for a task to finish, adds its ready children to the
 priority queue, marks the VM as idle, and the entire process repeats until the
-deadline is reached.
+deadline is reached.
+
 \begin{algorithm}[tb]
 \caption{Priority-based scheduling algorithm for DPDS}
 \label{alg:ds}
@@ -419,7 +430,8 @@ priority workflows may be executed even though there is no chance that those
 workflows will be completed within the current budget and deadline.
 Figure~\ref{fig:algorithm-example}a shows an example schedule generated using
 the DPDS algorithm. The figure illustrates how tasks from lower priority workflows
-backfill idle VMs when tasks from higher priority workflows are not available.
+backfill idle VMs when tasks from higher priority workflows are not available.
+
 
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
@@ -431,7 +443,8 @@ consider whether a lower priority task belongs to a workflow that will never be
 able to complete given the current budget and deadline. As a result, DPDS may
 start lower priority tasks just to keep VMs busy that will end up delaying
 higher priority tasks later on, making it less likely that higher priority
-workflows will be able to finish.
+workflows will be able to finish.
+
 
 In order to address this issue, the Workflow-Aware DPDS (WA-DPDS) algorithm
 extends DPDS by introducing a workflow admission procedure. The admission
@@ -444,7 +457,8 @@ its tasks are removed from the queue. This algorithm compares the current cost
 (consumed budget) and remaining budget, taking into account the cost of
 currently running VMs, and the cost of workflows that have already been
 admitted. In addition, it adds a small safety margin of \$0.10 to avoid going
-over the budget.
+over the budget.
+
 
 \begin{algorithm}[tb]
 \caption{Workflow admission algorithm for WA-DPDS}
@@ -476,7 +490,8 @@ admit smaller workflows that can efficiently utilize idle resources.
 %ensembles containing workflows of non-uniform sizes. It would also be possible
 %to extend this admission procedure to check other constraints, such as whether
 %the estimated critical path of the new workflow exceeds the time remaining
-%until the deadline.
+%until the deadline.
+
 
 
 \subsection{Static Provisioning Static Scheduling (SPSS)}
@@ -488,19 +503,22 @@ start only those workflows that it knows can be completed given the deadline and
 budget constraints, and eliminates any waste that may be allowed by the dynamic
 algorithms. However, the disadvantage of SPSS is that it is sensitive to dynamic
 changes in the environment (see Sections~\ref{sec:delays} and
-\ref{sec:variances}).
+\ref{sec:variances}).
+
 
 The approach used by SPSS is to plan each workflow in the ensemble in priority
 order, rejecting any workflows that would exceed the dedline or budget. Once the
 plan is complete, the VMs are provisioned and tasks are executed according to
-the schedules given by the plan.
+the schedules given by the plan.
+
 
 %The disadvantage of the static planning approach used by SPSS is that it is
 %sensitive to dynamic changes in the environment and the application that may
 %disrupt its carefully constructed plan. For example, if there are provisioning
 %delays, or if the runtime estimates for the tasks are inaccurate, then workflow
 %execution may diverge from the plan. This issue will be discussed further in
-%Sections~\ref{sec:delays} and \ref{sec:variances}.
+%Sections~\ref{sec:delays} and \ref{sec:variances}.
+
 
 Algorithm~\ref{alg:admit} shows how ensembles are planned in SPSS. Workflows
 from the ensemble are considered in priority order. For each workflow, SPSS
@@ -511,7 +529,8 @@ plan is accepted and the workflow is admitted. If not, then the new plan is
 rejected and the process continues with the next workflow in the ensemble. The
 idea is that, if each workflow can be completed by the
 deadline with the lowest possible cost, then the number of workflows that can be
-completed within the given budget will be maximized.
+completed within the given budget will be maximized.
+
 
 To plan a workflow, the SPSS algorithm assigns sub-deadlines to each individual
 task in the workflow, and then schedules each task so as to minimize the cost of
@@ -527,7 +546,8 @@ where $d$ is the deadline and $CP(w)$ is the critical path of $w$. We
 assume that $CP(w) \leq d$, otherwise the workflow cannot be completed by the
 deadline and must be rejected. 
 %For large ensembles we expect the critical path
-%of any individual workflow to be much less than the deadline.
+%of any individual workflow to be much less than the deadline.
+
 
 \begin{algorithm}[tb]
 \caption{Ensemble planning algorithm for SPSS}
@@ -637,7 +657,8 @@ runtime of existing VMs before allocating new VMs.
 %the algorithm will only allocate a new block if there are no idle slots on
 %existing blocks large enough or early enough to complete the task by its
 %deadline, and it will only allocate a new VM if it cannot add a block to an
-%existing VM to complete the task by its deadline.
+%existing VM to complete the task by its deadline.
+
 \begin{figure}[tb] 
   \centering
   \subfloat[DPDS]{
@@ -657,7 +678,8 @@ An example schedule generated by SPSS (Figure~\ref{fig:algorithm-example}b)
 shows how SPSS tends to start many workflows in parallel, running each workflow
 over a longer period of time on only a few VMs to minimize cost. In comparison,
 the dynamic algorithms tend to run one workflow at a time across many VMs in
-parallel.
+parallel.
+
 
 \section{Evaluation Methods}
 \label{sec:performance}
@@ -681,7 +703,8 @@ The simulator reads workflow description files in
 a modified version of the DAX format used by the Pegasus Workflow Management
 System~\cite{Deelman2005}. 
 %The modified file format was created for the
-%synthetic workflow generator developed by Bharathi, et al~\cite{Bharathi2008}.
+%synthetic workflow generator developed by Bharathi, et al~\cite{Bharathi2008}.
+
 
 \subsection{Workflow Ensembles}
 \label{sec:ensembles}
@@ -698,7 +721,8 @@ CyberShake. For each of these applications, workflows with 50, 100, 200, 300,
 size, 20 different workflow instances were generated using parameters and task
 runtime distributions from traces of real workflows. The total collection of
 synthetic workflows contains 5 applications, 11 different workflow sizes, and 20
-workflow instances, for a total of 1100 synthetic workflows.
+workflow instances, for a total of 1100 synthetic workflows.
+
 
 Using this collection of workflows, we constructed five different ensemble types:
 %
@@ -712,14 +736,16 @@ the priorities are assigned randomly.
 For many applications, however, large workflows are
 more important to users than small workflows because they represent more
 significant computations. To model this, the sorted ensembles are sorted by
-size, so that the largest workflows have the highest priority.
+size, so that the largest workflows have the highest priority.
+
 
 Constant ensembles contain workflows that all have the same number of tasks. 
 %For each constant ensemble, 
 The number of tasks is chosen randomly from the set of
 possible workflow sizes. Once the size is determined, then N workflows of that
 size are chosen randomly for the ensemble from the set of synthetic workflows.
-%for the given application.
+%for the given application.
+
 
 Uniform ensembles contain workflows with sizes that are uniformly distributed
 among the set of possible sizes. Each workflow 
@@ -728,7 +754,8 @@ is selected by first randomly choosing the size the workflow
 % according to a uniform distribution, 
 and then randomly choosing a workflow of that size from the set of
 synthetic workflows.
-% for the given application.
+% for the given application.
+
 
 Pareto ensembles contain a small number of larger workflows and a large number
 of smaller workflows. Their sizes  
@@ -739,7 +766,8 @@ produce a ``heavy-tail''. This causes Pareto ensembles to have a slightly larger
 number of large workflows, which reflects behavior commonly observed in many
 computational workloads. 
 %An example of the distribution of workflow sizes that
-%occurs in a Pareto ensemble is shown in Figure~\ref{fig:ensemble-pareto}.
+%occurs in a Pareto ensemble is shown in Figure~\ref{fig:ensemble-pareto}.
+
 
 %\begin{figure}[ht] 
 %    \centering
@@ -763,7 +791,8 @@ treat them as an ensemble. Similarly, when the number of workflows grows, and
 each workflow has a large number of tasks, either the deadline and budget
 constraints are low enough to prevent many of the workflows from running, or the
 problem of efficiently allocating them to the resources becomes similar to a
-bag-of-tasks problem, which is easier to solve efficiently.
+bag-of-tasks problem, which is easier to solve efficiently.
+
 
 
 \subsection{Experimental Parameters}
@@ -777,7 +806,8 @@ completed. We computed constraint ranges based on
 the characteristics of each ensemble. The budget constraints are calculated by
 identifying the smallest budget required to execute one of the workflows in the
 ensemble (MinBudget), and the smallest budget required to execute all workflows
-in the ensemble (MaxBudget):%
+in the ensemble (MaxBudget):
+%
 %
 $$
 MinBudget = \min_{w\ \in\ e}{Cost(w)}
@@ -793,7 +823,8 @@ of time required to execute a single workflow in the ensemble (MinDeadline),
 which is the length of the critical path for the workflow with the shortest
 critical path, and by identifying the smallest amount of time required to
 execute all workflows (MaxDeadline), which is the sum of the critical paths of
-all the workflows:%
+all the workflows:
+%
 %
 $$
 MinDeadline = \min_{w\ \in\ e}{CriticalPath(w)}
@@ -805,14 +836,16 @@ $$
 This range---$[MinDeadline, MaxDeadline]$---is then divided into equal intervals. 
 By computing the budget and deadline constraits in this way we ensure that the
 experiments for each ensemble cover the most interesting area of the parameter space for the
-ensemble.
+ensemble.
+
 
 In all the experiments we assumed that the VMs have a price of \$1 per VM-hour.
 This price was chosen to simplify interpretation of results and should not
 affect the relative performance of the different algorithms. In this study the
 heterogeneity of the infrastructure is not relevant since we assume that it is
 always possible to select a VM type that has the best price to performance ratio
-for a given application~\cite{Juve2009}.
+for a given application~\cite{Juve2009}.
+
 
 All the experiments were run with maximum autoscaling factor ($v_{max}$) set to
 1.0 for DPDS and WA-DPDS. After experimenting with DPDS and WA-DPDS we found
@@ -820,7 +853,8 @@ that, due to the high parallelism of workflows used, the resource utilization
 remains high enough without adjusting the autoscaling rate. Based on experiments
 with the target applications, we set the SPSS $\alpha$ parameter for deadline
 distribution to be 0.7, which allocates slightly more time to levels with many
-tasks.
+tasks.
+
 
 \subsection{Performance Metric}
 \label{sec:perf_metric}
@@ -832,7 +866,8 @@ count the number of workflows in the ensemble that each algorithm is able to
 complete within the budget before the deadline, but this metric does not account
 for the priority-based utility function specified by the user. Using the
 counting approach, a less efficient algorithm may be able to complete a large
-number of low-priority workflows by executing the smallest workflows first.
+number of low-priority workflows by executing the smallest workflows first.
+
 
 In order to account for the user's priority, we used an exponential scoring where the score for an ensemble $e$ is:
 %
@@ -901,7 +936,7 @@ The figure shows that, as the scaling factor increases, the relative performance
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=0.4\textwidth]{stretching_cybershake}
+    \includegraphics[width=0.3\textwidth]{stretching_cybershake}
     \caption[Percentage of high scores achieved by each algorithm for Cybershake pareto unsorted ensembles when task runtime is stretched]{Percentage of high scores achieved by each algorithm for Cybershake pareto unsorted ensembles when task runtime is stretched. A stretching factor of $x$ means that the runtime of tasks in each workflow was multiplied by $x$.}
     \label{fig:stretching}
 \end{figure}
@@ -931,10 +966,11 @@ The behavior of these algorithms indicate that, when the quality of runtime esti
 \begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
         \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-cost-all}
-        }
-    \subfloat[Ratio of Actual Makespan to Deadline]{
+    }
     \hspace{2cm}
-        \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-makespan-all} }
+    \subfloat[Ratio of Actual Makespan to Deadline]{
+        \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-makespan-all}
+    }
     \caption[Boxplots for budget and deadline ratios when runtime estimates are inaccurate]{Boxplots for budget and deadline ratios when runtime estimate error varies from $\pm$0\% to $\pm$50\% for all three algorithms. A value of 1 indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
     \label{fig:variances}
 \end{figure*}
@@ -961,11 +997,11 @@ Figure~\ref{fig:delays} shows the ratios of actual values to constraints when th
 \begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
         \includegraphics[width=0.4\textwidth]{run-finish-delays-test-0-output-cost-montage}
-        }
-    \subfloat[Ratio of Actual Makespan to Deadline]{
-        \hspace{2cm}
+    }
+    \hspace{2cm}
+    \subfloat[Ratio of Actual Makespan to Deadline]{    
         \includegraphics[width=0.4\textwidth]{run-finish-delays-test-0-output-dagfinish-montage}
-        }
+    }
     \caption[Boxplots for budget and deadline ratios when provisioning delays occur]{Boxplots for budget and deadline ratios when provisioning delay varies from 0 seconds to 15 minutes for all three algorithms. A value of 1 indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
     \label{fig:delays}
 \end{figure*}
@@ -982,6 +1018,7 @@ The effect of provisioning delays on workflow performance is similar to that of 
 % \end{figure}
 
 This behavior suggests that SPSS is far too sensitive to provisioning delays in its current form to be of practical use in real systems. It is likely, as was the case for inaccurate runtime estimates, that modifying the SPSS algorithm would improve its performance for provisioning delays. In fact, since provisioning operations are infrequent (because all the algorithms tend to provision resources for a long time), it is likely that the performance of SPSS could be improved significantly by simply adding an estimate of the provisioning delay to its scheduling function. Such an estimate may not have to be particularly accurate to get good results, and developing an estimate from historical data should be relatively simple. Testing this idea is left for future work.
+
 
 \subsection{Task Failures}
 \label{sec:failures}
@@ -1001,11 +1038,11 @@ failed task on the same VM that was selected in the plan.
 \begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
         \includegraphics[width=0.4\textwidth]{run-finish-failures-test-0-output-cost-all}
-        }
+    }
+    \hspace{2cm}
     \subfloat[Ratio of Actual Makespan to Deadline]{
-        \hspace{2cm}
         \includegraphics[width=0.4\textwidth]{run-finish-failures-test-0-output-makespan-all}
-        }
+    }
     \caption{Boxplots for budget and deadline ratios when failure rate varies
     from 0 seconds to 50 \% for all three algorithms. A value of 1
     indicates that the actual cost is equal to the budget, or the actual makespan is equal to the deadline, respectively. Values greater than 1 indicate that the budget/deadline has been exceeded.}
@@ -1036,7 +1073,7 @@ Figure~\ref{fig:spss_planning_time} shows that, for small workflows, the SPSS pl
 
 \begin{figure}[tb]
     \centering
-    \includegraphics[width=0.4\textwidth]{spss_planning_time}
+    \includegraphics[width=0.3\textwidth]{spss_planning_time}
     \caption{Planning time of SPSS algorithm for ensembles of 100 workflows and different workflow sizes.}
     \label{fig:spss_planning_time}
 \end{figure}
@@ -1081,7 +1118,7 @@ This study suggests several areas for future work. Our current approach models d
 \bibliographystyle{IEEEtran}
 
 % This balances the columns by inserting a column break at the given reference
-\IEEEtriggeratref{13}
+\IEEEtriggeratref{23}
 
 \bibliography{paper}
 
