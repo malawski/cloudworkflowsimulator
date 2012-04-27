@@ -1194,16 +1194,16 @@ This behavior suggests that SPSS is far too sensitive to provisioning delays in 
 \label{sec:failures}
 
 Running workflows consisting of large numbers of tasks on distributed systems
-almost always faces different types of failures. The goal of this experiment was
-to asses the behaviour of the algorithms in the presence of task execution
+often results in failures. The goal of the next experiment was
+to assess the behavior of the algorithms in the presence of task execution
 failures by introducing a failure model into the simulator. The model is
 characterized by a failure rate $f$ that defines the probability that a task
 will fail. The failure time of the task is determined by randomly sampling a
-time between task start and finish time. If the task fails, it is reported to
-the workflow engine, which then resubmits the task for execution. Dynamic algorithms
-add the task again to the priority queue (queue $P$ in Algorithm~\ref{alg:ds})
-so that it can be resubmitted by the scheduler. Static algorithm resubmits the
-failed task on the same VM that was selected in the plan.
+value between the task start time and finish time. If the task fails, it is reported to
+the workflow engine, which retries the task until it succeeds. The dynamic algorithms
+re-add the task to the priority queue (queue $P$ in Algorithm~\ref{alg:ds})
+so that it can be resubmitted by the scheduler. The SPSS algorithm immediately 
+resubmits the failed task to the same VM that was selected in the plan.
 
 \begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
@@ -1219,6 +1219,8 @@ failed task on the same VM that was selected in the plan.
     \label{fig:failures}
 \end{figure*}
 
+\TODO{Include a description of the ensembles that were simulated.}
+
 Fig.~\ref{fig:failures} shows the ratios of actual values to constraints when
 the failures are introduced. The high failure rates have a high impact on the
 performance of the static algorithm and can degrade the solution considerably.
@@ -1227,10 +1229,7 @@ and~\ref{fig:delays} one may conclude that failures are worse than
 provisioning delays and runtime estimate errors, since their impact is larger.
 However, small failure rates (below 10\%) do not cause constraint overruns
 larger than 10\%. We consider higher failure rates as rare events that suggest
-some significant system malfunction or improper resource selection
-process. It is thus more important that all the algorithms can handle task
-failures by resubmission (as is the case of Pegasus and Condor DAGMan).
-
+a significant system malfunction or invalid selection of resources.
 
 
 \subsection{SPSS Planning Time}
