@@ -867,19 +867,27 @@ counting approach, a less efficient algorithm may be able to complete a large
 number of low-priority workflows by executing the smallest workflows first.
 
 
-In order to account for the user's priority, we used an exponential scoring where the score for an ensemble $e$ is:
+In order to account for the user's priority, we used an exponential scoring
+where the score for an ensemble $e$ is:
 %
 $$
 Score(e) = \sum_{w~\in~Completed(e)}{2^{-Priority(w)}}
 $$
 %
-where $Completed(e)$ is the set of workflows in ensemble $e$ that was completed by the algorithm, and $Priority(w)$ is the priority of workflow $w$ such that the highest-priority workflow has $Priority(w)=0$, the next highest workflow has $Priority(w)=1$, and so on. This exponential scoring function gives the highest priority workflow a score that is higher than all the lower-priority workflows combined:
+where $Completed(e)$ is the set of workflows in ensemble $e$ that was
+completed by the algorithm, and $Priority(w)$ is the priority of workflow $w$
+such that the highest-priority workflow has $Priority(w)=0$, the next highest
+workflow has $Priority(w)=1$, and so on. This exponential scoring function
+gives the highest priority workflow a score that is higher than all the lower-
+priority workflows combined:
 %
 $$
 2^{-p} > \sum_{i~=~p+1,~\ldots}2^{-i}
 $$
 %
-This scoring is consistent with our definition of the problem, which is to complete as many workflows as possible, according to their priorities, given a set budget and deadline.
+This scoring is consistent with our definition of the problem, which is to
+complete as many workflows as possible, according to their priorities, given a
+set budget and deadline.
 
 
 
@@ -1008,40 +1016,46 @@ better scores.
 \subsection{Inaccurate Task Runtime Estimates}
 \label{sec:variances}
 
+\begin{figure*}[tb]
+    \centering
+    \subfloat[Ratio of Actual Cost to Budget]{
+        \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-cost-all}
+    }
+    \hspace{2cm}
+    \subfloat[Ratio of Actual Makespan to Deadline]{
+        \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-makespan-all}
+    }
+    \caption{Boxplots for budget and deadline ratios when runtime estimate 
+    error varies from $\pm$0\% to $\pm$50\% for all three algorithms. Values 
+    greater than 1 indicate that the budget/deadline constraint was exceeded.}
+    \label{fig:variances}
+\end{figure*}
+
 Both of the workflow-aware algorithms rely on estimates of task runtimes to
 make better scheduling and provisioning decisions. In practice, however, these
 estimates are often inaccurate. Given inaccuate estimates, the question is:
 How do errors in task runtime estimates impact the performance of our
 scheduling and provisioning algorithms? We created an experiment to measure
 how introducing uniform errors in these estimates affects the ability of the
-algorithms to achieve the desired budget and deadline constraints. 
-
-\TODO{Update the description of the experiment in this paragraph if necessary}
-
-This experiment used a single application, Montage, and a single ensemble
-type, uniform unsorted. This application and ensemble type was chosen
-arbitrarily for simplicity. It is expected that the application and ensemble
-type have little impact on how well the algorithms are able to stay within
-constraints.
+algorithms to achieve the desired budget and deadline constraints.
 
 The actual runtime of each task is adjusted in the simulation by adding a
 random error to the estimated runtime of $\pm p\%$. Since the sampling is done
 uniformly, we expect to get just as many overestimates as underestimates in
 any given simulation.
 
-Fig.~\ref{fig:variances} shows the results of simulations for estimate
-errors ranging from $0\%$ to $50\%$. These simulations were done for 10
-ensembles of 50 workflows using 10 budgets and 10 deadlines for each error
-value and algorithm (3000 simulations per error value). The figure shows box
-plots of the ratio of actual cost to budget and actual makespan to deadline.
-The actual cost and makespan are the simulated cost and makespan of the
-ensemble. The ratio of actual values to constraints indicates whether the
-actual value exeeded the constraint: Values less than 1 indicate that the
-constraint was not exceeded, and values greater than 1 indicate that the
-constraint was exceeded.
+Fig.~\ref{fig:variances} shows the results of simulations for estimate errors
+ranging from $0\%$ to $50\%$. The figure summarizes the results of an
+extensive suite of 525,000 simulations (10 ensembles of 50 workflows x 5
+applications x 5 distributions x 10 budgets x 10 deadlines x 7 error values x
+3 algorithms). The figure shows box plots of the ratio of actual cost to
+budget and actual makespan to deadline. The actual cost and makespan are the
+simulated cost and makespan of the ensemble. The ratio of actual values to
+constraints indicates whether the actual value exeeded the constraint: Values
+greater than 1 indicate that the constraint was exceeded.
 
 Fig.~\ref{fig:variances}.a shows the ratio of actual cost to budget. This
-figure illustrates two important algorithm characteristics. First, the dynamic
+plot illustrates two important algorithm characteristics. First, the dynamic
 algorithms very rarely exceeded the budget, even with very large errors. This
 indicates that the dynamic algorithms are able to adapt to uncertainties at
 runtime to ensure that the constraints are not exceeded, even when the quality
@@ -1061,7 +1075,7 @@ to changing circumstances.
 %overall cost is increased.
 
 Fig.~\ref{fig:variances}.b shows the ratio of actual makespan to budget. The
-interesting thing to notice about this figure is that, for all three
+interesting thing to notice about this plot is that, for all three
 algorithms, the deadline constraint is rarely exceeded, even in cases with
 very poor quality estimates. For the dynamic algorithms this is a result of
 the fact that they can adapt to poor estimates. For the static algorithm this
@@ -1097,21 +1111,6 @@ able to stay within the constraints given inaccurate task runtime estimates.
 %which may significantly decrease the score. These two modifications are
 %subjects for future work.
 
-\begin{figure*}[tb]
-    \centering
-    \subfloat[Ratio of Actual Cost to Budget]{
-        \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-cost-all}
-    }
-    \hspace{2cm}
-    \subfloat[Ratio of Actual Makespan to Deadline]{
-        \includegraphics[width=0.4\textwidth]{run-finish-variations-test-0-output-makespan-all}
-    }
-    \caption{Boxplots for budget and deadline ratios when runtime estimate 
-    error varies from $\pm$0\% to $\pm$50\% for all three algorithms. Values 
-    greater than 1 indicate that the budget/deadline constraint was exceeded.}
-    \label{fig:variances}
-\end{figure*}
-
 
 \subsection{Provisioning Delays}
 \label{sec:delays}
@@ -1127,17 +1126,16 @@ until they are terminated, and not from the moment that they become available.
 As a result, provisioning delays have an impact on both the cost (budget
 constraint) and makespan (deadline constraint) of the ensemble.
 
-\TODO{Update the following paragraph depending on what results Maciek included}
-
 Fig.~\ref{fig:delays} shows the ratios of actual values to constraints when
-the provisioning delay is increased from 0 seconds up to 15 minutes. These
-simulations were done using 10 uniform unsorted ensembles of 50 workflows from
-the Montage application, using 10 deadlines (1000 simulations per algorithm
-and provisioning delay). As in Fig.~\ref{fig:variances}, the y-axis in each
-plot represents the ratio of the actual simulated value to the constraint
-value for the budget constraint (actual cost) or the deadline constraint
-(actual makespan). These ratios indicate how frequently and by how much the
-actual simulated values exceeded (or did not exceed) the constraints.
+the provisioning delay is increased from 0 seconds up to 15 minutes. The
+figure summarizes a suite of 105,000 simulations (10 ensembles of 50 workflows
+x 5 distributions x 10 budgets x 10 deadlines x 7 error values x 3
+algorithms). Only one application, Montage, was used in this experiment. As in
+Fig.~\ref{fig:variances}, the y-axis in each plot represents the ratio of the
+actual simulated value to the constraint value for the budget constraint
+(actual cost) or the deadline constraint (actual makespan). These ratios
+indicate how frequently and by how much the actual simulated values exceeded
+(or did not exceed) the constraints.
 
 \begin{figure*}[tb]
     \centering
@@ -1154,9 +1152,16 @@ actual simulated values exceeded (or did not exceed) the constraints.
     \label{fig:delays}
 \end{figure*}
 
-\TODO{Update this next paragraph depending on what Maciek included in the figure. The results seem to have changed.}
-
-The effect of provisioning delays on workflow performance is similar to that of inaccurate runtime estimates: when the delays are small, all algorithms are able to produce results within the constraints, but when the delays are larger, the dynamic algorithms are able to adapt to avoid exceeding the constraints while the static algorithm is not. The explanation for this behavior is also similar. The difference is that, a very small error in runtime estimates has little impact on the budget, while a very small provisioning delay has a large impact on the budget. Fig.~\ref{fig:delays}.a shows that even for a very short provisioning delay of 30 seconds (usually it takes more than than 30 seconds just to boot a VM), the SPSS algorithm exceeds the budget by as much as a factor of 2, and has a distribution with an upper quartile of 1.5 times the budget. In the case of delays more than 5 minutes, which is more typical of what has been observed on academic infrastructure clouds~\cite{Juve2011} such as Magellan~\cite{Magellan} and FutureGrid~\cite{FutureGrid}, fully three quarters of the simulations exceeded the budget. With the exception of a few outliers for 10 and 15 minute delays, the dynamic algorithms consistently met the budget and deadline constraints.
+The effect of provisioning delays on workflow performance is similar to that
+of inaccurate runtime estimates: when the delays are small, all algorithms are
+able to produce results within the constraints, but when the delays are
+larger, the dynamic algorithms are able to adapt to avoid exceeding the
+constraints while the static algorithm is not. In the case of delays of more
+than 5 minutes, which is typical of what has been observed on academic
+infrastructure clouds~\cite{Juve2011} such as Magellan~\cite{Magellan} and
+FutureGrid~\cite{FutureGrid}, approximately half of the SPSS simulations
+exceeded the budget while none of the simulations using a dynamic algorithm
+exceeded the budget.
 
 % Fig.~\ref{fig:delays_scores} shows the relative performance as a
 % percentage of the number of high scores achieved by each algorithm as the
@@ -1183,25 +1188,33 @@ The effect of provisioning delays on workflow performance is similar to that of 
 %   \label{fig:delays_scores}
 % \end{figure}
 
-\TODO{Update this paragraph when Maciek explains what was included in the plot.}
-
-This behavior suggests that SPSS is far too sensitive to provisioning delays in its current form to be of practical use in real systems. It is likely, as was the case for inaccurate runtime estimates, that modifying the SPSS algorithm would improve its performance for provisioning delays. In fact, since provisioning operations are infrequent (because all the algorithms tend to provision resources for a long time), it is likely that the performance of SPSS could be improved significantly by simply adding an estimate of the provisioning delay to its scheduling function. Such an estimate may not have to be particularly accurate to get good results, and developing an estimate from historical data should be relatively simple. Testing this idea is left for future work.
+This experiment suggests that SPSS is far too sensitive to provisioning delays
+in its current form to be of practical use in real systems. It is possible
+that modifying the SPSS algorithm to account for provisioning delays would
+improve its performance on this experiment. In fact, since provisioning
+operations are infrequent (because all the algorithms tend to provision
+resources for a long time), it is likely that the performance of SPSS could be
+improved significantly by simply adding an estimate of the provisioning delay
+to its scheduling function. Such an estimate may not have to be particularly
+accurate to get good results, and developing an estimate from historical data
+should be relatively simple. Testing this idea is left for future work.
 
 
 \subsection{Task Failures}
 \label{sec:failures}
 
 Running workflows consisting of large numbers of tasks on distributed systems
-often results in failures. The goal of the next experiment was
-to assess the behavior of the algorithms in the presence of task execution
-failures by introducing a failure model into the simulator. The model is
-characterized by a failure rate $f$ that defines the probability that a task
-will fail. The failure time of the task is determined by randomly sampling a
-value between the task start time and finish time. If the task fails, it is reported to
-the workflow engine, which retries the task until it succeeds. The dynamic algorithms
-re-add the task to the priority queue (queue $P$ in Algorithm~\ref{alg:ds})
-so that it can be resubmitted by the scheduler. The SPSS algorithm immediately 
-resubmits the failed task to the same VM that was selected in the plan.
+often results in failures. The goal of the next experiment was to assess the
+behavior of the algorithms in the presence of task execution failures by
+introducing a failure model into the simulator. The model is characterized by
+a failure rate $f$ that defines the probability that a task will fail. The
+failure time of the task is determined by randomly sampling a value between
+the task start time and finish time. If the task fails, it is reported to the
+workflow engine, which retries the task until it succeeds. The dynamic
+algorithms re-add the task to the priority queue (queue $P$ in
+Algorithm~\ref{alg:ds}) so that it can be resubmitted by the scheduler. The
+SPSS algorithm immediately  resubmits the failed task to the same VM that was
+selected in the plan.
 
 \begin{figure*}[tb]
     \subfloat[Ratio of Actual Cost to Budget]{
@@ -1232,11 +1245,28 @@ a significant system malfunction or invalid selection of resources.
 
 \subsection{SPSS Planning Time}
 
-Unlike the dynamic algorithms, which execute their scheduling and provisioning logic at runtime, the SPSS algorithm plans out its provisioning and scheduling decisions ahead of workflow execution. Because SPSS involves more complicated logic than the dynamic algorithms, it is important to understand what impact this has on execution time.
+Unlike the dynamic algorithms, which execute their scheduling and provisioning
+logic at runtime, the SPSS algorithm plans out its provisioning and scheduling
+decisions ahead of workflow execution. Because SPSS involves more complicated
+logic than the dynamic algorithms, it is important to understand what impact
+this has on execution time.
 
-Fig.~\ref{fig:spss_planning_time} shows the SPSS planning time for ensembles of 100 workflows with five different workflow sizes: 50, 200, 400, 600, and 800 tasks. The ensembles were generated using a constant distribution equal to the workflow size desired. Two different applications were used: SIPHT and CyberShake. Each box summarizes the results of 2 applications, 10 random seeds, 10 budgets and 10 deadlines, or 2000 simulations per box.
+Fig.~\ref{fig:spss_planning_time} shows the SPSS planning time for ensembles
+of 100 workflows with five different workflow sizes: 50, 200, 400, 600, and
+800 tasks. The ensembles were generated using a constant distribution equal to
+the workflow size desired. Two different applications were used: SIPHT and
+CyberShake. Each box summarizes the results of 2 applications, 10 random
+seeds, 10 budgets and 10 deadlines, or 2000 simulations per box.
 
-Fig.~\ref{fig:spss_planning_time} shows that, for small workflows, the SPSS planning time is reasonable, taking on the order of tens of seconds to a few minutes. For larger ensembles of large workflows, however, the SPSS planning time can easily reach 10 minutes. Considering that the largest workflows used in this experiment are still relatively small (maximum of 800 tasks), and that real workflows are often much larger (workflows with tens of thousands of tasks are common, and workflows with hundreds of thousands or millions of tasks are not impossible), it is unlikely that SPSS will be practical for ensembles of very large workflows.
+Fig.~\ref{fig:spss_planning_time} shows that, for small workflows, the SPSS
+planning time is reasonable, taking on the order of tens of seconds to a few
+minutes. For larger ensembles of large workflows, however, the SPSS planning
+time can easily reach 10 minutes. Considering that the largest workflows used
+in this experiment are still relatively small (maximum of 800 tasks), and that
+real workflows are often much larger (workflows with tens of thousands of
+tasks are common, and workflows with hundreds of thousands or millions of
+tasks are not impossible), it is unlikely that SPSS will be practical for
+ensembles of very large workflows.
 
 \begin{figure}[tb]
     \centering
@@ -1245,33 +1275,102 @@ Fig.~\ref{fig:spss_planning_time} shows that, for small workflows, the SPSS plan
     \label{fig:spss_planning_time}
 \end{figure}
 
-The algorithmic complexity of SPSS is $O(n^2)$, where $n$ is the number of tasks in the ensemble. This derives from the fact that, for each task, SPSS considers scheduling the task on the cheapest available slot, which involves scanning all of the available slots on all the VMs. Since the number of available slots, in the worst case, is proportional to the number of tasks scheduled (because scheduling a task splits an existing slot into at most two slots), the complexity of SPSS is $O(n^2)$. In comparison, the dynamic algorithms all have a more scalable complexity of $O(n)$. DPDS only examines the tasks in the workflow once when they are scheduled, and WA-DPDS examines them twice: once in the admissions algorithm, and once when they are scheduled. This makes the dynamic algorithms a better fit for larger workflows and ensembles even though they may not produce results that are as good as SPSS.
+The algorithmic complexity of SPSS is $O(n^2)$, where $n$ is the number of
+tasks in the ensemble. This derives from the fact that, for each task, SPSS
+considers scheduling the task on the cheapest available slot, which involves
+scanning all of the available slots on all the VMs. Since the number of
+available slots, in the worst case, is proportional to the number of tasks
+scheduled (because scheduling a task splits an existing slot into at most two
+slots), the complexity of SPSS is $O(n^2)$. In comparison, the dynamic
+algorithms all have a more scalable complexity of $O(n)$. DPDS only examines
+the tasks in the workflow once when they are scheduled, and WA-DPDS examines
+them twice: once in the admissions algorithm, and once when they are
+scheduled. This makes the dynamic algorithms a better fit for larger workflows
+and ensembles even though they may not produce results that are as good as
+SPSS.
 
-It may be possible to optimize SPSS to reduce its runtime by, for example, clustering the workflow to increase task granularity, which would decrease the ratio of planning time to ensemble makespan. It may also be possible to reduce the complexity of SPSS by employing more sophisticated data structures to store the available slots. Investigating these topics is left for future work.
+It may be possible to optimize SPSS to reduce its runtime by, for example,
+clustering the workflow to increase task granularity, which would decrease the
+ratio of planning time to ensemble makespan. It may also be possible to reduce
+the complexity of SPSS by employing more sophisticated data structures to
+store the available slots. Investigating these topics is left for future work.
 
 
 \section{Conclusions and Future Work}
 \label{sec:conclusions}
 
-In this paper we addressed the interesting and important new problem of scheduling and resource provisioning for scientific workflow ensembles on IaaS clouds. The goal of this work is to maximize the number of prioritized workflows that can be completed given budget and deadline constraints.
+In this paper we addressed the interesting and important new problem of
+scheduling and resource provisioning for scientific workflow ensembles on IaaS
+clouds. The goal of this work is to maximize the number of prioritized
+workflows that can be completed given budget and deadline constraints.
 
-%This problem differs from previous work on grid and utility grid scheduling in that cloud infrastructures provide more control over provisioning, so that the number of resources can be adjusted according to the requirements of the application. Therefore the problem space becomes larger; it requires not only an efficient mapping of tasks to available resources, but also the selection of the best resource provisioning plan.
+%This problem differs from previous work on grid and utility grid scheduling
+%in that cloud infrastructures provide more control over provisioning, so that
+%the number of resources can be adjusted according to the requirements of the
+%application. Therefore the problem space becomes larger; it requires not only
+%an efficient mapping of tasks to available resources, but also the selection
+%of the best resource provisioning plan.
 
-%Formulating the problem as a maximization of the number of prioritized workflows completed from the ensemble is also novel and requires workflows to be admitted or rejected based on their estimated resource demands. We believe that this bi-constrained problem is highly relevant because such constraints are commonly imposed on many real-world projects. The approach is also directly applicable to grid environments that provide resource reservations and charge service units for resource use.
+%Formulating the problem as a maximization of the number of prioritized
+%workflows completed from the ensemble is also novel and requires workflows to
+%be admitted or rejected based on their estimated resource demands. We believe
+%that this bi-constrained problem is highly relevant because such constraints
+%are commonly imposed on many real-world projects. The approach is also
+%directly applicable to grid environments that provide resource reservations
+%and charge service units for resource use.
 
-We developed three algorithms to solve this problem: two dynamic algorithms, DPDS and WA-DPDS, and one static algorithm, SPSS. The algorithms were evaluated via simulation on ensembles of synthetic workflows, which were generated based on statistics from real scientific applications.
+We developed three algorithms to solve this problem: two dynamic algorithms,
+DPDS and WA-DPDS, and one static algorithm, SPSS. The algorithms were
+evaluated via simulation on ensembles of synthetic workflows, which were
+generated based on statistics from real scientific applications.
 
-The results of our simulation studies indicate that the two algorithms that take into account the structure of the workflow and task runtime estimates (WA-DPDS and SPSS) yield better results than the simple priority-based scheduling strategy (DPDS), which makes provisioning decisions based purely on resource utilization.
+The results of our simulation studies indicate that the two algorithms that
+take into account the structure of the workflow and task runtime estimates
+(WA-DPDS and SPSS) yield better results than the simple priority-based
+scheduling strategy (DPDS), which makes provisioning decisions based purely on
+resource utilization.
 
-In cases where there are no provisioning delays, task runtime estimates are good, and failures are rare, we found that the static algorithm, SPSS, performs significantly better than both dynamic algorithms. However, when conditions are less than perfect, the static plans produced by SPSS are disrupted and it frequently exceeds the budget and deadline constraints. In comparison, the dynamic algorithms are able to adapt to a wide variety of conditions, and rarely exceed the constraints even with long delays, poor estimates, and high failure rates.
+In cases where there are no provisioning delays, task runtime estimates are
+good, and failures are rare, we found that the static algorithm, SPSS,
+performs significantly better than both dynamic algorithms. However, when
+conditions are less than perfect, the static plans produced by SPSS are
+disrupted and it frequently exceeds the budget and deadline constraints. In
+comparison, the dynamic algorithms are able to adapt to a wide variety of
+conditions, and rarely exceed the constraints even with long delays, poor
+estimates, and high failure rates.
 
-%In addition, we found that SPSS tends to perform better on coarse-grained workflows than the dynamic algorithms. For wide, fine-grained workflows, such as CyberShake and Montage, however, the dynamic algorithms frequently produce performance that is as good or better than SPSS, because they are better able to pack the smaller tasks onto idle VMs close to the deadline than SPSS, which distributes deadlines to tasks in a way that prevents them from starting late.
+%In addition, we found that SPSS tends to perform better on coarse-grained
+%workflows than the dynamic algorithms. For wide, fine-grained workflows, such
+%as CyberShake and Montage, however, the dynamic algorithms frequently produce
+%performance that is as good or better than SPSS, because they are better able
+%to pack the smaller tasks onto idle VMs close to the deadline than SPSS,
+%which distributes deadlines to tasks in a way that prevents them from
+%starting late.
 
-%For very large workflows and ensembles, we found that the planning time of the SPSS algorithm is prohibitive. SPSS often took 10 minutes or more to plan ensembles of 100 workflows with 800 tasks each. This suggests that ensembles of workflows with tens of thousands of tasks, which are commonly encountered in real workflow applications, would take many hours to plan using SPSS. This makes the dynamic algorithms much more attractive for large scale problems.
+%For very large workflows and ensembles, we found that the planning time of
+%the SPSS algorithm is prohibitive. SPSS often took 10 minutes or more to plan
+%ensembles of 100 workflows with 800 tasks each. This suggests that ensembles
+%of workflows with tens of thousands of tasks, which are commonly encountered
+%in real workflow applications, would take many hours to plan using SPSS. This
+%makes the dynamic algorithms much more attractive for large scale problems.
 
-This study suggests several areas for future work. Our current approach models data access as part of the task execution time and does not consider data storage and transfer costs. In the future we plan to extend the application and infrastructure model to  include the various data storage options available on clouds. A previous experimental study \cite{Juve2010} suggests that the data demands of scientific workflows have a large impact on not only the execution time, but also on the cost of workflows in commercial clouds. We also plan to investigate heterogeneous environments that include multiple VM types and cloud providers, including private and community clouds, which will make the problem even more complex and challenging.
+This study suggests several areas for future work. Our current approach models
+data access as part of the task execution time and does not consider data
+storage and transfer costs. In the future we plan to extend the application
+and infrastructure model to  include the various data storage options
+available on clouds. A previous experimental study \cite{Juve2010} suggests
+that the data demands of scientific workflows have a large impact on not only
+the execution time, but also on the cost of workflows in commercial clouds. We
+also plan to investigate heterogeneous environments that include multiple VM
+types and cloud providers, including private and community clouds, which will
+make the problem even more complex and challenging.
 
-%The results of this study can be applied to develop tools that assist researchers in planning their large-scale computational experiments. The estimates of cost, runtime, and number of workflows completed that can be obtained from both the static algorithms and from the simulation runs, constitute valuable hints for planning ensembles and evaluating the associated trade-offs.
+%The results of this study can be applied to develop tools that assist
+%researchers in planning their large-scale computational experiments. The
+%estimates of cost, runtime, and number of workflows completed that can be
+%obtained from both the static algorithms and from the simulation runs,
+%constitute valuable hints for planning ensembles and evaluating the
+%associated trade-offs.
 
 
 %\section*{Acknowledgments}
@@ -1285,7 +1384,7 @@ This study suggests several areas for future work. Our current approach models d
 \bibliographystyle{IEEEtran}
 
 % This balances the columns by inserting a column break at the given reference
-\IEEEtriggeratref{19}
+\IEEEtriggeratref{16}
 
 \bibliography{paper}
 
