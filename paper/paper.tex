@@ -64,8 +64,8 @@ Research Computing, 111 ITC, Notre Dame, IN, USA, Email: naber@nd.edu}
 
 Large-scale applications expressed as scientific workflows are
 often grouped into ensembles of inter-related workflows. In this paper, we
-address a new and important problem concerning the efficient  management of
-such ensembles under budget and deadline constraints on  Infrastructure-
+address a new and important problem concerning the efficient management of
+such ensembles under budget and deadline constraints on Infrastructure-
 as-a-Service (IaaS) clouds. We discuss, develop, and assess algorithms based
 on static and dynamic strategies for both task scheduling and resource
 provisioning. We perform the evaluation via simulation using a set of
@@ -88,40 +88,40 @@ significantly improve the quality of solutions.
 \section{Introduction}
 \label{sec:intro}
 
-Scientific workflows, usually represented as Directed Acyclic Graphs (DAGs), are
-an important class of applications that lead to challenging problems
-in resource management on grid and utility computing systems. Workflows
-for large computational problems are often composed of several
-inter-related workflows grouped into {\em ensembles}.  Workflows in an
-ensemble typically have a similar structure, but they differ in their input
-data, number of tasks, and individual task sizes.
+Scientific workflows, usually represented as Directed Acyclic Graphs (DAGs),
+are an important class of applications that lead to challenging problems in
+resource management on grid and utility computing systems. Workflows for large
+computational problems are often composed of several inter-related workflows
+grouped into {\em ensembles}.  Workflows in an ensemble typically have a
+similar structure, but they differ in their input data, number of tasks, and
+individual task sizes.
 
+There are many applications that require scientific workflow ensembles.
+CyberShake~\cite{Callaghan2011}, for example, uses ensembles to generate
+seismic hazard maps.  Each workflow in a CyberShake ensemble generates a
+hazard curve for a particular geographic location, and several hazard curves
+are combined to create a hazard map.  In 2009 CyberShake was used to generate
+a map that required an ensemble of 239 workflows.  Similarly, users of
+Montage~\cite{Deelman2008} often need several workflows  with different
+parameters to generate a set of image mosaics that can be combined  into a
+single, large mosaic. The Galactic Plane ensemble, which generates several
+mosaics of the  entire sky in different wavelengths, consists of 17 workflows,
+each of which contains 900 sub-workflows.  Another ensemble example is the
+Periodograms application~\cite{Vockler2011}, which searches for extrasolar
+planets by detecting periodic dips in the light intensity of their host start.
+Due to the large scale of the input data, this application is often split up
+into multiple batches processed by different workflows. Additional workflows
+are created to run the analysis using different parameters. A recent analysis
+of Kepler satellite data required three ensembles of 15 workflows.
 
-CyberShake~\cite{Callaghan2011} is a good example of an application that
-requires scientific workflow ensembles. Generating a hazard map for a region
-such as Southern California requires an ensemble of many related workflows to
-compute individual hazard curves. E.g. the hazard map generated in 2009 required an ensemble of 239 workflows. In astronomy,
-a user might wish to use multiple Montage~\cite{Deelman2008}
-workflows with different parameters to generate a set of image mosaics that
-cover a given area of the sky in different wavelengths, or use an ensemble to generate
-the parts of a very large mosaic. The
-ensemble for generating a mosaic of the entire sky consists of 17 workflows, each of which contains 900 sub-workflows and
-computes one ``tile'' of the full mosaic. Another ensemble example is the
-Periodograms application~\cite{Vockler2011} that searches for extrasolar planets
-by detecting the periodic dips in light intensity. Due to the large scale of the
-input data, this application is often split up into multiple batches processed
-by different workflows. Additional workflows are created to run the analysis
-using different parameters. A recent analysis of Kepler satellite data
-required three ensembles of 15 workflows.
-
-
-Ensemble workflows may differ not only in their parameters, but also in their
-priority. For example, in CyberShake some sites may be in heavily populated
-areas or in strategic locations such as power plants, while others may be less
-important. Scientists typically prioritize the workflows in an ensemble such
-that important workflows are finished first. This enables them to see critical
-results early, and helps them to choose the most important workflows when the
-time and financial resources available for running the computations are limited.
+Workflows in an ensemble may differ not only in their parameters, but also in
+their priority. For example, in CyberShake some sites may be in heavily
+populated areas or in strategic locations such as power plants, while others
+may be less important. Scientists typically prioritize the workflows in such
+an ensemble so that important workflows are finished first. This enables them
+to see critical results early, and helps them to choose the most important
+workflows when the time and financial resources available for running the
+computations are limited.
 
 Infrastructure-as-a-Service (IaaS) clouds offer the ability to provision 
 resources on-demand according to a pay-per-use model. These systems 
@@ -135,7 +135,7 @@ more control also requires the development of new methods for task
 scheduling and resource provisioning. Resource management decisions required 
 in cloud scenarios not only have to take into account performance-related 
 metrics such as workflow makespan or resource utilization, but must also consider
-budget constraints, since the resources from commercia clouds
+budget constraints, since the resources from commercial clouds
 usually have monetary costs associated with them~\cite{Durkee2010}.
 
 In this paper, we aim to gain insight into resource management challenges when
@@ -148,22 +148,19 @@ research project?
 
 The main contributions of this paper are:
 \begin{itemize}
-  \item we define the problem of scheduling prioritized workflows grouped
-  into ensembles, under both budget and deadline constraints,
-  \item we analyze and develop dynamic (on-line) strategies for task scheduling
-  and resource provisioning as well as static algorithms that
-  rely on the information about the workflow structure (critical paths and
-  workflow levels) and estimates of task runtimes. 
-  \item we analyze and develop a hybrid workflow-aware dynamic scheduling
-  algorithm, together with admission procedures to predict which workflows from
-  the ensemble can be completed,
-  \item we evaluate these algorithms using our simulator based on
-  CloudSim~\cite{Calheiros2011}, which models the infrastructure and the application, 
-  taking into account uncertainties in task runtime
-  estimations, provisioning delays, and failures, 
+  \item we define the problem of scheduling prioritized workflow ensembles
+  under budget and deadline constraints,
+  \item we analyze and develop several dynamic (online) and static (offline) 
+  algorithms for task scheduling and resource provisioning that rely on workflow 
+  structure information (critical paths and workflow levels) and estimates of 
+  task runtimes,
+  \item we evaluate these algorithms using a simulator based on 
+  CloudSim~\cite{Calheiros2011}, which models the infrastructure and the 
+  application,taking into account uncertainties in task runtime estimates, 
+  provisioning delays, and failures, 
   \item we discuss the performance of the algorithms on a set of
   synthetic workflow ensembles based on important, real scientific
-  applications, on a broad range of different application scenarios, and
+  applications, using a broad range of different application scenarios and
   varying constraint values.
 \end{itemize}
 
@@ -182,8 +179,8 @@ The main contributions of this paper are:
 \label{sec:related}
 General policy and rule-based approaches to dynamic provisioning (e.g. Amazon
 Auto Scaling~\cite{Autoscaling} and
-RightScale~\cite{RightScale}) allow adjusting the size
-of resource pool based on metrics related to infrastructure and application.
+RightScale~\cite{RightScale}) allow the size
+of a resource pool to be adjusted based on metrics related to infrastructure and application.
 A typical infrastruc\-ture-specific metric is system load, whereas
 application-speci\-fic metrics include response time and length of a task or
 of a request queue. It is possible to set thresholds and limits to tune the behavior
@@ -199,7 +196,7 @@ independent tasks.
 
 Our work is related to the strategies for deadline-con\-strained
 cost-minimization workflow scheduling, developed for utility grid systems. However, our problem is
-different from \cite{Yu2005, Abrishami2010} in that we consider ensembles of workflows in
+different from \cite{Yu2005} and \cite{Abrishami2010} in that we consider ensembles of workflows in
 IaaS clouds, which allow one to provision resources on a per-hour billing model,
 rather than utility grids, which allow one to choose from a pool of existing
 resources with a per-job billing model. Our work is also different from
@@ -207,7 +204,7 @@ cloud-targeted autoscaling solution~\cite{Mao2011} in that we consider ensembles
 of workflows rather than unpredictable workloads containing workflows. We also consider budget constraints
 rather than cost minimization as a goal. In other words, we assume that there is
 more work to be done than the available budget, so some work must be rejected.
-Therefore cost is not something we optimize (i.e. an objective), but rather a constraint.
+Therefore, cost is not something we optimize (i.e. an objective), but rather a constraint.
 
 
 This work is related to bi-criteria scheduling and multi-criteria scheduling of
@@ -218,8 +215,8 @@ takes into account all of the criteria. In our case one objective (amount
 of work completed) is subject to optimization, whereas time and cost are
 treated as constraints. Other approaches~\cite{Talukder2009,Pandey2010} use
 metaheuristics that usually run for a long time before producing good results,
-which makes them less useful in the scenarios we consider in this paper. Our work can be also
-regarded as an extension of the budget-constrained workflow scheduling
+which makes them less useful in the scenarios we consider in this paper. Our work can also
+be regarded as an extension of the budget-constrained workflow scheduling
 \cite{Sakellariou2007} in the sense that we are dealing with workflow ensembles
 and the deadline constraint is added.
 
@@ -228,64 +225,61 @@ and the deadline constraint is added.
 \label{sec:problem}
 
 \underline{Resource Model}  We assume a resource model similar to Amazon's Elastic Compute Cloud (EC2),
-where virtual machine (VM) instances are requested on-demand and are billed by
+where virtual machine (VM) instances may be provisioned on-demand and are billed by
 the hour, with partial hours being rounded up. Although there may be
 heterogeneous VM types with different amounts of CPU, memory, disk space, and
 I/O, for this paper we focus on a single VM type because we assume that for most
 applications there will typically be only one or two VM types with the best
-price/performance ratio for the application~\cite{Juve2009}. We also assume that
+price/performance ratio for the application~\cite{Juve2009}. We assume that
 a submitted task has exclusive access to a VM instance and that there is no
-preemption. We assume that there is a delay between the time that a new VM
-instance is requested and when it becomes available to execute tasks. In
-practice this delay is typically on the order of tens of seconds to a few
-minutes, and is highly dependent upon the cloud platform and the VM image
-size~\cite{Nurmi2008b}.
+preemption. We also assume that there is a delay between the time that a new VM
+instance is requested and when it becomes available to execute tasks.
 
-
-
-\underline{Application Model} The target applications are ensembles of scientific workflows that can be
-modeled as DAGs, where the nodes in the graph
+\underline{Application Model} The target applications are ensembles of
+scientific workflows that can be modeled as DAGs, where the nodes in the graph
 represent computational tasks, and the edges represent data- or control-flow
-dependencies between the tasks. We assume that runtime estimates for the workflow tasks
- are know and  that they are not perfect, but may
-vary based on a uniform distribution of $\pm p\%$.
-
+dependencies between the tasks. We assume that runtime estimates for the
+workflow tasks are known, but that they are not perfect and may vary based on
+a uniform distribution of $\pm p\%$.
 
 This study uses synthetic workflows that were generated using historical data
 from real applications~\cite{Bharathi2008}. The applications come from a wide
 variety of domains including: bioinformatics (Epigenomics, SIPHT: sRNA
-identification protocol using high-throughput technology), astronomy (Montage),
-earthquake science (CyberShake), and physics (LIGO).  The synthetic workflows were generated using code
-developed in~\cite{WorkflowGenerator},  with tasks runtimes based on distributions gathered from
-running real workflows.
-
+identification protocol using high-throughput technology), astronomy
+(Montage), earthquake science (CyberShake), and physics (LIGO). The synthetic
+workflows were generated using code developed in~\cite{WorkflowGenerator},
+with task runtimes based on distributions gathered from running real
+workflows.
 
 Although workflows are often data-intensive, the algorithms described
 here do not currently consider the size of input and output data
 when scheduling tasks. Instead, it is assumed that all workflow data is stored in
 a shared cloud storage system, such as Amazon S3, and that intermediate data
-transfer times are included in task runtime estimates. It is also assumed that
+transfer times are included in task runtimes. It is also assumed that
 data transfer times between the shared storage and the VMs are equal for
 different VMs so that task placement decisions do not impact the
 runtime of the tasks.
 
-
-We assume that each workflow in an ensemble is given a numeric priority that indicates how
-important the workflow is to the user. As such, the priorities indicate the
-utility function of the user. These priorities are absolute in the sense that
-completing a workflow with a given priority is more valuable than completing all other workflows in the ensemble with lower
-priorities combined. The goal of the workflow ensemble scheduling and cloud
-provisioning problem is to complete as many high-priority workflows as possible
-given a fixed budget and deadline. Only workflows for which all tasks are
-finished by the deadline are considered to be complete---partial results are not
-usable in this model.
+We assume that each workflow in an ensemble is given a numeric priority that
+indicates how important the workflow is to the user. As such, the priorities
+indicate the utility function of the user. These priorities are absolute in
+the sense that completing a workflow with a given priority is more valuable
+than completing all other workflows in the ensemble with lower priorities
+combined. The goal of the workflow ensemble scheduling and cloud provisioning
+problem is to complete as many high-priority workflows as possible given a
+fixed budget and deadline. Only workflows for which all tasks are finished by
+the deadline are considered to be complete---partial results are not usable in
+this model.
 
 
 
 \section{Algorithms}
 \label{sec:algorithms}
 
-This section describes three algorithms developed to schedule and provision resources for ensembles of workflows on the cloud under budget and deadline constraints.
+This section describes three algorithms that were developed to schedule and
+provision resources for ensembles of workflows on the cloud under budget and
+deadline constraints.
+
 
 \subsection{Dynamic Provisioning Dynamic Scheduling (DPDS)}
 \label{sec:dpds}
@@ -294,27 +288,26 @@ DPDS is an online algorithm that provisions resources and schedules tasks at
 runtime. It consists of two main parts: a provisioning procedure, and a
 scheduling procedure.
 
-
 DPDS' provisioning procedure is based on resource utilization. DPDS starts with
 a fixed number of resources calculated based on the available time and budget,
 and adjusts the number of resources according to how well they are utilized by
 the application.
 Given a budget in dollars $b$, deadline in hours $d$, and the hourly price of a
-VM in dollars $p$, it is easy to calculate the number of VMs, $N_{VM}$, to
+VM in dollars $p$, it is possible to calculate the number of VMs, $N_{VM}$, to
 provision so that the entire budget is consumed before the deadline:
+%
 \begin{equation}
 \label{eq:static-plan}
 N_{VM} = \lceil b / (d * p) \rceil
 \end{equation}
 %
-DPDS provisions $N_{VM}$ VMs at the start of the ensemble execution, then
-it periodically computes resource
-utilization using the percentage of idle VMs over time, and adjusts the number
-of VMs if the utilization is above or below given thresholds. Because it is
-assumed that VMs are billed by the hour, DPDS only considers VMs that are
-approaching their hourly billing cycle when deciding which VMs to terminate.
-This dynamic provisioning algorithm is shown in Algorithm~\ref{alg:prov}.
-
+DPDS provisions $N_{VM}$ VMs at the start of the ensemble execution, then it
+periodically computes resource utilization using the percentage of idle VMs
+over time and adjusts the number of VMs if the utilization is above or below
+given thresholds. Because it is assumed that VMs are billed by the hour, DPDS
+only considers VMs that are approaching their hourly billing cycle when
+deciding which VMs to terminate. This dynamic provisioning algorithm is shown
+in Algorithm~\ref{alg:prov}.
 
 \begin{algorithm}[tb]
 \caption{Dynamic provisioning algorithm for DPDS}
@@ -345,11 +338,10 @@ threshold; $v_{max}$: maximum number of VMs
       \EndIf 
     \EndIf
 \EndProcedure
-\end{algorithmic}
-}
+\end{algorithmic}}
 \end{algorithm}
 
-The set of VMs completing their billing cycle is determined by  both
+The set of VMs completing their billing cycle is determined by both
 the provisioner interval, and the termination delay of the provider. This
 guarantees that VMs can be terminated before they start the next billing cycle
 and prevents the budget from being overrun. The VMs terminated in line
@@ -364,7 +356,6 @@ of highly parallel workflows, the provisioner will not start a new VM if the
 number of running VMs is greater than the product of $N_{VM}$ (from
 Equation~\ref{eq:static-plan}) and an autoscaling parameter, $v_{max}$. Unless
 otherwise specified, $v_{max}$ is assumed to be 1.
-
 
 In order to schedule individual workflow tasks onto available VMs, DPDS uses the
 dynamic, priority-based scheduling procedure shown in Algorithm~\ref{alg:ds}.
@@ -403,17 +394,16 @@ deadline is reached.
 }
 \end{algorithm}
 
-
-DPDS guarantees that tasks from lower priority workflows are
-always deferred when higher-priority tasks are available, but lower-priority
-tasks can still occupy idle VMs when higher-priority tasks are not available.
-Since there is no preemption, long-running low-priority tasks may
-delay the execution of higher-priority tasks. In addition, tasks from low
-priority workflows may be executed even though there is no chance that those
-workflows will be completed within the current budget and deadline.
-Fig.~\ref{fig:algorithm-example}a shows an example schedule generated using
-the DPDS algorithm. The figure illustrates how tasks from lower priority workflows
-backfill idle VMs when tasks from higher priority workflows are not available.
+DPDS guarantees that tasks from lower priority workflows are always deferred
+when higher-priority tasks are available, but lower-priority tasks can still
+occupy idle VMs when higher-priority tasks are not available. Since there is
+no preemption, long-running low-priority tasks may delay the execution of
+higher-priority tasks. In addition, tasks from low priority workflows may be
+executed even though there is no chance that those workflows will be completed
+within the current budget and deadline. Fig.~\ref{fig:algorithm-example}a
+shows an example schedule generated using the DPDS algorithm. The figure
+illustrates how tasks from lower priority workflows backfill idle VMs when
+tasks from higher priority workflows are not available.
 
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
@@ -426,27 +416,26 @@ start lower priority tasks just to keep VMs busy that will end up delaying
 higher priority tasks later on, making it less likely that higher priority
 workflows will be able to finish.
 
-The Workflow-Aware DPDS (WA-DPDS) algorithm
-extends DPDS by introducing a workflow admission procedure, which is invoked whenever WA-DPDS sees the first task of a new workflow at
-the head of the priority queue (i.e. when no other tasks from the workflow have
-been scheduled yet). The admission procedure---shown in
-Algorithm~\ref{alg:wa-dpds}---estimates whether there is enough budget remaining
-to admit the new workflow; if there is not, then the workflow is rejected and
-its tasks are removed from the queue. WA-DPDS compares the current cost
-(consumed budget) and remaining budget, taking into account the cost of
-currently running VMs, and the cost of workflows that have already been
-admitted. In addition, it adds a small safety margin of \$0.10 to avoid going
-over budget. We found the admission procedure useful
-not only to prevent low-priority workflows from delaying high-priority ones, but
-also to reject large and costly workflows that would overrun the budget and
-admit smaller workflows that can efficiently utilize idle resources.
-% in
-%ensembles containing workflows of non-uniform sizes. It would also be possible
+The Workflow-Aware DPDS (WA-DPDS) algorithm extends DPDS by introducing a
+workflow admission procedure, which is invoked whenever WA-DPDS sees the first
+task of a new workflow at the head of the priority queue (i.e. when no other
+tasks from the workflow have been scheduled yet). The admission procedure---
+shown in Algorithm~\ref{alg:wa-dpds}---estimates whether there is enough
+budget remaining to admit the new workflow; if there is not, then the workflow
+is rejected and its tasks are removed from the queue. WA-DPDS compares the
+current cost (consumed budget) and remaining budget, taking into account the
+cost of currently running VMs, and the cost of workflows that have already
+been admitted. In addition, it adds a small safety margin of \$0.10 to avoid
+going over budget. We found the admission procedure useful not only to prevent
+low-priority workflows from delaying high-priority ones, but also to reject
+large and costly workflows that would overrun the budget and admit smaller
+workflows that can efficiently utilize idle resources. 
+
+% in 
+%ensembles containing workflows of non-uniform sizes. It would also be possible 
 %to extend this admission procedure to check other constraints, such as whether
 %the estimated critical path of the new workflow exceeds the time remaining
 %until the deadline.
-
-
 
 \begin{algorithm}[tb]
 \caption{Workflow admission algorithm for WA-DPDS}
@@ -470,8 +459,6 @@ admit smaller workflows that can efficiently utilize idle resources.
 \end{algorithm}
 
 
-
-
 \subsection{Static Provisioning Static Scheduling (SPSS)}
 
 The previous dynamic (online) algorithms make provisioning and scheduling
@@ -483,12 +470,10 @@ algorithms. However, the disadvantage of SPSS is that it is sensitive to dynamic
 changes in the environment (see Sections~\ref{sec:delays} and
 \ref{sec:variances}).
 
-
 %The approach used by SPSS is to plan each workflow in the ensemble in priority
 %order, rejecting any workflows that would exceed the dedline or budget. Once the
 %plan is complete, the VMs are provisioned and tasks are executed according to
 %the schedules given by the plan.
-
 
 %The disadvantage of the static planning approach used by SPSS is that it is
 %sensitive to dynamic changes in the environment and the application that may
@@ -496,7 +481,6 @@ changes in the environment (see Sections~\ref{sec:delays} and
 %delays, or if the runtime estimates for the tasks are inaccurate, then workflow
 %execution may diverge from the plan. This issue will be discussed further in
 %Sections~\ref{sec:delays} and \ref{sec:variances}.
-
 
 Algorithm~\ref{alg:admit} shows how ensembles are planned in SPSS. Workflows
 from the ensemble are considered in priority order. For each workflow, SPSS
@@ -508,7 +492,6 @@ rejected and the process continues with the next workflow in the ensemble. The
 idea is that, if each workflow can be completed by the
 deadline with the lowest possible cost, then the number of workflows that can be
 completed within the given budget will be maximized.
-
 
 To plan a workflow, the SPSS algorithm assigns sub-deadlines to each individual
 task in the workflow, and then schedules each task so as to minimize the cost of
@@ -549,7 +532,8 @@ deadline and must be rejected.
 }
 \end{algorithm}
 
-A task's level is the length of the longest path between the task and an entry task of the workflow:
+A task's level is the length of the longest path between the task and an entry
+task of the workflow:
 %
 $$
 Level(t) = \begin{cases}
@@ -558,7 +542,13 @@ Level(t) = \begin{cases}
 \end{cases}
 $$
 %
-SPSS distributes the slack time of the workflow by level, so that each level of the workflow gets a portion of the workflow's slack time proportional to the number of tasks in the level and the total runtime of tasks in the level. The idea is that levels containing many tasks and large runtimes should be given a larger portion of the slack time so that tasks in those levels may be serialized. Otherwise, many resources need to be allocated to run all of the tasks in parallel, which may be more costly.
+SPSS distributes the slack time of the workflow by level, so that each level
+of the workflow gets a portion of the workflow's slack time proportional to
+the number of tasks in the level and the total runtime of tasks in the level.
+The idea is that levels containing many tasks and large runtimes should be
+given a larger portion of the slack time so that tasks in those levels may be
+serialized. Otherwise, many resources need to be allocated to run all of the
+tasks in parallel, which may be more costly.
 
 The slack time of a level $l$ in workflow $w$ is given by:
 %
@@ -566,7 +556,11 @@ $$
 ST(l) = ST(w) \Biggl[\left({\alpha}\frac{N(l)}{N(w)}\right) + \left({(1 - \alpha)}\frac{R(l)}{R(w)} \right)\Biggr]
 $$
 %
-where $N(w)$ is the number of tasks in the workflow, $N(l)$ is the number of tasks in level $l$, $R(w)$ is the total runtime of all tasks in the workflow, $R(w)$ is the total runtime of all tasks in level $l$, and $\alpha$ is a parameter between 0 and 1 that causes more slack time to be given to levels with more tasks (large $\alpha$) or more runtime (small $\alpha$).
+where $N(w)$ is the number of tasks in the workflow, $N(l)$ is the number of
+tasks in level $l$, $R(w)$ is the total runtime of all tasks in the workflow,
+$R(w)$ is the total runtime of all tasks in level $l$, and $\alpha$ is a
+parameter between 0 and 1 that causes more slack time to be given to levels
+with more tasks (large $\alpha$) or more runtime (small $\alpha$).
 
 The deadline of a task $t$ is then:
 %
@@ -574,7 +568,8 @@ $$
 DL(t) = LST(t) + RT(t) + ST(Level(t))
 $$
 %
-where $Level(t)$ is the level of $t$, $RT(t)$ is the runtime of $t$, and $LST(t)$ is the latest start time of $t$ determined by:
+where $Level(t)$ is the level of $t$, $RT(t)$ is the runtime of $t$, and 
+$LST(t)$ is the latest start time of $t$ determined by:
 %
 $$
 LST(t) = \begin{cases}
@@ -612,7 +607,6 @@ $$
 Algorithm~\ref{alg:planworkflow} shows how SPSS creates low-cost plans for each
 workflow. The \textsc{PlanWorkflow} procedure first calls
 \textsc{DeadlineDistribution} to assign sub-deadlines to tasks.
-% according to the procedure described above. 
 Then, \textsc{PlanWorkflow} schedules
 tasks onto VMs, allocating new VMs when necessary. For each task in the
 workflow, the least expensive slot is chosen to schedule the task so that it can
@@ -649,7 +643,6 @@ runtime of existing VMs before allocating new VMs.
   VM. Tasks are represented as boxes and are colored by workflow.}
   \label{fig:algorithm-example}
 \end{figure}
-
 
 An example schedule generated by SPSS (Fig.~\ref{fig:algorithm-example}b)
 shows how SPSS tends to start many workflows in parallel, running each workflow
@@ -689,9 +682,7 @@ System~\cite{Deelman2005}.
 
 In order to evaluate the algorithms on a standard set of workflows, we created
 randomized ensembles using workflows available from the workflow generator
-gallery~\cite{WorkflowGenerator}. 
-%% Ewa: maybe put url instead of citation
-The
+gallery~\cite{WorkflowGenerator}. The
 gallery contains synthetic workflows modeled using structures and parameters
 that were taken from real applications. Ensembles were created using synthetic
 workflows from five real applications: SIPHT, LIGO, Epigenomics, Montage and
@@ -704,11 +695,8 @@ workflow instances, for a total of 1100 synthetic workflows.
 
 
 Using this collection of workflows, we constructed five different ensemble types:
-%
-%\begin{itemize}
 constant, uniform sorted, uniform unsorted, Pareto sorted and Pareto unsorted.
-%\end{itemize}
-In the unsorted ensembles, workflows of different sizes are mixed together, and
+In the unsorted ensembles, workflows of different sizes are mixed together and
 the priorities are assigned randomly.
 % so that there is no relationship between
 %priority and workflow size. 
@@ -717,7 +705,6 @@ more important to users than small workflows because they represent more
 significant computations. To model this, the sorted ensembles are sorted by
 size, so that the largest workflows have the highest priority.
 
-
 Constant ensembles contain workflows that all have the same number of tasks. 
 %For each constant ensemble, 
 The number of tasks is chosen randomly from the set of
@@ -725,16 +712,14 @@ possible workflow sizes. Once the size is determined, then N workflows of that
 size are chosen randomly for the ensemble from the set of synthetic workflows.
 %for the given application.
 
-
 Uniform ensembles contain workflows with sizes that are uniformly distributed
 among the set of possible sizes. Each workflow 
 %in a uniform ensemble 
-is selected by first randomly choosing the size the workflow
+is selected by first randomly choosing the size of the workflow
 % according to a uniform distribution, 
 and then randomly choosing a workflow of that size from the set of
 synthetic workflows.
 % for the given application.
-
 
 Pareto ensembles contain a small number of larger workflows and a large number
 of smaller workflows. Their sizes  
@@ -746,7 +731,6 @@ number of large workflows, which reflects behavior commonly observed in many
 computational workloads. 
 %An example of the distribution of workflow sizes that
 %occurs in a Pareto ensemble is shown in Fig.~\ref{fig:ensemble-pareto}.
-
 
 %\begin{figure}[ht] 
 %    \centering
@@ -765,7 +749,7 @@ workflows, typical of the real applications we have examined (see Section~\ref{s
 %the past has been on the order of 100. 
 %Second, smaller ensembles consisting of
 %just a few workflows can be aggregated into a single workflow, so there is no need to
-%treat them as an ensemble. Similarly, when the number of workflows grows, and
+%treat them as an ensemble. Similarly, when the number of workflows grows and
 %each workflow has a large number of tasks, either the deadline and budget
 %constraints are low enough to prevent many of the workflows from running, or the
 %problem of efficiently allocating them to the resources becomes similar to a
@@ -786,7 +770,6 @@ identifying the smallest budget required to execute one of the workflows in the
 ensemble (MinBudget), and the smallest budget required to execute all workflows
 in the ensemble (MaxBudget):
 %
-%
 $$
 MinBudget = \min_{w\ \in\ e}{Cost(w)}
 $$
@@ -803,7 +786,6 @@ critical path, and by identifying the smallest amount of time required to
 execute all workflows (MaxDeadline), which is the sum of the critical paths of
 all the workflows:
 %
-%
 $$
 MinDeadline = \min_{w\ \in\ e}{CriticalPath(w)}
 $$
@@ -812,10 +794,9 @@ MaxDeadline = \sum_{w\ \in\ e}{CriticalPath(w)}
 $$
 %
 This range---$[MinDeadline, MaxDeadline]$---is then divided into equal intervals. 
-By computing the budget and deadline constraits in this way we ensure that the
+By computing the budget and deadline constraints in this way we ensure that the
 experiments for each ensemble cover the most interesting area of the parameter space for the
 ensemble.
-
 
 In all the experiments we assumed that the VMs have a price of \$1 per VM-hour.
 This price was chosen to simplify interpretation of results and should not
@@ -823,7 +804,6 @@ affect the relative performance of the different algorithms. In this study the
 heterogeneity of the infrastructure is not relevant since we assume that it is
 always possible to select a VM type that has the best price to performance ratio
 for a given application~\cite{Juve2009}.
-
 
 All the experiments were run with maximum autoscaling factor ($v_{max}$) set to
 1.0 for DPDS and WA-DPDS. After experimenting with DPDS and WA-DPDS we found
@@ -914,11 +894,11 @@ options and choose the one that results in the best outcome. In comparison,
 the dynamic algorithms are online algorithms and are not able to project into
 the future to weigh the outcomes of their choices.
 
-The second thing to notice about the figure is that, for constant ensembles,
-the dynamic algorithms perform significantly better relative to SPSS than for
-other ensemble types. This is a result of the fact that, since all of the
-workflows are of approximately the same size and shape, the choice of which
-workflow to execute next has little impact on the final result.
+The second thing to notice is that, for constant ensembles, the dynamic
+algorithms perform significantly better relative to SPSS compared to  other
+ensemble types. This is a result of the fact that, since all of the workflows
+are of approximately the same size and shape, the choice of which workflow to
+execute next has a smaller impact on the final result.
 
 Another thing to notice about this experiment is that the workflow-aware
 algorithms (WA-DPDS and SPSS) both perform better in most cases than the
@@ -955,7 +935,7 @@ tasks into the idle VM slots at the end of the schedule.
 
 %Fig.~\ref{fig:stretching} shows the relative performance of the algorithms
 %as the scaling factor is increased from 1 to 16. The figure only shows results
-%for the CyberShake application with pareto unsorted ensembles, but similar
+%for the CyberShake application with Pareto unsorted ensembles, but similar
 %results were found for other ensemble types for both Montage and CyberShake.
 %Each data point in the figure represents 500 simulations (5 ensembles with 10
 %budgets and 10 deadlines). The best scores percent was calculated the same way
@@ -971,7 +951,7 @@ tasks into the idle VM slots at the end of the schedule.
 %\begin{figure}[tb]
  %   \centering
  %   \includegraphics[width=0.3\textwidth]{stretching_cybershake}
- %   \caption{Percentage of high scores achieved by each algorithm for pareto 
+ %   \caption{Percentage of high scores achieved by each algorithm for Pareto 
  %   unsorted CyberShake ensembles when task runtime is scaled by a constant 
  %   factor. A scaling factor of $x$ means that the runtime of tasks in each 
  %   workflow was multiplied by $x$.}
@@ -1001,20 +981,22 @@ Both of the workflow-aware algorithms rely on estimates of task runtimes to
 make better scheduling and provisioning decisions. In practice, however, these
 estimates are often inaccurate. Given inaccuate estimates, the question is:
 How do errors in task runtime estimates impact the performance of our
-scheduling and provisioning algorithms?  Thus, we introduced uniform errors in the task runtime
-and observed the behavior of the algorithms in terms of meeting  the desired budget and deadline constraints.
+scheduling and provisioning algorithms?  To examine this we introduced uniform
+errors in the task runtime and observed the behavior of the algorithms in
+terms of meeting the desired budget and deadline constraints.
 
-The actual runtime of each task is adjusted in the simulation by adding a
-random error to the estimated runtime of $\pm p\%$. Since the sampling is done
-uniformly, we expect to get just as many overestimates as underestimates in
-any given simulation.
+In this experiment the actual runtime of each task is adjusted in the
+simulation by adding a random error to the estimated runtime of $\pm p\%$.
+Since the sampling is done uniformly, we expect to get just as many
+overestimates as underestimates in any given simulation.
 
-Fig.~\ref{fig:variances} shows the results of simulations for estimate errors
-ranging from $0\%$ to $50\%$. The figure summarizes the results of an
+Fig.~\ref{fig:variances} shows the results for estimate errors
+ranging from $0\%$ to $50\%$. The figure summarizes the outcome of an
 extensive suite of 525,000 simulations (10 ensembles of 50 workflows x 5
 applications x 5 distributions x 10 budgets x 10 deadlines x 7 error values x
 3 algorithms). The figure shows box plots of the ratio of the ensemble cost to
-budget and ensemble makespan to deadline. The ratio indicates whether the value (for example the simulated cost) exeeded the constraint (the budget): Values
+budget, and of ensemble makespan to deadline. The ratio indicates whether the value 
+(for example, the simulated cost) exeeded the constraint (the budget). Values
 greater than 1 indicate that the constraint was exceeded.
 
 Fig.~\ref{fig:variances}.a shows the ratio of simulated cost to budget. This
@@ -1045,13 +1027,13 @@ is a result of the way that SPSS schedules workflows, and not of a
 particularly clever optimization. The SPSS algorithm tends to schedule
 workflows early, using up the budget long before the deadline is reached. This
 is a consequence of the deadline distribution function in SPSS, which prevents
-workflows from starting late. This is shown by the gantt chart in
-Fig.~\ref{fig:algorithm-example}.b, which illustrates how SPSS tends to pile
+workflows from starting late. This is illustrated by the gantt chart in
+Fig.~\ref{fig:algorithm-example}.b, which shows how SPSS tends to pile
 up workflows at the beginning of the timeline. 
 %In comparison, the dynamic
 %algorithms tend to spread out workflow starts over the entire duration as
 %shown in Fig.~\ref{fig:algorithm-example}.a. The consequence of this
-5behavior is that SPSS plans tend to use up the budget but leave plenty of time
+%behavior is that SPSS plans tend to use up the budget but leave plenty of time
 %before the deadline. 
 As a result, when the runtime of the plan is increased by
 introducing errors, the SPSS plan has some room to expand without exceeding
@@ -1087,16 +1069,19 @@ on the order of a few minutes, and are highly dependent upon the cloud architect
 and/or the size of the VM image~\cite{Nurmi2008b}.
 
 We assume that resources are billed from the minute that they are requested
-until they are terminated. 
-As a result, provisioning delays have an impact on both the cost  and makespan of the ensemble.
+until they are terminated.  As a result, provisioning delays have an impact on
+both the cost and makespan of an ensemble.
 
 Fig.~\ref{fig:delays} shows the ratios of simulated values to constraints when
 the provisioning delay is increased from 0 seconds up to 15 minutes. The
 figure summarizes a suite of 105,000 simulations (10 ensembles of 50 workflows
 x 5 distributions x 10 budgets x 10 deadlines x 7 error values x 3
-algorithms). Only one application, Montage, was used in this experiment. As in
-Fig.~\ref{fig:variances}, the y-axis in each plot represents the ratio of the simulated value.
- to the constraint value for the budget constraint or the deadline constraint. 
+algorithms). To reduce the simulation time, only one application, Montage, was
+used in this experiment. 
+
+%As in Fig.~\ref{fig:variances}, the y-axis in each
+%plot represents the ratio of the simulated value to the constraint value for
+%the budget constraint or the deadline constraint.
 
 \begin{figure*}[tb]
     \centering
@@ -1118,11 +1103,12 @@ of inaccurate runtime estimates: when the delays are small, all algorithms are
 able to produce results within the constraints, but when the delays are
 larger, the dynamic algorithms are able to adapt to avoid exceeding the
 constraints while the static algorithm is not. In the case of delays of more
-than 5 minutes, which is typical of what has been observed on academic
+than one minute, which is typical of what has been observed on academic
 infrastructure clouds~\cite{Juve2011} such as Magellan~\cite{Magellan} and
 FutureGrid~\cite{FutureGrid}, approximately half of the SPSS simulations
-exceeded the budget while none of the simulations using a dynamic algorithm
-exceeded the budget.
+exceeded the budget; in some cases by up to a factor of 2. In comparison,
+none of the simulations that used a dynamic algorithm exceeded the budget
+or the deadline constraint.
 
 % Fig.~\ref{fig:delays_scores} shows the relative performance as a
 % percentage of the number of high scores achieved by each algorithm as the
@@ -1149,7 +1135,7 @@ exceeded the budget.
 %   \label{fig:delays_scores}
 % \end{figure}
 
-This experiment suggests that SPSS is far too sensitive to provisioning delays
+This experiment suggests that SPSS is too sensitive to provisioning delays
 in its current form to be of practical use in real systems. It is possible
 that modifying the SPSS algorithm to account for provisioning delays would
 improve its performance on this experiment. In fact, since provisioning
@@ -1191,31 +1177,32 @@ selected in the plan (to minimize the disruption to the overall plan).
     \label{fig:failures}
 \end{figure*}
 
-\TODO{Include a description of the ensembles that were simulated.}
-
-Fig.~\ref{fig:failures} shows the ratios of simulated values to constraints when
-the failures are introduced. The high failure rates have a high impact on the
-performance of the static algorithm and can degrade the solution considerably.
-Comparing Fig.~\ref{fig:failures} to Figs.~\ref{fig:variances}
-and~\ref{fig:delays} one may conclude that failures are worse than
-provisioning delays and runtime estimate errors, since their impact is larger.
-However, small failure rates (below 10\%) do not cause constraint overruns
-larger than 10\%. We consider higher failure rates as rare events that suggest
-a significant system malfunction or invalid selection of resources.
+Fig.~\ref{fig:failures} shows the ratios of simulated values to constraints
+when the failures are introduced. The figure summarizes a suite of 525,000
+simulations (10 ensembles of 50 workflows x 5 applications x 5 distributions x
+10 budgets x 10 deadlines x 7 failure rates x 3 algorithms). As in the
+previous  experiments, these results show that high failure rates have a large
+impact on the performance of the static algorithm and can degrade the solution
+considerably, while the dynamic algorithms are able to adapt. Comparing
+Fig.~\ref{fig:failures} to Figs.~\ref{fig:variances} and~\ref{fig:delays} one
+may conclude that failures are worse than provisioning delays and runtime
+estimate errors, since their impact is larger. However, we consider
+higher failure rates as rare events that suggest a significant system
+malfunction or invalid selection of resources.
 
 
 \subsection{SPSS Planning Time}
 
- Because SPSS involves more complicated
-logic than the dynamic algorithms and makes its decisions ahead of the execution, it is important to understand what impact
-this has on execution time.
+Because SPSS involves more complicated logic than the dynamic algorithms and
+makes its decisions before execution, it is important to understand what
+impact planning time has on the overall execution time.
 
 Fig.~\ref{fig:spss_planning_time} shows the SPSS planning time for ensembles
 of 100 workflows with five different workflow sizes: 50, 200, 400, 600, and
 800 tasks. The ensembles were generated using a constant distribution equal to
 the workflow size desired. Two different applications were used: SIPHT and
-CyberShake. Each box summarizes the results of 2 applications, 10 random
-seeds, 10 budgets and 10 deadlines, or 2000 simulations per box.
+CyberShake. Each box summarizes the results of 2000 simulations (2
+applications x 10 ensembles x 10 budgets x 10 deadlines).
 
 Fig.~\ref{fig:spss_planning_time} shows that, for small workflows, the SPSS
 planning time is reasonable, taking on the order of tens of seconds to a few
@@ -1224,7 +1211,7 @@ time can easily reach 10 minutes. Considering that the largest workflows used
 in this experiment are still relatively small (maximum of 800 tasks), and that
 real workflows are often much larger (workflows with tens of thousands of
 tasks are common, and workflows with hundreds of thousands or millions of
-tasks are not impossible), it is unlikely that SPSS will be practical for
+tasks are possible), it is unlikely that SPSS will be practical for
 ensembles of very large workflows.
 
 \begin{figure}[tb]
@@ -1234,24 +1221,18 @@ ensembles of very large workflows.
     \label{fig:spss_planning_time}
 \end{figure}
 
-%The algorithmic complexity of SPSS is $O(n^2)$, where $n$ is the number of
-%tasks in the ensemble. This derives from the fact that, for each task, 
-
-SPSS
-considers scheduling each task on the cheapest available slot, which involves
-scanning all of the available slots on all the VMs. Since the number of
-available slots, in the worst case, is proportional to the number of tasks
-scheduled
-%Ewa:  I don't get that
- (because scheduling a task splits an existing slot into at most two
-slots, one before the task, and one after), the complexity of SPSS is $O(n^2)$, where $n$ is the number of
-tasks in the ensemble. In comparison, the dynamic
-algorithms all have a more scalable complexity of $O(n)$. DPDS only examines
-the tasks in the workflow once when they are scheduled, and WA-DPDS examines
-them twice: once in the admissions algorithm, and once when they are
+SPSS considers scheduling each task on the cheapest available slot, which
+involves scanning all of the available slots on all of the VMs. Since the number
+of available slots, in the worst case, is proportional to the number of tasks
+scheduled (because scheduling a task splits an existing slot into at most two
+slots: one before the task, and one after), the complexity of SPSS is
+$O(n^2)$, where $n$ is the number of tasks in the ensemble. In comparison, the
+dynamic algorithms all have a more scalable complexity of $O(n)$. DPDS only
+examines the tasks in the workflow once when they are scheduled, and WA-DPDS
+examines them twice: once in the admissions algorithm, and once when they are
 scheduled. This makes the dynamic algorithms a better fit for larger workflows
-and ensembles even though in some cases they may not produce results that are as good as
-SPSS.
+and ensembles even though in some cases they may not produce results that are
+as good as SPSS.
 
 It may be possible to optimize SPSS to reduce its runtime by, for example,
 clustering the workflow to increase task granularity, which would decrease the
@@ -1289,12 +1270,11 @@ evaluated via simulation on ensembles of synthetic workflows, which were
 generated based on statistics from real scientific applications.
 
 The results of our simulation studies indicate that the two algorithms that
-take into account the structure of the workflow 
-%Ewa:  so it is really taking into account the workflow structure or the ensemble structure/members?
-and the members of the ensemble (through admission procedures) and task runtime estimates
+take into account the structure of the workflow and task runtime estimates
 (WA-DPDS and SPSS) yield better results than the simple priority-based
 scheduling strategy (DPDS), which makes provisioning decisions based purely on
-resource utilization.  This underscores the importance of viewing workflow ensembles as a whole rather than just individual tasks or individual workflows.
+resource utilization. This underscores the importance of viewing workflow
+ensembles as a whole rather than as individual tasks or individual workflows.
 
 In cases where there are no provisioning delays, task runtime estimates are
 good, and failures are rare, we found that SPSS
@@ -1350,7 +1330,7 @@ make the problem even more complex and challenging.
 \bibliographystyle{IEEEtran}
 
 % This balances the columns by inserting a column break at the given reference
-\IEEEtriggeratref{16}
+\IEEEtriggeratref{17}
 
 \bibliography{paper}
 
