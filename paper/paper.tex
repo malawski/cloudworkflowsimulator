@@ -108,7 +108,7 @@ single, large mosaic. The Galactic Plane ensemble, which generates several
 mosaics of the  entire sky in different wavelengths, consists of 17 workflows,
 each of which contains 900 sub-workflows.  Another ensemble example is the
 Periodograms application~\cite{Vockler2011}, which searches for extrasolar
-planets by detecting periodic dips in the light intensity of their host start.
+planets by detecting periodic dips in the light intensity of their host star.
 Due to the large scale of the input data, this application is often split up
 into multiple batches processed by different workflows. Additional workflows
 are created to run the analysis using different parameters. A recent analysis
@@ -995,9 +995,10 @@ ranging from $0\%$ to $50\%$. The figure summarizes the outcome of an
 extensive suite of 525,000 simulations (10 ensembles of 50 workflows x 5
 applications x 5 distributions x 10 budgets x 10 deadlines x 7 error values x
 3 algorithms). The figure shows box plots of the ratio of the ensemble cost to
-budget, and of ensemble makespan to deadline. The ratio indicates whether the value 
+budget, and of ensemble makespan to deadline. Whiskers on the plots
+indicate maximum and minimum values. The ratio indicates whether the value 
 (for example, the simulated cost) exeeded the constraint (the budget). Values
-greater than 1 indicate that the constraint was exceeded.
+greater than 1 indicate that the constraint was exceeded. 
 
 Fig.~\ref{fig:variances}.a shows the ratio of simulated cost to budget. This
 plot illustrates two important algorithm characteristics. First, the dynamic
@@ -1019,25 +1020,25 @@ to changing circumstances.
 %happen, which causes gaps in the schedule. So the net result is that the
 %overall cost is increased.
 
-Fig.~\ref{fig:variances}.b shows the ratio of simulated makespan to budget. 
+Fig.~\ref{fig:variances}.b shows the ratio of simulated makespan to budget.
 Interestingly, the deadline constraint is rarely exceeded, even in cases with
-very poor quality estimates. For the dynamic algorithms this is a result of
-the fact that they can adapt to poor estimates. For the static algorithm this
-is a result of the way that SPSS schedules workflows, and not of a
-particularly clever optimization. The SPSS algorithm tends to schedule
-workflows early, using up the budget long before the deadline is reached. This
-is a consequence of the deadline distribution function in SPSS, which prevents
-workflows from starting late. This is illustrated by the gantt chart in
-Fig.~\ref{fig:algorithm-example}.b, which shows how SPSS tends to pile
-up workflows at the beginning of the timeline. 
-%In comparison, the dynamic
-%algorithms tend to spread out workflow starts over the entire duration as
-%shown in Fig.~\ref{fig:algorithm-example}.a. The consequence of this
-%behavior is that SPSS plans tend to use up the budget but leave plenty of time
-%before the deadline. 
-As a result, when the runtime of the plan is increased by
-introducing errors, the SPSS plan has some room to expand without exceeding
-the deadline.
+very poor quality estimates. For the dynamic algorithms this is a result of the
+fact that they can adapt to poor estimates and stop submitting new tasks when
+the constraints are reached. Makespan is then computed as the finish time of the
+last fully completed workflow from the ensemble. For the static algorithm this
+is a result of the way that SPSS schedules workflows, and not of a particularly
+clever optimization. The SPSS algorithm tends to schedule workflows early, using
+up the budget long before the deadline is reached. This is a consequence of the
+deadline distribution function in SPSS, which prevents workflows from starting
+late. This is illustrated by the gantt chart in
+Fig.~\ref{fig:algorithm-example}.b, which shows how SPSS tends to pile up
+workflows at the beginning of the timeline.
+% In comparison, the dynamic algorithms tend to spread out workflow starts over
+% the entire duration as shown in Fig.~\ref{fig:algorithm-example}.a. The
+% consequence of this behavior is that SPSS plans tend to use up the budget but
+% leave plenty of time before the deadline.
+As a result, when the runtime of the plan is increased by introducing errors,
+the SPSS plan has some room to expand without exceeding the deadline.
 
 Note that the algorithms have \textit{not} been changed to account for
 inaccurate runtime estimates in this experiment. It is likely that better
