@@ -306,7 +306,8 @@ combined:
 $$ 2^{-p} > \sum_{i~=~p+1,~\ldots}2^{-i} $$
 %  This scoring is consistent with our definition of the problem, which is to
 % complete as many workflows as possible, according to their priorities, given a
-% set budget and deadline.
+% set budget and deadline.
+
 
 \section{Algorithms}
 \label{sec:algorithms}
@@ -992,7 +993,8 @@ estimates are often inaccurate. Given inaccuate estimates, the question is: How
 do errors in task runtime estimates impact the performance of our scheduling and
 provisioning algorithms?  To examine this we introduced uniform errors in the
 task runtime and observed the behavior of the algorithms in terms of meeting the
-desired budget and deadline constraints.
+desired budget and deadline constraints.
+
 
 In this experiment the actual runtime of each task is adjusted in the
 simulation by adding a random error to the estimated runtime of $\pm p\%$.
@@ -1117,7 +1119,8 @@ typical of what has been observed on academic clouds~\cite{Juve2011} such as
 Magellan~\cite{Magellan} and FutureGrid~\cite{FutureGrid}, approximately half of
 the SPSS simulations exceeded the budget; in some cases by up to a factor of 2.
 In comparison, none of the simulations that used a dynamic algorithm exceeded
-the budget or the deadline constraint.
+the budget or the deadline constraint.
+
 
 % Fig.~\ref{fig:delays_scores} shows the relative performance as a
 % percentage of the number of high scores achieved by each algorithm as the
@@ -1196,7 +1199,8 @@ are able to adapt. Comparing Fig.~\ref{fig:failures} to
 Figs.~\ref{fig:variances} and~\ref{fig:delays} one may conclude that failures
 are worse than provisioning delays and runtime estimate errors, since their
 impact is larger. However, we consider higher failure rates as rare events that
-suggest a significant system malfunction or invalid selection of resources.
+suggest a significant system malfunction or invalid selection of resources.
+
 
 
 \subsection{SPSS Planning Time}
@@ -1323,7 +1327,8 @@ utilization-based autoscaling with more advanced workflow-aware strategies
 based on feedback control.
 We also plan to investigate heterogeneous environments that include multiple VM
 types and cloud providers, including private and community clouds, which will
-make the problem even more complex and challenging.
+make the problem even more complex and challenging.
+
 
 %The results of this study can be applied to develop tools that assist
 %researchers in planning their large-scale computational experiments. The
@@ -1333,8 +1338,9 @@ make the problem even more complex and challenging.
 %associated trade-offs.
 
 
-%\section*{Acknowledgments}
-%Acknowledgements go here.
+\section*{Acknowledgments}
+This work was sponsored by the National Science Foundation under award 
+OCI-0943725 (STCI).
 
 
 % ACM style
