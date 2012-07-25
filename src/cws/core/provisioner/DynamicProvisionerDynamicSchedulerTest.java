@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Test;
@@ -18,8 +19,11 @@ import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
+import cws.core.algorithms.Algorithm;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
+import cws.core.experiment.AlgorithmFactory;
+import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.Experiment;
 import cws.core.experiment.ExperimentDescription;
 import cws.core.experiment.ExperimentResult;
@@ -75,8 +79,46 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
 		assertEquals(0, engine.getQueuedJobs().size());
 		
-		wfLog.printJobs("testEnsembleProvisionerDynamicSchedulerDag_CyberShake_100x10");
-		wfLog.printVmList("testEnsembleProvisionerDynamicSchedulerDag_CyberShake_100x10");
+		wfLog.printJobs("output/testEnsembleProvisionerDynamicSchedulerDag_CyberShake_100x10");
+		wfLog.printVmList("output/testEnsembleProvisionerDynamicSchedulerDag_CyberShake_100x10");
+	}
+	
+	
+	@Test
+	public void testGantt() {
+		String dagName = "CyberShake_100.dag";
+		double deadline = 3600.0; //seconds
+		double budget = 10.0;
+		double price = 1.0;
+		int numDAGs = 10;
+		double max_scaling = 1.0;
+		
+		
+		String dags[] = new String[numDAGs];
+		for (int i=0; i< numDAGs; i++) dags[i] = dagName;
+		
+        ExperimentDescription param = new ExperimentDescription("test", "DPDS", "output", dagPath, dags,
+                deadline, budget, price, max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);     
+		Algorithm algorithm = AlgorithmFactory.createAlgorithm(param);
+		algorithm.setGenerateLog(true);
+		String fileName = param.getRunDirectory() + File.separator + "output-test-DPDS";
+		algorithm.simulate(fileName);
+		
+		dagPath = "../projects/pegasus/Montage/";
+		dagName = "MONTAGE";
+		dags = DAGListGenerator.generateDAGListParetoUnsorted(new Random(0), dagName, 11);
+		budget = 10.0;
+		deadline = 2000.00; //seconds
+		
+        param = new ExperimentDescription("test", "SPSS", "output", dagPath, dags,
+                deadline, budget, price, max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);     
+		algorithm = AlgorithmFactory.createAlgorithm(param);
+		algorithm.setGenerateLog(true);
+		fileName = param.getRunDirectory() + File.separator + "output-test-SPSS";
+		algorithm.simulate(fileName);
+
+		
+		
 	}
 	
 	

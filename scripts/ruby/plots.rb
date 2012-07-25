@@ -71,8 +71,10 @@ def plot_schedule (filename)
   tasks = Tasks.new
   tasks.read_tasks(filename)
   
-  vms = read_array("cat #{filename}-vms.txt | grep -e '[0-9]'  ")
-
+  # change this to plot VMs
+  # vms = read_array("cat #{filename}-vms.txt | grep -e '[0-9]'  ")
+  vms = {}
+  
   ymax = vms.length + 0.8
   
   inputs = read_array("cat #{filename}-inputs-transfer.txt | grep -e '[0-9]'  ")
@@ -84,21 +86,35 @@ def plot_schedule (filename)
   Gnuplot.open do |gp|
     Gnuplot::Plot.new( gp ) do |plot|
 
-      plot.title  "Schedule " + File.basename(filename)
-      plot.xlabel "time"
-      plot.ylabel "VM ID"
-      plot.xtics 3600
+      #plot.title  "Schedule " + File.basename(filename)
+      plot.xlabel "Time"
+      plot.ylabel "VM"
+      #plot.xtics 3600
       #plot.ytics 50
       #plot.yrange "[-0.8:#{ymax}]"
-      #plot.terminal 'pdf size 8.5,11 font "arial,6" linewidth 1'
+      plot.terminal 'pdfcairo size 5,1.5 font "arial,8" linewidth 1'
       #plot.terminal 'pdf size 11,8.5 font "arial,6" linewidth 1'
-      #plot.output filename + ".pdf"
+      plot.output filename + ".pdf"
       #puts "Saving plot to file: " + filename + ".pdf"
-      plot.set "key right outside"
-      plot.set "grid"
-      plot.terminal "png size 1024,768"
+      #plot.set "key right outside"
+      plot.set "key off"
+      plot.noytics
+      plot.noxtics
+      #plot.set "grid"
+      plot.set "style line 1 lc rgb 'grey10' lt 1 lw 1"
+      plot.set "style line 2 lc rgb 'brown' lt 1 lw 1"
+      plot.set "style line 3 lc rgb 'orange' lt 1 lw 1"
+      plot.set "style line 4 lc rgb 'blue' lt 1 lw 1"
+      plot.set "style line 5 lc rgb 'green' lt 1 lw 1"
+      plot.set "style line 6 lc rgb 'grey10' lt 1 lw 1"
+      plot.set "style line 7 lc rgb 'brown' lt 1 lw 1"
+      plot.set "style line 8 lc rgb 'orange' lt 1 lw 1"
+      plot.set "style line 9 lc rgb 'blue' lt 1 lw 1"
+      plot.set "style line 10 lc rgb 'green' lt 1 lw 1"
+      plot.set "style fill border lc rgb 'black'"
+      #plot.terminal "png size 1024,768"
       #plot.output 'output/' + dag + deadline + ".png"
-      plot.output filename + ".png"
+      #plot.output filename + ".png"
 
       data = Array.new
 
@@ -128,10 +144,12 @@ def plot_schedule (filename)
       
             
       tasks.distinct_types.to_a.sort.each do |type|
+        # puts type
         # here we do filtering based on type (e.g. priority)
         dataset = Gnuplot::DataSet.new( [tasks.xlo, tasks.y, tasks.xlo, tasks.xhi, tasks.types] ) do |ds|
           ds.using = "($5==#{type} ? $1 : NaN):2:3:4:($2-0.4):($2+0.4)"
-          ds.with = "boxxyerrorbars fs solid 0.55"
+          #ds.with = "boxxyerrorbars fs solid 0.55"
+          ds.with = "boxxyerrorbars fillstyle solid 0.8 ls #{type+1} "
           ds.title = "Job type #{type}"
         end
         data.push(dataset)
