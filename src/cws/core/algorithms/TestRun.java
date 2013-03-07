@@ -269,8 +269,7 @@ public class TestRun {
 	        }
 	        
         } catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		} finally {
 			if(out != null)
 				out.close();

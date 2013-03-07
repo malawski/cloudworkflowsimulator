@@ -10,9 +10,9 @@ import java.util.Properties;
  * 
  * @author malawski
  * 
- *         Class representing a single experiment of submitting a given workflow
- *         ensemble with specified budget and deadline constraints.
- * 
+ * Class representing a single experiment of submitting a given 
+ * workflow ensemble with specified budget and deadline constraints.
+ *
  */
 
 public class ExperimentDescription {
@@ -39,51 +39,35 @@ public class ExperimentDescription {
 	private double alpha;
 	// runID used to distinguish e.g. different random seeds
 	private int runID;
-	// task runtimes from the dag are multiplied by this factor; this parameter
-	// is useful to control the task granularity
+	// task runtimes from the dag are multiplied by this factor; this parameter is useful to control the task granularity
 	private double taskDilatation;
-	// defines the maximum relative difference between estimated and actual task
-	// runtime, e.g. 0.50 means that task can run 50% longer than a given
-	// estimate
+	// defines the maximum relative difference between estimated and actual task runtime, e.g. 0.50 means that task can run 50% longer than a given estimate
 	private double runtimeVariation;
 	// provisioning delay in seconds
 	private double delay;
 	// distribution of ensembles
 	private String distribution;
 
+	
+	
 	/**
-	 * This description creates ensemble of workflows given in the dags array.
+	 * This description creates ensemble of workflows given in the dags array. 
 	 * 
-	 * @param algorithmName
-	 *            name of the algorithm class from cws.core.algorithms
-	 * @param dagPath
-	 *            path to DAG files
-	 * @param dags
-	 *            array of DAG file names
-	 * @param deadline
-	 *            deadline in seconds
-	 * @param budget
-	 *            budget in $
-	 * @param price
-	 *            VM hour price in $
-	 * @param numDAGs
-	 *            number of times a DAG is repeated in the ensemble
-	 * @param max_scaling
-	 *            maximum autoscaling factor for provisioner
-	 * @param alpha
-	 *            alpha parameter for SPSS
-	 * @param runID
-	 *            runID used to distinguish e.g. different random seeds
-	 * @param taskDilatation
-	 *            task runtimes from the dag are multiplied by this factor; this
-	 *            parameter is useful to control the task granularity
+	 * @param algorithmName name of the algorithm class from cws.core.algorithms
+	 * @param dagPath path to DAG files
+	 * @param dags array of DAG file names
+	 * @param deadline deadline in seconds
+	 * @param budget budget in $
+	 * @param price VM hour price in $
+	 * @param numDAGs number of times a DAG is repeated in the ensemble
+	 * @param max_scaling maximum autoscaling factor for provisioner
+	 * @param alpha alpha parameter for SPSS
+	 * @param runID runID used to distinguish e.g. different random seeds
+	 * @param taskDilatation task runtimes from the dag are multiplied by this factor; this parameter is useful to control the task granularity
 	 */
-
-	public ExperimentDescription(String group, String algorithmName,
-			String runDirectory, String dagPath, String[] dags,
-			double deadline, double budget, double price, double maxScaling,
-			double alpha, double taskDilatation, double runtimeVariation,
-			double delay, String distribution, int runID) {
+	
+	public ExperimentDescription(String group, String algorithmName, String runDirectory, String dagPath, String[] dags, double deadline, double budget, double price,
+			double maxScaling, double alpha, double taskDilatation, double runtimeVariation, double delay, String distribution, int runID) {
 		this.group = group;
 		this.algorithmName = algorithmName;
 		this.runDirectory = runDirectory;
@@ -100,11 +84,13 @@ public class ExperimentDescription {
 		this.delay = delay;
 		this.distribution = distribution;
 	}
-
+	
 	public ExperimentDescription(String propertyFileName) {
 		readProperties(propertyFileName);
 	}
 
+	
+	
 	public String getGroup() {
 		return group;
 	}
@@ -167,7 +153,7 @@ public class ExperimentDescription {
 
 	public void setAlgorithmName(String algorithmName) {
 		this.algorithmName = algorithmName;
-
+		
 	}
 
 	public String getRunDirectory() {
@@ -177,7 +163,7 @@ public class ExperimentDescription {
 	public void setRunDirectory(String runDirectory) {
 		this.runDirectory = runDirectory;
 	}
-
+	
 	public double getAlpha() {
 		return alpha;
 	}
@@ -209,7 +195,7 @@ public class ExperimentDescription {
 	public void setTaskDilatation(double taskDilatation) {
 		this.taskDilatation = taskDilatation;
 	}
-
+	
 	public double getRuntimeVariation() {
 		return runtimeVariation;
 	}
@@ -225,7 +211,7 @@ public class ExperimentDescription {
 	public void setDelay(double delay) {
 		this.delay = delay;
 	}
-
+	
 	public String getDistribution() {
 		return distribution;
 	}
@@ -272,13 +258,19 @@ public class ExperimentDescription {
 
 	private void readProperties(String fileName) {
 		Properties p = new Properties();
+		FileInputStream in = null;
 		try {
-			FileInputStream in = new FileInputStream(fileName);
-			p.load(in);
+			in = new FileInputStream(fileName);
 			in.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				if(in != null)
+					in.close();
+			} catch (IOException e) {
+				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
+			}
 		}
 		group = p.getProperty("group");
 		algorithmName = p.getProperty("algorithmName");
@@ -292,37 +284,44 @@ public class ExperimentDescription {
 		alpha = Double.parseDouble(p.getProperty("alpha"));
 		runID = Integer.parseInt(p.getProperty("runID"));
 		taskDilatation = Double.parseDouble(p.getProperty("taskDilatation"));
-		runtimeVariation = Double
-				.parseDouble(p.getProperty("runtimeVariation"));
+		runtimeVariation = Double.parseDouble(p.getProperty("runtimeVariation"));
 		delay = Double.parseDouble(p.getProperty("delay"));
 		distribution = p.getProperty("distribution");
-
+		
 	}
-
+	
 	private String[] dagsFromString(String property) {
 		return property.split(" ");
 	}
 
 	private String dagsToString() {
 		StringBuilder s = new StringBuilder();
-		for (String dag : dags)
-			s.append(dag + " ");
+		for (String dag : dags) s.append(dag + " ");
 		return s.toString();
 	}
-
+	
+	
 	/*
 	 * Creates a unique file name based on the values of the properties
 	 */
 	public String getFileName() {
-		String fileName = group + "-" + getAlgorithmName() + "-"
-				+ getDistribution() + "-" + getDags()[0] + "x"
-				+ getDags().length + "d" + getDeadline() + "b" + getBudget()
-				+ "m" + getMax_scaling() + "a" + getAlpha() + "t"
-				+ getTaskDilatation() + "v" + getRuntimeVariation() + "l"
-				+ getDelay() + "r" + runID;
-
+		String fileName = 
+			group + "-" +
+			getAlgorithmName() + "-" + 
+			getDistribution() + "-" + 
+			getDags()[0]+
+			"x" + getDags().length + 
+			"d" + getDeadline() + 
+			"b" + getBudget() + 
+			"m" + getMax_scaling() +
+			"a" + getAlpha() + 
+			"t" + getTaskDilatation() +
+			"v" + getRuntimeVariation() +
+			"l" + getDelay() +
+			"r" + runID;
+		
 		return fileName;
-
+		
 	}
-
+	
 }
