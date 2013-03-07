@@ -1,6 +1,7 @@
 package cws.core.algorithms;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -13,12 +14,11 @@ import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 import cws.core.FailureModel;
 import cws.core.UniformRuntimeDistribution;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
 import cws.core.dag.Task;
-import cws.core.dag.DAGParser;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
-import java.lang.Math;
 
 public class TestRun {
     
@@ -40,7 +40,7 @@ public class TestRun {
         System.exit(1);
     }
     
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         // These parameters are consistent with previous experiments
         double alpha = 0.7;
         double maxScaling = 1.0;
@@ -220,53 +220,60 @@ public class TestRun {
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
         
-        PrintStream out = new PrintStream(new FileOutputStream(outputfile));
-        
-        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,jobfinish,dagfinish,vmfinish,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline");
-        
-        for (double budget = minBudget; budget < maxBudget+(budgetStep/2.0); budget += budgetStep) {
-            System.out.println();
-            for (double deadline = minDeadline; deadline < maxDeadline+(deadlineStep/2.0); deadline+= deadlineStep) {
-                System.out.print(".");
-                Algorithm a = null;
-                if ("SPSS".equals(algorithm)) {
-                    a = new SPSS(budget, deadline, dags, alpha);
-                } else if ("DPDS".equals(algorithm)) {
-                    a = new DPDS(budget, deadline, dags, price, maxScaling);
-                } else if ("WADPDS".equals(algorithm)) {
-                    a = new WADPDS(budget, deadline, dags, price, maxScaling);
-                } else {
-                    throw new RuntimeException("Unknown algorithm: "+algorithm);
-                }
-                
-                if (runtimeVariance > 0.0) {
-                    VMFactory.setRuntimeDistribution(
-                            new UniformRuntimeDistribution(seed, runtimeVariance));
-                }
-                
-                if (delay > 0.0) {
-                    VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(delay));
-                }
-                
-                if (failureRate > 0.0) {
-                    VMFactory.setFailureModel(new FailureModel(seed, failureRate));
-                }
-                
-                a.simulate(algorithm);
-                
-                double planningTime = a.getPlanningnWallTime() / 1.0e9;
-                double simulationTime = a.getSimulationWallTime() / 1.0e9;
-                
-                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", 
-                        application, distribution, seed, ensembleSize, scalingFactor, budget, deadline, 
-                        a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
-                        planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(), 
-                        a.getActualJobFinishTime(), a.getActualDagFinishTime(), a.getActualVMFinishTime(), 
-                        runtimeVariance, delay, failureRate, minBudget, maxBudget,
-                        minDeadline, maxDeadline);
-            }
-        }
-        
-        out.close();
+        PrintStream out = null;
+		try {
+			out = new PrintStream(new FileOutputStream(outputfile));
+	        out.println("application,distribution,seed,dags,scale,budget,deadline,algorithm,completed,exponential,linear,planning,simulation,scorebits,cost,jobfinish,dagfinish,vmfinish,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline");
+	        
+	        for (double budget = minBudget; budget < maxBudget+(budgetStep/2.0); budget += budgetStep) {
+	            System.out.println();
+	            for (double deadline = minDeadline; deadline < maxDeadline+(deadlineStep/2.0); deadline+= deadlineStep) {
+	                System.out.print(".");
+	                Algorithm a = null;
+	                if ("SPSS".equals(algorithm)) {
+	                    a = new SPSS(budget, deadline, dags, alpha);
+	                } else if ("DPDS".equals(algorithm)) {
+	                    a = new DPDS(budget, deadline, dags, price, maxScaling);
+	                } else if ("WADPDS".equals(algorithm)) {
+	                    a = new WADPDS(budget, deadline, dags, price, maxScaling);
+	                } else {
+	                    throw new RuntimeException("Unknown algorithm: "+algorithm);
+	                }
+	                
+	                if (runtimeVariance > 0.0) {
+	                    VMFactory.setRuntimeDistribution(
+	                            new UniformRuntimeDistribution(seed, runtimeVariance));
+	                }
+	                
+	                if (delay > 0.0) {
+	                    VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(delay));
+	                }
+	                
+	                if (failureRate > 0.0) {
+	                    VMFactory.setFailureModel(new FailureModel(seed, failureRate));
+	                }
+	                
+	                a.simulate(algorithm);
+	                
+	                double planningTime = a.getPlanningnWallTime() / 1.0e9;
+	                double simulationTime = a.getSimulationWallTime() / 1.0e9;
+	                
+	                out.printf("%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", 
+	                        application, distribution, seed, ensembleSize, scalingFactor, budget, deadline, 
+	                        a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
+	                        planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(), 
+	                        a.getActualJobFinishTime(), a.getActualDagFinishTime(), a.getActualVMFinishTime(), 
+	                        runtimeVariance, delay, failureRate, minBudget, maxBudget,
+	                        minDeadline, maxDeadline);
+	            }
+	        }
+	        
+        } catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if(out != null)
+				out.close();
+		}
     }
 }

@@ -47,8 +47,9 @@ public class DAGParser {
         DAG dag = new DAG();
         Pattern split = Pattern.compile("\\s+");
         
+        BufferedReader br = null;
         try {
-            BufferedReader br = new BufferedReader(new FileReader(dagfile));
+            br = new BufferedReader(new FileReader(dagfile));
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 line = line.trim();
                 
@@ -117,9 +118,14 @@ public class DAGParser {
                     throw new RuntimeException("Unable to read DAG: invalid record: "+line);
                 }
             }
-            br.close();
         } catch(IOException ioe) {
             throw new RuntimeException("Unable to read DAG: I/O error", ioe);
+        } finally {
+        	try {
+				if(br != null)br.close();
+			} catch (IOException e) {
+				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
+			}
         }
         
         return dag;
@@ -155,6 +161,7 @@ public class DAGParser {
      */
     public static DAG parseDAX(File daxfile) {
         DAG dag = new DAG();
+        FileInputStream fis = null;
         try {
             /*
              * This filters an XML parsing stream to eliminate everything 
@@ -169,7 +176,7 @@ public class DAGParser {
             
             // Set up StAX parser
             XMLInputFactory f = XMLInputFactory.newInstance();
-            FileInputStream fis = new FileInputStream(daxfile);
+            fis = new FileInputStream(daxfile);
             XMLStreamReader xml = f.createFilteredReader(
                     f.createXMLStreamReader(fis, "UTF-8"), filter);
             
@@ -293,8 +300,14 @@ public class DAGParser {
         } catch (XMLStreamException xse) {
             throw new RuntimeException(
                     "Unable to parse DAX: XML parser error", xse);
+        } finally {
+        	try {
+        		if(fis != null)
+        			fis.close();
+			} catch (IOException e) {
+				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
+			}
         }
-        
         return dag;
     }
 }
