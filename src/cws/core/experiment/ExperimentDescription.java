@@ -6,9 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import cws.core.Provisioner;
-import cws.core.Scheduler;
-
 /**
  * 
  * @author malawski

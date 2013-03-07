@@ -1,6 +1,7 @@
 package cws.core.provisioner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,8 +14,6 @@ import org.junit.Test;
 
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
-import cws.core.Provisioner;
-import cws.core.Scheduler;
 import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
@@ -30,7 +29,6 @@ import cws.core.experiment.ExperimentResult;
 import cws.core.log.WorkflowLog;
 import cws.core.scheduler.DAGDynamicScheduler;
 import cws.core.scheduler.EnsembleDynamicScheduler;
-import cws.core.scheduler.WorkflowAwareEnsembleScheduler;
 
 
 public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {

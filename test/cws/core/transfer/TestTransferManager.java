@@ -1,7 +1,6 @@
 package cws.core.transfer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -9,7 +8,6 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import cws.core.WorkflowEvent;
 
