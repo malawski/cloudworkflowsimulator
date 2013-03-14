@@ -20,7 +20,8 @@ public class Backtrack extends StaticAlgorithm {
     /**
      * Develop a plan for a single DAG
      */
-    Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
+    @Override
+	Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
         TopologicalOrder order = new TopologicalOrder(dag);
         
         // Initial task assignment

@@ -161,14 +161,21 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 	
 	
 	public static void stringToFile(String s, String fileName) {
-		BufferedWriter out;
+		BufferedWriter out = null;
 		try {
 			out = new BufferedWriter(new FileWriter(fileName));
 			out.write(s);
 			out.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}	
+		} finally {
+			try {
+				if(out != null)
+					out.close();
+			} catch(IOException e) {
+				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
+			}
+		}
 	}
 
 

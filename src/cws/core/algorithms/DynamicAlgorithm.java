@@ -76,7 +76,8 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         return completedDAGs;
     }
     
-    public void simulate(String logname) {
+    @Override
+	public void simulate(String logname) {
         CloudSim.init(1, null, false);
         
         Cloud cloud = new Cloud();

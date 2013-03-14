@@ -1,7 +1,6 @@
 package cws.core.transfer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -9,7 +8,6 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import cws.core.WorkflowEvent;
 
@@ -18,9 +16,7 @@ public class TestTransferManager  {
     public static final long MB = 1024 * KB;
     public static final long GB = 1024 * MB;
     
-    private double DELTA = 0.000001;
-    
-
+    private double DELTA = 0.000001; // TODO: Why isn't it used anywhere?
     
     private class TransferDriver extends SimEntity implements WorkflowEvent {
         private TransferManager tm;

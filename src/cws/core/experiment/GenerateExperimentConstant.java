@@ -1,11 +1,4 @@
 package cws.core.experiment;
-
-
-import java.util.Random;
-
-import org.junit.Test;
-
-
 /**
  * Tests series of ensembles consisting of workflows form workflow generator  
  * https://confluence.pegasus.isi.edu/display/pegasus/WorkflowGenerator
