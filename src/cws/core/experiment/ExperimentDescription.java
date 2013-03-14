@@ -6,9 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import cws.core.Provisioner;
-import cws.core.Scheduler;
-
 /**
  * 
  * @author malawski
@@ -241,29 +238,39 @@ public class ExperimentDescription {
 		p.setProperty("runtimeVariation", "" + runtimeVariation);
 		p.setProperty("delay", "" + delay);
 		p.setProperty("distribution", getDistribution());
-		FileOutputStream out;
+		FileOutputStream out = null;
 		try {
 			out = new FileOutputStream(fileName);
 			p.store(out, "");
-			out.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				if (out != null)
+					out.close();
+			} catch (IOException e) {
+				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
+			}
 		}
-		
 	}
-	
+
 	private void readProperties(String fileName) {
 		Properties p = new Properties();
+		FileInputStream in = null;
 		try {
-			FileInputStream in = new FileInputStream(fileName);
-			p.load(in);
+			in = new FileInputStream(fileName);
+			in.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				if(in != null)
+					in.close();
+			} catch (IOException e) {
+				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
+			}
 		}
 		group = p.getProperty("group");
 		algorithmName = p.getProperty("algorithmName");

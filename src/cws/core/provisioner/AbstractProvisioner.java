@@ -30,7 +30,8 @@ public abstract class AbstractProvisioner implements Provisioner {
         return maxScaling;
     }
     
-    public void setCloud(Cloud cloud) {
+    @Override
+	public void setCloud(Cloud cloud) {
         this.cloud = cloud;
     }
     

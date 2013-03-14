@@ -73,14 +73,16 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         super(budget, deadline, dags);
     }
     
-    public void setCloud(Cloud c) {
+    @Override
+	public void setCloud(Cloud c) {
         if (cloud != null)
             cloud.removeVMListener(this);
         cloud = c;
         cloud.addVMListener(this);
     }
     
-    public void setWorkflowEngine(WorkflowEngine e) {
+    @Override
+	public void setWorkflowEngine(WorkflowEngine e) {
         if (engine != null)
             engine.removeJobListener(this);
         engine = e;
@@ -444,7 +446,8 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         actualDagFinishTime = Math.max(CloudSim.clock(), actualDagFinishTime);
     }
     
-    public void simulate(String logname) {
+    @Override
+	public void simulate(String logname) {
         CloudSim.init(1, null, false);
         
         Cloud cloud = new Cloud();

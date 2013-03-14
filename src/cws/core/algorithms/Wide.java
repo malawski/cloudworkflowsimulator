@@ -13,7 +13,8 @@ public class Wide extends Backtrack {
         super(budget, deadline, dags);
     }
     
-    public void plan() {
+    @Override
+	public void plan() {
         // Estimate number of nodes we can use
         double hours = getDeadline() / (60*60);
         double nodeHours = getBudget() / VMType.SMALL.price;
