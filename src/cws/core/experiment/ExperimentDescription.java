@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * 
  * @author malawski
@@ -247,12 +249,7 @@ public class ExperimentDescription {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
-			try {
-				if (out != null)
-					out.close();
-			} catch (IOException e) {
-				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
-			}
+			IOUtils.closeQuietly(out);
 		}
 	}
 
@@ -261,16 +258,11 @@ public class ExperimentDescription {
 		FileInputStream in = null;
 		try {
 			in = new FileInputStream(fileName);
-			in.close();
+			p.load(in);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
-			try {
-				if(in != null)
-					in.close();
-			} catch (IOException e) {
-				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
-			}
+			IOUtils.closeQuietly(in);
 		}
 		group = p.getProperty("group");
 		algorithmName = p.getProperty("algorithmName");
