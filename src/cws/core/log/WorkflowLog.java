@@ -9,6 +9,7 @@ import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
 import cws.core.DAGJob;
@@ -165,19 +166,10 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 		try {
 			out = new BufferedWriter(new FileWriter(fileName));
 			out.write(s);
-			out.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
-			try {
-				if(out != null)
-					out.close();
-			} catch(IOException e) {
-				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
-			}
+			IOUtils.closeQuietly(out);
 		}
 	}
-
-
-
 }
