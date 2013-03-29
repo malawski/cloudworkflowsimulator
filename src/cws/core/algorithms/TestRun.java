@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
@@ -271,8 +272,7 @@ public class TestRun {
         } catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		} finally {
-			if(out != null)
-				out.close();
+			IOUtils.closeQuietly(out);
 		}
     }
 }

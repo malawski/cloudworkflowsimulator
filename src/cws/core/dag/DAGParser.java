@@ -15,6 +15,8 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * This class parses simulation DAGs from files in various formats.
  *
@@ -121,13 +123,8 @@ public class DAGParser {
         } catch(IOException ioe) {
             throw new RuntimeException("Unable to read DAG: I/O error", ioe);
         } finally {
-        	try {
-				if(br != null)br.close();
-			} catch (IOException e) {
-				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
-			}
+			IOUtils.closeQuietly(br);
         }
-        
         return dag;
     }
     
@@ -162,6 +159,7 @@ public class DAGParser {
     public static DAG parseDAX(File daxfile) {
         DAG dag = new DAG();
         FileInputStream fis = null;
+        XMLStreamReader xmlReader = null;
         try {
             /*
              * This filters an XML parsing stream to eliminate everything 
@@ -177,31 +175,31 @@ public class DAGParser {
             // Set up StAX parser
             XMLInputFactory f = XMLInputFactory.newInstance();
             fis = new FileInputStream(daxfile);
-            XMLStreamReader xml = f.createFilteredReader(
+            xmlReader = f.createFilteredReader(
                     f.createXMLStreamReader(fis, "UTF-8"), filter);
             
             // Sanity check
-            if (!"adag".equals(xml.getLocalName())) {
-                Location l = xml.getLocation();
+            if (!"adag".equals(xmlReader.getLocalName())) {
+                Location l = xmlReader.getLocation();
                 throw new RuntimeException(String.format(
-                        "Unexpected element '%s' at %d:%d", xml.getLocalName(), 
+                        "Unexpected element '%s' at %d:%d", xmlReader.getLocalName(), 
                         l.getLineNumber(), l.getColumnNumber()));
             }
             
-            xml.next(); // Skip over <adag>
+            xmlReader.next(); // Skip over <adag>
             
             // While we have not seen </adag>
-            while (!xml.isEndElement()) {
+            while (!xmlReader.isEndElement()) {
                 // <job> element
-                if ("job".equalsIgnoreCase(xml.getLocalName())) {
+                if ("job".equalsIgnoreCase(xmlReader.getLocalName())) {
                     
                     // Parse task
-                    String id = xml.getAttributeValue(null, "id");
-                    String ns = xml.getAttributeValue(null, "namespace");
-                    String name = xml.getAttributeValue(null, "name");
-                    String version = xml.getAttributeValue(null, "version");
+                    String id = xmlReader.getAttributeValue(null, "id");
+                    String ns = xmlReader.getAttributeValue(null, "namespace");
+                    String name = xmlReader.getAttributeValue(null, "name");
+                    String version = xmlReader.getAttributeValue(null, "version");
                     double runtime = Double.parseDouble(
-                            xml.getAttributeValue(null, "runtime"));
+                            xmlReader.getAttributeValue(null, "runtime"));
                     
                     // Transformation name is namespace::name:version
                     String transformation = String.format(
@@ -210,27 +208,27 @@ public class DAGParser {
                     // Add the task to the dag
                     dag.addTask(new Task(id, transformation, runtime));
                     
-                    xml.next(); // to first <uses> or </job>
+                    xmlReader.next(); // to first <uses> or </job>
                     
                     // List of input files and output files for the task
                     ArrayList<String> inputs = new ArrayList<String>();
                     ArrayList<String> outputs = new ArrayList<String>();
                     
-                    while (!xml.isEndElement()) {
+                    while (!xmlReader.isEndElement()) {
                         // Sanity check
-                        if (!"uses".equals(xml.getLocalName())) {
-                            Location l = xml.getLocation();
+                        if (!"uses".equals(xmlReader.getLocalName())) {
+                            Location l = xmlReader.getLocation();
                             throw new RuntimeException(String.format(
                                     "Unexpected element '%s' at %d:%d", 
-                                    xml.getLocalName(), l.getLineNumber(), 
+                                    xmlReader.getLocalName(), l.getLineNumber(), 
                                     l.getColumnNumber()));
                         }
                         
                         // Parse file info
-                        String file = xml.getAttributeValue(null, "file");
+                        String file = xmlReader.getAttributeValue(null, "file");
                         long size = Long.parseLong(
-                                xml.getAttributeValue(null, "size"));
-                        String link = xml.getAttributeValue(null, "link");
+                                xmlReader.getAttributeValue(null, "size"));
+                        String link = xmlReader.getAttributeValue(null, "link");
                         
                         // Add the file to the dag
                         dag.addFile(file, size);
@@ -246,8 +244,8 @@ public class DAGParser {
                                     file));
                         }
                         
-                        xml.next(); // to </uses>
-                        xml.next(); // to next <uses> or </job>
+                        xmlReader.next(); // to </uses>
+                        xmlReader.next(); // to next <uses> or </job>
                     }
                     
                     // Set input output files for the job
@@ -256,56 +254,57 @@ public class DAGParser {
                 }
                 
                 // <child> element
-                else if ("child".equalsIgnoreCase(xml.getLocalName())) {
+                else if ("child".equalsIgnoreCase(xmlReader.getLocalName())) {
                     
-                    String child = xml.getAttributeValue(null, "ref");
+                    String child = xmlReader.getAttributeValue(null, "ref");
                     
-                    xml.next(); // to first <parent> or </child>
+                    xmlReader.next(); // to first <parent> or </child>
                     
-                    while (!xml.isEndElement()) {
+                    while (!xmlReader.isEndElement()) {
                         // Sanity check
-                        if (!"parent".equals(xml.getLocalName())) {
-                            Location l = xml.getLocation();
+                        if (!"parent".equals(xmlReader.getLocalName())) {
+                            Location l = xmlReader.getLocation();
                             throw new RuntimeException(String.format(
                                     "Unexpected element '%s' at %d:%d", 
-                                    xml.getLocalName(), l.getLineNumber(), 
+                                    xmlReader.getLocalName(), l.getLineNumber(), 
                                     l.getColumnNumber()));
                         }
                         
-                        String parent = xml.getAttributeValue(null, "ref");
+                        String parent = xmlReader.getAttributeValue(null, "ref");
                         
                         //System.out.printf("%s -> %s\n", parent, child);
                         dag.addEdge(parent, child);
                         
-                        xml.next(); // to </parent>
-                        xml.next(); // to next <parent> or </child>
+                        xmlReader.next(); // to </parent>
+                        xmlReader.next(); // to next <parent> or </child>
                     }
                 }
                 
                 // Unknown element
                 else {
                     // Sanity check
-                    Location l = xml.getLocation();
+                    Location l = xmlReader.getLocation();
                     throw new RuntimeException(String.format(
-                            "Unknown element '%s' at %d:%d", xml.getLocalName(), 
+                            "Unknown element '%s' at %d:%d", xmlReader.getLocalName(), 
                             l.getLineNumber(), l.getColumnNumber()));
                 }
                 
-                xml.next(); // From (</job>,</child>) to (<job>,<child>,</adag>)
+                xmlReader.next(); // From (</job>,</child>) to (<job>,<child>,</adag>)
             }
             
-            xml.close();
         } catch (IOException ioe) {
             throw new RuntimeException("Unable to parse DAX: I/O error", ioe);
         } catch (XMLStreamException xse) {
             throw new RuntimeException(
                     "Unable to parse DAX: XML parser error", xse);
         } finally {
+			IOUtils.closeQuietly(fis);
         	try {
-        		if(fis != null)
-        			fis.close();
-			} catch (IOException e) {
-				// Close quietly. TODO(bryk): Start using commons-io lib to do this.
+        		if(xmlReader != null)
+        			xmlReader.close();
+			} catch (XMLStreamException xse) {
+	            throw new RuntimeException(
+	                    "Unable to parse DAX: XML parser error", xse);
 			}
         }
         return dag;
