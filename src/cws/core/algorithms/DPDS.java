@@ -8,8 +8,7 @@ import cws.core.scheduler.EnsembleDynamicScheduler;
 
 public class DPDS extends DynamicAlgorithm {
     public DPDS(double budget, double deadline, List<DAG> dags, double price, double maxScaling) {
-        super(budget, deadline, dags, price, 
-                new EnsembleDynamicScheduler(), 
-                new SimpleUtilizationBasedProvisioner(maxScaling));
+        super(budget, deadline, dags, price, new EnsembleDynamicScheduler(), new SimpleUtilizationBasedProvisioner(
+                maxScaling));
     }
 }

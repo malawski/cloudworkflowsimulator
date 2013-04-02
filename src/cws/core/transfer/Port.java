@@ -7,28 +7,28 @@ package cws.core.transfer;
  * The only reason for this object is that we need to keep track of the
  * unique ports so that if multiple transfers make use of a single port we
  * can assign a max-min fair share of the bandwidth to each transfer.
- *
+ * 
  * @author Gideon Juve <juve@usc.edu>
  */
 public class Port {
     /** Next unique port ID */
     private static int next_id = 0;
-    
+
     /** Unique ID for this port */
     private int id;
-    
+
     /** Available bandwidth in Mbps */
     private double bandwidth;
-    
+
     public Port(double bandwidth) {
         this.id = next_id++;
         this.bandwidth = bandwidth;
     }
-    
+
     public double getBandwidth() {
         return bandwidth;
     }
-    
+
     public int getID() {
         return id;
     }

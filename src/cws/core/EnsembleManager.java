@@ -12,19 +12,19 @@ import cws.core.dag.DAG;
 /**
  * This class manages a collection of DAGs and submits them to a WorkflowEngine
  * for execution in priority order according to a scheduling algorithm.
- *
+ * 
  * @author Gideon Juve <juve@usc.edu>
  */
 public class EnsembleManager extends SimEntity implements WorkflowEvent {
     /** List of all DAGs remaining to be executed */
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
-    
+
     /** DAG listeners */
     private LinkedList<DAGJobListener> listeners;
-    
+
     /** Workflow engine that will receive DAGs for execution */
     private WorkflowEngine engine = null;
-    
+
     public EnsembleManager(Collection<DAG> dags, WorkflowEngine engine) {
         super("EnsembleManager");
         this.engine = engine;
@@ -33,15 +33,15 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
         prioritizeDAGs(dags);
         CloudSim.addEntity(this);
     }
-    
+
     public EnsembleManager(WorkflowEngine engine) {
         this(null, engine);
     }
-    
+
     private void prioritizeDAGs(Collection<DAG> dags) {
         if (dags == null)
             return;
-        
+
         // For now just add them in whatever order they come in
         int priority = 0;
         for (DAG d : dags) {
@@ -50,34 +50,34 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
             this.dags.add(dj);
         }
     }
-    
+
     public void addDAGJobListener(DAGJobListener l) {
         this.listeners.add(l);
     }
-    
+
     public void removeDAGJobListener(DAGJobListener l) {
         this.listeners.remove(l);
     }
-    
+
     @Override
     public void startEntity() {
         // Submit all DAGs
-        while(!dags.isEmpty()) {
+        while (!dags.isEmpty()) {
             submitDAG(dags.pop());
         }
     }
-    
+
     @Override
     public void processEvent(SimEvent ev) {
         switch (ev.getTag()) {
-            case DAG_STARTED:
-                dagStarted((DAGJob)ev.getData());
-                break;
-            case DAG_FINISHED:
-                dagFinished((DAGJob)ev.getData());
-                break;
-            default:
-                throw new RuntimeException("Unknown event: "+ev);
+        case DAG_STARTED:
+            dagStarted((DAGJob) ev.getData());
+            break;
+        case DAG_FINISHED:
+            dagFinished((DAGJob) ev.getData());
+            break;
+        default:
+            throw new RuntimeException("Unknown event: " + ev);
         }
     }
 
@@ -85,19 +85,19 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
     public void shutdownEntity() {
         // Do nothing
     }
-    
+
     public void submitDAG(DAGJob dagJob) {
         // Submit the dag to the workflow engine
         sendNow(engine.getId(), DAG_SUBMIT, dagJob);
     }
-    
+
     private void dagStarted(DAGJob dag) {
         // Notify all listeners
         for (DAGJobListener l : listeners) {
             l.dagStarted(dag);
         }
     }
-    
+
     private void dagFinished(DAGJob dag) {
         // Notify all listeners
         for (DAGJobListener l : listeners) {
