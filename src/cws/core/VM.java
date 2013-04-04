@@ -11,6 +11,7 @@ import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
+import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.transfer.Port;
 
 /**
@@ -280,7 +281,7 @@ public class VM extends SimEntity implements WorkflowEvent {
             jobFinish((Job) ev.getData());
             break;
         default:
-            throw new RuntimeException("Unknown event: " + ev);
+            throw new UnknownWorkflowEventException("Unknown event: " + ev);
         }
     }
 

@@ -6,6 +6,8 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 
+import cws.core.exception.UnknownWorkflowEventException;
+
 /**
  * A Cloud is an entity that handles the provisioning and deprovisioning
  * of VM resources.
@@ -53,7 +55,7 @@ public class Cloud extends SimEntity implements WorkflowEvent {
                 vmTerminated((VM)ev.getData());
                 break;
             default:
-                throw new RuntimeException("Unknown event: "+ev);
+                throw new UnknownWorkflowEventException("Unknown event: "+ev);
         }
     }
 
