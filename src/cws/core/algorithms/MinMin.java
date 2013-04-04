@@ -39,7 +39,7 @@ public class MinMin extends StaticAlgorithm {
 
             // The runtime is just the size of the task (MI) divided by the
             // MIPS of the VM
-            double runtime = t.size / vm.mips;
+            double runtime = t.getSize() / vm.mips;
             runtimes.put(t, runtime);
 
             // Compute the minimum cost of running this workflow
@@ -94,7 +94,7 @@ public class MinMin extends StaticAlgorithm {
         // Create queue
         HashSet<Task> queue = new HashSet<Task>();
         for (Task t : order) {
-            if (t.parents.size() == 0)
+            if (t.getParents().size() == 0)
                 queue.add(t);
         }
 
@@ -111,7 +111,7 @@ public class MinMin extends StaticAlgorithm {
 
                 // Compute earliest start time of task
                 double earliestStart = 0.0;
-                for (Task p : t.parents) {
+                for (Task p : t.getParents()) {
                     earliestStart = Math.max(earliestStart, finishTimes.get(p));
                 }
 
@@ -305,9 +305,9 @@ public class MinMin extends StaticAlgorithm {
             finishTimes.put(task, optimal.slot.start + runtimes.get(task));
 
             // Release any children of task
-            for (Task c : task.children) {
+            for (Task c : task.getChildren()) {
                 boolean ready = true;
-                for (Task p : c.parents) {
+                for (Task p : c.getParents()) {
                     if (!finishTimes.containsKey(p)) {
                         ready = false;
                         break;

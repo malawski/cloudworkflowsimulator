@@ -224,7 +224,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         int numlevels = 0;
         for (Task t : order) {
             int level = 0;
-            for (Task p : t.parents) {
+            for (Task p : t.getParents()) {
                 int plevel = levels.get(p);
                 level = Math.max(level, plevel + 1);
             }
@@ -292,7 +292,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         for (Task t : order) {
             int level = levels.get(t);
             double latestDeadline = 0.0;
-            for (Task p : t.parents) {
+            for (Task p : t.getParents()) {
                 double pdeadline = deadlines.get(p);
                 latestDeadline = Math.max(latestDeadline, pdeadline);
             }

@@ -29,7 +29,7 @@ public class CriticalPath {
         if (runtimes == null) {
             runtimes = new HashMap<Task, Double>();
             for (Task task : order) {
-                runtimes.put(task, task.size);
+                runtimes.put(task, task.getSize());
             }
         }
 
@@ -40,7 +40,7 @@ public class CriticalPath {
 
         // Now we adjust the values in the topological order
         for (Task task : order) {
-            for (Task child : task.children) {
+            for (Task child : task.getChildren()) {
                 eft.put(child, Math.max(eft.get(child), eft.get(task) + runtimes.get(child)));
             }
         }

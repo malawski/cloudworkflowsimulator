@@ -21,7 +21,7 @@ public class DAGStats {
 
             // The runtime is just the size of the task (MI) divided by the
             // MIPS of the VM
-            double runtime = t.size / mips;
+            double runtime = t.getSize() / mips;
             runtimes.put(t, runtime);
 
             // Compute the minimum cost of running this workflow

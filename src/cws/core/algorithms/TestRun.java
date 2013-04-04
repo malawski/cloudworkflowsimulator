@@ -195,8 +195,8 @@ public class TestRun {
 
             if (scalingFactor > 1.0) {
                 for (String tid : dag.getTasks()) {
-                    Task t = dag.getTask(tid);
-                    t.size *= scalingFactor;
+                    Task t = dag.getTaskById(tid);
+                    t.setSize(t.getSize() * scalingFactor);
                 }
             }
 

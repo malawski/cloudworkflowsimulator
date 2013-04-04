@@ -46,7 +46,7 @@ public class SPSS extends StaticAlgorithm {
 
             // The runtime is just the size of the task (MI) divided by the
             // MIPS of the VM
-            double runtime = t.size / vm.mips;
+            double runtime = t.getSize() / vm.mips;
             runtimes.put(t, runtime);
 
             // Compute the minimum cost of running this workflow
@@ -118,7 +118,7 @@ public class SPSS extends StaticAlgorithm {
 
             // Compute earliest start time of task
             double earliestStart = 0.0;
-            for (Task p : t.parents) {
+            for (Task p : t.getParents()) {
                 earliestStart = Math.max(earliestStart, finishTimes.get(p));
             }
 
@@ -285,7 +285,7 @@ public class SPSS extends StaticAlgorithm {
             }
 
             if (newResource.cost < best.cost) {
-                System.out.printf("%s best: %f %s\n", t.id, best.cost, newResource.betterThan(best));
+                System.out.printf("%s best: %f %s\n", t.getId(), best.cost, newResource.betterThan(best));
             }
 
             // Schedule task on resource of best solution

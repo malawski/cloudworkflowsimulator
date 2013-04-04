@@ -88,7 +88,7 @@ public class Experiment {
     public double sumRuntime(DAG dag) {
         double sum = 0.0;
         for (String taskName : dag.getTasks()) {
-            sum += dag.getTask(taskName).size;
+            sum += dag.getTaskById(taskName).getSize();
         }
         return sum;
     }
@@ -192,8 +192,8 @@ public class Experiment {
 
             if (taskDilatation > 1.0) {
                 for (String tid : dag.getTasks()) {
-                    Task t = dag.getTask(tid);
-                    t.size *= taskDilatation;
+                    Task t = dag.getTaskById(tid);
+                    t.setSize(t.getSize() * taskDilatation);
                 }
             }
 

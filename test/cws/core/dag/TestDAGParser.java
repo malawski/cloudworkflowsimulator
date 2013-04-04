@@ -16,10 +16,10 @@ public class TestDAGParser {
     public void testSmall() {
         DAG dag = DAGParser.parseDAG(new File("dags/cybershake_small.dag"));
         assertEquals(dag.numTasks(), 25703);
-        Task t = dag.getTask("ID1_8_6");
-        assertEquals(t.id, "ID1_8_6");
-        assertEquals(t.inputs.size(), 3);
-        assertEquals(t.outputs.size(), 2);
+        Task t = dag.getTaskById("ID1_8_6");
+        assertEquals(t.getId(), "ID1_8_6");
+        assertEquals(t.getInputFiles().size(), 3);
+        assertEquals(t.getOutputFiles().size(), 2);
     }
 
     @Test
@@ -33,9 +33,9 @@ public class TestDAGParser {
         DAG dag = DAGParser.parseDAX(new File("dags/Montage_25.xml"));
         assertEquals(25, dag.numTasks());
         assertEquals(38, dag.numFiles());
-        Task t = dag.getTask("ID00022");
-        assertEquals(t.id, "ID00022");
-        assertEquals(2, t.inputs.size());
-        assertEquals(2, t.outputs.size());
+        Task t = dag.getTaskById("ID00022");
+        assertEquals(t.getId(), "ID00022");
+        assertEquals(2, t.getInputFiles().size());
+        assertEquals(2, t.getOutputFiles().size());
     }
 }

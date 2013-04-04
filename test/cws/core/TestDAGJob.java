@@ -35,7 +35,7 @@ public class TestDAGJob {
 
         Task a = dj.nextReadyTask();
 
-        assertEquals(a.id, "a");
+        assertEquals(a.getId(), "a");
 
         assertEquals(dj.readyTasks(), 0);
 
@@ -45,13 +45,13 @@ public class TestDAGJob {
 
         Task bc = dj.nextReadyTask();
 
-        assertTrue("b".equals(bc.id) || "c".equals(bc.id));
+        assertTrue("b".equals(bc.getId()) || "c".equals(bc.getId()));
 
         assertEquals(dj.readyTasks(), 1);
 
         Task cb = dj.nextReadyTask();
 
-        assertTrue("b".equals(cb.id) || "c".equals(cb.id));
+        assertTrue("b".equals(cb.getId()) || "c".equals(cb.getId()));
 
         assertEquals(dj.readyTasks(), 0);
 
@@ -65,7 +65,7 @@ public class TestDAGJob {
 
         Task d = dj.nextReadyTask();
 
-        assertEquals(d.id, "d");
+        assertEquals(d.getId(), "d");
 
         assertFalse(dj.isFinished());
 

@@ -18,11 +18,11 @@ public class CriticalPathTest {
         TopologicalOrder order = new TopologicalOrder(dag);
         CriticalPath cp = new CriticalPath(order);
 
-        Task A = dag.getTask("A");
-        Task B = dag.getTask("B");
-        Task C = dag.getTask("C");
-        Task D = dag.getTask("D");
-        Task E = dag.getTask("E");
+        Task A = dag.getTaskById("A");
+        Task B = dag.getTaskById("B");
+        Task C = dag.getTaskById("C");
+        Task D = dag.getTaskById("D");
+        Task E = dag.getTaskById("E");
 
         assertEquals(1.0, cp.eft(A), 0.00001);
 

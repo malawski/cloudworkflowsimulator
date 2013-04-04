@@ -43,11 +43,11 @@ public class TopologicalOrderTest {
         // Validate that all the children of each task have a sort index later
         // than their parent
         for (String id : dag.getTasks()) {
-            Task t = dag.getTask(id);
+            Task t = dag.getTaskById(id);
             int pi = l.indexOf(t);
-            for (Task c : t.children) {
+            for (Task c : t.getChildren()) {
                 int ci = l.indexOf(c);
-                assertTrue(String.format("%s should be after %s", c.id, t.id), ci > pi);
+                assertTrue(String.format("%s should be after %s", c.getId(), t.getId()), ci > pi);
             }
         }
     }
