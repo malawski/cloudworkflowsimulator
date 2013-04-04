@@ -15,10 +15,10 @@ public class DAG {
     }
 
     public void addTask(Task t) {
-        if (tasks.containsKey(t.id)) {
-            throw new RuntimeException("Task already exists: " + t.id);
+        if (tasks.containsKey(t.getId())) {
+            throw new RuntimeException("Task already exists: " + t.getId());
         }
-        tasks.put(t.id, t);
+        tasks.put(t.getId(), t);
     }
 
     public void addFile(String name, double size) {
@@ -37,18 +37,18 @@ public class DAG {
         if (c == null) {
             throw new RuntimeException("Invalid edge: Child not found: " + child);
         }
-        p.children.add(c);
-        c.parents.add(p);
+        p.getChildren().add(c);
+        c.getParents().add(p);
     }
 
-    public void setInputs(String task, List<String> inputs) {
-        Task t = getTask(task);
-        t.inputs = inputs;
+    public void setInputs(String taskId, List<String> inputs) {
+        Task t = getTaskById(taskId);
+        t.setInputFiles(inputs);
     }
 
     public void setOutputs(String task, List<String> outputs) {
-        Task t = getTask(task);
-        t.outputs = outputs;
+        Task t = getTaskById(task);
+        t.setOutputFiles(outputs);
     }
 
     public int numTasks() {
@@ -59,7 +59,7 @@ public class DAG {
         return files.size();
     }
 
-    public Task getTask(String id) {
+    public Task getTaskById(String id) {
         if (!tasks.containsKey(id)) {
             throw new RuntimeException("Task not found: " + id);
         }

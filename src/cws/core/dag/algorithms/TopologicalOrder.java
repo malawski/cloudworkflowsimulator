@@ -25,7 +25,7 @@ public class TopologicalOrder implements Iterable<Task> {
 
     public TopologicalOrder(DAG dag) {
         for (String taskName : dag.getTasks()) {
-            Task task = dag.getTask(taskName);
+            Task task = dag.getTaskById(taskName);
             if (!marked.contains(task))
                 dfs(task);
         }
@@ -34,7 +34,7 @@ public class TopologicalOrder implements Iterable<Task> {
 
     private void dfs(Task task) {
         marked.add(task);
-        for (Task child : task.children) {
+        for (Task child : task.getChildren()) {
             if (!marked.contains(child))
                 dfs(child);
         }

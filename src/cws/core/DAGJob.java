@@ -41,8 +41,8 @@ public class DAGJob {
 
         // Release all root tasks
         for (String tid : dag.getTasks()) {
-            Task t = dag.getTask(tid);
-            if (t.parents.size() == 0) {
+            Task t = dag.getTaskById(tid);
+            if (t.getParents().size() == 0) {
                 releaseTask(t);
             }
         }
@@ -105,9 +105,9 @@ public class DAGJob {
         completedTasks.add(t);
 
         // Release all ready children
-        for (Task c : t.children) {
+        for (Task c : t.getChildren()) {
             if (!releasedTasks.contains(c)) {
-                if (completedTasks.containsAll(c.parents)) {
+                if (completedTasks.containsAll(c.getParents())) {
                     releaseTask(c);
                 }
             }

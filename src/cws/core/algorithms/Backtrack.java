@@ -37,7 +37,7 @@ public class Backtrack extends StaticAlgorithm {
 
             // The runtime is just the size of the task (MI) divided by the
             // MIPS of the VM
-            double runtime = t.size / vm.mips;
+            double runtime = t.getSize() / vm.mips;
             runtimes.put(t, runtime);
 
             // Compute the minimum cost of running this workflow
@@ -72,7 +72,7 @@ public class Backtrack extends StaticAlgorithm {
         for (Task t : order.reverse()) {
             double deadline = getDeadline();
             deadline = deadline - (getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay());
-            for (Task c : t.children) {
+            for (Task c : t.getChildren()) {
                 deadline = Math.min(deadline, deadlines.get(c) - runtimes.get(c));
             }
             deadlines.put(t, deadline);
@@ -111,7 +111,7 @@ public class Backtrack extends StaticAlgorithm {
 
             // Compute earliest start time of task
             double earliestStart = 0.0;
-            for (Task p : t.parents) {
+            for (Task p : t.getParents()) {
                 earliestStart = Math.max(earliestStart, finishTimes.get(p));
             }
 
