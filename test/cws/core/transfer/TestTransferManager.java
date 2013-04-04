@@ -16,8 +16,6 @@ public class TestTransferManager {
     public static final long MB = 1024 * KB;
     public static final long GB = 1024 * MB;
 
-    private double DELTA = 0.000001; // TODO(bryk): Why isn't it used anywhere?
-
     private class TransferDriver extends SimEntity implements WorkflowEvent {
         private TransferManager tm;
         private List<Transfer> transfers;

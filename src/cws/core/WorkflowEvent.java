@@ -87,4 +87,15 @@ public interface WorkflowEvent {
     /** Submit next provisioning request */
     public static final int PROVISIONING_REQUEST = 22;
 
+    // ///////////////////////////////////////////////////////
+    // STORAGE EVENTS
+    // ///////////////////////////////////////////////////////
+    /** Client wants either to read or write file */
+    int NEW_FILE_TRANSFER = 23;
+
+    /** Update progress of a file transfer */
+    int UPDATE_FILE_TRANSFER_PROGRESS = 24;
+
+    /** File transfer has completed */
+    int FILE_TRANSFER_COMPLETE = 25;
 }

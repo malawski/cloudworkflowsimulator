@@ -10,6 +10,7 @@ import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 
 import cws.core.WorkflowEvent;
+import cws.core.exception.UnknownWorkflowEventException;
 
 /**
  * This entity simulates data transfers between potentially shared network
@@ -89,7 +90,7 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
             finalAckReceived((Transfer) ev.getData());
             break;
         default:
-            throw new RuntimeException("Unknown event: " + ev);
+            throw new UnknownWorkflowEventException("Unknown event: " + ev);
         }
     }
 

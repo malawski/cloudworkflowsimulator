@@ -26,7 +26,8 @@ public class TestFailureModel {
         assertEquals(0.01, computePercentFailures(0.01), 0.001);
         assertEquals(0.05, computePercentFailures(0.05), 0.001);
         assertEquals(0.1, computePercentFailures(0.1), 0.001);
-        assertEquals(0.5, computePercentFailures(0.5), 0.001);
+        assertEquals(0.5, computePercentFailures(0.5), 0.001); // TODO(bryk): this assert fails sometimes - that's
+                                                               // really bad
         assertEquals(0.75, computePercentFailures(0.75), 0.001);
         assertEquals(1.0, computePercentFailures(1.0), 0.001);
     }
