@@ -90,12 +90,12 @@ public interface WorkflowEvent {
     // ///////////////////////////////////////////////////////
     // STORAGE EVENTS
     // ///////////////////////////////////////////////////////
-    /** Client wants either to read or write file */
-    int NEW_FILE_TRANSFER = 23;
-
-    /** Update progress of a file transfer */
-    int UPDATE_FILE_TRANSFER_PROGRESS = 24;
-
     /** File transfer has completed */
-    int FILE_TRANSFER_COMPLETE = 25;
+    int FILE_TRANSFER_COMPLETED = 25;
+
+    /** Send just before job's start */
+    int FILE_MANAGER_BEFORE_JOB_START = 26;
+
+    /** Send just after job has finished */
+    int FILE_MANAGER_AFTER_JOB_FINISH = 27;
 }
