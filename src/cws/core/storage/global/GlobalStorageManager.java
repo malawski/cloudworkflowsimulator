@@ -38,7 +38,7 @@ public class GlobalStorageManager extends StorageManager {
 
     /**
      * When the file read has completed we should:
-     * * inform job's VM if all imput files are available
+     * * inform job's VM if all input files are available
      * * read another input file
      * @param read
      */
