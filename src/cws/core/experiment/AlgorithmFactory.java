@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.UniformRuntimeDistribution;
 import cws.core.algorithms.Algorithm;
@@ -21,12 +20,10 @@ import cws.core.dag.Task;
 /**
  * Factory for creating algorithms based on experiment description.
  * @author malawski
- * 
  */
 public class AlgorithmFactory {
 
     public static Algorithm createAlgorithm(ExperimentDescription e) {
-
         List<DAG> dags = new ArrayList<DAG>();
         String name = e.getAlgorithmName();
         String dagPath = e.getDagPath();
@@ -75,23 +72,5 @@ public class AlgorithmFactory {
         else
             return null;
 
-    }
-
-    /**
-     * 
-     * FIXME create a separate class
-     * 
-     */
-    static class ConstantDistribution implements ContinuousDistribution {
-        private double delay;
-
-        public ConstantDistribution(double delay) {
-            this.delay = delay;
-        }
-
-        @Override
-        public double sample() {
-            return this.delay;
-        }
     }
 }

@@ -24,7 +24,10 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
 
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
 
-    /** XXX How is this different than the one above? */
+    /**
+     * XXX How is this different than the one above?
+     * TODO(bryk): anyone can answer this question?
+     */
     private LinkedList<DAGJob> allDAGJobs = new LinkedList<DAGJob>();
 
     private HashSet<JobListener> jobListeners = new HashSet<JobListener>();
@@ -55,18 +58,24 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     /**
      * The value that is used by provisioner to estimate system load
      * FIXME This seems unnecessary
+     * TODO(bryk): As far as I can see this is used in the code. So it IS necessary. I'll remove this comment if no one
+     * votes against.
      */
     private int queueLength = 0;
 
     /**
      * Deadline
      * XXX Why should the workflow engine know about the deadline?
+     * TODO(bryk): As far as I can see this is used in the code. So it IS necessary. I'll remove this comment if no one
+     * votes against.
      */
     private double deadline = Double.MAX_VALUE;
 
     /**
      * Budget
      * XXX Why should the workflow engine know about the budget?
+     * TODO(bryk): As far as I can see this is used in the code. So it IS necessary. I'll remove this comment if no one
+     * votes against.
      */
     double budget = Double.MAX_VALUE;
 
@@ -80,58 +89,6 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
 
     public WorkflowEngine(Provisioner provisioner, Scheduler scheduler) {
         this(new SimpleJobFactory(), provisioner, scheduler);
-    }
-
-    public int getQueueLength() {
-        return queueLength;
-    }
-
-    public void setQueueLength(int queueLength) {
-        this.queueLength = queueLength;
-    }
-
-    public double getDeadline() {
-        return deadline;
-    }
-
-    public void setDeadline(double deadline) {
-        this.deadline = deadline;
-    }
-
-    public double getBudget() {
-        return budget;
-    }
-
-    public void setBudget(double budget) {
-        this.budget = budget;
-    }
-
-    public Queue<Job> getQueuedJobs() {
-        return queue;
-    }
-
-    public List<VM> getAvailableVMs() {
-        return vms;
-    }
-
-    public Set<VM> getFreeVMs() {
-        return freeVMs;
-    }
-
-    public Set<VM> getBusyVMs() {
-        return busyVMs;
-    }
-
-    public LinkedList<DAGJob> getAllDags() {
-        return allDAGJobs;
-    }
-
-    public void addJobListener(JobListener l) {
-        jobListeners.add(l);
-    }
-
-    public void removeJobListener(JobListener l) {
-        jobListeners.remove(l);
     }
 
     @Override
@@ -194,6 +151,9 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         scheduler.scheduleJobs(this);
     }
 
+    /**
+     * @param vm - not used since this method does nothing
+     */
     private void vmTerminated(VM vm) {
         /* Do nothing */
     }
@@ -286,5 +246,57 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         }
 
         scheduler.scheduleJobs(this);
+    }
+
+    public int getQueueLength() {
+        return queueLength;
+    }
+
+    public void setQueueLength(int queueLength) {
+        this.queueLength = queueLength;
+    }
+
+    public double getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(double deadline) {
+        this.deadline = deadline;
+    }
+
+    public double getBudget() {
+        return budget;
+    }
+
+    public void setBudget(double budget) {
+        this.budget = budget;
+    }
+
+    public Queue<Job> getQueuedJobs() {
+        return queue;
+    }
+
+    public List<VM> getAvailableVMs() {
+        return vms;
+    }
+
+    public Set<VM> getFreeVMs() {
+        return freeVMs;
+    }
+
+    public Set<VM> getBusyVMs() {
+        return busyVMs;
+    }
+
+    public LinkedList<DAGJob> getAllDags() {
+        return allDAGJobs;
+    }
+
+    public void addJobListener(JobListener l) {
+        jobListeners.add(l);
+    }
+
+    public void removeJobListener(JobListener l) {
+        jobListeners.remove(l);
     }
 }

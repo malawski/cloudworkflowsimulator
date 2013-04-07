@@ -14,16 +14,13 @@ import cws.core.WorkflowEvent;
 
 /**
  * This scheduler submits jobs to VMs on FCFS basis.
- * Job is submitted to VM only if VM is idle (no queueing in VMs).
+ * Job is submitted to VM only if VM is idle (no queuing in VMs).
  * @author malawski
- * 
  */
-
 public class DAGDynamicScheduler implements Scheduler, WorkflowEvent {
 
     @Override
     public void scheduleJobs(WorkflowEngine engine) {
-
         // use the queued (released) jobs from the workflow engine
         Queue<Job> jobs = engine.getQueuedJobs();
 
@@ -37,7 +34,6 @@ public class DAGDynamicScheduler implements Scheduler, WorkflowEvent {
      * @param engine
      */
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-
         Set<VM> freeVMs = engine.getFreeVMs();
         Set<VM> busyVMs = engine.getBusyVMs();
 
@@ -54,8 +50,6 @@ public class DAGDynamicScheduler implements Scheduler, WorkflowEvent {
 
     @Override
     public void setWorkflowEngine(WorkflowEngine engine) {
-        // TODO Auto-generated method stub
-
+        // do nothing
     }
-
 }

@@ -17,16 +17,13 @@ import cws.core.WorkflowEvent;
  * This scheduler submits jobs to VMs on FCFS basis.
  * The ready jobs are inserted into VM queues for execution.
  * @author malawski
- * 
  */
-
 public class DAGSchedulerFCFS implements Scheduler, WorkflowEvent {
 
     private List<VM> vms;
 
     @Override
     public void scheduleJobs(WorkflowEngine engine) {
-
         Queue<Job> jobs = engine.getQueuedJobs();
         vms = engine.getAvailableVMs();
 
@@ -50,8 +47,6 @@ public class DAGSchedulerFCFS implements Scheduler, WorkflowEvent {
 
     @Override
     public void setWorkflowEngine(WorkflowEngine engine) {
-        // TODO Auto-generated method stub
-
+        // do nothing
     }
-
 }

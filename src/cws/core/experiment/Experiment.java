@@ -94,22 +94,6 @@ public class Experiment {
     }
 
     /**
-     * TODO(bryk): Why this method is not used?
-     * Helper method to read DAX or DAG file format.
-     * XML-based DAX seems to be 10x slower.
-     * @param file
-     * @return DAG object
-     */
-    private static DAG parse(File file) {
-        if (file.getName().endsWith("dag"))
-            return DAGParser.parseDAG(file);
-        else if (file.getName().endsWith("dax"))
-            return DAGParser.parseDAX(file);
-        else
-            throw new RuntimeException("Unrecognized file: " + file.getName());
-    }
-
-    /**
      * Generates a series of experiments for varying deadlines
      * @param runDirectory the directory with input and output files for this series
      * @param group prefix to prepend to generated output files
