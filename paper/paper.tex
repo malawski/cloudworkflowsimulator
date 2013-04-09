@@ -930,40 +930,39 @@ it is prevented from starting workflows late, which prevents it from packing
 tasks into the idle VM slots at the end of the schedule.
 
 
-%\subsection{Task Granularity}
-%\TODO{Should we remove this section?}
-%
-%In the last experiment we noted that, for Montage and CyberShake, the short
-%runtimes of their tasks made the dynamic algorithms perform better relative to
-%SPSS. In order to test this theory we adjusted the granularity of the tasks in
-%several Montage and CyberShake ensembles to see how this would affect the
-%relative performance of the algorithms. The granularity adjustment was
-%achieved by multiplying the runtime of each task by a fixed scaling factor.
+\subsection{Task Granularity}
 
-%Fig.~\ref{fig:stretching} shows the relative performance of the algorithms
-%as the scaling factor is increased from 1 to 16. The figure only shows results
-%for the CyberShake application with Pareto unsorted ensembles, but similar
-%results were found for other ensemble types for both Montage and CyberShake.
-%Each data point in the figure represents 500 simulations (5 ensembles with 10
-%budgets and 10 deadlines). The best scores percent was calculated the same way
-%as it was for Fig.~\ref{fig:distributions}.
+In the last experiment we noted that, for Montage and CyberShake, the short
+runtimes of their tasks made the dynamic algorithms perform better relative to
+SPSS. In order to test this theory we adjusted the granularity of the tasks in
+several Montage and CyberShake ensembles to see how this would affect the
+relative performance of the algorithms. The granularity adjustment was
+achieved by multiplying the runtime of each task by a fixed scaling factor.
 
-%The figure shows that, as the scaling factor increases beyond 2, the relative
-%performance of SPSS surpasses that of the dynamic algorithms. Similar results
-%were found for other ensemble types for both applications. This result
-%suggests that, in general, for fine-grained workflows the dynamic algorithms
-%will produce better scores, and for coarse-grained workflows SPSS will produce
-%better scores.
+Fig.~\ref{fig:stretching} shows the relative performance of the algorithms
+as the scaling factor is increased from 1 to 16. The figure only shows results
+for the CyberShake application with Pareto unsorted ensembles, but similar
+results were found for other ensemble types for both Montage and CyberShake.
+Each data point in the figure represents 500 simulations (5 ensembles with 10
+budgets and 10 deadlines). The best scores percent was calculated the same way
+as it was for Fig.~\ref{fig:distributions}.
 
-%\begin{figure}[tb]
- %   \centering
- %   \includegraphics[width=0.3\textwidth]{stretching_cybershake}
- %   \caption{Percentage of high scores achieved by each algorithm for Pareto 
- %   unsorted CyberShake ensembles when task runtime is scaled by a constant 
- %   factor. A scaling factor of $x$ means that the runtime of tasks in each 
- %   workflow was multiplied by $x$.}
-%    \label{fig:stretching}
-%\end{figure}
+The figure shows that, as the scaling factor increases beyond 2, the relative
+performance of SPSS surpasses that of the dynamic algorithms. Similar results
+were found for other ensemble types for both applications. This result
+suggests that, in general, for fine-grained workflows the dynamic algorithms
+will produce better scores, and for coarse-grained workflows SPSS will produce
+better scores.
+
+\begin{figure}[tb]
+    \centering
+    \includegraphics[width=0.3\textwidth]{stretching_cybershake}
+    \caption{Percentage of high scores achieved by each algorithm for Pareto 
+    unsorted CyberShake ensembles when task runtime is scaled by a constant 
+    factor. A scaling factor of $x$ means that the runtime of tasks in each 
+    workflow was multiplied by $x$.}
+    \label{fig:stretching}
+\end{figure}
 
 
 \subsection{Inaccurate Task Runtime Estimates}
