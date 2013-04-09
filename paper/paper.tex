@@ -1,6 +1,7 @@
-\documentclass[conference]{IEEEtran}
+\documentclass[preprint,12pt]{elsarticle}
+%\documentclass[final,1p,times,twocolumn]{elsarticle}
 \usepackage{fancyhdr}
-\usepackage[pdftex]{graphicx}
+\usepackage{graphicx}
 \graphicspath{{./figures/}}
 \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
 \usepackage[cmex10]{amsmath}
@@ -14,65 +15,29 @@
   {\Large \textcolor{red}{\textbf{TODO: }#1}}
 }
 
+\journal{Future Generation Computer Systems}
+
 \begin{document}
+
+\begin{frontmatter}
 
 % can use linebreaks \\ within to get better formatting as desired
 \title{Cost- and Deadline-Constrained Provisioning for Scientific Workflow
 Ensembles in IaaS Clouds}
 
+\author[agh]{Maciej Malawski}
+\ead{malawski@agh.edu.pl}
+\author[isi]{Gideon Juve}
+\ead{gideon@isi.edu}
+\author[isi]{Ewa Deelman}
+\ead{deelman@isi.edu}
+\author[nd]{Jarek Nabrzyski}
+\ead{naber@nd.edu}
 
-% IEEE Format
-\author{\IEEEauthorblockN{Maciej
-Malawski\IEEEauthorrefmark{1}\IEEEauthorrefmark{3}, Gideon
-Juve\IEEEauthorrefmark{2}, Ewa Deelman\IEEEauthorrefmark{2} and Jarek
-Nabrzyski\IEEEauthorrefmark{3}} 
-\IEEEauthorblockA{\IEEEauthorrefmark{1}AGH University of Science and
-Technology, Dept. of Computer Science, Krakow, Poland, Email:
-malawski@agh.edu.pl} 
-\IEEEauthorblockA{\IEEEauthorrefmark{2}USC Information Sciences Institute, 4676
-Admiralty Way, Marina del Rey, CA, USA, Email: \{gideon,deelman\}@isi.edu} 
-\IEEEauthorblockA{\IEEEauthorrefmark{3}University of Notre Dame, Center for
-Research Computing, 111 ITC, Notre Dame, IN, USA, Email: naber@nd.edu}
-}
+\address[agh]{AGH University of Science and Technology, Dept. of Computer Science, Krakow, Poland} 
+\address[isi]{USC Information Sciences Institute, 4676 Admiralty Way, Marina del Rey, CA, USA} 
+\address[nd]{University of Notre Dame, Center for Research Computing, 111 ITC, Notre Dame, IN, USA}
 
-% ACM Format
-%\numberofauthors{3}
-%\author{
-%    \alignauthor Maciej Malawski\\
-%       \affaddr{AGH University of Science and Technology}\\
-%       \affaddr{Dept. of Computer Science}\\
-%       \affaddr{Krakow, Poland; and}\\
-%       \affaddr{University of Notre Dame}\\
-%       \affaddr{Center for Research Computing}\\
-%       \affaddr{111 ITC, Notre Dame, IN, USA}\\
-%       \email{mmalawsk@nd.edu}
-%    \alignauthor Gideon Juve and Ewa Deelman\\
-%       \affaddr{USC Information Sciences Institute}\\
-%       \affaddr{4676 Admiralty Way}\\
-%       \affaddr{Marina del Rey, CA, USA}\\
-%       \email{\{gideon,deelman\}@isi.edu}
-%    \alignauthor Jarek Nabrzyski\\
-%       \affaddr{University of Notre Dame}\\
-%       \affaddr{Center for Research Computing}\\
-%       \affaddr{111 ITC, Notre Dame, IN, USA}\\
-%       \email{naber@nd.edu}
-%}
-
-\maketitle
- 
-\thispagestyle{fancy}
-\lhead{}
-\rhead{}
-\chead{}
-\lfoot{\footnotesize{
-SC12, November 10-16, 2012, Salt Lake City, Utah, USA
-\newline
-978-1-4673-0806-9/12/\$31.00 \copyright 2012 IEEE}}
-\rfoot{}
-\cfoot{}
-\renewcommand{\headrulewidth}{0pt}
-\renewcommand{\footrulewidth}{0pt}
- 
 \begin{abstract}
 
 Large-scale applications expressed as scientific workflows are
@@ -92,11 +57,11 @@ significantly improve the quality of solutions.
 
 \end{abstract}
 
-% IEEE does not have these
-%\category{H.3.4}{Systems and Software}{Distributed systems}
-%\category{D.4.8}{Performance}{Simulation}
-%\terms{DAG, Scheduling, Simulation}
-%\keywords{Scientific workflows, Workflow ensembles, Cloud computing, Infrastructure-as-a-Service}
+\begin{keyword}
+scientific workflows, workflow ensembles, cloud computing, resource provisioning
+\end{keyword}
+
+\end{frontmatter}
 
 \section{Introduction}
 \label{sec:intro}
@@ -1347,7 +1312,10 @@ by the EU FP7 projects UrbanFlood (248767) and VPH-Share (269978).
 %\bibliographystyle{abbrv}
 
 % IEEE style
-\bibliographystyle{IEEEtran}
+%\bibliographystyle{IEEEtran}
+
+% FGCS style
+\bibliographystyle{elsarticle-num}
 
 % This balances the columns by inserting a column break at the given reference
 %\IEEEtriggeratref{15}
