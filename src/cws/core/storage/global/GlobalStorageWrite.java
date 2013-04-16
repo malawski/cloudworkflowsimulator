@@ -1,11 +1,9 @@
 package cws.core.storage.global;
 
-import cws.core.storage.FileTransfer;
-
 /**
  * TODO(bryk): comment
  */
-public class GlobalStorageWrite extends FileTransfer {
+public class GlobalStorageWrite extends FileTransferTask {
     private long fileSize;
 
     public GlobalStorageWrite(String fileName, int listenerId, long fileSize) {

@@ -1,20 +1,19 @@
-package cws.core.storage;
+package cws.core.storage.global;
 
 /**
- * TODO(bryk) : comment
+ * TODO(bryk): comment
  */
-public abstract class FileTransfer {
+public abstract class FileTransferTask /* extends Task */{
     /**
      * Transferring file's name
      */
     private String fileName;
     /**
-     * After the transfer has finished this listener will be informed about this. <br>
-     * Event name: FILE_TRANSFER_COMPLETED
+     * Listener to which send events related to this transfer
      */
     private int listenerId;
 
-    public FileTransfer(String fileName, int listenerId) {
+    public FileTransferTask(String fileName, int listenerId) {
         this.fileName = fileName;
         this.listenerId = listenerId;
     }

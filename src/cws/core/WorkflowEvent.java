@@ -90,12 +90,22 @@ public interface WorkflowEvent {
     // ///////////////////////////////////////////////////////
     // STORAGE EVENTS
     // ///////////////////////////////////////////////////////
-    /** File transfer has completed */
-    int FILE_TRANSFER_COMPLETED = 25;
 
-    /** Send just before job's start */
-    int FILE_MANAGER_BEFORE_JOB_START = 26;
+    /** TODO */
+    int GLOBAL_STORAGE_START_READ = 23;
 
-    /** Send just after job has finished */
-    int FILE_MANAGER_AFTER_JOB_FINISH = 27;
+    /** TODO */
+    int GLOBAL_STORAGE_START_WRITE = 24;
+
+    /** TODO */
+    int GLOBAL_STORAGE_UPDATE_READ_PROGRESS = 25;
+
+    /** TODO */
+    int GLOBAL_STORAGE_UPDATE_WRITE_PROGRESS = 26;
+
+    /** TODO */
+    int GLOBAL_STORAGE_READ_FINISHED = 27;
+
+    /** TODO */
+    int GLOBAL_STORAGE_WRITE_FINISHED = 28;
 }
