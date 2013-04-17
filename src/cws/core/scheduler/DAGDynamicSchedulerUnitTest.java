@@ -15,34 +15,34 @@ import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.dag.Task;
+import cws.core.emulator.CloudEmulator;
 
 public class DAGDynamicSchedulerUnitTest {
 	DAGDynamicScheduler scheduler;
 	WorkflowEngine engine;
+	CloudEmulator emulator;
 	
 	Queue<Job> jobs;
-	Set<VM> freeVMs;
-	Set<VM> busyVMs;
-	
+	Set<VM> freeVMs;	
 	
 	@Before
 	public void setUp() throws Exception {
-		scheduler = new DAGDynamicScheduler();
+		emulator = mock(CloudEmulator.class);
+		
+		scheduler = new DAGDynamicScheduler(emulator);
 		engine = mock(WorkflowEngine.class);
 		scheduler.setWorkflowEngine(engine);
 		
 		jobs = new LinkedList<Job>();
 		freeVMs = new HashSet<VM>();
-		busyVMs = new HashSet<VM>();
 		
 		when(engine.getQueuedJobs()).thenReturn(jobs);
 		when(engine.getFreeVMs()).thenReturn(freeVMs);
-		when(engine.getBusyVMs()).thenReturn(busyVMs);
 	}
 
 	@Test
 	public void shouldDoNothingWithEmptyQueue() {
-		freeVMs.add(mock(VM.class));
+		freeVMs.add(createVMMock());
 		// empty queues
 		
 		Queue<Job> expected = jobs;
@@ -54,20 +54,12 @@ public class DAGDynamicSchedulerUnitTest {
 	@Test
 	public void shouldScheduleFirstJobIfOneVMAvailable() {
 		jobs.add(createJobMock());
-		freeVMs.add(mock(VM.class));
+		freeVMs.add(createVMMock());
 		
 		Queue<Job> expected = new LinkedList<Job>();
 		
 		scheduler.scheduleJobs(engine);
 		assertTrue(expected.equals(jobs));
-	}
-
-	private Job createJobMock() {
-		Task task = mock(Task.class);		
-		Job job = new Job(20.0);
-		job.setTask(task);
-		
-		return job;
 	}
 
 	@Test
@@ -79,5 +71,17 @@ public class DAGDynamicSchedulerUnitTest {
 		
 		scheduler.scheduleJobs(engine);		
 		assertTrue(expected.equals(jobs));
+	}
+	
+	private Job createJobMock() {
+		Task task = mock(Task.class);		
+		Job job = new Job(20.0);
+		job.setTask(task);
+		
+		return job;
+	}
+	
+	private VM createVMMock() {
+		return mock(VM.class);
 	}
 }

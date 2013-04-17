@@ -21,6 +21,7 @@ import cws.core.WorkflowEvent;
 import cws.core.algorithms.Algorithm;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
+import cws.core.emulator.CloudEmulator;
 import cws.core.experiment.AlgorithmFactory;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.Experiment;
@@ -42,7 +43,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
         SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner();
         provisioner.setCloud(cloud);
 
-        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
+        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(new CloudEmulator());
 
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
 

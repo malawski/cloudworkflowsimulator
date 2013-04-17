@@ -8,6 +8,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 
 import cws.core.Job;
 import cws.core.WorkflowEngine;
+import cws.core.emulator.CloudEmulator;
 
 /**
  * This scheduler submits workflow ensemble to VMs on FCFS basis.
@@ -19,7 +20,11 @@ import cws.core.WorkflowEngine;
 
 public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
 
-    /**
+    public EnsembleDynamicScheduler(CloudEmulator emulator) {
+		super(emulator);
+	}
+
+	/**
      * Compares jobs based on their priority
      */
     protected class JobComparator implements Comparator<Job> {
