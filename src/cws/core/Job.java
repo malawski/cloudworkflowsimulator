@@ -58,19 +58,17 @@ public class Job {
     /** Job result */
     private Result result;
 
-    public Job(DAGJob dagJob, Task task, int owner, double size) {
-        this(size);
-        setDAGJob(dagJob);
-        setTask(task);
-        setOwner(owner);
-    }
-
-    public Job(double size) {
+    public Job() {
         this.id = next_id++;
-        this.size = size;
         this.releaseTime = CloudSim.clock();
         this.state = State.QUEUED;
         this.result = Result.NONE;
+    }
+
+    public void execute() {
+        setStartTime(CloudSim.clock());
+        setState(Job.State.RUNNING);
+        task.execute(this);
     }
 
     public int getID() {

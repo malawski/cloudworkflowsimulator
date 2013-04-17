@@ -1,7 +1,15 @@
 package cws.core.dag;
 
+import static cws.core.WorkflowEvent.JOB_FINISHED;
+import static cws.core.WorkflowEvent.JOB_STARTED;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.core.CloudSim;
+
+import cws.core.Job;
 
 /**
  * 
@@ -106,5 +114,31 @@ public class Task {
 
     public void setOutputFiles(List<String> outputs) {
         this.outputFiles = outputs;
+    }
+
+    public void execute(Job job) {
+        // Tell the owner
+        CloudSim.send(job.getVM().getId(), job.getOwner(), 0.0, JOB_STARTED, job);
+
+        // Compute the duration of the job on this VM
+        double size = getSize();
+        double predictedRuntime = size / job.getVM().getMIPS();
+
+        // Compute actual runtime
+        double actualRuntime = job.getVM().getRuntimeDistribution().getActualRuntime(predictedRuntime);
+
+        // Decide whether the job succeeded or failed
+        if (job.getVM().getFailureModel().failureOccurred()) {
+            job.setResult(Job.Result.FAILURE);
+
+            // How long did it take to fail?
+            actualRuntime = job.getVM().getFailureModel().runtimeBeforeFailure(actualRuntime);
+        } else {
+            job.setResult(Job.Result.SUCCESS);
+        }
+
+        CloudSim.send(job.getVM().getId(), job.getVM().getId(), actualRuntime, JOB_FINISHED, job);
+        Log.printLine(CloudSim.clock() + " Starting job " + job.getID() + " on VM " + job.getVM().getId()
+                + " duration " + actualRuntime);
     }
 }

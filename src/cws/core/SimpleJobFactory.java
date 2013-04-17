@@ -20,7 +20,7 @@ public class SimpleJobFactory implements JobFactory {
 
     @Override
     public Job createJob(DAGJob dagJob, Task task, int owner) {
-        Job j = new Job(task.getSize() * scale);
+        Job j = new Job();
         j.setDAGJob(dagJob);
         j.setTask(task);
         j.setOwner(owner);

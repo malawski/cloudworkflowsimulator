@@ -342,35 +342,8 @@ public class VM extends SimEntity implements WorkflowEvent {
     }
 
     private void jobStart(Job job) {
-        // The job is now running
-        job.setStartTime(CloudSim.clock());
-        job.setState(Job.State.RUNNING);
-        // add it to the running set
         runningJobs.add(job);
-
-        // Tell the owner
-        send(job.getOwner(), 0.0, JOB_STARTED, job);
-
-        // Compute the duration of the job on this VM
-        double size = job.getSize();
-        double predictedRuntime = size / mips;
-
-        // Compute actual runtime
-        double actualRuntime = this.runtimeDistribution.getActualRuntime(predictedRuntime);
-
-        // Decide whether the job succeeded or failed
-        if (failureModel.failureOccurred()) {
-            job.setResult(Job.Result.FAILURE);
-
-            // How long did it take to fail?
-            actualRuntime = failureModel.runtimeBeforeFailure(actualRuntime);
-        } else {
-            job.setResult(Job.Result.SUCCESS);
-        }
-
-        send(getId(), actualRuntime, JOB_FINISHED, job);
-        Log.printLine(CloudSim.clock() + " Starting job " + job.getID() + " on VM " + job.getVM().getId()
-                + " duration " + actualRuntime);
+        job.execute();
 
         // One core is now busy running the job
         idleCores--;
