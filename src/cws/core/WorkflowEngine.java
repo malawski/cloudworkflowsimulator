@@ -213,19 +213,22 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         // If the job succeeded
         if (j.getResult() == Job.Result.SUCCESS && CloudSim.clock() <= deadline) {
 
-            // Mark the task as complete in the DAG
-            dj.completeTask(t);
+        	// FIXME: temporary hack - when data transfer job
+        	if(dj != null) {
+        		// Mark the task as complete in the DAG
+                dj.completeTask(t);
 
-            // Queue any jobs that are now ready
-            queueReadyJobs(dj);
+                // Queue any jobs that are now ready
+                queueReadyJobs(dj);
 
-            // If the workflow is complete, send it back
-            if (dj.isFinished()) {
-                dags.remove(dj);
-                sendNow(dj.getOwner(), DAG_FINISHED, dj);
-            }
+                // If the workflow is complete, send it back
+                if (dj.isFinished()) {
+                    dags.remove(dj);
+                    sendNow(dj.getOwner(), DAG_FINISHED, dj);
+                }
+        	}
 
-            Log.printLine(CloudSim.clock() + " Job " + j.getID() + " finished on VM " + j.getVM().getId());
+        	Log.printLine(CloudSim.clock() + " Job " + j.getTask().getId()+ " finished on VM " + j.getVM().getId());
             VM vm = j.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))
@@ -235,7 +238,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         // If the job failed
         if (j.getResult() == Job.Result.FAILURE) {
             // Retry the job
-            Log.printLine(CloudSim.clock() + " Job " + j.getID() + " failed on VM " + j.getVM().getId()
+            Log.printLine(CloudSim.clock() + " Job " + j.getTask().getId() + " failed on VM " + j.getVM().getId()
                     + " resubmitting...");
             Job retry = jobFactory.createJob(dj, t, getId());
             VM vm = j.getVM();

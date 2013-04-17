@@ -37,27 +37,36 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
     public void scheduleJobs(WorkflowEngine engine) {
 
         // check the deadline constraints (provisioner takes care about budget)
-
         double deadline = engine.getDeadline();
         double time = CloudSim.clock();
 
         // stop scheduling any new jobs if we are over deadline
-        if (time >= deadline) {
+        if (isDeadlineExceeded(deadline, time)) {
             return;
         }
 
         Queue<Job> jobs = engine.getQueuedJobs();
 
-        // move all jobs to priority queue
-        prioritizedJobs.addAll(jobs);
-        jobs.clear();
+        moveAllJobsToPriorityQueue(jobs);
 
         // use prioritized list for scheduling
         scheduleQueue(prioritizedJobs, engine);
 
-        // update queue length for the provisioner
-        engine.setQueueLength(prioritizedJobs.size());
+        updateQueueLengthForProvisioner(engine);
 
     }
+
+	private void updateQueueLengthForProvisioner(WorkflowEngine engine) {
+		engine.setQueueLength(prioritizedJobs.size());
+	}
+
+	private void moveAllJobsToPriorityQueue(Queue<Job> jobs) {
+		prioritizedJobs.addAll(jobs);
+        jobs.clear();
+	}
+
+	private boolean isDeadlineExceeded(double deadline, double time) {
+		return time >= deadline;
+	}
 
 }

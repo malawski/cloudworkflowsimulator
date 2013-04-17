@@ -369,7 +369,7 @@ public class VM extends SimEntity implements WorkflowEvent {
         }
 
         send(getId(), actualRuntime, JOB_FINISHED, job);
-        Log.printLine(CloudSim.clock() + " Starting job " + job.getID() + " on VM " + job.getVM().getId()
+        Log.printLine(CloudSim.clock() + " Starting job " + job.getTask().getId() + " on VM " + job.getVM().getId()
                 + " duration " + actualRuntime);
 
         // One core is now busy running the job
