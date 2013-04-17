@@ -1,4 +1,4 @@
-package cws.core.storage;
+package cws.core.storage.global;
 
 import java.util.Random;
 
@@ -6,17 +6,15 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
 
-import cws.core.Job;
 import cws.core.SimEntityStub;
 import cws.core.WorkflowEvent;
-import cws.core.storage.global.GlobalStorageManager;
 
 /**
  * Tests {@link StorageManager}.
  */
 public class SimpleStorageManagerTest {
     private Random random;
-    private StorageManager storageManager;
+    private GlobalStorageManager storageManager;
 
     @Before
     public void before() {
@@ -35,8 +33,7 @@ public class SimpleStorageManagerTest {
         CloudSim.addEntity(new SimEntityStub() {
             @Override
             public void startEntity() {
-                send(storageManager.getId(), random.nextDouble(), WorkflowEvent.GLOBAL_STORAGE_START_READ, new Job(
-                        100));
+                send(storageManager.getId(), random.nextDouble(), WorkflowEvent.GLOBAL_STORAGE_START_READ, null);
             }
         });
         CloudSim.startSimulation();
