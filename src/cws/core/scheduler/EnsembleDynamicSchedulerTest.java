@@ -20,6 +20,7 @@ import cws.core.WorkflowEvent;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
+import cws.core.emulator.CloudEmulator;
 import cws.core.log.WorkflowLog;
 
 public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
@@ -29,7 +30,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         CloudSim.init(1, null, false);
 
         Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
+        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(new CloudEmulator());
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
         Cloud cloud = new Cloud();
 
@@ -54,7 +55,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         CloudSim.init(1, null, false);
 
         Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
+        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(new CloudEmulator());
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
         Cloud cloud = new Cloud();
 
@@ -93,7 +94,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         CloudSim.init(1, null, false);
 
         Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
+        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(new CloudEmulator());
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
         Cloud cloud = new Cloud();
 
@@ -128,7 +129,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         CloudSim.init(1, null, false);
 
         Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
+        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(new CloudEmulator());
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
         Cloud cloud = new Cloud();
 

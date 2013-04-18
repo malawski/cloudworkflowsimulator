@@ -11,8 +11,10 @@ import cws.core.DAGJob;
 import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
+import cws.core.WorkflowEvent;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
+import cws.core.emulator.CloudEmulator;
 
 /**
  * This scheduler submits workflow ensemble to VMs on FCFS basis.
@@ -22,7 +24,12 @@ import cws.core.dag.Task;
  * @author malawski
  */
 public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
-    private Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
+	
+    public WorkflowAwareEnsembleScheduler(CloudEmulator emulator) {
+		super(emulator);
+	}
+
+	private Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
     private Set<DAGJob> rejectedDAGs = new HashSet<DAGJob>();
 
     @Override
@@ -90,7 +97,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
             freeVMs.remove(vm); // remove VM from free set
             busyVMs.add(vm); // add vm to busy set
             Log.printLine(CloudSim.clock() + " Submitting job " + job.getID() + " to VM " + job.getVM().getId());
-            CloudSim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);
+            CloudSim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
         }
     }
 

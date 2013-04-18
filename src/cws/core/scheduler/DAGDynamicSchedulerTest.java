@@ -20,16 +20,17 @@ import cws.core.WorkflowEvent;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
+import cws.core.emulator.CloudEmulator;
 import cws.core.log.WorkflowLog;
 
-public class DAGDynamicSchedulerTest implements WorkflowEvent {
+public class DAGDynamicSchedulerTest {
 
     @Test
     public void testScheduleVMS() {
         CloudSim.init(1, null, false);
 
         Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new DAGDynamicScheduler();
+        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(new CloudEmulator());
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
         Cloud cloud = new Cloud();
 
@@ -39,7 +40,7 @@ public class DAGDynamicSchedulerTest implements WorkflowEvent {
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
-            CloudSim.send(engine.getId(), cloud.getId(), 0.1, VM_LAUNCH, vm);
+            CloudSim.send(engine.getId(), cloud.getId(), 0.1, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         CloudSim.startSimulation();
@@ -54,7 +55,7 @@ public class DAGDynamicSchedulerTest implements WorkflowEvent {
         CloudSim.init(1, null, false);
 
         Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new DAGDynamicScheduler();
+        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(new CloudEmulator());
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
         Cloud cloud = new Cloud();
 
@@ -65,7 +66,7 @@ public class DAGDynamicSchedulerTest implements WorkflowEvent {
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0);
             vms.add(vm);
-            CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         DAG dag = new DAG();
@@ -93,7 +94,7 @@ public class DAGDynamicSchedulerTest implements WorkflowEvent {
         CloudSim.init(1, null, false);
 
         Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new DAGDynamicScheduler();
+        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(new CloudEmulator());
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
         Cloud cloud = new Cloud();
 
@@ -104,7 +105,7 @@ public class DAGDynamicSchedulerTest implements WorkflowEvent {
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0);
             vms.add(vm);
-            CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         DAG dag = DAGParser.parseDAG(new File("dags/CyberShake_100.dag"));
