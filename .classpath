@@ -11,5 +11,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/cloudworkflowsimulator/lib/commons-io-2.4-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/mockito-all-1.9.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
