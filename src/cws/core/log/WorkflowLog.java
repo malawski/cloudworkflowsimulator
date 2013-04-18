@@ -77,12 +77,20 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 
             if (job.getState() == Job.State.TERMINATED && job.getResult() == Job.Result.SUCCESS) {
                 pw.print("SUCCESS");
+                
+                //FIXME: temporary hack - detecting data transfer job
+                if(job.getDAGJob() == null) continue;
 
                 pw.println(indent + indent + job.getDAGJob().getPriority() + indent + indent + indent
                         + job.getVM().getId() + indent + indent + dft.format(job.getDuration()) + indent + indent
                         + dft.format(job.getStartTime()) + indent + indent + dft.format(job.getFinishTime()));
             } else {
                 pw.print("FAILED");
+                
+
+                //FIXME: temporary hack - detecting data transfer job
+                if(job.getDAGJob() == null) continue;
+                
                 pw.println(indent + indent + job.getDAGJob().getPriority() + indent + indent + indent
                         + job.getVM().getId() + indent + indent + dft.format(job.getDuration()) + indent + indent
                         + dft.format(job.getStartTime()) + indent + indent + dft.format(job.getFinishTime()));
