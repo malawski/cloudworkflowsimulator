@@ -4,9 +4,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
 
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 
 /**
@@ -15,7 +16,7 @@ import cws.core.dag.DAG;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class EnsembleManager extends SimEntity implements WorkflowEvent {
+public class EnsembleManager extends CWSSimEntity implements WorkflowEvent {
     /** List of all DAGs remaining to be executed */
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
 
@@ -25,8 +26,8 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
     /** Workflow engine that will receive DAGs for execution */
     private WorkflowEngine engine = null;
 
-    public EnsembleManager(Collection<DAG> dags, WorkflowEngine engine) {
-        super("EnsembleManager");
+    public EnsembleManager(Collection<DAG> dags, WorkflowEngine engine, CloudSimWrapper cloudsim) {
+        super("EnsembleManager", cloudsim);
         this.engine = engine;
         this.dags = new LinkedList<DAGJob>();
         this.listeners = new LinkedList<DAGJobListener>();
@@ -34,8 +35,8 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
         CloudSim.addEntity(this);
     }
 
-    public EnsembleManager(WorkflowEngine engine) {
-        this(null, engine);
+    public EnsembleManager(WorkflowEngine engine, CloudSimWrapper cloudsim) {
+        this(null, engine, cloudsim);
     }
 
     private void prioritizeDAGs(Collection<DAG> dags) {
@@ -68,7 +69,7 @@ public class EnsembleManager extends SimEntity implements WorkflowEvent {
     }
 
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
         case DAG_STARTED:
             dagStarted((DAGJob) ev.getData());

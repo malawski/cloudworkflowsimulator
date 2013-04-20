@@ -11,9 +11,8 @@ import cws.core.Job;
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
-
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
-import cws.core.emulator.CloudEmulator;
 
 /**
  * This scheduler submits jobs to VMs on FCFS basis.
@@ -22,9 +21,9 @@ import cws.core.emulator.CloudEmulator;
  */
 public class DAGDynamicScheduler implements Scheduler {
 	
-	private CloudEmulator  emulator;
+	private CloudSimWrapper  emulator;
 	
-    public DAGDynamicScheduler(CloudEmulator emulator) {
+    public DAGDynamicScheduler(CloudSimWrapper emulator) {
 		this.emulator = emulator;
 	}
 

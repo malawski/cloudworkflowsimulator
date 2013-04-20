@@ -6,11 +6,12 @@ import java.util.Set;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.transfer.Port;
 
@@ -37,7 +38,7 @@ import cws.core.transfer.Port;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class VM extends SimEntity implements WorkflowEvent {
+public class VM extends CWSSimEntity implements WorkflowEvent {
 
     private static int next_id = 0;
 
@@ -102,8 +103,8 @@ public class VM extends SimEntity implements WorkflowEvent {
     /** Varies the failure rate of tasks according to a specified distribution */
     private FailureModel failureModel = new FailureModel(0, 0.0);
 
-    public VM(int mips, int cores, double bandwidth, double price) {
-        super("VM" + (next_id++));
+    public VM(int mips, int cores, double bandwidth, double price, CloudSimWrapper cloudsim) {
+        super("VM" + (next_id++), cloudsim);
         this.mips = mips;
         this.cores = cores;
         this.inputPort = new Port(bandwidth);
@@ -266,7 +267,7 @@ public class VM extends SimEntity implements WorkflowEvent {
     }
 
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
         case VM_LAUNCH:
             launchVM();

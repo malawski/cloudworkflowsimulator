@@ -6,16 +6,15 @@ import static cws.core.WorkflowEvent.GLOBAL_STORAGE_START_WRITE;
 import static cws.core.WorkflowEvent.GLOBAL_STORAGE_UPDATE_READ_PROGRESS;
 import static cws.core.WorkflowEvent.GLOBAL_STORAGE_UPDATE_WRITE_PROGRESS;
 import static cws.core.WorkflowEvent.GLOBAL_STORAGE_WRITE_FINISHED;
-
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
-
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.exception.UnknownWorkflowEventException;
 
 /**
  * TODO(bryk): comment
  */
-public class GlobalStorageManager extends SimEntity {
+public class GlobalStorageManager extends CWSSimEntity {
     /**
      * Average read speed of the storage.
      * TODO(bryk): randomize under some distribution r/w speeds.
@@ -31,17 +30,17 @@ public class GlobalStorageManager extends SimEntity {
     /**
      * Initializes GlobalStorageManager with the appropriate parameters. Check their documentation for more information.
      */
-    public GlobalStorageManager(double readSpeed, double writeSpeed) {
-        super("GlobalStorageManager");
+    public GlobalStorageManager(double readSpeed, double writeSpeed, CloudSimWrapper cloudsim) {
+        super("GlobalStorageManager", cloudsim);
         this.readSpeed = readSpeed;
         this.writeSpeed = writeSpeed;
     }
 
     /**
-     * @see SimEntity#processEvent(SimEvent)
+     * @see CWSSimEntity#processEvent(CWSSimEvent)
      */
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
         case GLOBAL_STORAGE_START_READ:
             onStartRead((GlobalStorageRead) ev.getData());

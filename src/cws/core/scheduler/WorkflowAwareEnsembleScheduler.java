@@ -12,9 +12,9 @@ import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
-import cws.core.emulator.CloudEmulator;
 
 /**
  * This scheduler submits workflow ensemble to VMs on FCFS basis.
@@ -25,7 +25,7 @@ import cws.core.emulator.CloudEmulator;
  */
 public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 	
-    public WorkflowAwareEnsembleScheduler(CloudEmulator emulator) {
+    public WorkflowAwareEnsembleScheduler(CloudSimWrapper emulator) {
 		super(emulator);
 	}
 

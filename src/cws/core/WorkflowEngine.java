@@ -8,9 +8,10 @@ import java.util.Set;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
 
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 
 /**
@@ -19,7 +20,7 @@ import cws.core.dag.Task;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class WorkflowEngine extends SimEntity implements WorkflowEvent {
+public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
     public static int next_id = 0;
 
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
@@ -79,16 +80,16 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
      */
     double budget = Double.MAX_VALUE;
 
-    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler) {
-        super("WorkflowEngine" + (next_id++));
+    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler, CloudSimWrapper cloudsim) {
+        super("WorkflowEngine" + (next_id++), cloudsim);
         this.jobFactory = jobFactory;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
         CloudSim.addEntity(this);
     }
 
-    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler) {
-        this(new SimpleJobFactory(), provisioner, scheduler);
+    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, CloudSimWrapper cloudsim) {
+        this(new SimpleJobFactory(), provisioner, scheduler, cloudsim);
     }
 
     @Override
@@ -99,7 +100,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
     }
 
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
         case VM_LAUNCHED:
             vmLaunched((VM) ev.getData());

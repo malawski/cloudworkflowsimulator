@@ -1,6 +1,6 @@
 package cws.core.scheduler;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.Cloud;
@@ -18,12 +19,20 @@ import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.log.WorkflowLog;
 
 public class DAGSchedulerFCFSTest implements WorkflowEvent {
+    private CloudSimWrapper cloudsim;
+
+    @Before
+    public void setUp() {
+        // TODO(_mequrel_): change to IoC in the future or to mock
+        cloudsim = new CloudSimWrapper();
+    }
 
     @Test
     public void testScheduleVMS() {
@@ -31,12 +40,12 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 
         Provisioner provisioner = null;
         Scheduler scheduler = new DAGSchedulerFCFS();
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
-        Cloud cloud = new Cloud();
+        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
+        Cloud cloud = new Cloud(cloudsim);
 
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VM vm = new VM(1000, 1, 1.0, 1.0);
+            VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
@@ -56,8 +65,8 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 
         Provisioner provisioner = null;
         Scheduler scheduler = new DAGSchedulerFCFS();
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
-        Cloud cloud = new Cloud();
+        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
+        Cloud cloud = new Cloud(cloudsim);
 
         WorkflowLog jobLog = new WorkflowLog();
 
@@ -65,7 +74,7 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VM vm = new VM(1000, 1, 1.0, 1.0);
+            VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
             vms.add(vm);
             CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
         }
@@ -79,7 +88,8 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
         List<DAG> dags = new ArrayList<DAG>();
         dags.add(dag);
 
-        new EnsembleManager(dags, engine);
+        // FIXME (_mequrel): looks awkward, a comment should be added or some logic inversed
+        new EnsembleManager(dags, engine, cloudsim);
 
         CloudSim.startSimulation();
 
@@ -96,8 +106,8 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 
         Provisioner provisioner = null;
         Scheduler scheduler = new DAGSchedulerFCFS();
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
-        Cloud cloud = new Cloud();
+        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
+        Cloud cloud = new Cloud(cloudsim);
 
         WorkflowLog jobLog = new WorkflowLog();
 
@@ -105,7 +115,7 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
 
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VM vm = new VM(1000, 1, 1.0, 1.0);
+            VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
             vms.add(vm);
             CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
         }
@@ -115,7 +125,8 @@ public class DAGSchedulerFCFSTest implements WorkflowEvent {
         List<DAG> dags = new ArrayList<DAG>();
         dags.add(dag);
 
-        new EnsembleManager(dags, engine);
+        // FIXME (_mequrel): looks awkward, a comment should be added or some logic inversed
+        new EnsembleManager(dags, engine, cloudsim);
 
         CloudSim.startSimulation();
 

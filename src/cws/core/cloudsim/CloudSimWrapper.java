@@ -1,4 +1,4 @@
-package cws.core.emulator;
+package cws.core.cloudsim;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -8,7 +8,7 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 
-public class CloudEmulator {
+public class CloudSimWrapper {
 
 	public void submitJob(WorkflowEngine engine, VM vm, Job job) {
 		Log.printLine(CloudSim.clock() + " Submitting job " + job.getTask().getId() + " to VM " + job.getVM().getId());

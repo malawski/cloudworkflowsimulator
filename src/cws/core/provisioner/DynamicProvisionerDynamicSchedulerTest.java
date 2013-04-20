@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.Cloud;
@@ -19,9 +20,9 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.algorithms.Algorithm;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
-import cws.core.emulator.CloudEmulator;
 import cws.core.experiment.AlgorithmFactory;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.Experiment;
@@ -34,18 +35,26 @@ import cws.core.scheduler.EnsembleDynamicScheduler;
 public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
     private String dagPath = "dags/";
 
+    private CloudSimWrapper cloudsim;
+
+    @Before
+    public void setUp() {
+        // TODO(_mequrel_): change to IoC in the future or to mock
+        cloudsim = new CloudSimWrapper();
+    }
+
     @Test
     public void testProvisionerScheduleDag100x10() {
         CloudSim.init(1, null, false);
 
-        Cloud cloud = new Cloud();
+        Cloud cloud = new Cloud(cloudsim);
 
         SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner();
         provisioner.setCloud(cloud);
 
-        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(new CloudEmulator());
+        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(new CloudSimWrapper());
 
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
+        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
 
         WorkflowLog wfLog = new WorkflowLog();
         engine.addJobListener(wfLog);
@@ -56,7 +65,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VM vm = new VM(1000, 1, 1.0, 1.0);
+            VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
@@ -70,7 +79,8 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
             dags.add(dag);
         }
 
-        new EnsembleManager(dags, engine);
+        // FIXME (_mequrel): looks awkward, a comment should be added or some logic inversed
+        new EnsembleManager(dags, engine, cloudsim);
 
         CloudSim.startSimulation();
 

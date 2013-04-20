@@ -14,20 +14,20 @@ import org.junit.Test;
 import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
-import cws.core.emulator.CloudEmulator;
 
 public class DAGDynamicSchedulerUnitTest {
 	DAGDynamicScheduler scheduler;
 	WorkflowEngine engine;
-	CloudEmulator emulator;
+	CloudSimWrapper emulator;
 	
 	Queue<Job> jobs;
 	Set<VM> freeVMs;	
 	
 	@Before
 	public void setUp() throws Exception {
-		emulator = mock(CloudEmulator.class);
+		emulator = mock(CloudSimWrapper.class);
 		
 		scheduler = new DAGDynamicScheduler(emulator);
 		engine = mock(WorkflowEngine.class);

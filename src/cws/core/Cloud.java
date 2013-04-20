@@ -3,9 +3,10 @@ package cws.core;
 import java.util.HashSet;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
 
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.exception.UnknownWorkflowEventException;
 
 /**
@@ -14,15 +15,15 @@ import cws.core.exception.UnknownWorkflowEventException;
  *
  * @author Gideon Juve <juve@usc.edu>
  */
-public class Cloud extends SimEntity implements WorkflowEvent {
+public class Cloud extends CWSSimEntity implements WorkflowEvent {
     
     /** The set of currently active VMs */
     private HashSet<VM> vms = new HashSet<VM>();
     
     private HashSet<VMListener> vmListeners = new HashSet<VMListener>();
     
-    public Cloud() {
-        super("Cloud");
+    public Cloud(CloudSimWrapper cloudsim) {
+        super("Cloud", cloudsim);
         CloudSim.addEntity(this);
     }
     
@@ -40,7 +41,7 @@ public class Cloud extends SimEntity implements WorkflowEvent {
     }
 
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(CWSSimEvent ev) {
         switch(ev.getTag()) {
             case VM_LAUNCH:
                 launchVM(ev.getSource(), (VM)ev.getData());

@@ -5,24 +5,25 @@ import java.util.List;
 import java.util.Random;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
 import org.junit.Test;
 
 import cws.core.WorkflowEvent;
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 
 public class TestRandomTransferManager {
     public static final long KB = 1024;
     public static final long MB = 1024 * KB;
     public static final long GB = 1024 * MB;
 
-    private class TransferDriver extends SimEntity implements WorkflowEvent {
+    private class TransferDriver extends CWSSimEntity implements WorkflowEvent {
         private TransferManager tm;
         private List<Transfer> transfers;
 
-        public TransferDriver() {
-            super("TransferDriver");
-            this.tm = new TransferManager();
+        public TransferDriver(CloudSimWrapper cloudsim) {
+            super("TransferDriver", cloudsim);
+            this.tm = new TransferManager(cloudsim);
             CloudSim.addEntity(this);
         }
 
@@ -40,7 +41,7 @@ public class TestRandomTransferManager {
         }
 
         @Override
-        public void processEvent(SimEvent ev) {
+        public void processEvent(CWSSimEvent ev) {
         }
 
         @Override
@@ -54,7 +55,8 @@ public class TestRandomTransferManager {
 
         Random rng = new Random(7);
 
-        TransferDriver td = new TransferDriver();
+        // TODO(_mequrel_): change to IoC in the future
+        TransferDriver td = new TransferDriver(new CloudSimWrapper());
 
         Port a = new Port(1000);
         Port[] b = new Port[4];

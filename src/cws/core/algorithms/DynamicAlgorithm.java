@@ -12,6 +12,7 @@ import cws.core.DAGJob;
 import cws.core.DAGJobListener;
 import cws.core.EnsembleManager;
 import cws.core.Job;
+import cws.core.Job.Result;
 import cws.core.JobListener;
 import cws.core.Provisioner;
 import cws.core.Scheduler;
@@ -20,7 +21,7 @@ import cws.core.VM;
 import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
-import cws.core.Job.Result;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.experiment.VMFactory;
 import cws.core.log.WorkflowLog;
@@ -81,11 +82,14 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     public void simulate(String logname) {
         CloudSim.init(1, null, false);
 
-        Cloud cloud = new Cloud();
+        // TODO(_mequrel_): change to IoC in the future
+        Cloud cloud = new Cloud(new CloudSimWrapper());
         cloud.addVMListener(this);
         provisioner.setCloud(cloud);
 
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
+        // TODO(_mequrel_): change to IoC in the future
+        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler,
+                new CloudSimWrapper());
         engine.setDeadline(getDeadline());
         engine.setBudget(getBudget());
 
@@ -93,7 +97,8 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
         scheduler.setWorkflowEngine(engine);
 
-        EnsembleManager em = new EnsembleManager(getDAGs(), engine);
+        // TODO(_mequrel_): change to IoC in the future
+        EnsembleManager em = new EnsembleManager(getDAGs(), engine, new CloudSimWrapper());
         em.addDAGJobListener(this);
 
         WorkflowLog log = null;

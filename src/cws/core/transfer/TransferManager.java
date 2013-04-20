@@ -6,10 +6,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
 
 import cws.core.WorkflowEvent;
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.exception.UnknownWorkflowEventException;
 
 /**
@@ -44,7 +45,7 @@ import cws.core.exception.UnknownWorkflowEventException;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class TransferManager extends SimEntity implements WorkflowEvent {
+public class TransferManager extends CWSSimEntity implements WorkflowEvent {
     /** Conversion constant for milliseconds to seconds */
     public static final double MSEC_TO_SEC = 1.0 / 1000.0;
 
@@ -54,8 +55,8 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
     /** Listeners for transfer events */
     private HashSet<TransferListener> listeners;
 
-    public TransferManager() {
-        super("TransferManager");
+    public TransferManager(CloudSimWrapper cloudsim) {
+        super("TransferManager", cloudsim);
         CloudSim.addEntity(this);
         activeTransfers = new HashSet<Transfer>();
         listeners = new HashSet<TransferListener>();
@@ -75,7 +76,7 @@ public class TransferManager extends SimEntity implements WorkflowEvent {
     }
 
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
         case NEW_TRANSFER:
             newTransfer((Transfer) ev.getData());

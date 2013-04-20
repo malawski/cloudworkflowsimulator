@@ -16,6 +16,7 @@ import cws.core.DAGJob;
 import cws.core.DAGJobListener;
 import cws.core.EnsembleManager;
 import cws.core.Job;
+import cws.core.Job.Result;
 import cws.core.JobListener;
 import cws.core.Provisioner;
 import cws.core.Scheduler;
@@ -23,7 +24,7 @@ import cws.core.VM;
 import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
-import cws.core.Job.Result;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -455,9 +456,12 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     public void simulate(String logname) {
         CloudSim.init(1, null, false);
 
-        Cloud cloud = new Cloud();
-        WorkflowEngine engine = new WorkflowEngine(this, this);
-        EnsembleManager manager = new EnsembleManager(engine);
+        // TODO(_mequrel_): change to IoC in the future
+        Cloud cloud = new Cloud(new CloudSimWrapper());
+        // TODO(_mequrel_): change to IoC in the future
+        WorkflowEngine engine = new WorkflowEngine(this, this, new CloudSimWrapper());
+        // TODO(_mequrel_): change to IoC in the future
+        EnsembleManager manager = new EnsembleManager(engine, new CloudSimWrapper());
 
         setCloud(cloud);
         setEnsembleManager(manager);
