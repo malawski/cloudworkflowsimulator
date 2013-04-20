@@ -368,10 +368,9 @@ public class VM extends CWSSimEntity {
         }
 
         send(getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
-        getCloudsim().log(
-                " Starting job " + job.getTask().getId() + " on VM "
-                + job.getVM().getId()
-                + " duration " + actualRuntime);
+         getCloudsim().log(
+                " Starting job " + job.getID() + " on VM " + job.getVM().getId()
+         + " duration " + actualRuntime);
 
         // One core is now busy running the job
         idleCores--;
