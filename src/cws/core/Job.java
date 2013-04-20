@@ -1,7 +1,5 @@
 package cws.core;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-
 import cws.core.dag.Task;
 
 /**
@@ -58,17 +56,17 @@ public class Job {
     /** Job result */
     private Result result;
 
-    public Job(DAGJob dagJob, Task task, int owner, double size) {
-        this(size);
+    public Job(DAGJob dagJob, Task task, int owner, double size, double releaseTime) {
+        this(size, releaseTime);
         setDAGJob(dagJob);
         setTask(task);
         setOwner(owner);
     }
 
-    public Job(double size) {
+    public Job(double size, double releaseTime) {
         this.id = next_id++;
         this.size = size;
-        this.releaseTime = CloudSim.clock();
+        this.releaseTime = releaseTime;
         this.state = State.QUEUED;
         this.result = Result.NONE;
     }

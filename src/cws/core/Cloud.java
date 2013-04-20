@@ -2,8 +2,6 @@ package cws.core;
 
 import java.util.HashSet;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -24,7 +22,7 @@ public class Cloud extends CWSSimEntity implements WorkflowEvent {
     
     public Cloud(CloudSimWrapper cloudsim) {
         super("Cloud", cloudsim);
-        CloudSim.addEntity(this);
+        cloudsim.addEntity(this);
     }
     
     public void addVMListener(VMListener l) {
@@ -68,7 +66,7 @@ public class Cloud extends CWSSimEntity implements WorkflowEvent {
     private void launchVM(int owner, VM vm) {
         vm.setOwner(owner);
         vm.setCloud(getId());
-        vm.setLaunchTime(CloudSim.clock());
+        vm.setLaunchTime(getCloudsim().clock());
         vms.add(vm);
         
         // We launch the VM now...
@@ -112,7 +110,7 @@ public class Cloud extends CWSSimEntity implements WorkflowEvent {
             throw new RuntimeException("Unknown VM");
         }
         
-        vm.setTerminateTime(CloudSim.clock());
+        vm.setTerminateTime(getCloudsim().clock());
         vms.remove(vm);
         
         // Listeners find out

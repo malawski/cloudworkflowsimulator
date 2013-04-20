@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import org.cloudbus.cloudsim.Log;
+
 import cws.core.Job;
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
+import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 
@@ -21,11 +24,16 @@ import cws.core.dag.Task;
  */
 public class DAGDynamicScheduler implements Scheduler {
 	
-	private CloudSimWrapper  emulator;
+    private CloudSimWrapper cloudsim;
 	
-    public DAGDynamicScheduler(CloudSimWrapper emulator) {
-		this.emulator = emulator;
+    public DAGDynamicScheduler(CloudSimWrapper cloudsim) {
+		this.cloudsim = cloudsim;
 	}
+
+    @Override
+    public void setWorkflowEngine(WorkflowEngine engine) {
+        // do nothing
+    }
 
 	@Override
     public void scheduleJobs(WorkflowEngine engine) {
@@ -33,6 +41,10 @@ public class DAGDynamicScheduler implements Scheduler {
         Queue<Job> jobs = engine.getQueuedJobs();
 
         scheduleQueue(jobs, engine);
+    }
+
+    protected CloudSimWrapper getCloudSim() {
+        return cloudsim;
     }
 
     /**
@@ -57,84 +69,88 @@ public class DAGDynamicScheduler implements Scheduler {
             List<Job> outputTransferJob = createOutputTransferJobs(job, vm);
             
             for (Job inputJob : inputTransferJob) {
-				emulator.submitJob(engine, vm, inputJob);
+                sendJobToVM(engine, vm, inputJob);
 			}
             
-            emulator.submitJob(engine, vm, job);
+            sendJobToVM(engine, vm, job);
             
             for (Job outputJob : outputTransferJob) {
-            	emulator.submitJob(engine, vm, outputJob);
+                sendJobToVM(engine, vm, outputJob);
 			}
             
         }
     }
 
-	private List<Job> createOutputTransferJobs(Job job, VM vm) {
-		List<Job> jobs = new ArrayList<Job>();
-		
-		Task task = job.getTask();
-		// FIXME: no idea why it could be null, parser should be fixed and this check removed
-		if(task.getOutputFiles() == null) {
-			return Collections.emptyList();
-		}		
-				
-		for (String file : task.getOutputFiles()) {
-			jobs.add(createOutputTransferJob(file, vm, job));
-		}
-		
-		return jobs;
-	}
+    private void sendJobToVM(WorkflowEngine engine, VM vm, Job job) {
+        cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
+        Log.printLine(cloudsim.clock() + " Submitting job " + job.getTask().getId() + " to VM "
+                + job.getVM().getId());
+    }
 
-	private Job createOutputTransferJob(String file	, VM vm, Job job) {
-		Task dataTask = new Task("output-gs-" + job.getTask().getId() + "-" + file, "data" + job.getTask().getTransformation(), 12.0); 
-		
-		Job datajob = new Job(dataTask.getSize());
-		datajob.setTask(dataTask);
-		datajob.setOwner(job.getOwner());
-		datajob.setVM(vm);
-		return datajob;
-	}
+    private List<Job> createOutputTransferJobs(Job job, VM vm) {
+        List<Job> jobs = new ArrayList<Job>();
 
-	private List<Job> createInputTransferJobs(Job job, VM vm) {
-		List<Job> jobs = new ArrayList<Job>();
-		
-		Task task = job.getTask();
-		// FIXME: no idea why it could be null, parser should be fixed and this check removed
-		if(task.getInputFiles() == null) {
-			return Collections.emptyList();
-		}
-		
-		for (String file : task.getInputFiles()) {
-			jobs.add(createInputTransferJob(file, vm, job));
-		}
-		
-		return jobs;
-	}
+        Task task = job.getTask();
+        // FIXME: no idea why it could be null, parser should be fixed and this check removed
+        if (task.getOutputFiles() == null) {
+            return Collections.emptyList();
+        }
 
-	private Job createInputTransferJob(String file	, VM vm, Job job) {
-		Task dataTask = new Task("input-gs-" + job.getTask().getId() + "-" + file, "data" + job.getTask().getTransformation(), 12.0); 
-		
-		Job datajob = new Job(dataTask.getSize());
-		datajob.setTask(dataTask);
-		datajob.setOwner(job.getOwner());
-		datajob.setVM(vm);
-		return datajob;
-	}
+        for (String file : task.getOutputFiles()) {
+            jobs.add(createOutputTransferJob(file, vm, job));
+        }
 
-	private boolean isPossibilityToSchedule(Queue<Job> jobs, Set<VM> freeVMs) {
-		return !freeVMs.isEmpty() && !jobs.isEmpty();
-	}
+        return jobs;
+    }
 
-	private void markVMAsBusy(Set<VM> freeVMs, VM vm) {
-		freeVMs.remove(vm);
-	}
+    private Job createOutputTransferJob(String file, VM vm, Job job) {
+        Task dataTask = new Task("output-gs-" + job.getTask().getId() + "-" + file, "data"
+                + job.getTask().getTransformation(), 12.0);
 
-	private VM getFirst(Set<VM> freeVMs) {
-		return freeVMs.iterator().next();
-	}
+        Job datajob = new Job(dataTask.getSize(), cloudsim.clock());
+        datajob.setTask(dataTask);
+        datajob.setOwner(job.getOwner());
+        datajob.setVM(vm);
+        return datajob;
+    }
 
-    @Override
-    public void setWorkflowEngine(WorkflowEngine engine) {
-        // do nothing
+    private List<Job> createInputTransferJobs(Job job, VM vm) {
+        List<Job> jobs = new ArrayList<Job>();
+
+        Task task = job.getTask();
+        // FIXME: no idea why it could be null, parser should be fixed and this check removed
+        if (task.getInputFiles() == null) {
+            return Collections.emptyList();
+        }
+
+        for (String file : task.getInputFiles()) {
+            jobs.add(createInputTransferJob(file, vm, job));
+        }
+
+        return jobs;
+    }
+
+    private Job createInputTransferJob(String file, VM vm, Job job) {
+        Task dataTask = new Task("input-gs-" + job.getTask().getId() + "-" + file, "data"
+                + job.getTask().getTransformation(), 12.0);
+
+        Job datajob = new Job(dataTask.getSize(), cloudsim.clock());
+        datajob.setTask(dataTask);
+        datajob.setOwner(job.getOwner());
+        datajob.setVM(vm);
+        return datajob;
+    }
+
+    private boolean isPossibilityToSchedule(Queue<Job> jobs, Set<VM> freeVMs) {
+        return !freeVMs.isEmpty() && !jobs.isEmpty();
+    }
+
+    private void markVMAsBusy(Set<VM> freeVMs, VM vm) {
+        freeVMs.remove(vm);
+    }
+
+    private VM getFirst(Set<VM> freeVMs) {
+        return freeVMs.iterator().next();
     }
 }
+

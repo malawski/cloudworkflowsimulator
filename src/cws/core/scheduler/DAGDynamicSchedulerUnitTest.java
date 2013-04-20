@@ -1,7 +1,8 @@
 package cws.core.scheduler;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -20,16 +21,16 @@ import cws.core.dag.Task;
 public class DAGDynamicSchedulerUnitTest {
 	DAGDynamicScheduler scheduler;
 	WorkflowEngine engine;
-	CloudSimWrapper emulator;
+    CloudSimWrapper cloudsim;
 	
 	Queue<Job> jobs;
 	Set<VM> freeVMs;	
 	
 	@Before
 	public void setUp() throws Exception {
-		emulator = mock(CloudSimWrapper.class);
+        cloudsim = mock(CloudSimWrapper.class);
 		
-		scheduler = new DAGDynamicScheduler(emulator);
+        scheduler = new DAGDynamicScheduler(cloudsim);
 		engine = mock(WorkflowEngine.class);
 		scheduler.setWorkflowEngine(engine);
 		
@@ -75,7 +76,7 @@ public class DAGDynamicSchedulerUnitTest {
 	
 	private Job createJobMock() {
 		Task task = mock(Task.class);		
-		Job job = new Job(20.0);
+        Job job = new Job(20.0, 10.0);
 		job.setTask(task);
 		
 		return job;

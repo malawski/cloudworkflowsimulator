@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -57,7 +55,7 @@ public class TransferManager extends CWSSimEntity implements WorkflowEvent {
 
     public TransferManager(CloudSimWrapper cloudsim) {
         super("TransferManager", cloudsim);
-        CloudSim.addEntity(this);
+        cloudsim.addEntity(this);
         activeTransfers = new HashSet<Transfer>();
         listeners = new HashSet<TransferListener>();
     }

@@ -2,7 +2,6 @@ package cws.core;
 
 import static org.junit.Assert.assertEquals;
 
-import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +20,7 @@ public class TestVM {
         public VMDriver(VM vm, CloudSimWrapper cloudsim) {
             super("VMDriver", cloudsim);
             this.vm = vm;
-            CloudSim.addEntity(this);
+            getCloudsim().addEntity(this);
         }
 
         public void setJobs(Job[] jobs) {
@@ -64,20 +63,19 @@ public class TestVM {
     public void setUp() {
         // TODO(_mequrel_): change to IoC in the future
         cloudsim = new CloudSimWrapper();
+        cloudsim.init(1, null, false);
     }
 
     @Test
     public void testSingleJob() {
-        CloudSim.init(1, null, false);
-
-        Job j = new Job(1000);
+        Job j = new Job(1000, cloudsim.clock());
 
         VM vm = new VM(100, 1, 100, 0.40, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j });
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         assertEquals(j.getReleaseTime(), 0.0, 0.0);
         assertEquals(j.getSubmitTime(), 0.0, 0.0);
@@ -87,17 +85,15 @@ public class TestVM {
 
     @Test
     public void testTwoJobs() {
-        CloudSim.init(1, null, false);
-
-        Job j1 = new Job(1000);
-        Job j2 = new Job(1000);
+        Job j1 = new Job(1000, cloudsim.clock());
+        Job j2 = new Job(1000, cloudsim.clock());
 
         VM vm = new VM(100, 1, 100, 0.40, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         assertEquals(j1.getReleaseTime(), 0.0, 0.0);
         assertEquals(j1.getSubmitTime(), 0.0, 0.0);
@@ -112,17 +108,15 @@ public class TestVM {
 
     @Test
     public void testMultiCoreVM() {
-        CloudSim.init(1, null, false);
-
-        Job j1 = new Job(1000);
-        Job j2 = new Job(1000);
+        Job j1 = new Job(1000, cloudsim.clock());
+        Job j2 = new Job(1000, cloudsim.clock());
 
         VM vm = new VM(100, 2, 100, 0.40, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         assertEquals(j1.getReleaseTime(), 0.0, 0.0);
         assertEquals(j1.getSubmitTime(), 0.0, 0.0);

@@ -7,7 +7,6 @@ import java.util.Queue;
 import java.util.Set;
 
 import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -85,7 +84,7 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
         this.jobFactory = jobFactory;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
-        CloudSim.addEntity(this);
+        getCloudsim().addEntity(this);
     }
 
     public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, CloudSimWrapper cloudsim) {
@@ -177,7 +176,7 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
             Task t = dj.nextReadyTask();
             if (t == null)
                 break;
-            Job j = jobFactory.createJob(dj, t, getId());
+            Job j = jobFactory.createJob(dj, t, getId(), getCloudsim().clock());
             j.setDAGJob(dj);
             j.setTask(t);
             j.setOwner(getId());
@@ -212,7 +211,7 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
         Task t = j.getTask();
 
         // If the job succeeded
-        if (j.getResult() == Job.Result.SUCCESS && CloudSim.clock() <= deadline) {
+        if (j.getResult() == Job.Result.SUCCESS && getCloudsim().clock() <= deadline) {
 
         	// FIXME: temporary hack - when data transfer job
         	if(dj != null) {
@@ -229,7 +228,8 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
                 }
         	}
 
-        	Log.printLine(CloudSim.clock() + " Job " + j.getTask().getId()+ " finished on VM " + j.getVM().getId());
+            Log.printLine(getCloudsim().clock() + " Job " + j.getTask().getId() + " finished on VM "
+                    + j.getVM().getId());
             VM vm = j.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))
@@ -239,9 +239,9 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
         // If the job failed
         if (j.getResult() == Job.Result.FAILURE) {
             // Retry the job
-            Log.printLine(CloudSim.clock() + " Job " + j.getTask().getId() + " failed on VM " + j.getVM().getId()
+            Log.printLine(getCloudsim().clock() + " Job " + j.getTask().getId() + " failed on VM " + j.getVM().getId()
                     + " resubmitting...");
-            Job retry = jobFactory.createJob(dj, t, getId());
+            Job retry = jobFactory.createJob(dj, t, getId(), getCloudsim().clock());
             VM vm = j.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))

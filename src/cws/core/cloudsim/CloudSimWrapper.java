@@ -1,18 +1,35 @@
 package cws.core.cloudsim;
 
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
+import java.util.Calendar;
 
-import cws.core.Job;
-import cws.core.VM;
-import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
+import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.core.SimEntity;
+import org.cloudbus.cloudsim.core.predicates.Predicate;
 
 public class CloudSimWrapper {
 
-	public void submitJob(WorkflowEngine engine, VM vm, Job job) {
-		Log.printLine(CloudSim.clock() + " Submitting job " + job.getTask().getId() + " to VM " + job.getVM().getId());
-		CloudSim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
-	}
+    public void addEntity(SimEntity entity) {
+        CloudSim.addEntity(entity);
+    }
+
+    public double clock() {
+        return CloudSim.clock();
+    }
+
+    public void cancelAll(int src, Predicate p) {
+        CloudSim.cancelAll(src, p);
+    }
+
+    public void init(int numUser, Calendar calendar, boolean traceFlag) {
+        CloudSim.init(numUser, calendar, traceFlag);
+    }
+
+    public void startSimulation() {
+        CloudSim.startSimulation();
+    }
+
+    public void send(int src, int dest, double delay, int tag, Object data) {
+        CloudSim.send(src, dest, delay, tag, data);
+    }
 
 }

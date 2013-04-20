@@ -3,8 +3,6 @@ package cws.core;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -32,7 +30,7 @@ public class EnsembleManager extends CWSSimEntity implements WorkflowEvent {
         this.dags = new LinkedList<DAGJob>();
         this.listeners = new LinkedList<DAGJobListener>();
         prioritizeDAGs(dags);
-        CloudSim.addEntity(this);
+        cloudsim.addEntity(this);
     }
 
     public EnsembleManager(WorkflowEngine engine, CloudSimWrapper cloudsim) {

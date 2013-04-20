@@ -2,6 +2,7 @@ package cws.core.algorithms;
 
 import java.util.List;
 
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 
 /**
@@ -9,8 +10,8 @@ import cws.core.dag.DAG;
  */
 public class Wide extends Backtrack {
 
-    public Wide(double budget, double deadline, List<DAG> dags) {
-        super(budget, deadline, dags);
+    public Wide(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, cloudsim);
     }
 
     @Override

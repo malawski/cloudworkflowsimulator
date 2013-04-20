@@ -4,8 +4,6 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-
 import cws.core.Job;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -20,11 +18,12 @@ import cws.core.cloudsim.CloudSimWrapper;
 
 public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
 
-    public EnsembleDynamicScheduler(CloudSimWrapper emulator) {
-		super(emulator);
-	}
 
-	/**
+    public EnsembleDynamicScheduler(CloudSimWrapper cloudsim) {
+        super(cloudsim);
+    }
+
+    /**
      * Compares jobs based on their priority
      */
     protected class JobComparator implements Comparator<Job> {
@@ -43,7 +42,7 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
 
         // check the deadline constraints (provisioner takes care about budget)
         double deadline = engine.getDeadline();
-        double time = CloudSim.clock();
+        double time = getCloudSim().clock();
 
         // stop scheduling any new jobs if we are over deadline
         if (isDeadlineExceeded(deadline, time)) {

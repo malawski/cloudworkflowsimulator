@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
@@ -117,7 +116,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         this.price = price;
         this.running = false;
         this.cpuSecondsConsumed = 0.0;
-        CloudSim.addEntity(this);
+        getCloudsim().addEntity(this);
     }
 
     public void setDeprovisioningDelay(double deprovisioningDelay) {
@@ -230,7 +229,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         if (launchTime < 0)
             return 0.0;
         else if (terminateTime < 0)
-            return CloudSim.clock() - launchTime;
+            return getCloudsim().clock() - launchTime;
         else
             return terminateTime - launchTime;
     }
@@ -307,7 +306,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
 
         // cancel future events
         Predicate p = new PredicateType(JOB_FINISHED);
-        CloudSim.cancelAll(getId(), p);
+        getCloudsim().cancelAll(getId(), p);
 
         // Move running jobs back to the queue...
         jobs.addAll(runningJobs);
@@ -317,7 +316,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         for (Job job : jobs) {
             job.setResult(Job.Result.FAILURE);
             send(job.getOwner(), 0.0, JOB_FINISHED, job);
-            Log.printLine(CloudSim.clock() + " Terminating job " + job.getID() + " on VM " + job.getVM().getId());
+            Log.printLine(getCloudsim().clock() + " Terminating job " + job.getID() + " on VM " + job.getVM().getId());
         }
 
         // Reset dynamic state
@@ -331,7 +330,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
             throw new RuntimeException("Cannot execute jobs: VM not running");
         }
 
-        job.setSubmitTime(CloudSim.clock());
+        job.setSubmitTime(getCloudsim().clock());
         job.setState(Job.State.IDLE);
         job.setVM(this);
 
@@ -344,7 +343,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
 
     private void jobStart(Job job) {
         // The job is now running
-        job.setStartTime(CloudSim.clock());
+        job.setStartTime(getCloudsim().clock());
         job.setState(Job.State.RUNNING);
         // add it to the running set
         runningJobs.add(job);
@@ -370,7 +369,8 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         }
 
         send(getId(), actualRuntime, JOB_FINISHED, job);
-        Log.printLine(CloudSim.clock() + " Starting job " + job.getTask().getId() + " on VM " + job.getVM().getId()
+        Log.printLine(getCloudsim().clock() + " Starting job " + job.getTask().getId() + " on VM "
+                + job.getVM().getId()
                 + " duration " + actualRuntime);
 
         // One core is now busy running the job
@@ -388,7 +388,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         runningJobs.remove(job);
 
         // Complete the job
-        job.setFinishTime(CloudSim.clock());
+        job.setFinishTime(getCloudsim().clock());
         job.setState(Job.State.TERMINATED);
 
         // Increment the usage

@@ -8,8 +8,9 @@ import cws.core.provisioner.SimpleUtilizationBasedProvisioner;
 import cws.core.scheduler.EnsembleDynamicScheduler;
 
 public class DPDS extends DynamicAlgorithm {
-    public DPDS(double budget, double deadline, List<DAG> dags, double price, double maxScaling) {
-        super(budget, deadline, dags, price, new EnsembleDynamicScheduler(new CloudSimWrapper()), new SimpleUtilizationBasedProvisioner(
-                maxScaling));
+    public DPDS(double budget, double deadline, List<DAG> dags, double price, double maxScaling,
+            CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, price, new EnsembleDynamicScheduler(cloudsim),
+                new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim), cloudsim);
     }
 }

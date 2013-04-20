@@ -9,7 +9,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 
 import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
 
 import cws.core.Cloud;
 import cws.core.DAGJob;
@@ -34,6 +33,8 @@ import cws.core.log.WorkflowLog;
 
 public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent, Provisioner, Scheduler, VMListener,
         JobListener, DAGJobListener {
+
+    private CloudSimWrapper cloudsim;
 
     /** Engine that executes workflows */
     private WorkflowEngine engine;
@@ -71,8 +72,9 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     protected long simulationStartWallTime;
     protected long simulationFinishWallTime;
 
-    public StaticAlgorithm(double budget, double deadline, List<DAG> dags) {
+    public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags);
+        this.cloudsim = cloudsim;
     }
 
     @Override
@@ -310,7 +312,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         int priority = dags.indexOf(dag);
         DAGJob dagJob = new DAGJob(dag, manager.getId());
         dagJob.setPriority(priority);
-        CloudSim.send(manager.getId(), engine.getId(), 0.0, DAG_SUBMIT, dagJob);
+        cloudsim.send(manager.getId(), engine.getId(), 0.0, DAG_SUBMIT, dagJob);
     }
 
     @Override
@@ -407,13 +409,13 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     }
 
     private void launchVM(VM vm, double start) {
-        double now = CloudSim.clock();
+        double now = cloudsim.clock();
         double delay = start - now;
-        CloudSim.send(engine.getId(), cloud.getId(), delay, VM_LAUNCH, vm);
+        cloudsim.send(engine.getId(), cloud.getId(), delay, VM_LAUNCH, vm);
     }
 
     private void terminateVM(VM vm) {
-        CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
+        cloudsim.send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
     }
 
     private void submitJob(VM vm, Job job) {
@@ -435,7 +437,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         // Submit the job to the VM
         idle.remove(vm);
         job.setVM(vm);
-        CloudSim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);
+        cloudsim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);
     }
 
     @Override
@@ -449,19 +451,16 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             throw new RuntimeException("DAG not finished");
         }
         dagsFinished += 1;
-        actualDagFinishTime = Math.max(CloudSim.clock(), actualDagFinishTime);
+        actualDagFinishTime = Math.max(cloudsim.clock(), actualDagFinishTime);
     }
 
     @Override
     public void simulate(String logname) {
-        CloudSim.init(1, null, false);
+        cloudsim.init(1, null, false);
 
-        // TODO(_mequrel_): change to IoC in the future
-        Cloud cloud = new Cloud(new CloudSimWrapper());
-        // TODO(_mequrel_): change to IoC in the future
-        WorkflowEngine engine = new WorkflowEngine(this, this, new CloudSimWrapper());
-        // TODO(_mequrel_): change to IoC in the future
-        EnsembleManager manager = new EnsembleManager(engine, new CloudSimWrapper());
+        Cloud cloud = new Cloud(cloudsim);
+        WorkflowEngine engine = new WorkflowEngine(this, this, cloudsim);
+        EnsembleManager manager = new EnsembleManager(engine, cloudsim);
 
         setCloud(cloud);
         setEnsembleManager(manager);
@@ -481,7 +480,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
 
         simulationStartWallTime = System.nanoTime();
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         simulationFinishWallTime = System.nanoTime();
 

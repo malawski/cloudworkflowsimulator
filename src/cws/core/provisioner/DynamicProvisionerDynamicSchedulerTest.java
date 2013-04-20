@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
-import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,11 +44,11 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
     @Test
     public void testProvisionerScheduleDag100x10() {
-        CloudSim.init(1, null, false);
+        cloudsim.init(1, null, false);
 
         Cloud cloud = new Cloud(cloudsim);
 
-        SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner();
+        SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner(cloudsim);
         provisioner.setCloud(cloud);
 
         DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(new CloudSimWrapper());
@@ -69,7 +68,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
-            CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            cloudsim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
         }
 
         List<DAG> dags = new ArrayList<DAG>();
@@ -82,7 +81,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
         // FIXME (_mequrel): looks awkward, a comment should be added or some logic inversed
         new EnsembleManager(dags, engine, cloudsim);
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         assertEquals(0, engine.getQueuedJobs().size());
 
@@ -105,7 +104,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
         ExperimentDescription param = new ExperimentDescription("test", "DPDS", "output", dagPath, dags, deadline,
                 budget, price, max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);
-        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param);
+        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim);
         algorithm.setGenerateLog(true);
         String fileName = param.getRunDirectory() + File.separator + "output-test-DPDS";
         algorithm.simulate(fileName);
@@ -118,7 +117,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
         param = new ExperimentDescription("test", "SPSS", "output", dagPath, dags, deadline, budget, price,
                 max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);
-        algorithm = AlgorithmFactory.createAlgorithm(param);
+        algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim);
         algorithm.setGenerateLog(true);
         fileName = param.getRunDirectory() + File.separator + "output-test-SPSS";
         algorithm.simulate(fileName);

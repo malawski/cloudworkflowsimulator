@@ -14,6 +14,7 @@ import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.FailureModel;
 import cws.core.UniformRuntimeDistribution;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
@@ -223,6 +224,9 @@ public class TestRun {
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
 
+        // TODO(_mequrel_): change to IoC in the future
+        CloudSimWrapper cloudsim = new CloudSimWrapper();
+
         PrintStream fileOut = null;
         try {
             fileOut = new PrintStream(new FileOutputStream(outputfile));
@@ -237,11 +241,11 @@ public class TestRun {
                     System.out.print(".");
                     Algorithm a = null;
                     if ("SPSS".equals(algorithm)) {
-                        a = new SPSS(budget, deadline, dags, alpha);
+                        a = new SPSS(budget, deadline, dags, alpha, cloudsim);
                     } else if ("DPDS".equals(algorithm)) {
-                        a = new DPDS(budget, deadline, dags, price, maxScaling);
+                        a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim);
                     } else if ("WADPDS".equals(algorithm)) {
-                        a = new WADPDS(budget, deadline, dags, price, maxScaling);
+                        a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim);
                     } else {
                         throw new RuntimeException("Unknown algorithm: " + algorithm);
                     }
