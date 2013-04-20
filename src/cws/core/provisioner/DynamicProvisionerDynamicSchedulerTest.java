@@ -31,7 +31,7 @@ import cws.core.log.WorkflowLog;
 import cws.core.scheduler.DAGDynamicScheduler;
 import cws.core.scheduler.EnsembleDynamicScheduler;
 
-public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
+public class DynamicProvisionerDynamicSchedulerTest {
     private String dagPath = "dags/";
 
     private CloudSimWrapper cloudsim;
@@ -51,7 +51,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
         SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner(cloudsim);
         provisioner.setCloud(cloud);
 
-        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(new CloudSimWrapper());
+        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(cloudsim);
 
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
 
@@ -68,7 +68,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
-            cloudsim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         List<DAG> dags = new ArrayList<DAG>();

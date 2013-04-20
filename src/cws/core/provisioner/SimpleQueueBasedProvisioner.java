@@ -10,7 +10,7 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.experiment.VMFactory;
 
-public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements Provisioner, WorkflowEvent {
+public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements Provisioner {
 
     public SimpleQueueBasedProvisioner(CloudSimWrapper cloudsim) {
         super(cloudsim);
@@ -39,7 +39,7 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
         if (queueLength > 0) {
             VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0);
             getCloudSim().log(" Starting VM: " + vm.getId());
-            getCloudSim().send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         } else { // terminate free VMs
             Set<VM> freeVMs = engine.getFreeVMs();
             Iterator<VM> vmIt = freeVMs.iterator();
@@ -47,9 +47,10 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
                 VM vm = vmIt.next();
                 vmIt.remove();
                 getCloudSim().log(" Terminating VM: " + vm.getId());
-                getCloudSim().send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
+                getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
             }
         }
-        getCloudSim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL, PROVISIONING_REQUEST, null);
+        getCloudSim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL, WorkflowEvent.PROVISIONING_REQUEST,
+                null);
     }
 }

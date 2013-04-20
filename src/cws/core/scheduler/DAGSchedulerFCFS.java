@@ -16,7 +16,7 @@ import cws.core.cloudsim.CloudSimWrapper;
  * The ready jobs are inserted into VM queues for execution.
  * @author malawski
  */
-public class DAGSchedulerFCFS implements Scheduler, WorkflowEvent {
+public class DAGSchedulerFCFS implements Scheduler {
 
     private List<VM> vms;
 
@@ -44,7 +44,7 @@ public class DAGSchedulerFCFS implements Scheduler, WorkflowEvent {
                 Job job = jobs.poll(); // retrieve and remove job from ready set
                 job.setVM(vm);
                 cloudsim.log(" Submitting job " + job.getID() + " to VM " + job.getVM().getId());
-                cloudsim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);
+                cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
             }
         }
     }

@@ -11,7 +11,7 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.experiment.VMFactory;
 
-public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner implements Provisioner, WorkflowEvent {
+public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner implements Provisioner {
 
     // above this utilization threshold we start provisioning additional VMs
     private static final double UPPER_THRESHOLD = 0.90;
@@ -132,7 +132,8 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
             // some instances may be still running so we want to be invoked again to stop them before they reach full
             // hour
             if (engine.getFreeVMs().size() + engine.getBusyVMs().size() > 0)
-                getCloudSim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL, PROVISIONING_REQUEST, null);
+                getCloudSim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL,
+                        WorkflowEvent.PROVISIONING_REQUEST, null);
             // return without further provisioning
             return;
         }
@@ -158,7 +159,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 
             VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0);
             getCloudSim().log(" Starting VM: " + vm.getId());
-            getCloudSim().send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
 
         } else if (!finishing_phase && utilization < LOWER_THRESHOLD) {
 
@@ -179,7 +180,8 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
         }
 
         // send event to initiate next provisioning cycle
-        getCloudSim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL, PROVISIONING_REQUEST, null);
+        getCloudSim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL, WorkflowEvent.PROVISIONING_REQUEST,
+                null);
 
     }
 
@@ -216,7 +218,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
                 vmIt.remove();
                 removed.add(vm);
                 getCloudSim().log(" Terminating VM: " + vm.getId());
-                getCloudSim().send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
+                getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
             }
         }
         return removed;

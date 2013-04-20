@@ -17,7 +17,7 @@ import cws.core.dag.Task;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
+public class WorkflowEngine extends CWSSimEntity {
     public static int next_id = 0;
 
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
@@ -93,28 +93,28 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
     public void startEntity() {
         // send the first provisioning request
         // it should be sent after dag submissions events
-        send(this.getId(), 0.0001, PROVISIONING_REQUEST);
+        send(this.getId(), 0.0001, WorkflowEvent.PROVISIONING_REQUEST);
     }
 
     @Override
     public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
-        case VM_LAUNCHED:
+        case WorkflowEvent.VM_LAUNCHED:
             vmLaunched((VM) ev.getData());
             break;
-        case VM_TERMINATED:
+        case WorkflowEvent.VM_TERMINATED:
             vmTerminated((VM) ev.getData());
             break;
-        case DAG_SUBMIT:
+        case WorkflowEvent.DAG_SUBMIT:
             dagSubmit((DAGJob) ev.getData());
             break;
-        case JOB_STARTED:
+        case WorkflowEvent.JOB_STARTED:
             jobStarted((Job) ev.getData());
             break;
-        case JOB_FINISHED:
+        case WorkflowEvent.JOB_FINISHED:
             jobFinished((Job) ev.getData());
             break;
-        case PROVISIONING_REQUEST:
+        case WorkflowEvent.PROVISIONING_REQUEST:
             if (provisioner != null)
                 if (vms.size() > 0 || dags.size() > 0)
                     provisioner.provisionResources(this);
@@ -162,7 +162,7 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
         allDAGJobs.add(dj);
 
         // The DAG starts immediately
-        sendNow(dj.getOwner(), DAG_STARTED, dj);
+        sendNow(dj.getOwner(), WorkflowEvent.DAG_STARTED, dj);
 
         // Queue any ready jobs for this DAG
         queueReadyJobs(dj);
@@ -222,7 +222,7 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
                 // If the workflow is complete, send it back
                 if (dj.isFinished()) {
                     dags.remove(dj);
-                    sendNow(dj.getOwner(), DAG_FINISHED, dj);
+                    sendNow(dj.getOwner(), WorkflowEvent.DAG_FINISHED, dj);
                 }
         	}
 

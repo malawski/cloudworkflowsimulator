@@ -43,7 +43,7 @@ import cws.core.exception.UnknownWorkflowEventException;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class TransferManager extends CWSSimEntity implements WorkflowEvent {
+public class TransferManager extends CWSSimEntity {
     /** Conversion constant for milliseconds to seconds */
     public static final double MSEC_TO_SEC = 1.0 / 1000.0;
 
@@ -76,16 +76,16 @@ public class TransferManager extends CWSSimEntity implements WorkflowEvent {
     @Override
     public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
-        case NEW_TRANSFER:
+        case WorkflowEvent.NEW_TRANSFER:
             newTransfer((Transfer) ev.getData());
             break;
-        case HANDSHAKE_COMPLETE:
+        case WorkflowEvent.HANDSHAKE_COMPLETE:
             handshakeComplete((Transfer) ev.getData());
             break;
-        case UPDATE_TRANSFER_PROGRESS:
+        case WorkflowEvent.UPDATE_TRANSFER_PROGRESS:
             updateProgress();
             break;
-        case FINAL_ACK_RECEIVED:
+        case WorkflowEvent.FINAL_ACK_RECEIVED:
             finalAckReceived((Transfer) ev.getData());
             break;
         default:
@@ -115,7 +115,7 @@ public class TransferManager extends CWSSimEntity implements WorkflowEvent {
 
         // It takes 1 RTT to complete the initial handshake in TCP
         double rttSec = t.getRTT() * MSEC_TO_SEC;
-        send(this.getId(), rttSec, HANDSHAKE_COMPLETE, t);
+        send(this.getId(), rttSec, WorkflowEvent.HANDSHAKE_COMPLETE, t);
     }
 
     /** Called when the initial handshake for a transfer is complete */
@@ -154,7 +154,7 @@ public class TransferManager extends CWSSimEntity implements WorkflowEvent {
 
             // It takes 1 RTT to get the final ACK
             double rttSec = t.getRTT() * MSEC_TO_SEC;
-            send(this.getId(), rttSec, FINAL_ACK_RECEIVED, t);
+            send(this.getId(), rttSec, WorkflowEvent.FINAL_ACK_RECEIVED, t);
         }
 
         // If there are still some transfers remaining
@@ -186,7 +186,7 @@ public class TransferManager extends CWSSimEntity implements WorkflowEvent {
             for (Transfer t : activeTransfers) {
                 nextUpdate = Math.min(nextUpdate, t.estimateTimeRemaining());
             }
-            send(this.getId(), nextUpdate, UPDATE_TRANSFER_PROGRESS);
+            send(this.getId(), nextUpdate, WorkflowEvent.UPDATE_TRANSFER_PROGRESS);
         }
     }
 
@@ -323,6 +323,6 @@ public class TransferManager extends CWSSimEntity implements WorkflowEvent {
         }
 
         // Inform the owner that their transfer is complete
-        sendNow(t.getOwner(), TRANSFER_COMPLETE, t);
+        sendNow(t.getOwner(), WorkflowEvent.TRANSFER_COMPLETE, t);
     }
 }

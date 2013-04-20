@@ -13,7 +13,7 @@ public class TestVM {
 
     private CloudSimWrapper cloudsim;
 
-    private class VMDriver extends CWSSimEntity implements WorkflowEvent {
+    private class VMDriver extends CWSSimEntity {
         private VM vm;
         private Job[] jobs;
 
@@ -29,24 +29,24 @@ public class TestVM {
 
         @Override
         public void startEntity() {
-            sendNow(vm.getId(), VM_LAUNCH);
+            sendNow(vm.getId(), WorkflowEvent.VM_LAUNCH);
 
             // Submit all the jobs
             for (Job j : jobs) {
                 j.setOwner(getId());
-                send(vm.getId(), 0.0, JOB_SUBMIT, j);
+                send(vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, j);
             }
         }
 
         @Override
         public void processEvent(CWSSimEvent ev) {
             switch (ev.getTag()) {
-            case JOB_STARTED: {
+            case WorkflowEvent.JOB_STARTED: {
                 Job j = (Job) ev.getData();
                 assertEquals(Job.State.RUNNING, j.getState());
                 break;
             }
-            case JOB_FINISHED: {
+            case WorkflowEvent.JOB_FINISHED: {
                 Job j = (Job) ev.getData();
                 assertEquals(Job.State.TERMINATED, j.getState());
                 break;

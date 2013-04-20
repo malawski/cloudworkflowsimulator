@@ -17,7 +17,7 @@ public class TestRandomTransferManager {
     public static final long MB = 1024 * KB;
     public static final long GB = 1024 * MB;
 
-    private class TransferDriver extends CWSSimEntity implements WorkflowEvent {
+    private class TransferDriver extends CWSSimEntity {
         private TransferManager tm;
         private List<Transfer> transfers;
 
@@ -36,7 +36,7 @@ public class TestRandomTransferManager {
             Random rng = new Random(0);
             // Submit all the transfers
             for (Transfer t : transfers) {
-                send(tm.getId(), rng.nextDouble(), NEW_TRANSFER, t);
+                send(tm.getId(), rng.nextDouble(), WorkflowEvent.NEW_TRANSFER, t);
             }
         }
 

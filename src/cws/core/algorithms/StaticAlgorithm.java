@@ -29,7 +29,7 @@ import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.experiment.VMFactory;
 import cws.core.log.WorkflowLog;
 
-public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent, Provisioner, Scheduler, VMListener,
+public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener,
         JobListener, DAGJobListener {
 
     private CloudSimWrapper cloudsim;
@@ -317,7 +317,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         int priority = dags.indexOf(dag);
         DAGJob dagJob = new DAGJob(dag, manager.getId());
         dagJob.setPriority(priority);
-        cloudsim.send(manager.getId(), engine.getId(), 0.0, DAG_SUBMIT, dagJob);
+        cloudsim.send(manager.getId(), engine.getId(), 0.0, WorkflowEvent.DAG_SUBMIT, dagJob);
     }
 
     @Override
@@ -416,11 +416,11 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     private void launchVM(VM vm, double start) {
         double now = cloudsim.clock();
         double delay = start - now;
-        cloudsim.send(engine.getId(), cloud.getId(), delay, VM_LAUNCH, vm);
+        cloudsim.send(engine.getId(), cloud.getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
     }
 
     private void terminateVM(VM vm) {
-        cloudsim.send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
+        cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
     }
 
     private void submitJob(VM vm, Job job) {
@@ -442,7 +442,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         // Submit the job to the VM
         idle.remove(vm);
         job.setVM(vm);
-        cloudsim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);
+        cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
     }
 
     @Override

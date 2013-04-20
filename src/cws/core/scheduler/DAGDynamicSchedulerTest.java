@@ -63,7 +63,7 @@ public class DAGDynamicSchedulerTest {
         cloudsim.init(1, null, false);
 
         Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(new CloudSimWrapper());
+        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(cloudsim);
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
         Cloud cloud = new Cloud(cloudsim);
 
@@ -103,7 +103,7 @@ public class DAGDynamicSchedulerTest {
         cloudsim.init(1, null, false);
 
         Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(new CloudSimWrapper());
+        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(cloudsim);
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
         Cloud cloud = new Cloud(cloudsim);
 

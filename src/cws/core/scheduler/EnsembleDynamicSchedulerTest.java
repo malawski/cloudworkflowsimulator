@@ -23,7 +23,7 @@ import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.log.WorkflowLog;
 
-public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
+public class EnsembleDynamicSchedulerTest {
 
     private CloudSimWrapper cloudsim;
 
@@ -47,7 +47,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
-            cloudsim.send(engine.getId(), cloud.getId(), 0.1, VM_LAUNCH, vm);
+            cloudsim.send(engine.getId(), cloud.getId(), 0.1, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         cloudsim.startSimulation();
@@ -70,7 +70,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
             vms.add(vm);
-            cloudsim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         DAG dag = new DAG();
@@ -107,7 +107,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
             vms.add(vm);
-            cloudsim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         DAG dag = DAGParser.parseDAG(new File("dags/CyberShake_100.dag"));
@@ -140,7 +140,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
             vms.add(vm);
-            cloudsim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         List<DAG> dags = new ArrayList<DAG>();

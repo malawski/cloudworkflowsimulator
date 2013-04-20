@@ -14,7 +14,7 @@ import cws.core.dag.DAG;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class EnsembleManager extends CWSSimEntity implements WorkflowEvent {
+public class EnsembleManager extends CWSSimEntity {
     /** List of all DAGs remaining to be executed */
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
 
@@ -69,10 +69,10 @@ public class EnsembleManager extends CWSSimEntity implements WorkflowEvent {
     @Override
     public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
-        case DAG_STARTED:
+        case WorkflowEvent.DAG_STARTED:
             dagStarted((DAGJob) ev.getData());
             break;
-        case DAG_FINISHED:
+        case WorkflowEvent.DAG_FINISHED:
             dagFinished((DAGJob) ev.getData());
             break;
         default:
@@ -87,7 +87,7 @@ public class EnsembleManager extends CWSSimEntity implements WorkflowEvent {
 
     public void submitDAG(DAGJob dagJob) {
         // Submit the dag to the workflow engine
-        sendNow(engine.getId(), DAG_SUBMIT, dagJob);
+        sendNow(engine.getId(), WorkflowEvent.DAG_SUBMIT, dagJob);
     }
 
     private void dagStarted(DAGJob dag) {

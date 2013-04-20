@@ -13,7 +13,7 @@ import cws.core.exception.UnknownWorkflowEventException;
  *
  * @author Gideon Juve <juve@usc.edu>
  */
-public class Cloud extends CWSSimEntity implements WorkflowEvent {
+public class Cloud extends CWSSimEntity {
     
     /** The set of currently active VMs */
     private HashSet<VM> vms = new HashSet<VM>();
@@ -41,16 +41,16 @@ public class Cloud extends CWSSimEntity implements WorkflowEvent {
     @Override
     public void processEvent(CWSSimEvent ev) {
         switch(ev.getTag()) {
-            case VM_LAUNCH:
+        case WorkflowEvent.VM_LAUNCH:
                 launchVM(ev.getSource(), (VM)ev.getData());
                 break;
-            case VM_TERMINATE:
+        case WorkflowEvent.VM_TERMINATE:
                 terminateVM((VM)ev.getData());
                 break;
-            case VM_LAUNCHED:
+        case WorkflowEvent.VM_LAUNCHED:
                 vmLaunched((VM)ev.getData());
                 break;
-            case VM_TERMINATED:
+        case WorkflowEvent.VM_TERMINATED:
                 vmTerminated((VM)ev.getData());
                 break;
             default:
@@ -70,10 +70,10 @@ public class Cloud extends CWSSimEntity implements WorkflowEvent {
         vms.add(vm);
         
         // We launch the VM now...
-        sendNow(vm.getId(), VM_LAUNCH);
+        sendNow(vm.getId(), WorkflowEvent.VM_LAUNCH);
         
         // But it isn't ready until after the delay
-        send(getId(), vm.getProvisioningDelay(), VM_LAUNCHED, vm);
+        send(getId(), vm.getProvisioningDelay(), WorkflowEvent.VM_LAUNCHED, vm);
     }
     
     private void vmLaunched(VM vm) {
@@ -88,7 +88,7 @@ public class Cloud extends CWSSimEntity implements WorkflowEvent {
         }
         
         // The owner learns about the launch
-        sendNow(vm.getOwner(), VM_LAUNCHED, vm);
+        sendNow(vm.getOwner(), WorkflowEvent.VM_LAUNCHED, vm);
     }
     
     private void terminateVM(VM vm) {
@@ -98,10 +98,10 @@ public class Cloud extends CWSSimEntity implements WorkflowEvent {
         }
         
         // We terminate the VM now...
-        sendNow(vm.getId(), VM_TERMINATE);
+        sendNow(vm.getId(), WorkflowEvent.VM_TERMINATE);
         
         // But it isn't gone until after the delay
-        send(getId(), vm.getDeprovisioningDelay(), VM_TERMINATED, vm);
+        send(getId(), vm.getDeprovisioningDelay(), WorkflowEvent.VM_TERMINATED, vm);
     }
     
     private void vmTerminated(VM vm) {
@@ -119,6 +119,6 @@ public class Cloud extends CWSSimEntity implements WorkflowEvent {
         }
         
         // The owner finds out
-        sendNow(vm.getOwner(), VM_TERMINATED, vm);
+        sendNow(vm.getOwner(), WorkflowEvent.VM_TERMINATED, vm);
     }
 }

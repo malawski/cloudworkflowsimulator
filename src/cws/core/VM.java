@@ -36,7 +36,7 @@ import cws.core.transfer.Port;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class VM extends CWSSimEntity implements WorkflowEvent {
+public class VM extends CWSSimEntity {
 
     private static int next_id = 0;
 
@@ -267,16 +267,16 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
     @Override
     public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
-        case VM_LAUNCH:
+        case WorkflowEvent.VM_LAUNCH:
             launchVM();
             break;
-        case VM_TERMINATE:
+        case WorkflowEvent.VM_TERMINATE:
             terminateVM();
             break;
-        case JOB_SUBMIT:
+        case WorkflowEvent.JOB_SUBMIT:
             jobSubmit((Job) ev.getData());
             break;
-        case JOB_FINISHED:
+        case WorkflowEvent.JOB_FINISHED:
             jobFinish((Job) ev.getData());
             break;
         default:
@@ -304,7 +304,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         running = false;
 
         // cancel future events
-        Predicate p = new PredicateType(JOB_FINISHED);
+        Predicate p = new PredicateType(WorkflowEvent.JOB_FINISHED);
         getCloudsim().cancelAll(getId(), p);
 
         // Move running jobs back to the queue...
@@ -314,7 +314,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         // ... and fail all queued jobs
         for (Job job : jobs) {
             job.setResult(Job.Result.FAILURE);
-            send(job.getOwner(), 0.0, JOB_FINISHED, job);
+            send(job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
             getCloudsim().log(" Terminating job " + job.getID() + " on VM " + job.getVM().getId());
         }
 
@@ -348,7 +348,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         runningJobs.add(job);
 
         // Tell the owner
-        send(job.getOwner(), 0.0, JOB_STARTED, job);
+        send(job.getOwner(), 0.0, WorkflowEvent.JOB_STARTED, job);
 
         // Compute the duration of the job on this VM
         double size = job.getSize();
@@ -367,7 +367,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
             job.setResult(Job.Result.SUCCESS);
         }
 
-        send(getId(), actualRuntime, JOB_FINISHED, job);
+        send(getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
         getCloudsim().log(
                 " Starting job " + job.getTask().getId() + " on VM "
                 + job.getVM().getId()
@@ -395,7 +395,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         cpuSecondsConsumed += job.getDuration();
 
         // Tell the owner
-        send(job.getOwner(), 0.0, JOB_FINISHED, job);
+        send(job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
 
         // The core that was running the job is now free
         idleCores++;
