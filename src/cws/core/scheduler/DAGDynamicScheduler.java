@@ -57,25 +57,28 @@ public class DAGDynamicScheduler implements Scheduler {
         Set<VM> freeVMs = new HashSet<VM>(engine.getFreeVMs());
 
         while (canBeScheduled(jobs, freeVMs)) {
-            VM vm = getFirst(freeVMs);
-            markVMAsBusy(freeVMs, vm);
-
             Job job = jobs.poll();
-            job.setVM(vm);
+            scheduleJob(job, freeVMs, engine);
+        }
+    }
 
-            List<Job> inputTransferJob = createInputTransferJobs(job, vm);
-            List<Job> outputTransferJob = createOutputTransferJobs(job, vm);
+    protected void scheduleJob(Job job, Set<VM> freeVMs, WorkflowEngine engine) {
+        VM vm = getFirst(freeVMs);
+        markVMAsBusy(freeVMs, vm);
 
-            for (Job inputJob : inputTransferJob) {
-                sendJobToVM(engine, vm, inputJob);
-            }
+        job.setVM(vm);
 
-            sendJobToVM(engine, vm, job);
+        List<Job> inputTransferJob = createInputTransferJobs(job, vm);
+        List<Job> outputTransferJob = createOutputTransferJobs(job, vm);
 
-            for (Job outputJob : outputTransferJob) {
-                sendJobToVM(engine, vm, outputJob);
-            }
+        for (Job inputJob : inputTransferJob) {
+            sendJobToVM(engine, vm, inputJob);
+        }
 
+        sendJobToVM(engine, vm, job);
+
+        for (Job outputJob : outputTransferJob) {
+            sendJobToVM(engine, vm, outputJob);
         }
     }
 
