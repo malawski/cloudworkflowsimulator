@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
@@ -316,7 +315,7 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         for (Job job : jobs) {
             job.setResult(Job.Result.FAILURE);
             send(job.getOwner(), 0.0, JOB_FINISHED, job);
-            Log.printLine(getCloudsim().clock() + " Terminating job " + job.getID() + " on VM " + job.getVM().getId());
+            getCloudsim().log(" Terminating job " + job.getID() + " on VM " + job.getVM().getId());
         }
 
         // Reset dynamic state
@@ -369,7 +368,8 @@ public class VM extends CWSSimEntity implements WorkflowEvent {
         }
 
         send(getId(), actualRuntime, JOB_FINISHED, job);
-        Log.printLine(getCloudsim().clock() + " Starting job " + job.getTask().getId() + " on VM "
+        getCloudsim().log(
+                " Starting job " + job.getTask().getId() + " on VM "
                 + job.getVM().getId()
                 + " duration " + actualRuntime);
 

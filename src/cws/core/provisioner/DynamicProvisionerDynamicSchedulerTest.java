@@ -55,7 +55,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
 
-        WorkflowLog wfLog = new WorkflowLog();
+        WorkflowLog wfLog = new WorkflowLog(cloudsim);
         engine.addJobListener(wfLog);
         cloud.addVMListener(wfLog);
 

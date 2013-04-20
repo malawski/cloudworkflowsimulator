@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.cloudbus.cloudsim.Log;
 
 import cws.core.DAGJob;
 import cws.core.DAGJobListener;
@@ -18,12 +17,19 @@ import cws.core.Job;
 import cws.core.JobListener;
 import cws.core.VM;
 import cws.core.VMListener;
+import cws.core.cloudsim.CloudSimWrapper;
 
 public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 
     Set<Job> jobs = new HashSet<Job>();
     Set<VM> vms = new HashSet<VM>();
     Set<DAGJob> djs = new HashSet<DAGJob>();
+
+    private CloudSimWrapper cloudsim;
+
+    public WorkflowLog(CloudSimWrapper cloudsim) {
+        this.cloudsim = cloudsim;
+    }
 
     @Override
     public void jobReleased(Job job) {
@@ -145,8 +151,7 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
                 finished++;
         }
         pw.println("Completed DAGs: " + finished);
-        Log.print(sw.toString());
-
+        cloudsim.print(sw.toString());
     }
 
     public static void stringToFile(String s, String fileName) {

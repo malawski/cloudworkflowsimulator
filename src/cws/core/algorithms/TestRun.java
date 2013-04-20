@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.FailureModel;
@@ -147,8 +146,11 @@ public class TestRun {
         System.out.printf("delay = %f\n", delay);
         System.out.printf("failureRate = %f\n", failureRate);
 
+        // TODO(_mequrel_): change to IoC in the future
+        CloudSimWrapper cloudsim = new CloudSimWrapper();
+
         // Disable cloudsim logging
-        Log.disable();
+        cloudsim.disableLogging();
 
         // Determine the distribution
         String[] names = null;
@@ -224,8 +226,7 @@ public class TestRun {
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
 
-        // TODO(_mequrel_): change to IoC in the future
-        CloudSimWrapper cloudsim = new CloudSimWrapper();
+
 
         PrintStream fileOut = null;
         try {

@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.Log;
-
 import cws.core.DAGJob;
 import cws.core.Job;
 import cws.core.VM;
@@ -95,7 +93,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
             job.setVM(vm);
             freeVMs.remove(vm); // remove VM from free set
             busyVMs.add(vm); // add vm to busy set
-            Log.printLine(getCloudSim().clock() + " Submitting job " + job.getID() + " to VM " + job.getVM().getId());
+            getCloudSim().log(" Submitting job " + job.getID() + " to VM " + job.getVM().getId());
             getCloudSim().send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
         }
     }
@@ -105,7 +103,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
         double costEstimate = estimateCost(dj, engine);
         double budgetRemaining = estimateBudgetRemaining(engine);
-        Log.printLine(getCloudSim().clock() + " Cost estimate: " + costEstimate + " Budget remaining: "
+        getCloudSim().log(" Cost estimate: " + costEstimate + " Budget remaining: "
                 + budgetRemaining);
         return costEstimate < budgetRemaining;
     }
@@ -159,7 +157,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         // we add this for safety in order not to underestimate our budget
         double safetyMargin = 0.1;
 
-        Log.printLine(getCloudSim().clock() + " Budget for new VMs: " + rn + " Budget on running VMs: " + rc
+        getCloudSim().log(
+                " Budget for new VMs: " + rn + " Budget on running VMs: " + rc
                 + " Remaining budget of admitted workflows: " + ra);
 
         return rn + rc - ra - safetyMargin;

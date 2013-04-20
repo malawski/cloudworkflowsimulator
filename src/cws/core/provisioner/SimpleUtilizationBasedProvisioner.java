@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.Log;
-
 import cws.core.Provisioner;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
@@ -47,7 +45,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
         double time = getCloudSim().clock();
         double cost = engine.getCost();
 
-        Log.printLine(getCloudSim().clock() + " Provisioner: Budget consumed " + cost);
+        getCloudSim().log(" Provisioner: Budget consumed " + cost);
 
         // assuming all VMs are homogeneous
         double vmPrice = 0;
@@ -81,8 +79,8 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 
         int numVMsCompleting = completingVMs.size();
 
-        Log.printLine(getCloudSim().clock() + " Provisioner: number of instances : " + numVMsRunning);
-        Log.printLine(getCloudSim().clock() + " Provisioner: number of instances completing: " + numVMsCompleting);
+        getCloudSim().log(" Provisioner: number of instances : " + numVMsRunning);
+        getCloudSim().log(" Provisioner: number of instances completing: " + numVMsCompleting);
 
         // if we are close to the budget
         if (budget - cost < vmPrice * numVMsCompleting || time > deadline) {
@@ -95,7 +93,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
             if (time > deadline)
                 numToTerminate = numVMsRunning;
 
-            Log.printLine(getCloudSim().clock() + " Provisioner: number of instances to terminate: " + numToTerminate);
+            getCloudSim().log(" Provisioner: number of instances to terminate: " + numToTerminate);
 
             // set of vms scheduled for termination
             Set<VM> toTerminate = new HashSet<VM>();
@@ -144,7 +142,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
         double numBusyVMs = engine.getBusyVMs().size();
         double utilization = numBusyVMs / (numFreeVMS + numBusyVMs);
 
-        Log.printLine(getCloudSim().clock() + " Provisioner: utilization: " + utilization);
+        getCloudSim().log(" Provisioner: utilization: " + utilization);
 
         // if we are close to constraints we should not provision new vms
         boolean finishing_phase = budget - cost <= vmPrice * numVMsRunning || time > deadline;
@@ -159,7 +157,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
                 && numBusyVMs + numFreeVMS < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 
             VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0);
-            Log.printLine(getCloudSim().clock() + " Starting VM: " + vm.getId());
+            getCloudSim().log(" Starting VM: " + vm.getId());
             getCloudSim().send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
 
         } else if (!finishing_phase && utilization < LOWER_THRESHOLD) {
@@ -217,7 +215,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
             if (secondsRemaining < PROVISIONER_INTERVAL + DEPROVISIONING_DELAY_ESTIMATE) {
                 vmIt.remove();
                 removed.add(vm);
-                Log.printLine(getCloudSim().clock() + " Terminating VM: " + vm.getId());
+                getCloudSim().log(" Terminating VM: " + vm.getId());
                 getCloudSim().send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
             }
         }

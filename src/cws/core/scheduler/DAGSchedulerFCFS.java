@@ -4,8 +4,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
-import org.cloudbus.cloudsim.Log;
-
 import cws.core.Job;
 import cws.core.Scheduler;
 import cws.core.VM;
@@ -45,7 +43,7 @@ public class DAGSchedulerFCFS implements Scheduler, WorkflowEvent {
             if (vm.getQueueLength() == 0) {
                 Job job = jobs.poll(); // retrieve and remove job from ready set
                 job.setVM(vm);
-                Log.printLine(cloudsim.clock() + " Submitting job " + job.getID() + " to VM " + job.getVM().getId());
+                cloudsim.log(" Submitting job " + job.getID() + " to VM " + job.getVM().getId());
                 cloudsim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);
             }
         }

@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.Log;
-
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -228,8 +226,7 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
                 }
         	}
 
-            Log.printLine(getCloudsim().clock() + " Job " + j.getTask().getId() + " finished on VM "
-                    + j.getVM().getId());
+            getCloudsim().log(" Job " + j.getTask().getId() + " finished on VM " + j.getVM().getId());
             VM vm = j.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))
@@ -239,8 +236,8 @@ public class WorkflowEngine extends CWSSimEntity implements WorkflowEvent {
         // If the job failed
         if (j.getResult() == Job.Result.FAILURE) {
             // Retry the job
-            Log.printLine(getCloudsim().clock() + " Job " + j.getTask().getId() + " failed on VM " + j.getVM().getId()
-                    + " resubmitting...");
+            getCloudsim()
+                    .log(" Job " + j.getTask().getId() + " failed on VM " + j.getVM().getId() + " resubmitting...");
             Job retry = jobFactory.createJob(dj, t, getId(), getCloudsim().clock());
             VM vm = j.getVM();
             // add to free if contained in busy set

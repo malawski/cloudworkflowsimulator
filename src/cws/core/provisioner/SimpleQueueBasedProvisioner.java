@@ -3,8 +3,6 @@ package cws.core.provisioner;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.Log;
-
 import cws.core.Provisioner;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
@@ -24,7 +22,7 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
         // use the queued (released) jobs from the workflow engine
         int queueLength = engine.getQueueLength();
 
-        Log.printLine(getCloudSim().clock() + " Provisioner: queue length: " + queueLength);
+        getCloudSim().log(" Provisioner: queue length: " + queueLength);
 
         // check the deadline and budget constraints
         double budget = engine.getBudget();
@@ -40,7 +38,7 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
         // add one VM if queue not empty
         if (queueLength > 0) {
             VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0);
-            Log.printLine(getCloudSim().clock() + " Starting VM: " + vm.getId());
+            getCloudSim().log(" Starting VM: " + vm.getId());
             getCloudSim().send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
         } else { // terminate free VMs
             Set<VM> freeVMs = engine.getFreeVMs();
@@ -48,7 +46,7 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
             while (vmIt.hasNext()) {
                 VM vm = vmIt.next();
                 vmIt.remove();
-                Log.printLine(getCloudSim().clock() + " Terminating VM: " + vm.getId());
+                getCloudSim().log(" Terminating VM: " + vm.getId());
                 getCloudSim().send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
             }
         }

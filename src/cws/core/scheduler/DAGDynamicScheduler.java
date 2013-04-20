@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.Log;
 
 import cws.core.Job;
 import cws.core.Scheduler;
@@ -83,8 +82,7 @@ public class DAGDynamicScheduler implements Scheduler {
 
     private void sendJobToVM(WorkflowEngine engine, VM vm, Job job) {
         cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
-        Log.printLine(cloudsim.clock() + " Submitting job " + job.getTask().getId() + " to VM "
-                + job.getVM().getId());
+        cloudsim.log("Submitting job " + job.getTask().getId() + " to VM " + job.getVM().getId());
     }
 
     private List<Job> createOutputTransferJobs(Job job, VM vm) {

@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.cloudbus.cloudsim.Log;
-
 import cws.core.Cloud;
 import cws.core.DAGJob;
 import cws.core.DAGJobListener;
@@ -100,7 +98,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
         WorkflowLog log = null;
         if (shouldGenerateLog()) {
-            log = new WorkflowLog();
+            log = new WorkflowLog(cloudsim);
             engine.addJobListener(log);
             cloud.addVMListener(log);
             em.addDAGJobListener(log);
@@ -114,8 +112,8 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         if (getBudget() < price)
             numVMs = 0;
 
-        Log.printLine(cloudsim.clock() + " Estimated num of VMs " + numVMs);
-        Log.printLine(cloudsim.clock() + " Total budget " + getBudget());
+        cloudsim.log(" Estimated num of VMs " + numVMs);
+        cloudsim.log(" Total budget " + getBudget());
 
         // Launch VMs
         HashSet<VM> vms = new HashSet<VM>();
@@ -137,9 +135,9 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
             log.printDAGJobs();
         }
 
-        Log.printLine(cloudsim.clock() + " Estimated num of VMs " + numVMs);
-        Log.printLine(cloudsim.clock() + " Total budget " + getBudget());
-        Log.printLine(cloudsim.clock() + " Total cost " + engine.getCost());
+        cloudsim.log(" Estimated num of VMs " + numVMs);
+        cloudsim.log(" Total budget " + getBudget());
+        cloudsim.log(" Total cost " + engine.getCost());
 
         // Set results
         actualCost = engine.getCost();

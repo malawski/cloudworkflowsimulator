@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import org.cloudbus.cloudsim.Log;
-
 import cws.core.Cloud;
 import cws.core.DAGJob;
 import cws.core.DAGJobListener;
@@ -156,6 +154,13 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     }
 
     /**
+     * @return the cloudsim
+     */
+    protected CloudSimWrapper getCloudsim() {
+        return cloudsim;
+    }
+
+    /**
      * Develop a plan for running as many DAGs as we can
      */
     public void plan() {
@@ -167,12 +172,12 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
                 if (newPlan.getCost() <= getBudget()) {
                     admittedDAGs.add(dag);
                     plan = newPlan;
-                    Log.printLine("Admitting DAG. Cost of new plan: " + plan.getCost());
+                    getCloudsim().log("Admitting DAG. Cost of new plan: " + plan.getCost());
                 } else {
-                    Log.printLine("Rejecting DAG: New plan exceeds budget: " + newPlan.getCost());
+                    getCloudsim().log("Rejecting DAG: New plan exceeds budget: " + newPlan.getCost());
                 }
             } catch (NoFeasiblePlan m) {
-                Log.printLine("Rejecting DAG: " + m.getMessage());
+                getCloudsim().log("Rejecting DAG: " + m.getMessage());
             }
         }
 
@@ -468,7 +473,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
 
         WorkflowLog log = null;
         if (shouldGenerateLog()) {
-            log = new WorkflowLog();
+            log = new WorkflowLog(cloudsim);
             engine.addJobListener(log);
             cloud.addVMListener(log);
             manager.addDAGJobListener(log);

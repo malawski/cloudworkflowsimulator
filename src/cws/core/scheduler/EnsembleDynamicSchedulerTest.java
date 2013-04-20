@@ -63,7 +63,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
         Cloud cloud = new Cloud(cloudsim);
 
-        WorkflowLog jobLog = new WorkflowLog();
+        WorkflowLog jobLog = new WorkflowLog(cloudsim);
         engine.addJobListener(jobLog);
 
         HashSet<VM> vms = new HashSet<VM>();
@@ -100,7 +100,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
         Cloud cloud = new Cloud(cloudsim);
 
-        WorkflowLog jobLog = new WorkflowLog();
+        WorkflowLog jobLog = new WorkflowLog(cloudsim);
         engine.addJobListener(jobLog);
 
         HashSet<VM> vms = new HashSet<VM>();
@@ -133,7 +133,7 @@ public class EnsembleDynamicSchedulerTest implements WorkflowEvent {
         WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
         Cloud cloud = new Cloud(cloudsim);
 
-        WorkflowLog jobLog = new WorkflowLog();
+        WorkflowLog jobLog = new WorkflowLog(cloudsim);
         engine.addJobListener(jobLog);
 
         HashSet<VM> vms = new HashSet<VM>();
