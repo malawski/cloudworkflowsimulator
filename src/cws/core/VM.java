@@ -4,13 +4,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.transfer.Port;
 
@@ -37,7 +36,7 @@ import cws.core.transfer.Port;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class VM extends SimEntity implements WorkflowEvent {
+public class VM extends CWSSimEntity {
 
     private static int next_id = 0;
 
@@ -102,8 +101,8 @@ public class VM extends SimEntity implements WorkflowEvent {
     /** Varies the failure rate of tasks according to a specified distribution */
     private FailureModel failureModel = new FailureModel(0, 0.0);
 
-    public VM(int mips, int cores, double bandwidth, double price) {
-        super("VM" + (next_id++));
+    public VM(int mips, int cores, double bandwidth, double price, CloudSimWrapper cloudsim) {
+        super("VM" + (next_id++), cloudsim);
         this.mips = mips;
         this.cores = cores;
         this.inputPort = new Port(bandwidth);
@@ -116,7 +115,7 @@ public class VM extends SimEntity implements WorkflowEvent {
         this.price = price;
         this.running = false;
         this.cpuSecondsConsumed = 0.0;
-        CloudSim.addEntity(this);
+        getCloudsim().addEntity(this);
     }
 
     public void setDeprovisioningDelay(double deprovisioningDelay) {
@@ -229,7 +228,7 @@ public class VM extends SimEntity implements WorkflowEvent {
         if (launchTime < 0)
             return 0.0;
         else if (terminateTime < 0)
-            return CloudSim.clock() - launchTime;
+            return getCloudsim().clock() - launchTime;
         else
             return terminateTime - launchTime;
     }
@@ -266,18 +265,18 @@ public class VM extends SimEntity implements WorkflowEvent {
     }
 
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
-        case VM_LAUNCH:
+        case WorkflowEvent.VM_LAUNCH:
             launchVM();
             break;
-        case VM_TERMINATE:
+        case WorkflowEvent.VM_TERMINATE:
             terminateVM();
             break;
-        case JOB_SUBMIT:
+        case WorkflowEvent.JOB_SUBMIT:
             jobSubmit((Job) ev.getData());
             break;
-        case JOB_FINISHED:
+        case WorkflowEvent.JOB_FINISHED:
             jobFinish((Job) ev.getData());
             break;
         default:
@@ -305,8 +304,8 @@ public class VM extends SimEntity implements WorkflowEvent {
         running = false;
 
         // cancel future events
-        Predicate p = new PredicateType(JOB_FINISHED);
-        CloudSim.cancelAll(getId(), p);
+        Predicate p = new PredicateType(WorkflowEvent.JOB_FINISHED);
+        getCloudsim().cancelAll(getId(), p);
 
         // Move running jobs back to the queue...
         jobs.addAll(runningJobs);
@@ -315,8 +314,8 @@ public class VM extends SimEntity implements WorkflowEvent {
         // ... and fail all queued jobs
         for (Job job : jobs) {
             job.setResult(Job.Result.FAILURE);
-            send(job.getOwner(), 0.0, JOB_FINISHED, job);
-            Log.printLine(CloudSim.clock() + " Terminating job " + job.getID() + " on VM " + job.getVM().getId());
+            send(job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
+            getCloudsim().log(" Terminating job " + job.getID() + " on VM " + job.getVM().getId());
         }
 
         // Reset dynamic state
@@ -330,7 +329,7 @@ public class VM extends SimEntity implements WorkflowEvent {
             throw new RuntimeException("Cannot execute jobs: VM not running");
         }
 
-        job.setSubmitTime(CloudSim.clock());
+        job.setSubmitTime(getCloudsim().clock());
         job.setState(Job.State.IDLE);
         job.setVM(this);
 
@@ -360,14 +359,14 @@ public class VM extends SimEntity implements WorkflowEvent {
         runningJobs.remove(job);
 
         // Complete the job
-        job.setFinishTime(CloudSim.clock());
+        job.setFinishTime(getCloudsim().clock());
         job.setState(Job.State.TERMINATED);
 
         // Increment the usage
         cpuSecondsConsumed += job.getDuration();
 
         // Tell the owner
-        send(job.getOwner(), 0.0, JOB_FINISHED, job);
+        send(job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
 
         // The core that was running the job is now free
         idleCores++;

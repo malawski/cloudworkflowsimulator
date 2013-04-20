@@ -5,7 +5,7 @@ import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class TestFailureModel {
+public class FailureModelTest {
 
     private double computePercentFailures(double failureRate) {
         FailureModel m = new FailureModel(System.currentTimeMillis(), failureRate);

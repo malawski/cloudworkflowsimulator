@@ -4,14 +4,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
-
 import cws.core.Cloud;
 import cws.core.DAGJob;
 import cws.core.DAGJobListener;
 import cws.core.EnsembleManager;
 import cws.core.Job;
+import cws.core.Job.Result;
 import cws.core.JobListener;
 import cws.core.Provisioner;
 import cws.core.Scheduler;
@@ -20,7 +18,7 @@ import cws.core.VM;
 import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
-import cws.core.Job.Result;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.experiment.VMFactory;
 import cws.core.log.WorkflowLog;
@@ -30,8 +28,9 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     private double price;
 
     private Scheduler scheduler;
-
     private Provisioner provisioner;
+
+    private CloudSimWrapper cloudsim;
 
     private List<DAG> completedDAGs = new LinkedList<DAG>();
 
@@ -45,11 +44,12 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     protected long simulationFinishWallTime;
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, double price, Scheduler scheduler,
-            Provisioner provisioner) {
+            Provisioner provisioner, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags);
         this.price = price;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
+        this.cloudsim = cloudsim;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
     @Override
     public void dagFinished(DAGJob dagJob) {
-        actualDagFinishTime = Math.max(actualDagFinishTime, CloudSim.clock());
+        actualDagFinishTime = Math.max(actualDagFinishTime, cloudsim.clock());
     }
 
     @Override
@@ -79,13 +79,13 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
     @Override
     public void simulate(String logname) {
-        CloudSim.init(1, null, false);
+        cloudsim.init(1, null, false);
 
-        Cloud cloud = new Cloud();
+        Cloud cloud = new Cloud(cloudsim);
         cloud.addVMListener(this);
         provisioner.setCloud(cloud);
 
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
+        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
         engine.setDeadline(getDeadline());
         engine.setBudget(getBudget());
 
@@ -93,12 +93,12 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
         scheduler.setWorkflowEngine(engine);
 
-        EnsembleManager em = new EnsembleManager(getDAGs(), engine);
+        EnsembleManager em = new EnsembleManager(getDAGs(), engine, cloudsim);
         em.addDAGJobListener(this);
 
         WorkflowLog log = null;
         if (shouldGenerateLog()) {
-            log = new WorkflowLog();
+            log = new WorkflowLog(cloudsim);
             engine.addJobListener(log);
             cloud.addVMListener(log);
             em.addDAGJobListener(log);
@@ -112,20 +112,20 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         if (getBudget() < price)
             numVMs = 0;
 
-        Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
-        Log.printLine(CloudSim.clock() + " Total budget " + getBudget());
+        cloudsim.log(" Estimated num of VMs " + numVMs);
+        cloudsim.log(" Total budget " + getBudget());
 
         // Launch VMs
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numVMs; i++) {
             VM vm = VMFactory.createVM(1000, 1, 1.0, price);
             vms.add(vm);
-            CloudSim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+            cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         simulationStartWallTime = System.nanoTime();
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         simulationFinishWallTime = System.nanoTime();
 
@@ -135,9 +135,9 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
             log.printDAGJobs();
         }
 
-        Log.printLine(CloudSim.clock() + " Estimated num of VMs " + numVMs);
-        Log.printLine(CloudSim.clock() + " Total budget " + getBudget());
-        Log.printLine(CloudSim.clock() + " Total cost " + engine.getCost());
+        cloudsim.log(" Estimated num of VMs " + numVMs);
+        cloudsim.log(" Total budget " + getBudget());
+        cloudsim.log(" Total cost " + engine.getCost());
 
         // Set results
         actualCost = engine.getCost();

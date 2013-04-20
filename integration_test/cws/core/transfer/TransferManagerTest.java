@@ -4,26 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
+import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.WorkflowEvent;
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 
-public class TestRandomTransferManager {
+public class TransferManagerTest {
     public static final long KB = 1024;
     public static final long MB = 1024 * KB;
     public static final long GB = 1024 * MB;
 
-    private class TransferDriver extends SimEntity implements WorkflowEvent {
+    private class TransferDriver extends CWSSimEntity {
         private TransferManager tm;
         private List<Transfer> transfers;
 
-        public TransferDriver() {
-            super("TransferDriver");
-            this.tm = new TransferManager();
-            CloudSim.addEntity(this);
+        public TransferDriver(CloudSimWrapper cloudsim) {
+            super("TransferDriver", cloudsim);
+            this.tm = new TransferManager(cloudsim);
+            cloudsim.addEntity(this);
         }
 
         public void setTransfers(List<Transfer> transfers) {
@@ -35,12 +36,12 @@ public class TestRandomTransferManager {
             Random rng = new Random(0);
             // Submit all the transfers
             for (Transfer t : transfers) {
-                send(tm.getId(), rng.nextDouble(), NEW_TRANSFER, t);
+                send(tm.getId(), rng.nextDouble(), WorkflowEvent.NEW_TRANSFER, t);
             }
         }
 
         @Override
-        public void processEvent(SimEvent ev) {
+        public void processEvent(CWSSimEvent ev) {
         }
 
         @Override
@@ -48,13 +49,20 @@ public class TestRandomTransferManager {
         }
     }
 
+    private CloudSimWrapper cloudsim;
+
+    @Before
+    public void setUp() {
+        // TODO(_mequrel_): change to IoC in the future or to mock
+        cloudsim = new CloudSimWrapper();
+        cloudsim.init(1, null, false);
+    }
+
     @Test
     public void testSimpleTransfer24() {
-        CloudSim.init(1, null, false);
-
         Random rng = new Random(7);
 
-        TransferDriver td = new TransferDriver();
+        TransferDriver td = new TransferDriver(cloudsim);
 
         Port a = new Port(1000);
         Port[] b = new Port[4];
@@ -65,12 +73,12 @@ public class TestRandomTransferManager {
         List<Transfer> transfers = new ArrayList<Transfer>();
 
         for (int i = 0; i < 24; i++) {
-            Transfer t1 = new Transfer(a, b[i % 4], l, (int) (100 * rng.nextDouble()) * MB, td.getId());
+            Transfer t1 = new Transfer(a, b[i % 4], l, (int) (100 * rng.nextDouble()) * MB, td.getId(), cloudsim);
             transfers.add(t1);
         }
 
         td.setTransfers(transfers);
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
     }
 }

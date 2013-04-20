@@ -1,19 +1,20 @@
-package cws.core;
+package cws.core.stub;
 
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 
 /**
  * Used in tests using SimEntities to save a few lines of code.
  */
-public class SimEntityStub extends SimEntity {
+public class SimEntityStub extends CWSSimEntity {
 
-    public SimEntityStub(String name) {
-        super(name);
+    public SimEntityStub(String name, CloudSimWrapper cloudsim) {
+        super(name, cloudsim);
     }
 
-    public SimEntityStub() {
-        super("SimEntityStub");
+    public SimEntityStub(CloudSimWrapper cloudsim) {
+        super("SimEntityStub", cloudsim);
     }
 
     /**
@@ -27,7 +28,7 @@ public class SimEntityStub extends SimEntity {
      * @see org.cloudbus.cloudsim.core.SimEntity#processEvent(org.cloudbus.cloudsim.core.SimEvent)
      */
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(CWSSimEvent ev) {
     }
 
     /**

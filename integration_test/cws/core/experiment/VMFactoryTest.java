@@ -1,20 +1,28 @@
 package cws.core.experiment;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
-import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 import org.cloudbus.cloudsim.distributions.LognormalDistr;
+import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.VM;
+import cws.core.cloudsim.CloudSimWrapper;
 
 public class VMFactoryTest {
 
+    private CloudSimWrapper cloudsim;
+
+    @Before
+    public void setUp() {
+        // TODO(_mequrel_): change to IoC in the future or to mock
+        cloudsim = new CloudSimWrapper();
+    }
+
     @Test
     public void testCreateVM() {
-
-        CloudSim.init(1, null, false);
+        cloudsim.init(1, null, false);
         // To get mean m and stddev s, use:
         // sigma = sqrt(log(1+s^2/m^2))
         // mu = log(m)-0.5*log(1+s^2/m^2)

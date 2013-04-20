@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
-import org.cloudbus.cloudsim.core.CloudSim;
+import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.Cloud;
@@ -19,6 +19,7 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.algorithms.Algorithm;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.experiment.AlgorithmFactory;
@@ -30,23 +31,31 @@ import cws.core.log.WorkflowLog;
 import cws.core.scheduler.DAGDynamicScheduler;
 import cws.core.scheduler.EnsembleDynamicScheduler;
 
-public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
+public class DynamicProvisionerDynamicSchedulerTest {
     private String dagPath = "dags/";
+
+    private CloudSimWrapper cloudsim;
+
+    @Before
+    public void setUp() {
+        // TODO(_mequrel_): change to IoC in the future or to mock
+        cloudsim = new CloudSimWrapper();
+    }
 
     @Test
     public void testProvisionerScheduleDag100x10() {
-        CloudSim.init(1, null, false);
+        cloudsim.init(1, null, false);
 
-        Cloud cloud = new Cloud();
+        Cloud cloud = new Cloud(cloudsim);
 
-        SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner();
+        SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner(cloudsim);
         provisioner.setCloud(cloud);
 
-        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler();
+        DAGDynamicScheduler scheduler = new EnsembleDynamicScheduler(cloudsim);
 
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler);
+        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
 
-        WorkflowLog wfLog = new WorkflowLog();
+        WorkflowLog wfLog = new WorkflowLog(cloudsim);
         engine.addJobListener(wfLog);
         cloud.addVMListener(wfLog);
 
@@ -55,11 +64,11 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VM vm = new VM(1000, 1, 1.0, 1.0);
+            VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
-            CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_LAUNCH, vm);
+            cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         List<DAG> dags = new ArrayList<DAG>();
@@ -69,9 +78,10 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
             dags.add(dag);
         }
 
-        new EnsembleManager(dags, engine);
+        // FIXME (_mequrel): looks awkward, a comment should be added or some logic inversed
+        new EnsembleManager(dags, engine, cloudsim);
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         assertEquals(0, engine.getQueuedJobs().size());
 
@@ -94,7 +104,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
         ExperimentDescription param = new ExperimentDescription("test", "DPDS", "output", dagPath, dags, deadline,
                 budget, price, max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);
-        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param);
+        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim);
         algorithm.setGenerateLog(true);
         String fileName = param.getRunDirectory() + File.separator + "output-test-DPDS";
         algorithm.simulate(fileName);
@@ -107,7 +117,7 @@ public class DynamicProvisionerDynamicSchedulerTest implements WorkflowEvent {
 
         param = new ExperimentDescription("test", "SPSS", "output", dagPath, dags, deadline, budget, price,
                 max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);
-        algorithm = AlgorithmFactory.createAlgorithm(param);
+        algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim);
         algorithm.setGenerateLog(true);
         fileName = param.getRunDirectory() + File.separator + "output-test-SPSS";
         algorithm.simulate(fileName);

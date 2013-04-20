@@ -6,11 +6,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
-
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 
 /**
@@ -19,7 +17,7 @@ import cws.core.dag.Task;
  * 
  * @author Gideon Juve <juve@usc.edu>
  */
-public class WorkflowEngine extends SimEntity implements WorkflowEvent {
+public class WorkflowEngine extends CWSSimEntity {
     public static int next_id = 0;
 
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
@@ -79,44 +77,44 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
      */
     double budget = Double.MAX_VALUE;
 
-    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler) {
-        super("WorkflowEngine" + (next_id++));
+    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler, CloudSimWrapper cloudsim) {
+        super("WorkflowEngine" + (next_id++), cloudsim);
         this.jobFactory = jobFactory;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
-        CloudSim.addEntity(this);
+        getCloudsim().addEntity(this);
     }
 
-    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler) {
-        this(new SimpleJobFactory(), provisioner, scheduler);
+    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, CloudSimWrapper cloudsim) {
+        this(new SimpleJobFactory(), provisioner, scheduler, cloudsim);
     }
 
     @Override
     public void startEntity() {
         // send the first provisioning request
         // it should be sent after dag submissions events
-        send(this.getId(), 0.0001, PROVISIONING_REQUEST);
+        send(this.getId(), 0.0001, WorkflowEvent.PROVISIONING_REQUEST);
     }
 
     @Override
-    public void processEvent(SimEvent ev) {
+    public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
-        case VM_LAUNCHED:
+        case WorkflowEvent.VM_LAUNCHED:
             vmLaunched((VM) ev.getData());
             break;
-        case VM_TERMINATED:
+        case WorkflowEvent.VM_TERMINATED:
             vmTerminated((VM) ev.getData());
             break;
-        case DAG_SUBMIT:
+        case WorkflowEvent.DAG_SUBMIT:
             dagSubmit((DAGJob) ev.getData());
             break;
-        case JOB_STARTED:
+        case WorkflowEvent.JOB_STARTED:
             jobStarted((Job) ev.getData());
             break;
-        case JOB_FINISHED:
+        case WorkflowEvent.JOB_FINISHED:
             jobFinished((Job) ev.getData());
             break;
-        case PROVISIONING_REQUEST:
+        case WorkflowEvent.PROVISIONING_REQUEST:
             if (provisioner != null)
                 if (vms.size() > 0 || dags.size() > 0)
                     provisioner.provisionResources(this);
@@ -164,7 +162,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         allDAGJobs.add(dj);
 
         // The DAG starts immediately
-        sendNow(dj.getOwner(), DAG_STARTED, dj);
+        sendNow(dj.getOwner(), WorkflowEvent.DAG_STARTED, dj);
 
         // Queue any ready jobs for this DAG
         queueReadyJobs(dj);
@@ -176,7 +174,7 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
             Task t = dj.nextReadyTask();
             if (t == null)
                 break;
-            Job j = jobFactory.createJob(dj, t, getId());
+            Job j = jobFactory.createJob(dj, t, getId(), getCloudsim());
             j.setDAGJob(dj);
             j.setTask(t);
             j.setOwner(getId());
@@ -211,21 +209,24 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         Task t = j.getTask();
 
         // If the job succeeded
-        if (j.getResult() == Job.Result.SUCCESS && CloudSim.clock() <= deadline) {
+        if (j.getResult() == Job.Result.SUCCESS && getCloudsim().clock() <= deadline) {
 
-            // Mark the task as complete in the DAG
-            dj.completeTask(t);
+        	// FIXME: temporary hack - when data transfer job
+        	if(dj != null) {
+        		// Mark the task as complete in the DAG
+                dj.completeTask(t);
 
-            // Queue any jobs that are now ready
-            queueReadyJobs(dj);
+                // Queue any jobs that are now ready
+                queueReadyJobs(dj);
 
-            // If the workflow is complete, send it back
-            if (dj.isFinished()) {
-                dags.remove(dj);
-                sendNow(dj.getOwner(), DAG_FINISHED, dj);
-            }
+                // If the workflow is complete, send it back
+                if (dj.isFinished()) {
+                    dags.remove(dj);
+                    sendNow(dj.getOwner(), WorkflowEvent.DAG_FINISHED, dj);
+                }
+        	}
 
-            Log.printLine(CloudSim.clock() + " Job " + j.getID() + " finished on VM " + j.getVM().getId());
+            getCloudsim().log(" Job " + j.getTask().getId() + " finished on VM " + j.getVM().getId());
             VM vm = j.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))
@@ -235,9 +236,9 @@ public class WorkflowEngine extends SimEntity implements WorkflowEvent {
         // If the job failed
         if (j.getResult() == Job.Result.FAILURE) {
             // Retry the job
-            Log.printLine(CloudSim.clock() + " Job " + j.getID() + " failed on VM " + j.getVM().getId()
-                    + " resubmitting...");
-            Job retry = jobFactory.createJob(dj, t, getId());
+            getCloudsim()
+                    .log(" Job " + j.getTask().getId() + " failed on VM " + j.getVM().getId() + " resubmitting...");
+            Job retry = jobFactory.createJob(dj, t, getId(), getCloudsim());
             VM vm = j.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))

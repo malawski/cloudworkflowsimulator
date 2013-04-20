@@ -1,7 +1,6 @@
 package cws.core;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 
 /**
@@ -58,15 +57,18 @@ public class Job {
     /** Job result */
     private Result result;
 
-    public Job() {
+    private CloudSimWrapper cloudsim;
+
+    public Job(CloudSimWrapper cloudsim) {
         this.id = next_id++;
-        this.releaseTime = CloudSim.clock();
+        this.releaseTime = cloudsim.clock();
+        this.cloudsim = cloudsim;
         this.state = State.QUEUED;
         this.result = Result.NONE;
     }
 
     public void execute() {
-        setStartTime(CloudSim.clock());
+        setStartTime(cloudsim.clock());
         setState(Job.State.RUNNING);
         task.execute(this);
     }

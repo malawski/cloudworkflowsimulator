@@ -1,6 +1,6 @@
 package cws.core.transfer;
 
-import org.cloudbus.cloudsim.core.CloudSim;
+import cws.core.cloudsim.CloudSimWrapper;
 
 /**
  * Simulates a data/file transfer from one network port to another over
@@ -63,6 +63,8 @@ public class Transfer {
     /** Finish time of transfer */
     private double finishTime;
 
+    private CloudSimWrapper cloudsim;
+
     /**
      * Every transfer has a source port, a destination port, a link that the data travels
      * over, and an owner.
@@ -73,13 +75,14 @@ public class Transfer {
      * @param dataSize Size of data transfer in bytes
      * @param owner The entity that owns this transfer
      */
-    public Transfer(Port source, Port destination, Link link, long dataSize, int owner) {
+    public Transfer(Port source, Port destination, Link link, long dataSize, int owner, CloudSimWrapper cloudsim) {
         this.id = next_id++;
         this.src = source;
         this.dest = destination;
         this.link = link;
         this.dataSize = dataSize;
         this.owner = owner;
+        this.cloudsim = cloudsim;
 
         // Compute how much we are actually going to transfer
         int mtu = link.getMTU();
@@ -92,10 +95,11 @@ public class Transfer {
         // bandwidth assigned to the transfer is zero
         this.bytesRemaining = transferSize;
         this.currentBandwidth = 0;
-        this.lastUpdate = CloudSim.clock();
+        this.lastUpdate = cloudsim.clock();
 
         this.startTime = 0;
         this.finishTime = 0;
+
     }
 
     public long getDataSize() {
@@ -138,7 +142,7 @@ public class Transfer {
         this.currentBandwidth = newBandwidth;
 
         // Also record the time that the bandwidth was updated
-        this.lastUpdate = CloudSim.clock();
+        this.lastUpdate = cloudsim.clock();
     }
 
     /** Get the RTT for this transfer in ms */
@@ -156,12 +160,12 @@ public class Transfer {
 
     /** Start the transfer */
     protected void start() {
-        this.startTime = CloudSim.clock();
+        this.startTime = cloudsim.clock();
     }
 
     /** Finish the transfer */
     protected void finish() {
-        this.finishTime = CloudSim.clock();
+        this.finishTime = cloudsim.clock();
     }
 
     /** Get the total time required for the transfer */
@@ -190,7 +194,7 @@ public class Transfer {
 
         // Compute how much time has passed since the last time the
         // bandwidth was updated
-        double now = CloudSim.clock();
+        double now = cloudsim.clock();
         double elapsed = now - this.lastUpdate;
 
         // If any time has elapsed, then compute how many bytes remain
@@ -222,7 +226,7 @@ public class Transfer {
      */
     public double estimateTimeRemaining() {
         // Sanity check
-        if (CloudSim.clock() != this.lastUpdate) {
+        if (cloudsim.clock() != this.lastUpdate) {
             throw new RuntimeException("Tried to estimate time remaining "
                     + "when the bandwidth wasn't updated recently");
         }

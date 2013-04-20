@@ -1,10 +1,11 @@
 package cws.core.algorithms;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.HashMap;
 
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -15,8 +16,8 @@ import cws.core.dag.algorithms.TopologicalOrder;
  */
 public class MinMin extends StaticAlgorithm {
 
-    public MinMin(double budget, double deadline, List<DAG> dags) {
-        super(budget, deadline, dags);
+    public MinMin(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, cloudsim);
     }
 
     /**

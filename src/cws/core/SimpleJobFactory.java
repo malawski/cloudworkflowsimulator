@@ -1,5 +1,6 @@
 package cws.core;
 
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 
 /**
@@ -19,8 +20,8 @@ public class SimpleJobFactory implements JobFactory {
     }
 
     @Override
-    public Job createJob(DAGJob dagJob, Task task, int owner) {
-        Job j = new Job();
+    public Job createJob(DAGJob dagJob, Task task, int owner, CloudSimWrapper cloudsim) {
+        Job j = new Job(cloudsim);
         j.setDAGJob(dagJob);
         j.setTask(task);
         j.setOwner(owner);

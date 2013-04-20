@@ -4,23 +4,27 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
-
 import cws.core.Job;
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 
 /**
  * This scheduler submits jobs to VMs on FCFS basis.
  * The ready jobs are inserted into VM queues for execution.
  * @author malawski
  */
-public class DAGSchedulerFCFS implements Scheduler, WorkflowEvent {
+public class DAGSchedulerFCFS implements Scheduler {
 
     private List<VM> vms;
+
+    private CloudSimWrapper cloudsim;
+
+    public DAGSchedulerFCFS(CloudSimWrapper cloudsim) {
+        this.cloudsim = cloudsim;
+    }
 
     @Override
     public void scheduleJobs(WorkflowEngine engine) {
@@ -39,8 +43,8 @@ public class DAGSchedulerFCFS implements Scheduler, WorkflowEvent {
             if (vm.getQueueLength() == 0) {
                 Job job = jobs.poll(); // retrieve and remove job from ready set
                 job.setVM(vm);
-                Log.printLine(CloudSim.clock() + " Submitting job " + job.getID() + " to VM " + job.getVM().getId());
-                CloudSim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);
+                cloudsim.log(" Submitting job " + job.getID() + " to VM " + job.getVM().getId());
+                cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
             }
         }
     }

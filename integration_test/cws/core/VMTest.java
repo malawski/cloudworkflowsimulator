@@ -1,23 +1,27 @@
 package cws.core;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Before;
 import org.junit.Test;
 
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CWSSimEvent;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
-import static org.junit.Assert.*;
 
-public class TestVM {
+public class VMTest {
 
-    private class VMDriver extends SimEntity implements WorkflowEvent {
+    private CloudSimWrapper cloudsim;
+
+    private class VMDriver extends CWSSimEntity {
         private VM vm;
         private Job[] jobs;
 
-        public VMDriver(VM vm) {
-            super("VMDriver");
+        public VMDriver(VM vm, CloudSimWrapper cloudsim) {
+            super("VMDriver", cloudsim);
             this.vm = vm;
-            CloudSim.addEntity(this);
+            getCloudsim().addEntity(this);
         }
 
         public void setJobs(Job[] jobs) {
@@ -26,24 +30,24 @@ public class TestVM {
 
         @Override
         public void startEntity() {
-            sendNow(vm.getId(), VM_LAUNCH);
+            sendNow(vm.getId(), WorkflowEvent.VM_LAUNCH);
 
             // Submit all the jobs
             for (Job j : jobs) {
                 j.setOwner(getId());
-                send(vm.getId(), 0.0, JOB_SUBMIT, j);
+                send(vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, j);
             }
         }
 
         @Override
-        public void processEvent(SimEvent ev) {
+        public void processEvent(CWSSimEvent ev) {
             switch (ev.getTag()) {
-            case JOB_STARTED: {
+            case WorkflowEvent.JOB_STARTED: {
                 Job j = (Job) ev.getData();
                 assertEquals(Job.State.RUNNING, j.getState());
                 break;
             }
-            case JOB_FINISHED: {
+            case WorkflowEvent.JOB_FINISHED: {
                 Job j = (Job) ev.getData();
                 assertEquals(Job.State.TERMINATED, j.getState());
                 break;
@@ -56,19 +60,24 @@ public class TestVM {
         }
     }
 
+    @Before
+    public void setUp() {
+        // TODO(_mequrel_): change to IoC in the future
+        cloudsim = new CloudSimWrapper();
+        cloudsim.init(1, null, false);
+    }
+
     @Test
     public void testSingleJob() {
-        CloudSim.init(1, null, false);
-
-        Job j = new Job();
+        Job j = new Job(cloudsim);
         j.setTask(new Task("task_id", "transformation", 1000));
 
-        VM vm = new VM(100, 1, 100, 0.40);
+        VM vm = new VM(100, 1, 100, 0.40, cloudsim);
 
-        VMDriver driver = new VMDriver(vm);
+        VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j });
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         assertEquals(0.0, j.getReleaseTime(), 0.0);
         assertEquals(0.0, j.getSubmitTime(), 0.0);
@@ -78,19 +87,16 @@ public class TestVM {
 
     @Test
     public void testTwoJobs() {
-        CloudSim.init(1, null, false);
-
-        Job j1 = new Job();
+        Job j1 = new Job(cloudsim);
         j1.setTask(new Task("task_id", "transformation", 1000));
-        Job j2 = new Job();
+        Job j2 = new Job(cloudsim);
         j2.setTask(new Task("task_id2", "transformation", 1000));
+        VM vm = new VM(100, 1, 100, 0.40, cloudsim);
 
-        VM vm = new VM(100, 1, 100, 0.40);
-
-        VMDriver driver = new VMDriver(vm);
+        VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         assertEquals(0.0, j1.getReleaseTime(), 0.0);
         assertEquals(0.0, j1.getSubmitTime(), 0.0);
@@ -105,20 +111,18 @@ public class TestVM {
 
     @Test
     public void testMultiCoreVM() {
-        CloudSim.init(1, null, false);
-
-        Job j1 = new Job();
+        Job j1 = new Job(cloudsim);
         j1.setTask(new Task("task_id1", "transformation", 1000));
 
-        Job j2 = new Job();
+        Job j2 = new Job(cloudsim);
         j2.setTask(new Task("task_id2", "transformation", 1000));
 
-        VM vm = new VM(100, 2, 100, 0.40);
+        VM vm = new VM(100, 2, 100, 0.40, cloudsim);
 
-        VMDriver driver = new VMDriver(vm);
+        VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         assertEquals(0.0, j1.getReleaseTime(), 0.0);
         assertEquals(0.0, j1.getSubmitTime(), 0.0);

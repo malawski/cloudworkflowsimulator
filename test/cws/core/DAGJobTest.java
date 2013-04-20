@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 
-public class TestDAGJob {
+public class DAGJobTest {
 
     public DAG diamondDAG() {
         DAG diamond = new DAG();

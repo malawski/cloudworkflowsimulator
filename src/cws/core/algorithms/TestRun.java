@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.FailureModel;
 import cws.core.UniformRuntimeDistribution;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
@@ -146,8 +146,11 @@ public class TestRun {
         System.out.printf("delay = %f\n", delay);
         System.out.printf("failureRate = %f\n", failureRate);
 
+        // TODO(_mequrel_): change to IoC in the future
+        CloudSimWrapper cloudsim = new CloudSimWrapper();
+
         // Disable cloudsim logging
-        Log.disable();
+        cloudsim.disableLogging();
 
         // Determine the distribution
         String[] names = null;
@@ -223,6 +226,8 @@ public class TestRun {
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
 
+
+
         PrintStream fileOut = null;
         try {
             fileOut = new PrintStream(new FileOutputStream(outputfile));
@@ -237,11 +242,11 @@ public class TestRun {
                     System.out.print(".");
                     Algorithm a = null;
                     if ("SPSS".equals(algorithm)) {
-                        a = new SPSS(budget, deadline, dags, alpha);
+                        a = new SPSS(budget, deadline, dags, alpha, cloudsim);
                     } else if ("DPDS".equals(algorithm)) {
-                        a = new DPDS(budget, deadline, dags, price, maxScaling);
+                        a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim);
                     } else if ("WADPDS".equals(algorithm)) {
-                        a = new WADPDS(budget, deadline, dags, price, maxScaling);
+                        a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim);
                     } else {
                         throw new RuntimeException("Unknown algorithm: " + algorithm);
                     }

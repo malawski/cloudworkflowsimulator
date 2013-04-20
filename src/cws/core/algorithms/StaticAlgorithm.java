@@ -8,14 +8,12 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
-
 import cws.core.Cloud;
 import cws.core.DAGJob;
 import cws.core.DAGJobListener;
 import cws.core.EnsembleManager;
 import cws.core.Job;
+import cws.core.Job.Result;
 import cws.core.JobListener;
 import cws.core.Provisioner;
 import cws.core.Scheduler;
@@ -23,7 +21,7 @@ import cws.core.VM;
 import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
-import cws.core.Job.Result;
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -31,8 +29,10 @@ import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.experiment.VMFactory;
 import cws.core.log.WorkflowLog;
 
-public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent, Provisioner, Scheduler, VMListener,
+public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener,
         JobListener, DAGJobListener {
+
+    private CloudSimWrapper cloudsim;
 
     /** Engine that executes workflows */
     private WorkflowEngine engine;
@@ -70,8 +70,9 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     protected long simulationStartWallTime;
     protected long simulationFinishWallTime;
 
-    public StaticAlgorithm(double budget, double deadline, List<DAG> dags) {
+    public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags);
+        this.cloudsim = cloudsim;
     }
 
     @Override
@@ -153,6 +154,13 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     }
 
     /**
+     * @return the cloudsim
+     */
+    protected CloudSimWrapper getCloudsim() {
+        return cloudsim;
+    }
+
+    /**
      * Develop a plan for running as many DAGs as we can
      */
     public void plan() {
@@ -164,12 +172,12 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
                 if (newPlan.getCost() <= getBudget()) {
                     admittedDAGs.add(dag);
                     plan = newPlan;
-                    Log.printLine("Admitting DAG. Cost of new plan: " + plan.getCost());
+                    getCloudsim().log("Admitting DAG. Cost of new plan: " + plan.getCost());
                 } else {
-                    Log.printLine("Rejecting DAG: New plan exceeds budget: " + newPlan.getCost());
+                    getCloudsim().log("Rejecting DAG: New plan exceeds budget: " + newPlan.getCost());
                 }
             } catch (NoFeasiblePlan m) {
-                Log.printLine("Rejecting DAG: " + m.getMessage());
+                getCloudsim().log("Rejecting DAG: " + m.getMessage());
             }
         }
 
@@ -309,7 +317,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         int priority = dags.indexOf(dag);
         DAGJob dagJob = new DAGJob(dag, manager.getId());
         dagJob.setPriority(priority);
-        CloudSim.send(manager.getId(), engine.getId(), 0.0, DAG_SUBMIT, dagJob);
+        cloudsim.send(manager.getId(), engine.getId(), 0.0, WorkflowEvent.DAG_SUBMIT, dagJob);
     }
 
     @Override
@@ -406,13 +414,13 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
     }
 
     private void launchVM(VM vm, double start) {
-        double now = CloudSim.clock();
+        double now = cloudsim.clock();
         double delay = start - now;
-        CloudSim.send(engine.getId(), cloud.getId(), delay, VM_LAUNCH, vm);
+        cloudsim.send(engine.getId(), cloud.getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
     }
 
     private void terminateVM(VM vm) {
-        CloudSim.send(engine.getId(), cloud.getId(), 0.0, VM_TERMINATE, vm);
+        cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
     }
 
     private void submitJob(VM vm, Job job) {
@@ -434,7 +442,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
         // Submit the job to the VM
         idle.remove(vm);
         job.setVM(vm);
-        CloudSim.send(engine.getId(), vm.getId(), 0.0, JOB_SUBMIT, job);
+        cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
     }
 
     @Override
@@ -448,16 +456,16 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
             throw new RuntimeException("DAG not finished");
         }
         dagsFinished += 1;
-        actualDagFinishTime = Math.max(CloudSim.clock(), actualDagFinishTime);
+        actualDagFinishTime = Math.max(cloudsim.clock(), actualDagFinishTime);
     }
 
     @Override
     public void simulate(String logname) {
-        CloudSim.init(1, null, false);
+        cloudsim.init(1, null, false);
 
-        Cloud cloud = new Cloud();
-        WorkflowEngine engine = new WorkflowEngine(this, this);
-        EnsembleManager manager = new EnsembleManager(engine);
+        Cloud cloud = new Cloud(cloudsim);
+        WorkflowEngine engine = new WorkflowEngine(this, this, cloudsim);
+        EnsembleManager manager = new EnsembleManager(engine, cloudsim);
 
         setCloud(cloud);
         setEnsembleManager(manager);
@@ -465,7 +473,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
 
         WorkflowLog log = null;
         if (shouldGenerateLog()) {
-            log = new WorkflowLog();
+            log = new WorkflowLog(cloudsim);
             engine.addJobListener(log);
             cloud.addVMListener(log);
             manager.addDAGJobListener(log);
@@ -477,7 +485,7 @@ public abstract class StaticAlgorithm extends Algorithm implements WorkflowEvent
 
         simulationStartWallTime = System.nanoTime();
 
-        CloudSim.startSimulation();
+        cloudsim.startSimulation();
 
         simulationFinishWallTime = System.nanoTime();
 

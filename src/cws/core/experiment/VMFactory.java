@@ -6,6 +6,7 @@ import cws.core.FailureModel;
 import cws.core.IdentityRuntimeDistribution;
 import cws.core.RuntimeDistribution;
 import cws.core.VM;
+import cws.core.cloudsim.CloudSimWrapper;
 
 public class VMFactory {
 
@@ -54,7 +55,8 @@ public class VMFactory {
     }
 
     public static VM createVM(int mips, int cores, double bandwidth, double price) {
-        VM vm = new VM(mips, cores, bandwidth, price);
+        // TODO(_mequrel_): change to IoC in the future
+        VM vm = new VM(mips, cores, bandwidth, price, new CloudSimWrapper());
         vm.setProvisioningDelay(provisioningDelayDistribution.sample());
         vm.setDeprovisioningDelay(deprovisioningDelayDistribution.sample());
         vm.setRuntimeDistribution(runtimeDistribution);
