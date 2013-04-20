@@ -1,4 +1,4 @@
-package cws.core;
+package cws.core.stub;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;

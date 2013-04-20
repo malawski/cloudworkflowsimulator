@@ -9,7 +9,7 @@ import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 
-public class TestVM {
+public class VMTest {
 
     private CloudSimWrapper cloudsim;
 

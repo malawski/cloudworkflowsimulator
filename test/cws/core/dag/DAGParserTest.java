@@ -10,7 +10,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 
-public class TestDAGParser {
+public class DAGParserTest {
 
     @Test
     public void testSmall() {
