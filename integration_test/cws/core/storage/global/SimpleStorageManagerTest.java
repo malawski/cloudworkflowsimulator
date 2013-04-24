@@ -5,6 +5,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
+import cws.core.CloudSimTest;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.stub.SimEntityStub;
@@ -12,7 +13,7 @@ import cws.core.stub.SimEntityStub;
 /**
  * Tests {@link StorageManager}.
  */
-public class SimpleStorageManagerTest {
+public class SimpleStorageManagerTest extends CloudSimTest {
     private Random random;
     private GlobalStorageManager storageManager;
 

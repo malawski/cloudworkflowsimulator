@@ -8,7 +8,7 @@ import org.junit.Test;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.Task;
+import cws.core.dag.ComputationTask;
 
 public class VMTest {
 
@@ -70,7 +70,7 @@ public class VMTest {
     @Test
     public void testSingleJob() {
         Job j = new Job(cloudsim);
-        j.setTask(new Task("task_id", "transformation", 1000));
+        j.setTask(new ComputationTask("task_id", "transformation", 1000));
 
         VM vm = new VM(100, 1, 100, 0.40, cloudsim);
 
@@ -88,9 +88,9 @@ public class VMTest {
     @Test
     public void testTwoJobs() {
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id", "transformation", 1000));
+        j1.setTask(new ComputationTask("task_id", "transformation", 1000));
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000));
+        j2.setTask(new ComputationTask("task_id2", "transformation", 1000));
         VM vm = new VM(100, 1, 100, 0.40, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
@@ -112,10 +112,10 @@ public class VMTest {
     @Test
     public void testMultiCoreVM() {
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id1", "transformation", 1000));
+        j1.setTask(new ComputationTask("task_id1", "transformation", 1000));
 
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000));
+        j2.setTask(new ComputationTask("task_id2", "transformation", 1000));
 
         VM vm = new VM(100, 2, 100, 0.40, cloudsim);
 

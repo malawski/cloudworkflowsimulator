@@ -10,8 +10,8 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.ComputationTask;
 import cws.core.dag.DAG;
-import cws.core.dag.Task;
 
 /**
  * This scheduler submits workflow ensemble to VMs on FCFS basis.
@@ -103,8 +103,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
         double costEstimate = estimateCost(dj, engine);
         double budgetRemaining = estimateBudgetRemaining(engine);
-        getCloudSim().log(" Cost estimate: " + costEstimate + " Budget remaining: "
-                + budgetRemaining);
+        getCloudSim().log(" Cost estimate: " + costEstimate + " Budget remaining: " + budgetRemaining);
         return costEstimate < budgetRemaining;
     }
 
@@ -159,7 +158,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
         getCloudSim().log(
                 " Budget for new VMs: " + rn + " Budget on running VMs: " + rc
-                + " Remaining budget of admitted workflows: " + ra);
+                        + " Remaining budget of admitted workflows: " + ra);
 
         return rn + rc - ra - safetyMargin;
     }
@@ -175,10 +174,11 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         double cost = 0.0;
         DAG dag = admittedDJ.getDAG();
         for (String taskName : dag.getTasks()) {
-            Task task = dag.getTaskById(taskName);
+            ComputationTask task = dag.getTaskById(taskName);
             if (!admittedDJ.isComplete(task))
                 cost += task.getSize() * vmPrice(engine);
         }
+        // TODO(bryk): estimate data transfers
         return cost / 3600.0;
     }
 

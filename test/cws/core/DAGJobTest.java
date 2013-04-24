@@ -3,6 +3,7 @@ package cws.core;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import cws.core.dag.ComputationTask;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 
@@ -10,10 +11,10 @@ public class DAGJobTest {
 
     public DAG diamondDAG() {
         DAG diamond = new DAG();
-        Task a = new Task("a", "test::a", 10);
-        Task b = new Task("b", "test::b", 5);
-        Task c = new Task("c", "test::c", 5);
-        Task d = new Task("d", "test::d", 10);
+        ComputationTask a = new ComputationTask("a", "test::a", 10);
+        ComputationTask b = new ComputationTask("b", "test::b", 5);
+        ComputationTask c = new ComputationTask("c", "test::c", 5);
+        ComputationTask d = new ComputationTask("d", "test::d", 10);
         diamond.addTask(a);
         diamond.addTask(b);
         diamond.addTask(c);

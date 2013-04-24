@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.ComputationTask;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -26,11 +27,11 @@ public class Backtrack extends StaticAlgorithm {
         TopologicalOrder order = new TopologicalOrder(dag);
 
         // Initial task assignment
-        HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
-        HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
+        HashMap<ComputationTask, VMType> vmTypes = new HashMap<ComputationTask, VMType>();
+        HashMap<ComputationTask, Double> runtimes = new HashMap<ComputationTask, Double>();
         double minCost = 0.0;
         double totalRuntime = 0.0;
-        for (Task t : order) {
+        for (ComputationTask t : order) {
 
             // Initially we assign each VM to the SMALL type
             VMType vm = VMType.SMALL;
@@ -69,8 +70,8 @@ public class Backtrack extends StaticAlgorithm {
          * }
          */
 
-        HashMap<Task, Double> deadlines = new HashMap<Task, Double>();
-        for (Task t : order.reverse()) {
+        HashMap<ComputationTask, Double> deadlines = new HashMap<ComputationTask, Double>();
+        for (ComputationTask t : order.reverse()) {
             double deadline = getDeadline();
             deadline = deadline - (getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay());
             for (Task c : t.getChildren()) {
@@ -96,8 +97,8 @@ public class Backtrack extends StaticAlgorithm {
         return best;
     }
 
-    boolean planDAG(DAG dag, Plan plan, HashMap<Task, Double> runtimes, HashMap<Task, Double> deadlines,
-            HashMap<Task, VMType> vmTypes) {
+    boolean planDAG(DAG dag, Plan plan, HashMap<ComputationTask, Double> runtimes,
+            HashMap<ComputationTask, Double> deadlines, HashMap<ComputationTask, VMType> vmTypes) {
 
         TopologicalOrder order = new TopologicalOrder(dag);
 

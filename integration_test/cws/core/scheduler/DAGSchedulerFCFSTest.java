@@ -19,9 +19,9 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.ComputationTask;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
-import cws.core.dag.Task;
 import cws.core.log.WorkflowLog;
 
 public class DAGSchedulerFCFSTest {
@@ -76,7 +76,7 @@ public class DAGSchedulerFCFSTest {
 
         DAG dag = new DAG();
         for (int i = 0; i < 100; i++) {
-            Task task = new Task("TASK" + i, "transformation", (i % 10));
+            ComputationTask task = new ComputationTask("TASK" + i, "transformation", (i % 10));
             dag.addTask(task);
         }
 

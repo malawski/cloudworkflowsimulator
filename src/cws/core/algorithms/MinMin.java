@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.ComputationTask;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -28,11 +29,11 @@ public class MinMin extends StaticAlgorithm {
         TopologicalOrder order = new TopologicalOrder(dag);
 
         // Initial task assignment
-        HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
-        HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
+        HashMap<ComputationTask, VMType> vmTypes = new HashMap<ComputationTask, VMType>();
+        HashMap<ComputationTask, Double> runtimes = new HashMap<ComputationTask, Double>();
         double minCost = 0.0;
         double totalRuntime = 0.0;
-        for (Task t : order) {
+        for (ComputationTask t : order) {
 
             // Initially we assign each VM to the SMALL type
             VMType vm = VMType.SMALL;
@@ -40,7 +41,7 @@ public class MinMin extends StaticAlgorithm {
 
             // The runtime is just the size of the task (MI) divided by the
             // MIPS of the VM
-            double runtime = t.getSize() / vm.mips;
+            double runtime = t.getSize();
             runtimes.put(t, runtime);
 
             // Compute the minimum cost of running this workflow
@@ -84,7 +85,7 @@ public class MinMin extends StaticAlgorithm {
          */
 
         // Use the fancy deadline distribution
-        HashMap<Task, Double> deadlines = deadlineDistribution(order, runtimes, 0.7);
+        HashMap<ComputationTask, Double> deadlines = deadlineDistribution(order, runtimes, 0.7);
 
         // Create a new plan
         Plan plan = new Plan(currentPlan);

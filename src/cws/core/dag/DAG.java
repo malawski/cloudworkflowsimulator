@@ -9,12 +9,12 @@ import java.util.List;
  */
 public class DAG {
     private HashMap<String, Double> files = new HashMap<String, Double>();
-    private HashMap<String, Task> tasks = new HashMap<String, Task>();
+    private HashMap<String, ComputationTask> tasks = new HashMap<String, ComputationTask>();
 
     public DAG() {
     }
 
-    public void addTask(Task t) {
+    public void addTask(ComputationTask t) {
         if (tasks.containsKey(t.getId())) {
             throw new RuntimeException("Task already exists: " + t.getId());
         }
@@ -29,11 +29,11 @@ public class DAG {
     }
 
     public void addEdge(String parent, String child) {
-        Task p = tasks.get(parent);
+        ComputationTask p = tasks.get(parent);
         if (p == null) {
             throw new RuntimeException("Invalid edge: Parent not found: " + parent);
         }
-        Task c = tasks.get(child);
+        ComputationTask c = tasks.get(child);
         if (c == null) {
             throw new RuntimeException("Invalid edge: Child not found: " + child);
         }
@@ -42,12 +42,12 @@ public class DAG {
     }
 
     public void setInputs(String taskId, List<String> inputs) {
-        Task t = getTaskById(taskId);
+        ComputationTask t = getTaskById(taskId);
         t.setInputFiles(inputs);
     }
 
     public void setOutputs(String task, List<String> outputs) {
-        Task t = getTaskById(task);
+        ComputationTask t = getTaskById(task);
         t.setOutputFiles(outputs);
     }
 
@@ -59,7 +59,7 @@ public class DAG {
         return files.size();
     }
 
-    public Task getTaskById(String id) {
+    public ComputationTask getTaskById(String id) {
         if (!tasks.containsKey(id)) {
             throw new RuntimeException("Task not found: " + id);
         }

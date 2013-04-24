@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import cws.core.dag.ComputationTask;
 import cws.core.dag.DAG;
-import cws.core.dag.Task;
 
 /**
  * Compute topological order of a DAG.
@@ -19,39 +19,39 @@ import cws.core.dag.Task;
  * @author malawski
  * 
  */
-public class TopologicalOrder implements Iterable<Task> {
-    private Set<Task> marked = new HashSet<Task>();
-    private Deque<Task> postorder = new LinkedList<Task>();
+public class TopologicalOrder implements Iterable<ComputationTask> {
+    private Set<ComputationTask> marked = new HashSet<ComputationTask>();
+    private Deque<ComputationTask> postorder = new LinkedList<ComputationTask>();
 
     public TopologicalOrder(DAG dag) {
         for (String taskName : dag.getTasks()) {
-            Task task = dag.getTaskById(taskName);
+            ComputationTask task = dag.getTaskById(taskName);
             if (!marked.contains(task))
                 dfs(task);
         }
         marked = null;
     }
 
-    private void dfs(Task task) {
+    private void dfs(ComputationTask task) {
         marked.add(task);
-        for (Task child : task.getChildren()) {
+        for (ComputationTask child : task.getChildren()) {
             if (!marked.contains(child))
                 dfs(child);
         }
         postorder.add(task);
     }
 
-    public Iterable<Task> reverse() {
-        return new Iterable<Task>() {
+    public Iterable<ComputationTask> reverse() {
+        return new Iterable<ComputationTask>() {
             @Override
-            public Iterator<Task> iterator() {
+            public Iterator<ComputationTask> iterator() {
                 return postorder.iterator();
             }
         };
     }
 
     @Override
-    public Iterator<Task> iterator() {
+    public Iterator<ComputationTask> iterator() {
         return postorder.descendingIterator();
     }
 }

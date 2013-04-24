@@ -1,14 +1,10 @@
 package cws.core.dag;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
 import org.junit.Test;
-
-import cws.core.dag.DAG;
-import cws.core.dag.DAGParser;
-import cws.core.dag.Task;
 
 public class DAGParserTest {
 
@@ -16,7 +12,7 @@ public class DAGParserTest {
     public void testSmall() {
         DAG dag = DAGParser.parseDAG(new File("dags/cybershake_small.dag"));
         assertEquals(dag.numTasks(), 25703);
-        Task t = dag.getTaskById("ID1_8_6");
+        ComputationTask t = dag.getTaskById("ID1_8_6");
         assertEquals(t.getId(), "ID1_8_6");
         assertEquals(t.getInputFiles().size(), 3);
         assertEquals(t.getOutputFiles().size(), 2);
@@ -33,7 +29,7 @@ public class DAGParserTest {
         DAG dag = DAGParser.parseDAX(new File("dags/Montage_25.xml"));
         assertEquals(25, dag.numTasks());
         assertEquals(38, dag.numFiles());
-        Task t = dag.getTaskById("ID00022");
+        ComputationTask t = dag.getTaskById("ID00022");
         assertEquals(t.getId(), "ID00022");
         assertEquals(2, t.getInputFiles().size());
         assertEquals(2, t.getOutputFiles().size());

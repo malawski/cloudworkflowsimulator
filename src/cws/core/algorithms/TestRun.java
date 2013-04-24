@@ -14,10 +14,10 @@ import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 import cws.core.FailureModel;
 import cws.core.UniformRuntimeDistribution;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.ComputationTask;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
-import cws.core.dag.Task;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
 
@@ -198,7 +198,7 @@ public class TestRun {
 
             if (scalingFactor > 1.0) {
                 for (String tid : dag.getTasks()) {
-                    Task t = dag.getTaskById(tid);
+                    ComputationTask t = dag.getTaskById(tid);
                     t.setSize(t.getSize() * scalingFactor);
                 }
             }
@@ -225,8 +225,6 @@ public class TestRun {
 
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
-
-
 
         PrintStream fileOut = null;
         try {

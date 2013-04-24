@@ -22,6 +22,7 @@ import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.ComputationTask;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -29,8 +30,8 @@ import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.experiment.VMFactory;
 import cws.core.log.WorkflowLog;
 
-public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener,
-        JobListener, DAGJobListener {
+public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener,
+        DAGJobListener {
 
     private CloudSimWrapper cloudsim;
 
@@ -220,7 +221,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     /**
      * Assign deadlines to each task in the DAG
      */
-    HashMap<Task, Double> deadlineDistribution(TopologicalOrder order, HashMap<Task, Double> runtimes, double alpha) {
+    HashMap<ComputationTask, Double> deadlineDistribution(TopologicalOrder order,
+            HashMap<ComputationTask, Double> runtimes, double alpha) {
 
         // Sanity check
         if (alpha < 0 || alpha > 1) {
@@ -296,8 +298,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
          * 
          * t.deadline = max[p in t.parents](p.deadline) + t.runtime + shares[t.level]
          */
-        HashMap<Task, Double> deadlines = new HashMap<Task, Double>();
-        for (Task t : order) {
+        HashMap<ComputationTask, Double> deadlines = new HashMap<ComputationTask, Double>();
+        for (ComputationTask t : order) {
             int level = levels.get(t);
             double latestDeadline = 0.0;
             for (Task p : t.getParents()) {
@@ -506,18 +508,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             log.printJobs(logname);
             log.printVmList(logname);
             log.printDAGJobs();
-        }
-    }
-
-    enum VMType {
-        SMALL(1, 1.0), MEDIUM(5, 0.40), LARGE(10, 0.80);
-
-        int mips;
-        double price;
-
-        VMType(int mips, double price) {
-            this.mips = mips;
-            this.price = price;
         }
     }
 

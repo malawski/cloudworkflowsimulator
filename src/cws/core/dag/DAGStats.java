@@ -16,8 +16,8 @@ public class DAGStats {
         minCost = 0.0;
         totalRuntime = 0.0;
 
-        HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
-        for (Task t : order) {
+        HashMap<ComputationTask, Double> runtimes = new HashMap<ComputationTask, Double>();
+        for (ComputationTask t : order) {
 
             // The runtime is just the size of the task (MI) divided by the
             // MIPS of the VM

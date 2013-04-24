@@ -1,5 +1,10 @@
 package cws.core;
 
+import static cws.core.WorkflowEvent.JOB_STARTED;
+
+import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.core.CloudSim;
+
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 
@@ -70,7 +75,10 @@ public class Job {
     public void execute() {
         setStartTime(cloudsim.clock());
         setState(Job.State.RUNNING);
+        // Tell the owner
+        CloudSim.send(getVM().getId(), getOwner(), 0.0, JOB_STARTED, this);
         task.execute(this);
+        Log.printLine(CloudSim.clock() + " Starting job " + getID() + " on VM " + getVM().getId());
     }
 
     public int getID() {
