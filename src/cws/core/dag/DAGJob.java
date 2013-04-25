@@ -1,11 +1,9 @@
-package cws.core;
+package cws.core.dag;
 
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import cws.core.dag.DAG;
-import cws.core.dag.Task;
 
 /**
  * This class records information about the execution of a DAG, including the

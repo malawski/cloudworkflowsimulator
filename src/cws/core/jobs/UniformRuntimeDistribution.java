@@ -1,4 +1,4 @@
-package cws.core;
+package cws.core.jobs;
 
 import java.util.Random;
 

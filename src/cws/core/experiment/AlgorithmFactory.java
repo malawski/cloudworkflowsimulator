@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import cws.core.UniformRuntimeDistribution;
 import cws.core.algorithms.Algorithm;
 import cws.core.algorithms.Backtrack;
 import cws.core.algorithms.DPDS;
@@ -16,6 +15,7 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
+import cws.core.jobs.UniformRuntimeDistribution;
 
 /**
  * Factory for creating algorithms based on experiment description.

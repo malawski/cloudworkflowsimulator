@@ -4,12 +4,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
-import cws.core.Job;
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.jobs.Job;
 
 /**
  * This scheduler submits jobs to VMs on FCFS basis.

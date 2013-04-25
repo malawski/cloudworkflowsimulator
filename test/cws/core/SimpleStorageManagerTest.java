@@ -1,4 +1,4 @@
-package cws.core.storage.global;
+package cws.core;
 
 import java.util.Random;
 
@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.storage.global.GlobalStorageManager;
 import cws.core.stub.SimEntityStub;
 
 /**

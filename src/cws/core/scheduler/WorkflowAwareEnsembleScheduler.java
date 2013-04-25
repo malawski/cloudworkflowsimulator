@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 
-import cws.core.DAGJob;
-import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
+import cws.core.jobs.Job;
 
 /**
  * This scheduler submits workflow ensemble to VMs on FCFS basis.

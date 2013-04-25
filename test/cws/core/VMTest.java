@@ -8,6 +8,7 @@ import org.junit.Test;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.jobs.Job;
 
 public class VMTest {
 

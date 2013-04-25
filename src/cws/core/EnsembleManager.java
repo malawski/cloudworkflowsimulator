@@ -7,6 +7,8 @@ import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGJob;
+import cws.core.dag.DAGJobListener;
 
 /**
  * This class manages a collection of DAGs and submits them to a WorkflowEngine

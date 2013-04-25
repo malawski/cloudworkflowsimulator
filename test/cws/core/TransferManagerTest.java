@@ -1,4 +1,4 @@
-package cws.core.transfer;
+package cws.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,10 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.transfer.Link;
+import cws.core.transfer.Port;
+import cws.core.transfer.Transfer;
+import cws.core.transfer.TransferManager;
 
 public class TransferManagerTest {
     public static final long KB = 1024;

@@ -1,4 +1,4 @@
-package cws.core.experiment;
+package cws.core;
 
 import static org.junit.Assert.assertTrue;
 
@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.experiment.VMFactory;
 
 public class VMFactoryTest {
 

@@ -3,10 +3,10 @@ package cws.core.experiment;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.FailureModel;
-import cws.core.IdentityRuntimeDistribution;
-import cws.core.RuntimeDistribution;
 import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.jobs.IdentityRuntimeDistribution;
+import cws.core.jobs.RuntimeDistribution;
 
 public class VMFactory {
 

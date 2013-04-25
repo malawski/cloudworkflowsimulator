@@ -1,5 +1,7 @@
-package cws.core;
+package cws.core.jobs;
 
+import cws.core.VM;
+import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 
 /**

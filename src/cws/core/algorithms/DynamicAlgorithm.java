@@ -5,22 +5,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cws.core.Cloud;
-import cws.core.DAGJob;
-import cws.core.DAGJobListener;
 import cws.core.EnsembleManager;
-import cws.core.Job;
-import cws.core.Job.Result;
-import cws.core.JobListener;
 import cws.core.Provisioner;
 import cws.core.Scheduler;
-import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGJob;
+import cws.core.dag.DAGJobListener;
 import cws.core.experiment.VMFactory;
+import cws.core.jobs.Job;
+import cws.core.jobs.JobListener;
+import cws.core.jobs.SimpleJobFactory;
+import cws.core.jobs.Job.Result;
 import cws.core.log.WorkflowLog;
 
 public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMListener, JobListener {

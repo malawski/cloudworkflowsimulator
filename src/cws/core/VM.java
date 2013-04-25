@@ -11,6 +11,9 @@ import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.exception.UnknownWorkflowEventException;
+import cws.core.jobs.IdentityRuntimeDistribution;
+import cws.core.jobs.Job;
+import cws.core.jobs.RuntimeDistribution;
 import cws.core.transfer.Port;
 
 /**
