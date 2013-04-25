@@ -1,4 +1,4 @@
-package cws.core;
+package cws.core.transfer;
 
 import java.util.ArrayList;
 import java.util.List;
