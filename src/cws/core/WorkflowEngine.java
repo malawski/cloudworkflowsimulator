@@ -93,7 +93,7 @@ public class WorkflowEngine extends CWSSimEntity {
     public void startEntity() {
         // send the first provisioning request
         // it should be sent after dag submissions events
-        send(this.getId(), 0.0001, WorkflowEvent.PROVISIONING_REQUEST);
+        getCloudsim().send(getId(), this.getId(), 0.0001, WorkflowEvent.PROVISIONING_REQUEST);
     }
 
     @Override
@@ -211,9 +211,9 @@ public class WorkflowEngine extends CWSSimEntity {
         // If the job succeeded
         if (j.getResult() == Job.Result.SUCCESS && getCloudsim().clock() <= deadline) {
 
-        	// FIXME: temporary hack - when data transfer job
-        	if(dj != null) {
-        		// Mark the task as complete in the DAG
+            // FIXME: temporary hack - when data transfer job
+            if (dj != null) {
+                // Mark the task as complete in the DAG
                 dj.completeTask(t);
 
                 // Queue any jobs that are now ready
@@ -224,7 +224,7 @@ public class WorkflowEngine extends CWSSimEntity {
                     dags.remove(dj);
                     sendNow(dj.getOwner(), WorkflowEvent.DAG_FINISHED, dj);
                 }
-        	}
+            }
 
             getCloudsim().log(" Job " + j.getTask().getId() + " finished on VM " + j.getVM().getId());
             VM vm = j.getVM();

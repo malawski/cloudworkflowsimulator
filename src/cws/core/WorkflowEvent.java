@@ -91,21 +91,15 @@ public interface WorkflowEvent {
     // STORAGE EVENTS
     // ///////////////////////////////////////////////////////
 
-    /** TODO */
-    int GLOBAL_STORAGE_START_READ = 23;
+    /** Sent just before the start of a task. Input files should be then transferred */
+    int STORAGE_BEFORE_TASK_START = 29;
 
-    /** TODO */
-    int GLOBAL_STORAGE_START_WRITE = 24;
+    /** Sent just after the finish of a task. Output files should be then transferred */
+    int STORAGE_AFTER_TASK_COMPLETED = 30;
 
-    /** TODO */
-    int GLOBAL_STORAGE_UPDATE_READ_PROGRESS = 25;
+    /** Sent after all input files have been transferred to a task */
+    int STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED = 32;
 
-    /** TODO */
-    int GLOBAL_STORAGE_UPDATE_WRITE_PROGRESS = 26;
-
-    /** TODO */
-    int GLOBAL_STORAGE_READ_FINISHED = 27;
-
-    /** TODO */
-    int GLOBAL_STORAGE_WRITE_FINISHED = 28;
+    /** Sent after all output files have been transferred out from a task */
+    int STORAGE_ALL_AFTER_TRANSFERS_COMPLETED = 33;
 }

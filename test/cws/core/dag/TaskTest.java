@@ -3,7 +3,6 @@ package cws.core.dag;
 import org.junit.Before;
 import org.junit.Test;
 
-import cws.core.CloudSimTest;
 import cws.core.FailureModel;
 import cws.core.Job;
 import cws.core.RuntimeDistribution;
@@ -13,7 +12,7 @@ import cws.core.VM;
  * Generic tests for {@link Task} class. Tests contracts for this class. Should be subclassed to provide implementations
  * to test.
  */
-public abstract class TaskTest extends CloudSimTest {
+public abstract class TaskTest {
     protected Task task;
     protected Job job;
     protected VM vm;
