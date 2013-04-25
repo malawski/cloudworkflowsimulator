@@ -1,8 +1,10 @@
-package cws.core;
+package cws.core.jobs;
 
 import java.util.Random;
 
 import org.junit.Test;
+
+import cws.core.FailureModel;
 import static org.junit.Assert.*;
 
 public class FailureModelTest {
