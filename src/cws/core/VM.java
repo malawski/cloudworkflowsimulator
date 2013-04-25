@@ -313,7 +313,7 @@ public class VM extends CWSSimEntity {
         // ... and fail all queued jobs
         for (Job job : jobs) {
             job.setResult(Job.Result.FAILURE);
-            send(job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
+            getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
             getCloudsim().log(" Terminating job " + job.getID() + " on VM " + job.getVM().getId());
         }
 
@@ -347,7 +347,7 @@ public class VM extends CWSSimEntity {
         runningJobs.add(job);
 
         // Tell the owner
-        send(job.getOwner(), 0.0, WorkflowEvent.JOB_STARTED, job);
+        getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_STARTED, job);
 
         // Compute the duration of the job on this VM
         double size = job.getTask().getSize();
@@ -366,7 +366,7 @@ public class VM extends CWSSimEntity {
             job.setResult(Job.Result.SUCCESS);
         }
 
-        send(getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
+        getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
         getCloudsim().log(
                 " Starting job " + job.getID() + " on VM " + job.getVM().getId() + " duration " + actualRuntime);
 
@@ -392,7 +392,7 @@ public class VM extends CWSSimEntity {
         cpuSecondsConsumed += job.getDuration();
 
         // Tell the owner
-        send(job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
+        getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
 
         // The core that was running the job is now free
         idleCores++;

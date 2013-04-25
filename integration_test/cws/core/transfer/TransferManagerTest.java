@@ -36,7 +36,7 @@ public class TransferManagerTest {
             Random rng = new Random(0);
             // Submit all the transfers
             for (Transfer t : transfers) {
-                send(tm.getId(), rng.nextDouble(), WorkflowEvent.NEW_TRANSFER, t);
+                getCloudsim().send(getId(), tm.getId(), rng.nextDouble(), WorkflowEvent.NEW_TRANSFER, t);
             }
         }
 

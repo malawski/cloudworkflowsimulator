@@ -26,14 +26,16 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
 
+import cws.core.DAGJob;
 import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAG;
 import cws.core.dag.Task;
 
-public class DAGDynamicSchedulerUnitTest {
-    DAGDynamicScheduler scheduler;
+public class WorkflowAwareEnsembleSchedulerUnitTest {
+    WorkflowAwareEnsembleScheduler scheduler;
     WorkflowEngine engine;
     CloudSimWrapper cloudsim;
 
@@ -43,9 +45,14 @@ public class DAGDynamicSchedulerUnitTest {
     @Before
     public void setUp() throws Exception {
         cloudsim = mock(CloudSimWrapper.class);
+        when(cloudsim.clock()).thenReturn(1.0);
 
-        scheduler = new DAGDynamicScheduler(cloudsim);
+        scheduler = new WorkflowAwareEnsembleScheduler(cloudsim);
+
         engine = mock(WorkflowEngine.class);
+        when(engine.getDeadline()).thenReturn(10.0);
+        when(engine.getBudget()).thenReturn(10.0);
+
         scheduler.setWorkflowEngine(engine);
 
         jobs = new LinkedList<Job>();
@@ -68,7 +75,7 @@ public class DAGDynamicSchedulerUnitTest {
 
     @Test
     public void shouldScheduleFirstJobIfOneVMAvailable() {
-        Job job = createJobMock();
+        Job job = createSimpleJobMock();
         jobs.add(job);
         freeVMs.add(createVMMock());
 
@@ -83,7 +90,7 @@ public class DAGDynamicSchedulerUnitTest {
     @Test
     public void shouldNotScheduleIfNoVMAvailable() {
         // empty VMs
-        jobs.add(createJobMock());
+        jobs.add(createSimpleJobMock());
 
         Queue<Job> expected = jobs;
 
@@ -97,7 +104,7 @@ public class DAGDynamicSchedulerUnitTest {
 
         List<String> inputs = Arrays.asList("file1", "file2");
         List<String> outputs = Collections.emptyList();
-        Job job = createJobMock(inputs, outputs);
+        Job job = createSimpleJobMock(inputs, outputs);
 
         jobs.add(job);
 
@@ -113,7 +120,7 @@ public class DAGDynamicSchedulerUnitTest {
 
         List<String> inputs = Collections.emptyList();
         List<String> outputs = Arrays.asList("file1", "file2", "file3");
-        Job job = createJobMock(inputs, outputs);
+        Job job = createSimpleJobMock(inputs, outputs);
 
         jobs.add(job);
 
@@ -129,7 +136,7 @@ public class DAGDynamicSchedulerUnitTest {
 
         List<String> inputs = Arrays.asList("input-file");
         List<String> outputs = Arrays.asList("output-file");
-        Job job = createJobMock(inputs, outputs);
+        Job job = createSimpleJobMock(inputs, outputs);
 
         jobs.add(job);
 
@@ -156,10 +163,17 @@ public class DAGDynamicSchedulerUnitTest {
         }
     }
 
-    private Job createJobMock(List<String> inputs, List<String> outputs) {
+    private Job createSimpleJobMock(List<String> inputs, List<String> outputs) {
         Task task = mock(Task.class);
+
+        DAG dag = new DAG();
+        dag.addTask(task);
+
+        DAGJob dagjob = new DAGJob(dag, 0);
+
         Job job = new Job(cloudsim);
         job.setTask(task);
+        job.setDAGJob(dagjob);
 
         when(task.getInputFiles()).thenReturn(inputs);
         when(task.getOutputFiles()).thenReturn(outputs);
@@ -169,8 +183,8 @@ public class DAGDynamicSchedulerUnitTest {
         return job;
     }
 
-    private Job createJobMock() {
-        return createJobMock(new ArrayList<String>(), new ArrayList<String>());
+    private Job createSimpleJobMock() {
+        return createSimpleJobMock(new ArrayList<String>(), new ArrayList<String>());
     }
 
     private VM createVMMock() {

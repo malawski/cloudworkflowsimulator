@@ -8,7 +8,6 @@ import cws.core.DAGJob;
 import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 import cws.core.dag.DAG;
@@ -38,7 +37,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         double time = getCloudSim().clock();
 
         // stop scheduling any new jobs if we are over deadline
-        if (time >= deadline) {
+        if (isDeadlineExceeded(deadline, time)) {
             return;
         }
 
@@ -56,6 +55,10 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
     }
 
+    protected boolean isDeadlineExceeded(double deadline, double time) {
+        return time >= deadline;
+    }
+
     /**
      * Schedule all jobs from the queue to available free VMs.
      * Successfully scheduled jobs are removed from the queue.
@@ -64,42 +67,59 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
      */
     @Override
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
+        // FIXME(_mequrel_): copying references because when we remove it from list, garbage collector removes VM...
+        // imho it shouldnt working like that
+        Set<VM> freeVMs = new HashSet<VM>(engine.getFreeVMs());
 
-        Set<VM> freeVMs = engine.getFreeVMs();
-        Set<VM> busyVMs = engine.getBusyVMs();
-
-        while (!freeVMs.isEmpty() && !jobs.isEmpty()) {
+        while (canBeScheduled(jobs, freeVMs)) {
             Job job = jobs.poll();
 
-            // remove first job from the prioroty queue if dag not admitted
-
-            DAGJob dj = job.getDAGJob();
-
-            if (rejectedDAGs.contains(dj)) {
-                // ignore
-                continue;
-            } else if (admittedDAGs.contains(dj)) {
-                // schedule the job
-            } else if (admitDAG(dj, engine)) {
-                // if the DAG is admitted we add it to the queue
-                admittedDAGs.add(dj);
-            } else {
-                rejectedDAGs.add(dj);
-                // skip this job
-                continue;
+            if (isJobDagAdmitted(job, engine)) {
+                scheduleJob(job, freeVMs, engine);
             }
-
-            VM vm = freeVMs.iterator().next();
-            job.setVM(vm);
-            freeVMs.remove(vm); // remove VM from free set
-            busyVMs.add(vm); // add vm to busy set
-            getCloudSim().log(" Submitting job " + job.getID() + " to VM " + job.getVM().getId());
-            getCloudSim().send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
         }
     }
 
+    private boolean isJobDagAdmitted(Job job, WorkflowEngine engine) {
+        DAGJob dj = job.getDAGJob();
+        
+        if (jobHasBeenAlreadyAdmitted(dj)) {
+            return true;
+        }
+        else if(jobHasBeenAlreadyRejected(dj)) {
+            return false;
+        }
+        else {
+            boolean isAdmittable = isJobAdmittable(dj, engine);
+            rememberAdmitionOrRejection(dj, isAdmittable);
+            return isAdmittable;
+        }
+        
+    }
+
+    private void rememberAdmitionOrRejection(DAGJob dj, boolean isAdmittable) {
+        if(isAdmittable) {
+            admittedDAGs.add(dj);    
+        }
+        else {
+            rejectedDAGs.add(dj);
+        }
+    }
+
+    protected boolean jobHasBeenAlreadyRejected(DAGJob dj) {
+        return rejectedDAGs.contains(dj);
+    }
+
+    protected boolean jobHasBeenAlreadyAdmitted(DAGJob dj) {
+        return admittedDAGs.contains(dj);
+    }
+
+    protected boolean canBeScheduled(Queue<Job> jobs, Set<VM> freeVMs) {
+        return !freeVMs.isEmpty() && !jobs.isEmpty();
+    }
+
     // decide what to do with the job from a new dag
-    private boolean admitDAG(DAGJob dj, WorkflowEngine engine) {
+    private boolean isJobAdmittable(DAGJob dj, WorkflowEngine engine) {
 
         double costEstimate = estimateCost(dj, engine);
         double budgetRemaining = estimateBudgetRemaining(engine);

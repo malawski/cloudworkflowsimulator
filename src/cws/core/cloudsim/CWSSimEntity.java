@@ -16,6 +16,30 @@ public abstract class CWSSimEntity extends SimEntity {
         return cloudsim;
     }
 
+    @Deprecated
+    @Override
+    protected void send(int entityId, double delay, int cloudSimTag) {
+        super.send(entityId, delay, cloudSimTag);
+    }
+
+    @Deprecated
+    @Override
+    protected void send(int entityId, double delay, int cloudSimTag, Object data) {
+        super.send(entityId, delay, cloudSimTag, data);
+    }
+
+    @Deprecated
+    @Override
+    protected void send(String entityName, double delay, int cloudSimTag, Object data) {
+        super.send(entityName, delay, cloudSimTag, data);
+    }
+
+    @Deprecated
+    @Override
+    protected void send(String entityName, double delay, int cloudSimTag) {
+        super.send(entityName, delay, cloudSimTag);
+    }
+
     public abstract void processEvent(CWSSimEvent ev);
 
     @Override

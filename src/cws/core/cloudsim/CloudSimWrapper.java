@@ -33,6 +33,10 @@ public class CloudSimWrapper {
         CloudSim.send(src, dest, delay, tag, data);
     }
 
+    public void send(int src, int dest, double delay, int tag) {
+        send(src, dest, delay, tag, null);
+    }
+
     public void log(String msg) {
         Log.printLine(clock() + msg);
     }

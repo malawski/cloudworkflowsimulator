@@ -13,6 +13,7 @@ public class CWSSimEvent {
      * @return
      * @see org.cloudbus.cloudsim.core.SimEvent#toString()
      */
+    @Override
     public String toString() {
         return simEvent.toString();
     }
@@ -102,6 +103,7 @@ public class CWSSimEvent {
      * @return
      * @see org.cloudbus.cloudsim.core.SimEvent#clone()
      */
+    @Override
     public Object clone() {
         return simEvent.clone();
     }
