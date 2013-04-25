@@ -34,7 +34,7 @@ public class VMTest {
             // Submit all the jobs
             for (Job j : jobs) {
                 j.setOwner(getId());
-                send(vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, j);
+                getCloudsim().send(getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, j);
             }
         }
 

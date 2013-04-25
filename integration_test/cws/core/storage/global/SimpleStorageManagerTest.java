@@ -39,7 +39,8 @@ public class SimpleStorageManagerTest {
         cloudsim.addEntity(new SimEntityStub(cloudsim) {
             @Override
             public void startEntity() {
-                send(storageManager.getId(), random.nextDouble(), WorkflowEvent.GLOBAL_STORAGE_START_READ, null);
+                getCloudsim().send(getId(), storageManager.getId(), random.nextDouble(),
+                        WorkflowEvent.GLOBAL_STORAGE_START_READ, null);
             }
         });
         cloudsim.startSimulation();

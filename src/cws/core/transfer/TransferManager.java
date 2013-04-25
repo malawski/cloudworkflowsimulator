@@ -115,7 +115,7 @@ public class TransferManager extends CWSSimEntity {
 
         // It takes 1 RTT to complete the initial handshake in TCP
         double rttSec = t.getRTT() * MSEC_TO_SEC;
-        send(this.getId(), rttSec, WorkflowEvent.HANDSHAKE_COMPLETE, t);
+        getCloudsim().send(getId(), getId(), rttSec, WorkflowEvent.HANDSHAKE_COMPLETE, t);
     }
 
     /** Called when the initial handshake for a transfer is complete */
@@ -154,7 +154,7 @@ public class TransferManager extends CWSSimEntity {
 
             // It takes 1 RTT to get the final ACK
             double rttSec = t.getRTT() * MSEC_TO_SEC;
-            send(this.getId(), rttSec, WorkflowEvent.FINAL_ACK_RECEIVED, t);
+            getCloudsim().send(getId(), getId(), rttSec, WorkflowEvent.FINAL_ACK_RECEIVED, t);
         }
 
         // If there are still some transfers remaining
@@ -186,7 +186,7 @@ public class TransferManager extends CWSSimEntity {
             for (Transfer t : activeTransfers) {
                 nextUpdate = Math.min(nextUpdate, t.estimateTimeRemaining());
             }
-            send(this.getId(), nextUpdate, WorkflowEvent.UPDATE_TRANSFER_PROGRESS);
+            getCloudsim().send(getId(), getId(), nextUpdate, WorkflowEvent.UPDATE_TRANSFER_PROGRESS);
         }
     }
 
