@@ -17,10 +17,9 @@ public abstract class CWSSimEntity extends SimEntity {
     }
 
     public abstract void processEvent(CWSSimEvent ev);
-    
+
     @Override
     public final void processEvent(SimEvent ev) {
         processEvent(new CWSSimEvent(ev));
     }
 }
-

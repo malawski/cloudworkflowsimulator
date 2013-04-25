@@ -1,10 +1,5 @@
 package cws.core;
 
-import static cws.core.WorkflowEvent.JOB_STARTED;
-
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
-
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 
@@ -41,9 +36,6 @@ public class Job {
     /** The owner of the job */
     private int owner;
 
-    /** The size of the job in millions of instructions (MI) */
-    private double size;
-
     /** Time the job was released */
     private double releaseTime;
 
@@ -62,23 +54,11 @@ public class Job {
     /** Job result */
     private Result result;
 
-    private CloudSimWrapper cloudsim;
-
     public Job(CloudSimWrapper cloudsim) {
         this.id = next_id++;
         this.releaseTime = cloudsim.clock();
-        this.cloudsim = cloudsim;
         this.state = State.QUEUED;
         this.result = Result.NONE;
-    }
-
-    public void execute() {
-        setStartTime(cloudsim.clock());
-        setState(Job.State.RUNNING);
-        // Tell the owner
-        CloudSim.send(getVM().getId(), getOwner(), 0.0, JOB_STARTED, this);
-        task.execute(this);
-        Log.printLine(CloudSim.clock() + " Starting job " + getID() + " on VM " + getVM().getId());
     }
 
     public int getID() {
@@ -115,14 +95,6 @@ public class Job {
 
     public Task getTask() {
         return task;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
-    public double getSize() {
-        return size;
     }
 
     public void setReleaseTime(double releaseTime) {

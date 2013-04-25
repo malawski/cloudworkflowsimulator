@@ -77,7 +77,7 @@ public class DAGParser {
                     String id = rec[1];
                     String xform = rec[2];
                     double size = Double.parseDouble(rec[3]);
-                    dag.addTask(new ComputationTask(id, xform, size));
+                    dag.addTask(new Task(id, xform, size));
                 } else if ("FILE".equalsIgnoreCase(type)) {
                     if (rec.length != 3) {
                         throw new RuntimeException("Invalid FILE record: " + line);
@@ -198,7 +198,7 @@ public class DAGParser {
                     String transformation = String.format("%s::%s:%s", ns, name, version);
 
                     // Add the task to the dag
-                    dag.addTask(new ComputationTask(id, transformation, runtime));
+                    dag.addTask(new Task(id, transformation, runtime));
 
                     xmlReader.next(); // to first <uses> or </job>
 

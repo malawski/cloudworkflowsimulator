@@ -115,7 +115,6 @@ public class VM extends CWSSimEntity {
         this.price = price;
         this.running = false;
         this.cpuSecondsConsumed = 0.0;
-        getCloudsim().addEntity(this);
     }
 
     public void setDeprovisioningDelay(double deprovisioningDelay) {
@@ -341,8 +340,35 @@ public class VM extends CWSSimEntity {
     }
 
     private void jobStart(Job job) {
+        // The job is now running
+        job.setStartTime(getCloudsim().clock());
+        job.setState(Job.State.RUNNING);
+        // add it to the running set
         runningJobs.add(job);
-        job.execute();
+
+        // Tell the owner
+        send(job.getOwner(), 0.0, WorkflowEvent.JOB_STARTED, job);
+
+        // Compute the duration of the job on this VM
+        double size = job.getTask().getSize();
+        double predictedRuntime = size / mips;
+
+        // Compute actual runtime
+        double actualRuntime = this.runtimeDistribution.getActualRuntime(predictedRuntime);
+
+        // Decide whether the job succeeded or failed
+        if (failureModel.failureOccurred()) {
+            job.setResult(Job.Result.FAILURE);
+
+            // How long did it take to fail?
+            actualRuntime = failureModel.runtimeBeforeFailure(actualRuntime);
+        } else {
+            job.setResult(Job.Result.SUCCESS);
+        }
+
+        send(getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
+        getCloudsim().log(
+                " Starting job " + job.getID() + " on VM " + job.getVM().getId() + " duration " + actualRuntime);
 
         // One core is now busy running the job
         idleCores--;

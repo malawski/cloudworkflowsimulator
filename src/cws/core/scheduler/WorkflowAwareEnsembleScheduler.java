@@ -10,7 +10,7 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.ComputationTask;
+import cws.core.dag.Task;
 import cws.core.dag.DAG;
 
 /**
@@ -174,7 +174,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         double cost = 0.0;
         DAG dag = admittedDJ.getDAG();
         for (String taskName : dag.getTasks()) {
-            ComputationTask task = dag.getTaskById(taskName);
+            Task task = dag.getTaskById(taskName);
             if (!admittedDJ.isComplete(task))
                 cost += task.getSize() * vmPrice(engine);
         }

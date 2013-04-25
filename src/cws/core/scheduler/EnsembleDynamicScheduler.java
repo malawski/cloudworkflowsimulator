@@ -18,7 +18,6 @@ import cws.core.cloudsim.CloudSimWrapper;
 
 public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
 
-
     public EnsembleDynamicScheduler(CloudSimWrapper cloudsim) {
         super(cloudsim);
     }
@@ -60,17 +59,17 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
 
     }
 
-	private void updateQueueLengthForProvisioner(WorkflowEngine engine) {
-		engine.setQueueLength(prioritizedJobs.size());
-	}
+    private void updateQueueLengthForProvisioner(WorkflowEngine engine) {
+        engine.setQueueLength(prioritizedJobs.size());
+    }
 
-	private void moveAllJobsToPriorityQueue(Queue<Job> jobs) {
-		prioritizedJobs.addAll(jobs);
+    private void moveAllJobsToPriorityQueue(Queue<Job> jobs) {
+        prioritizedJobs.addAll(jobs);
         jobs.clear();
-	}
+    }
 
-	private boolean isDeadlineExceeded(double deadline, double time) {
-		return time >= deadline;
-	}
+    private boolean isDeadlineExceeded(double deadline, double time) {
+        return time >= deadline;
+    }
 
 }

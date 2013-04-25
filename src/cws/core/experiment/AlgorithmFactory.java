@@ -13,7 +13,7 @@ import cws.core.algorithms.SPSS;
 import cws.core.algorithms.WADPDS;
 import cws.core.algorithms.Wide;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.ComputationTask;
+import cws.core.dag.Task;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 
@@ -34,7 +34,7 @@ public class AlgorithmFactory {
             // scale tasks size
             double dilatationFactor = e.getTaskDilatation();
             for (String tid : dag.getTasks()) {
-                ComputationTask t = dag.getTaskById(tid);
+                Task t = dag.getTaskById(tid);
                 t.setSize(t.getSize() * dilatationFactor);
             }
         }

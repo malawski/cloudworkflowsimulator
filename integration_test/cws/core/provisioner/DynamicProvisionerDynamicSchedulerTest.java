@@ -45,7 +45,6 @@ public class DynamicProvisionerDynamicSchedulerTest {
     @Test
     public void testProvisionerScheduleDag100x10() {
         cloudsim.init(1, null, false);
-
         Cloud cloud = new Cloud(cloudsim);
 
         SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner(cloudsim);
@@ -121,7 +120,6 @@ public class DynamicProvisionerDynamicSchedulerTest {
         algorithm.setGenerateLog(true);
         fileName = param.getRunDirectory() + File.separator + "output-test-SPSS";
         algorithm.simulate(fileName);
-
     }
 
     @Test
@@ -186,7 +184,6 @@ public class DynamicProvisionerDynamicSchedulerTest {
 
     @Test
     public void testAwareDPDSEpigenomics() {
-
         String dagName = "GENOME.n.1000.0.dag";
 
         double price = 1.0;

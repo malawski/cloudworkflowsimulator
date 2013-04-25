@@ -8,7 +8,7 @@ import java.util.Random;
 
 import cws.core.algorithms.Algorithm;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.ComputationTask;
+import cws.core.dag.Task;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
@@ -196,7 +196,7 @@ public class Experiment {
 
             if (taskDilatation > 1.0) {
                 for (String tid : dag.getTasks()) {
-                    ComputationTask t = dag.getTaskById(tid);
+                    Task t = dag.getTaskById(tid);
                     t.setSize(t.getSize() * taskDilatation);
                 }
             }

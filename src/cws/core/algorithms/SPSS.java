@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.ComputationTask;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -34,11 +33,11 @@ public class SPSS extends StaticAlgorithm {
         TopologicalOrder order = new TopologicalOrder(dag);
 
         // Initial task assignment
-        HashMap<ComputationTask, VMType> vmTypes = new HashMap<ComputationTask, VMType>();
-        HashMap<ComputationTask, Double> runtimes = new HashMap<ComputationTask, Double>();
+        HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
+        HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
         double minCost = 0.0;
         double totalRuntime = 0.0;
-        for (ComputationTask t : order) {
+        for (Task t : order) {
 
             // Initially we assign each VM to the SMALL type
             VMType vm = VMType.SMALL;
@@ -81,7 +80,7 @@ public class SPSS extends StaticAlgorithm {
          */
 
         // Get deadlines for each task (deadline distribution)
-        final HashMap<ComputationTask, Double> deadlines = deadlineDistribution(order, runtimes, this.alpha);
+        final HashMap<Task, Double> deadlines = deadlineDistribution(order, runtimes, this.alpha);
 
         // Sort tasks by deadline
         LinkedList<Task> sortedTasks = new LinkedList<Task>();

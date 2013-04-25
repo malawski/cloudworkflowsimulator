@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-
 import cws.core.Job;
 import cws.core.Scheduler;
 import cws.core.VM;
@@ -22,19 +21,19 @@ import cws.core.dag.Task;
  * @author malawski
  */
 public class DAGDynamicScheduler implements Scheduler {
-	
+
     private CloudSimWrapper cloudsim;
-	
+
     public DAGDynamicScheduler(CloudSimWrapper cloudsim) {
-		this.cloudsim = cloudsim;
-	}
+        this.cloudsim = cloudsim;
+    }
 
     @Override
     public void setWorkflowEngine(WorkflowEngine engine) {
         // do nothing
     }
 
-	@Override
+    @Override
     public void scheduleJobs(WorkflowEngine engine) {
         // use the queued (released) jobs from the workflow engine
         Queue<Job> jobs = engine.getQueuedJobs();
@@ -53,30 +52,30 @@ public class DAGDynamicScheduler implements Scheduler {
      * @param engine
      */
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-    	// XXX: copying references because when we remove it from list, garbage collector removes VM...
-    	// imho it shouldnt working like that
-    	Set<VM> freeVMs = new HashSet<VM>(engine.getFreeVMs());
-        
+        // XXX: copying references because when we remove it from list, garbage collector removes VM...
+        // imho it shouldnt working like that
+        Set<VM> freeVMs = new HashSet<VM>(engine.getFreeVMs());
+
         while (isPossibilityToSchedule(jobs, freeVMs)) {
-        	VM vm = getFirst(freeVMs);
-        	markVMAsBusy(freeVMs, vm);
-        	
+            VM vm = getFirst(freeVMs);
+            markVMAsBusy(freeVMs, vm);
+
             Job job = jobs.poll();
             job.setVM(vm);
-            
+
             List<Job> inputTransferJob = createInputTransferJobs(job, vm);
             List<Job> outputTransferJob = createOutputTransferJobs(job, vm);
-            
+
             for (Job inputJob : inputTransferJob) {
                 sendJobToVM(engine, vm, inputJob);
-			}
-            
+            }
+
             sendJobToVM(engine, vm, job);
-            
+
             for (Job outputJob : outputTransferJob) {
                 sendJobToVM(engine, vm, outputJob);
-			}
-            
+            }
+
         }
     }
 
@@ -105,7 +104,7 @@ public class DAGDynamicScheduler implements Scheduler {
         Task dataTask = new Task("output-gs-" + job.getTask().getId() + "-" + file, "data"
                 + job.getTask().getTransformation(), 12.0);
 
-        Job datajob = new Job(dataTask.getSize(), cloudsim.clock());
+        Job datajob = new Job(cloudsim);
         datajob.setTask(dataTask);
         datajob.setOwner(job.getOwner());
         datajob.setVM(vm);
@@ -132,7 +131,7 @@ public class DAGDynamicScheduler implements Scheduler {
         Task dataTask = new Task("input-gs-" + job.getTask().getId() + "-" + file, "data"
                 + job.getTask().getTransformation(), 12.0);
 
-        Job datajob = new Job(dataTask.getSize(), cloudsim.clock());
+        Job datajob = new Job(cloudsim);
         datajob.setTask(dataTask);
         datajob.setOwner(job.getOwner());
         datajob.setVM(vm);
@@ -151,4 +150,3 @@ public class DAGDynamicScheduler implements Scheduler {
         return freeVMs.iterator().next();
     }
 }
-

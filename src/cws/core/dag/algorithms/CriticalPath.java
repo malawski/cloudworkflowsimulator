@@ -3,7 +3,6 @@ package cws.core.dag.algorithms;
 import java.util.HashMap;
 import java.util.Map;
 
-import cws.core.dag.ComputationTask;
 import cws.core.dag.Task;
 
 /**
@@ -12,15 +11,15 @@ import cws.core.dag.Task;
  * @author malawski
  */
 public class CriticalPath {
-    private Map<ComputationTask, Double> eft;
+    private Map<Task, Double> eft;
     private Double length = null;
 
     public CriticalPath(TopologicalOrder order) {
         this(order, null);
     }
 
-    public CriticalPath(TopologicalOrder order, Map<ComputationTask, Double> runtimes) {
-        this.eft = new HashMap<ComputationTask, Double>();
+    public CriticalPath(TopologicalOrder order, Map<Task, Double> runtimes) {
+        this.eft = new HashMap<Task, Double>();
 
         /*
          * XXX By default use the task size as its runtime. This is not strictly
@@ -28,20 +27,20 @@ public class CriticalPath {
          * type that the task runs on.
          */
         if (runtimes == null) {
-            runtimes = new HashMap<ComputationTask, Double>();
-            for (ComputationTask task : order) {
+            runtimes = new HashMap<Task, Double>();
+            for (Task task : order) {
                 runtimes.put(task, task.getSize());
             }
         }
 
         // Initially the finish time is whatever the runtime is
-        for (ComputationTask task : order) {
+        for (Task task : order) {
             eft.put(task, runtimes.get(task));
         }
 
         // Now we adjust the values in the topological order
-        for (ComputationTask task : order) {
-            for (ComputationTask child : task.getChildren()) {
+        for (Task task : order) {
+            for (Task child : task.getChildren()) {
                 eft.put(child, Math.max(eft.get(child), eft.get(task) + runtimes.get(child)));
             }
         }

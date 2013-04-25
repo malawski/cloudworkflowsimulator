@@ -3,26 +3,40 @@ package cws.core.dag;
 import java.util.ArrayList;
 import java.util.List;
 
-import cws.core.Job;
-
 /**
  * @author Gideon Juve <juve@usc.edu>
  */
-public abstract class Task {
+public class Task {
     // TODO(bryk): document all these fields
     /** Globally uniqe task id */
     private String id = null;
+    private String transformation = null;
+
+    /** Number of MIPS needed to compute this task */
+    private double size = 0.0;
+
     /** Task's parents - the tasks that produce inputFiles */
-    private List<ComputationTask> parents = new ArrayList<ComputationTask>(2);
+    private List<Task> parents = new ArrayList<Task>(2);
 
     /** Task's children - the tasks which this Task produce files for */
-    private List<ComputationTask> children = new ArrayList<ComputationTask>(5);
+    private List<Task> children = new ArrayList<Task>(5);
 
-    public Task(String id) {
+    /** Task's input files */
+    private List<String> inputFiles = null;
+
+    /** Task's output files */
+    private List<String> outputFiles = null;
+
+    public Task(String id, String transformation, double size) {
         this.id = id;
+        this.transformation = transformation;
+        this.setSize(size);
+        // SIPHT workflows have tasks with 0.0 size so we commented out this condition
+        // if (size <= 0) {
+        // throw new RuntimeException(
+        // "Invalid size for task "+id+" ("+transformation+"): "+size);
+        // }
     }
-
-    public abstract void execute(Job job);
 
     /**
      * IT IS IMPORTANT THAT THESE ARE NOT IMPLEMENTED
@@ -53,15 +67,43 @@ public abstract class Task {
         return "<Task id=" + getId() + ">";
     }
 
+    public double getSize() {
+        return size;
+    }
+
+    public void setSize(double size) {
+        this.size = size;
+    }
+
+    public String getTransformation() {
+        return transformation;
+    }
+
     public String getId() {
         return id;
     }
 
-    public List<ComputationTask> getParents() {
+    public List<Task> getParents() {
         return parents;
     }
 
-    public List<ComputationTask> getChildren() {
+    public List<Task> getChildren() {
         return children;
+    }
+
+    public List<String> getInputFiles() {
+        return inputFiles;
+    }
+
+    public void setInputFiles(List<String> inputs) {
+        this.inputFiles = inputs;
+    }
+
+    public List<String> getOutputFiles() {
+        return outputFiles;
+    }
+
+    public void setOutputFiles(List<String> outputs) {
+        this.outputFiles = outputs;
     }
 }
