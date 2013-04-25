@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
-import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
@@ -27,6 +26,7 @@ import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.Experiment;
 import cws.core.experiment.ExperimentDescription;
 import cws.core.experiment.ExperimentResult;
+import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
 import cws.core.scheduler.DAGDynamicScheduler;
 import cws.core.scheduler.EnsembleDynamicScheduler;

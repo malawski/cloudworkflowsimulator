@@ -1,4 +1,4 @@
-package cws.core;
+package cws.core.dag;
 
 /**
  * An interface for parties interested in receiving notifications about DAG

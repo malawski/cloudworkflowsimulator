@@ -1,6 +1,6 @@
 package cws.core.storage;
 
-import cws.core.Job;
+import cws.core.jobs.Job;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 

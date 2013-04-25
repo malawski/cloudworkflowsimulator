@@ -8,10 +8,10 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
-import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.jobs.Job;
 
 /**
  * Tests {@link StorageManager}. An abstract class - should be subclassed and field {@link #storageManager} should be

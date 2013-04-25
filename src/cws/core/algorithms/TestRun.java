@@ -12,7 +12,6 @@ import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.FailureModel;
-import cws.core.UniformRuntimeDistribution;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 import cws.core.dag.DAG;
@@ -20,6 +19,7 @@ import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
+import cws.core.jobs.UniformRuntimeDistribution;
 
 public class TestRun {
 

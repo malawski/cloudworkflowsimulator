@@ -26,13 +26,13 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
 
-import cws.core.DAGJob;
-import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
+import cws.core.jobs.Job;
 
 public class WorkflowAwareEnsembleSchedulerUnitTest {
     WorkflowAwareEnsembleScheduler scheduler;

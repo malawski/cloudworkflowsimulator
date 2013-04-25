@@ -4,9 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.FailureModel;
-import cws.core.Job;
-import cws.core.RuntimeDistribution;
 import cws.core.VM;
+import cws.core.jobs.Job;
+import cws.core.jobs.RuntimeDistribution;
 
 /**
  * Generic tests for {@link Task} class. Tests contracts for this class. Should be subclassed to provide implementations

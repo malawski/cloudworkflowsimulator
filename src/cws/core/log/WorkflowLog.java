@@ -11,13 +11,13 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 
-import cws.core.DAGJob;
-import cws.core.DAGJobListener;
-import cws.core.Job;
-import cws.core.JobListener;
 import cws.core.VM;
 import cws.core.VMListener;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGJob;
+import cws.core.dag.DAGJobListener;
+import cws.core.jobs.Job;
+import cws.core.jobs.JobListener;
 
 public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
 

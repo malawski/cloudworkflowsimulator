@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import cws.core.dag.DAG;
+import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 
 public class DAGJobTest {

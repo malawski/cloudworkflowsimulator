@@ -14,14 +14,14 @@ import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
 import cws.core.Scheduler;
-import cws.core.SimpleJobFactory;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.Task;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
+import cws.core.dag.Task;
+import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
 
 public class DAGSchedulerFCFSTest {

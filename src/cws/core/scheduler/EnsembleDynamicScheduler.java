@@ -4,9 +4,9 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import cws.core.Job;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.jobs.Job;
 
 /**
  * This scheduler submits workflow ensemble to VMs on FCFS basis.

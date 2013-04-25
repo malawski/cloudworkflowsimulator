@@ -1,8 +1,8 @@
 package cws.core.storage.global;
 
-import cws.core.Job;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 
 /**

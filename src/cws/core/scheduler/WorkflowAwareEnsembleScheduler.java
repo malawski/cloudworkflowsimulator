@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 
-import cws.core.DAGJob;
-import cws.core.Job;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.Task;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGJob;
+import cws.core.dag.Task;
+import cws.core.jobs.Job;
 
 /**
  * This scheduler submits workflow ensemble to VMs on FCFS basis.
@@ -82,26 +82,23 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
     private boolean isJobDagAdmitted(Job job, WorkflowEngine engine) {
         DAGJob dj = job.getDAGJob();
-        
+
         if (jobHasBeenAlreadyAdmitted(dj)) {
             return true;
-        }
-        else if(jobHasBeenAlreadyRejected(dj)) {
+        } else if (jobHasBeenAlreadyRejected(dj)) {
             return false;
-        }
-        else {
+        } else {
             boolean isAdmittable = isJobAdmittable(dj, engine);
             rememberAdmitionOrRejection(dj, isAdmittable);
             return isAdmittable;
         }
-        
+
     }
 
     private void rememberAdmitionOrRejection(DAGJob dj, boolean isAdmittable) {
-        if(isAdmittable) {
-            admittedDAGs.add(dj);    
-        }
-        else {
+        if (isAdmittable) {
+            admittedDAGs.add(dj);
+        } else {
             rejectedDAGs.add(dj);
         }
     }

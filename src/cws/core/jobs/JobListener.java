@@ -1,4 +1,5 @@
-package cws.core;
+package cws.core.jobs;
+
 
 public interface JobListener {
     /** Job has been released (i.e. its parents are done) */

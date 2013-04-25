@@ -3,7 +3,7 @@ package cws.core.storage;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 
-import cws.core.Job;
+import cws.core.jobs.Job;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
