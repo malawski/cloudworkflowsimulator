@@ -28,6 +28,7 @@ import cws.core.jobs.Job;
 import cws.core.jobs.JobListener;
 import cws.core.jobs.Job.Result;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.VoidStorageManager;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener,
         DAGJobListener {
@@ -184,7 +185,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         for (Resource r : plan.resources) {
             // Create VM
             VMType type = r.vmtype;
-            VM vm = VMFactory.createVM(type.mips, 1, 1, type.price);
+            VM vm = VMFactory.createVM(type.mips, 1, 1, type.price, cloudsim);
 
             // Build task<->vm mappings
             LinkedList<Task> vmQueue = new LinkedList<Task>();
@@ -220,8 +221,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     /**
      * Assign deadlines to each task in the DAG
      */
-    HashMap<Task, Double> deadlineDistribution(TopologicalOrder order,
-            HashMap<Task, Double> runtimes, double alpha) {
+    HashMap<Task, Double> deadlineDistribution(TopologicalOrder order, HashMap<Task, Double> runtimes, double alpha) {
 
         // Sanity check
         if (alpha < 0 || alpha > 1) {
@@ -462,7 +462,9 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     @Override
     public void simulate(String logname) {
-        cloudsim.init(1, null, false);
+        cloudsim.init();
+        // TODO(bryk): that's ugly, I know
+        new VoidStorageManager(cloudsim);
 
         Cloud cloud = new Cloud(cloudsim);
         WorkflowEngine engine = new WorkflowEngine(this, this, cloudsim);

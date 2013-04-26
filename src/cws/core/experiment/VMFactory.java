@@ -54,9 +54,13 @@ public class VMFactory {
         VMFactory.failureModel = failureModel;
     }
 
-    public static VM createVM(int mips, int cores, double bandwidth, double price) {
+    /**
+     * @param cloudSimWrapper - initialized CloudSimWrapper instance. It needs to be inited, because we're creting
+     *            storage manager here.
+     */
+    public static VM createVM(int mips, int cores, double bandwidth, double price, CloudSimWrapper cloudSimWrapper) {
         // TODO(_mequrel_): change to IoC in the future
-        VM vm = new VM(mips, cores, bandwidth, price, new CloudSimWrapper());
+        VM vm = new VM(mips, cores, bandwidth, price, cloudSimWrapper);
         vm.setProvisioningDelay(provisioningDelayDistribution.sample());
         vm.setDeprovisioningDelay(deprovisioningDelayDistribution.sample());
         vm.setRuntimeDistribution(runtimeDistribution);

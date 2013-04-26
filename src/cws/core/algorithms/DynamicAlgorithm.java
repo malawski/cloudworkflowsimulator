@@ -22,6 +22,7 @@ import cws.core.jobs.JobListener;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.jobs.Job.Result;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.VoidStorageManager;
 
 public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMListener, JobListener {
 
@@ -79,7 +80,9 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
     @Override
     public void simulate(String logname) {
-        cloudsim.init(1, null, false);
+        cloudsim.init();
+        //TODO(bryk): that's ugly, I know
+        new VoidStorageManager(cloudsim);
 
         Cloud cloud = new Cloud(cloudsim);
         cloud.addVMListener(this);
@@ -118,7 +121,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         // Launch VMs
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numVMs; i++) {
-            VM vm = VMFactory.createVM(1000, 1, 1.0, price);
+            VM vm = VMFactory.createVM(1000, 1, 1.0, price, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }

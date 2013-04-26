@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
+import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
@@ -87,7 +88,7 @@ public class VM extends CWSSimEntity {
     private double price;
 
     /** Is this VM running? */
-    private boolean running;
+    private boolean isRunning;
 
     /** Number of CPU seconds consumed by jobs on this VM */
     private double cpuSecondsConsumed;
@@ -116,8 +117,204 @@ public class VM extends CWSSimEntity {
         this.launchTime = -1.0;
         this.terminateTime = -1.0;
         this.price = price;
-        this.running = false;
+        this.isRunning = false;
         this.cpuSecondsConsumed = 0.0;
+    }
+
+    /**
+     * Runtime of the VM in seconds. If the VM has not been launched, then
+     * the result is 0. If the VM is not terminated, then we use the current
+     * simulation time as the termination time. After the VM is terminated
+     * the runtime does not change.
+     */
+    public double getRuntime() {
+        if (launchTime < 0)
+            return 0.0;
+        else if (terminateTime < 0)
+            return getCloudsim().clock() - launchTime;
+        else
+            return terminateTime - launchTime;
+    }
+
+    /**
+     * Compute the total cost of this VM. This is computed by taking the
+     * runtime, rounding it up to the nearest whole hour, and multiplying
+     * by the hourly price.
+     */
+    public double getCost() {
+        double hours = getRuntime() / SECONDS_PER_HOUR;
+        hours = Math.ceil(hours);
+        // Log.printLine(CloudSim.clock() + " VM " + getId() + " cost " + hours * price);
+        return hours * price;
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public double getCPUSecondsConsumed() {
+        return cpuSecondsConsumed;
+    }
+
+    /** cpu_seconds / (runtime * cores) */
+    public double getUtilization() {
+        double totalCPUSeconds = getRuntime() * cores;
+        return cpuSecondsConsumed / totalCPUSeconds;
+    }
+
+    @Override
+    public void processEvent(CWSSimEvent ev) {
+        switch (ev.getTag()) {
+        case WorkflowEvent.VM_LAUNCH:
+            launchVM();
+            break;
+        case WorkflowEvent.VM_TERMINATE:
+            terminateVM();
+            break;
+        case WorkflowEvent.JOB_SUBMIT:
+            jobSubmit((Job) ev.getData());
+            break;
+        case WorkflowEvent.JOB_FINISHED:
+            jobFinish((Job) ev.getData());
+            break;
+        case WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED:
+            allInputsTrasferred((Job) ev.getData());
+            break;
+        case WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED:
+            allOutputsTransferred((Job) ev.getData());
+            break;
+        default:
+            throw new UnknownWorkflowEventException("Unknown event: " + ev);
+        }
+    }
+
+    private void launchVM() {
+        // Reset dynamic state
+        jobs.clear();
+        idleCores = cores;
+        cpuSecondsConsumed = 0.0;
+
+        // VM can now accept jobs
+        isRunning = true;
+    }
+
+    private void terminateVM() {
+        // Can no longer accept jobs
+        isRunning = false;
+
+        // cancel future events
+        Predicate p = new PredicateType(WorkflowEvent.JOB_FINISHED);
+        getCloudsim().cancelAll(getId(), p);
+
+        // Move running jobs back to the queue...
+        jobs.addAll(runningJobs);
+        runningJobs.clear();
+
+        // ... and fail all queued jobs
+        for (Job job : jobs) {
+            job.setResult(Job.Result.FAILURE);
+            getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
+            getCloudsim().log(" Terminating job " + job.getID() + " on VM " + job.getVM().getId());
+        }
+
+        // Reset dynamic state
+        jobs.clear();
+        idleCores = cores;
+    }
+
+    private void jobSubmit(Job job) {
+        // Sanity check
+        if (!isRunning) {
+            throw new RuntimeException("Cannot execute jobs: VM not running");
+        }
+
+        job.setSubmitTime(getCloudsim().clock());
+        job.setState(Job.State.IDLE);
+        job.setVM(this);
+
+        // Queue the job
+        jobs.add(job);
+
+        // This shouldn't do anything if the VM is busy
+        startJobs();
+    }
+
+    private void allInputsTrasferred(Job job) {
+        // Compute the duration of the job on this VM
+        double size = job.getTask().getSize();
+        double predictedRuntime = size / mips;
+
+        // Compute actual runtime
+        double actualRuntime = this.runtimeDistribution.getActualRuntime(predictedRuntime);
+
+        // Decide whether the job succeeded or failed
+        if (failureModel.failureOccurred()) {
+            job.setResult(Job.Result.FAILURE);
+
+            // How long did it take to fail?
+            actualRuntime = failureModel.runtimeBeforeFailure(actualRuntime);
+        } else {
+            job.setResult(Job.Result.SUCCESS);
+        }
+
+        getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
+    }
+
+    private void allOutputsTransferred(Job job) {
+        // remove from the running set
+        runningJobs.remove(job);
+
+        // Complete the job
+        job.setFinishTime(getCloudsim().clock());
+        job.setState(Job.State.TERMINATED);
+
+        // Increment the usage
+        cpuSecondsConsumed += job.getDuration();
+
+        // Tell the owner
+        getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
+
+        // The core that was running the job is now free
+        idleCores++;
+
+        // We may be able to start more jobs now
+        startJobs();
+    }
+
+    private void jobStart(Job job) {
+        getCloudsim().log(" Starting job " + job.getID() + " on VM " + job.getVM().getId());
+        // The job is now running
+        job.setStartTime(getCloudsim().clock());
+        job.setState(Job.State.RUNNING);
+        // add it to the running set
+        runningJobs.add(job);
+
+        // Tell the owner
+        getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_STARTED, job);
+
+        getCloudsim().send(getId(), CloudSim.getEntityId("StorageManager"), 0.0,
+                WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
+
+        // One core is now busy running the job
+        idleCores--;
+    }
+
+    private void jobFinish(Job job) {
+        // Sanity check
+        if (!isRunning) {
+            throw new RuntimeException("Cannot finish job: VM not running");
+        }
+
+        getCloudsim().send(getId(), CloudSim.getEntityId("StorageManager"), 0.0,
+                WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
+    }
+
+    private void startJobs() {
+        // While there are still idle jobs and cores
+        while (jobs.size() > 0 && idleCores > 0) {
+            // Start the next job in the queue
+            jobStart(jobs.poll());
+        }
     }
 
     public void setDeprovisioningDelay(double deprovisioningDelay) {
@@ -218,197 +415,5 @@ public class VM extends CWSSimEntity {
 
     public void setFailureModel(FailureModel failureModel) {
         this.failureModel = failureModel;
-    }
-
-    /**
-     * Runtime of the VM in seconds. If the VM has not been launched, then
-     * the result is 0. If the VM is not terminated, then we use the current
-     * simulation time as the termination time. After the VM is terminated
-     * the runtime does not change.
-     */
-    public double getRuntime() {
-        if (launchTime < 0)
-            return 0.0;
-        else if (terminateTime < 0)
-            return getCloudsim().clock() - launchTime;
-        else
-            return terminateTime - launchTime;
-    }
-
-    /**
-     * Compute the total cost of this VM. This is computed by taking the
-     * runtime, rounding it up to the nearest whole hour, and multiplying
-     * by the hourly price.
-     */
-    public double getCost() {
-        double hours = getRuntime() / SECONDS_PER_HOUR;
-        hours = Math.ceil(hours);
-        // Log.printLine(CloudSim.clock() + " VM " + getId() + " cost " + hours * price);
-        return hours * price;
-    }
-
-    public boolean isRunning() {
-        return running;
-    }
-
-    public double getCPUSecondsConsumed() {
-        return cpuSecondsConsumed;
-    }
-
-    /** cpu_seconds / (runtime * cores) */
-    public double getUtilization() {
-        double totalCPUSeconds = getRuntime() * cores;
-        return cpuSecondsConsumed / totalCPUSeconds;
-    }
-
-    @Override
-    public void startEntity() {
-        // Do Nothing
-    }
-
-    @Override
-    public void processEvent(CWSSimEvent ev) {
-        switch (ev.getTag()) {
-        case WorkflowEvent.VM_LAUNCH:
-            launchVM();
-            break;
-        case WorkflowEvent.VM_TERMINATE:
-            terminateVM();
-            break;
-        case WorkflowEvent.JOB_SUBMIT:
-            jobSubmit((Job) ev.getData());
-            break;
-        case WorkflowEvent.JOB_FINISHED:
-            jobFinish((Job) ev.getData());
-            break;
-        default:
-            throw new UnknownWorkflowEventException("Unknown event: " + ev);
-        }
-    }
-
-    @Override
-    public void shutdownEntity() {
-        // Do Nothing
-    }
-
-    private void launchVM() {
-        // Reset dynamic state
-        jobs.clear();
-        idleCores = cores;
-        cpuSecondsConsumed = 0.0;
-
-        // VM can now accept jobs
-        running = true;
-    }
-
-    private void terminateVM() {
-        // Can no longer accept jobs
-        running = false;
-
-        // cancel future events
-        Predicate p = new PredicateType(WorkflowEvent.JOB_FINISHED);
-        getCloudsim().cancelAll(getId(), p);
-
-        // Move running jobs back to the queue...
-        jobs.addAll(runningJobs);
-        runningJobs.clear();
-
-        // ... and fail all queued jobs
-        for (Job job : jobs) {
-            job.setResult(Job.Result.FAILURE);
-            getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
-            getCloudsim().log(" Terminating job " + job.getID() + " on VM " + job.getVM().getId());
-        }
-
-        // Reset dynamic state
-        jobs.clear();
-        idleCores = cores;
-    }
-
-    private void jobSubmit(Job job) {
-        // Sanity check
-        if (!running) {
-            throw new RuntimeException("Cannot execute jobs: VM not running");
-        }
-
-        job.setSubmitTime(getCloudsim().clock());
-        job.setState(Job.State.IDLE);
-        job.setVM(this);
-
-        // Queue the job
-        jobs.add(job);
-
-        // This shouldn't do anything if the VM is busy
-        startJobs();
-    }
-
-    private void jobStart(Job job) {
-        // The job is now running
-        job.setStartTime(getCloudsim().clock());
-        job.setState(Job.State.RUNNING);
-        // add it to the running set
-        runningJobs.add(job);
-
-        // Tell the owner
-        getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_STARTED, job);
-
-        // Compute the duration of the job on this VM
-        double size = job.getTask().getSize();
-        double predictedRuntime = size / mips;
-
-        // Compute actual runtime
-        double actualRuntime = this.runtimeDistribution.getActualRuntime(predictedRuntime);
-
-        // Decide whether the job succeeded or failed
-        if (failureModel.failureOccurred()) {
-            job.setResult(Job.Result.FAILURE);
-
-            // How long did it take to fail?
-            actualRuntime = failureModel.runtimeBeforeFailure(actualRuntime);
-        } else {
-            job.setResult(Job.Result.SUCCESS);
-        }
-
-        getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
-        getCloudsim().log(
-                " Starting job " + job.getID() + " on VM " + job.getVM().getId() + " duration " + actualRuntime);
-
-        // One core is now busy running the job
-        idleCores--;
-    }
-
-    private void jobFinish(Job job) {
-
-        // Sanity check
-        if (!running) {
-            throw new RuntimeException("Cannot finish job: VM not running");
-        }
-
-        // remove from the running set
-        runningJobs.remove(job);
-
-        // Complete the job
-        job.setFinishTime(getCloudsim().clock());
-        job.setState(Job.State.TERMINATED);
-
-        // Increment the usage
-        cpuSecondsConsumed += job.getDuration();
-
-        // Tell the owner
-        getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
-
-        // The core that was running the job is now free
-        idleCores++;
-
-        // We may be able to start more jobs now
-        startJobs();
-    }
-
-    private void startJobs() {
-        // While there are still idle jobs and cores
-        while (jobs.size() > 0 && idleCores > 0) {
-            // Start the next job in the queue
-            jobStart(jobs.poll());
-        }
     }
 }

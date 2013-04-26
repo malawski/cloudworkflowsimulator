@@ -30,6 +30,7 @@ import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
 import cws.core.scheduler.DAGDynamicScheduler;
 import cws.core.scheduler.EnsembleDynamicScheduler;
+import cws.core.storage.VoidStorageManager;
 
 public class DynamicProvisionerDynamicSchedulerTest {
     private String dagPath = "dags/";
@@ -44,8 +45,10 @@ public class DynamicProvisionerDynamicSchedulerTest {
 
     @Test
     public void testProvisionerScheduleDag100x10() {
-        cloudsim.init(1, null, false);
+        cloudsim.init();
         Cloud cloud = new Cloud(cloudsim);
+        // TODO(bryk): that's ugly, I know
+        new VoidStorageManager(cloudsim);
 
         SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner(cloudsim);
         provisioner.setCloud(cloud);

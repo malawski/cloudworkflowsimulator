@@ -8,6 +8,7 @@ import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 
 public class CloudSimWrapper {
+    private boolean isInitialized = false;
 
     public void addEntity(SimEntity entity) {
         CloudSim.addEntity(entity);
@@ -21,14 +22,32 @@ public class CloudSimWrapper {
         CloudSim.cancelAll(src, p);
     }
 
-    public void init(int numUser, Calendar calendar, boolean traceFlag) {
-        CloudSim.init(numUser, calendar, traceFlag);
+    /**
+     * Calls {@link CloudSim#init(int, Calendar, boolean)} with params 1, null, false.
+     * It calls this method only once. If you want to reinitialize CloudSim you need to create a new CloudSimWrapper
+     * instance.
+     */
+    public void init() {
+        if (!isInitialized) {
+            CloudSim.init(1, null, false);
+            isInitialized = true;
+        }
     }
 
     public void startSimulation() {
         CloudSim.startSimulation();
     }
 
+    /**
+     * @see CloudSim#getEntityId(String)
+     */
+    public int getEntityId(String entityName) {
+        return CloudSim.getEntityId(entityName);
+    }
+
+    /**
+     * @see CloudSim#send(int, int, double, int, Object)
+     */
     public void send(int src, int dest, double delay, int tag, Object data) {
         CloudSim.send(src, dest, delay, tag, data);
     }
@@ -49,4 +68,10 @@ public class CloudSimWrapper {
         Log.print(string);
     }
 
+    /**
+     * @return the isInitialized
+     */
+    public boolean isInitialized() {
+        return isInitialized;
+    }
 }

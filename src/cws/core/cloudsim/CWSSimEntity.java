@@ -46,4 +46,22 @@ public abstract class CWSSimEntity extends SimEntity {
     public final void processEvent(SimEvent ev) {
         processEvent(new CWSSimEvent(ev));
     }
+
+    /**
+     * This is overridden and does nothing by default, because almost everywhere we do nothing in this method.
+     * @see SimEntity#startEntity()
+     */
+    @Override
+    public void startEntity() {
+        // Do nothing by default
+    }
+
+    /**
+     * This is overridden and does nothing by default, because almost everywhere we do nothing in this method.
+     * @see SimEntity#shutdownEntity()
+     */
+    @Override
+    public void shutdownEntity() {
+        // Do nothing by default
+    }
 }

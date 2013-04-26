@@ -10,6 +10,7 @@ import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
+import cws.core.storage.VoidStorageManager;
 
 public class VMTest {
 
@@ -65,7 +66,9 @@ public class VMTest {
     public void setUp() {
         // TODO(_mequrel_): change to IoC in the future
         cloudsim = new CloudSimWrapper();
-        cloudsim.init(1, null, false);
+        cloudsim.init();
+        // TODO(bryk): that's ugly, I know
+        new VoidStorageManager(cloudsim);
     }
 
     @Test

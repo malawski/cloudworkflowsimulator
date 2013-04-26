@@ -23,7 +23,7 @@ public class VMFactoryTest {
 
     @Test
     public void testCreateVM() {
-        cloudsim.init(1, null, false);
+        cloudsim.init();
         // To get mean m and stddev s, use:
         // sigma = sqrt(log(1+s^2/m^2))
         // mu = log(m)-0.5*log(1+s^2/m^2)
@@ -39,15 +39,14 @@ public class VMFactoryTest {
         VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
         for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0);
+            VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0, cloudsim);
             assertTrue(vm.getProvisioningDelay() > 0.0);
             System.out.println(vm.getProvisioningDelay());
         }
         for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0);
+            VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0, cloudsim);
             assertTrue(vm.getDeprovisioningDelay() > 0.0);
             System.out.println(vm.getDeprovisioningDelay());
         }
     }
-
 }

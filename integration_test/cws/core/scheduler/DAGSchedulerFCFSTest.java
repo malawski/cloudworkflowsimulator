@@ -13,7 +13,6 @@ import org.junit.Test;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
-import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
@@ -23,24 +22,35 @@ import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.VoidStorageManager;
 
 public class DAGSchedulerFCFSTest {
     private CloudSimWrapper cloudsim;
+    private Provisioner provisioner;
+    private DAGSchedulerFCFS scheduler;
+    private WorkflowEngine engine;
+    private Cloud cloud;
+    private WorkflowLog jobLog;
 
     @Before
     public void setUp() {
         // TODO(_mequrel_): change to IoC in the future or to mock
         cloudsim = new CloudSimWrapper();
-        cloudsim.init(1, null, false);
+        cloudsim.init();
+
+        // TODO(bryk): that's ugly, I know
+        new VoidStorageManager(cloudsim);
+        provisioner = null;
+        scheduler = new DAGSchedulerFCFS(cloudsim);
+        engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
+        cloud = new Cloud(cloudsim);
+
+        jobLog = new WorkflowLog(cloudsim);
+        engine.addJobListener(jobLog);
     }
 
     @Test
     public void testScheduleVMS() {
-        Provisioner provisioner = null;
-        Scheduler scheduler = new DAGSchedulerFCFS(cloudsim);
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
-        Cloud cloud = new Cloud(cloudsim);
-
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
@@ -58,15 +68,6 @@ public class DAGSchedulerFCFSTest {
 
     @Test
     public void testScheduleDag() {
-        Provisioner provisioner = null;
-        Scheduler scheduler = new DAGSchedulerFCFS(cloudsim);
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
-        Cloud cloud = new Cloud(cloudsim);
-
-        WorkflowLog jobLog = new WorkflowLog(cloudsim);
-
-        engine.addJobListener(jobLog);
-
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
@@ -96,15 +97,6 @@ public class DAGSchedulerFCFSTest {
 
     @Test
     public void testScheduleDag100() {
-        Provisioner provisioner = null;
-        Scheduler scheduler = new DAGSchedulerFCFS(cloudsim);
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
-        Cloud cloud = new Cloud(cloudsim);
-
-        WorkflowLog jobLog = new WorkflowLog(cloudsim);
-
-        engine.addJobListener(jobLog);
-
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);

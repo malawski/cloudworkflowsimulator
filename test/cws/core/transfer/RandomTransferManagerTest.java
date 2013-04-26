@@ -59,7 +59,7 @@ public class RandomTransferManagerTest {
     public void setUp() {
         // TODO(_mequrel_): change to IoC in the future or to mock
         cloudsim = new CloudSimWrapper();
-        cloudsim.init(1, null, false);
+        cloudsim.init();
     }
 
     @Test

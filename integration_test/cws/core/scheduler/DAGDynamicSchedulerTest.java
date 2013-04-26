@@ -22,26 +22,35 @@ import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.VoidStorageManager;
 
 public class DAGDynamicSchedulerTest {
-
     private CloudSimWrapper cloudsim;
+    private Provisioner provisioner;
+    private DAGDynamicScheduler scheduler;
+    private WorkflowEngine engine;
+    private Cloud cloud;
+    private WorkflowLog jobLog;
 
     @Before
     public void setUp() {
         // TODO(_mequrel_): change to IoC in the future or to mock
         cloudsim = new CloudSimWrapper();
+        cloudsim.init();
+
+        // TODO(bryk): that's ugly, I know
+        new VoidStorageManager(cloudsim);
+        provisioner = null;
+        scheduler = new DAGDynamicScheduler(cloudsim);
+        engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
+        cloud = new Cloud(cloudsim);
+
+        jobLog = new WorkflowLog(cloudsim);
+        engine.addJobListener(jobLog);
     }
 
     @Test
     public void testScheduleVMS() {
-        cloudsim.init(1, null, false);
-
-        Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(cloudsim);
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
-        Cloud cloud = new Cloud(cloudsim);
-
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
@@ -59,17 +68,6 @@ public class DAGDynamicSchedulerTest {
 
     @Test
     public void testScheduleDag() {
-
-        cloudsim.init(1, null, false);
-
-        Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(cloudsim);
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
-        Cloud cloud = new Cloud(cloudsim);
-
-        WorkflowLog jobLog = new WorkflowLog(cloudsim);
-        engine.addJobListener(jobLog);
-
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
@@ -99,17 +97,6 @@ public class DAGDynamicSchedulerTest {
 
     @Test
     public void testScheduleDag100() {
-
-        cloudsim.init(1, null, false);
-
-        Provisioner provisioner = null;
-        DAGDynamicScheduler scheduler = new DAGDynamicScheduler(cloudsim);
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
-        Cloud cloud = new Cloud(cloudsim);
-
-        WorkflowLog jobLog = new WorkflowLog(cloudsim);
-        engine.addJobListener(jobLog);
-
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
             VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);

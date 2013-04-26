@@ -37,7 +37,7 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
 
         // add one VM if queue not empty
         if (queueLength > 0) {
-            VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0);
+            VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0, getCloudSim());
             getCloudSim().log(" Starting VM: " + vm.getId());
             getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         } else { // terminate free VMs
