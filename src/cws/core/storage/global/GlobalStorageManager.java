@@ -1,23 +1,23 @@
 package cws.core.storage.global;
 
-import cws.core.WorkflowEvent;
+import java.util.List;
+
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 
 /**
  * TODO(bryk): comment
+ * TODO(bryk): randomize parameters under some distribution
  */
 public class GlobalStorageManager extends StorageManager {
     /**
      * Average read speed of the storage.
-     * TODO(bryk): randomize under some distribution r/w speeds.
      */
     private double readSpeed;
 
     /**
      * Average write speed of the storage.
-     * TODO(bryk): randomize under some distribution r/w speeds.
      */
     private double writeSpeed;
 
@@ -32,12 +32,21 @@ public class GlobalStorageManager extends StorageManager {
 
     @Override
     public void onBeforeTaskStart(Job job) {
-        getCloudsim().send(getId(), job.getVM().getId(), 0, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, job);
+        List<String> files = job.getTask().getInputFiles();
+        if (files.size() == 0) {
+            notifyThatBeforeTransfersCompleted(job);
+        } else {
+            // TODO(bryk): implement
+        }
     }
 
     @Override
     public void onAfterTaskCompleted(Job job) {
-        // TODO Auto-generated method stub
-
+        List<String> files = job.getTask().getOutputFiles();
+        if (files.size() == 0) {
+            notifyThatAfterTransfersCompleted(job);
+        } else {
+            // TODO(bryk): implement
+        }
     }
 }

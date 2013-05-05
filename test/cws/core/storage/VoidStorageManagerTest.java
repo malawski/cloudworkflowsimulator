@@ -1,13 +1,9 @@
-/**
- * 
- */
 package cws.core.storage;
 
 import org.junit.Before;
 
 /**
- * @author piotr
- * 
+ * Tests {@link VoidStorageManager}.
  */
 public class VoidStorageManagerTest extends StorageManagerTest {
 

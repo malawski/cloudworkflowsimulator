@@ -1,8 +1,7 @@
 package cws.core.storage;
 
-import cws.core.jobs.Job;
-import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.jobs.Job;
 
 /**
  * Void storage manager that behaves as if the file transfers were indefinitely short. Using this manager effectively
@@ -15,11 +14,11 @@ public class VoidStorageManager extends StorageManager {
 
     @Override
     public void onBeforeTaskStart(Job job) {
-        getCloudsim().send(getId(), job.getVM().getId(), 0, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, job);
+        notifyThatBeforeTransfersCompleted(job);
     }
 
     @Override
     public void onAfterTaskCompleted(Job job) {
-        getCloudsim().send(getId(), job.getVM().getId(), 0, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, job);
+        notifyThatAfterTransfersCompleted(job);
     }
 }
