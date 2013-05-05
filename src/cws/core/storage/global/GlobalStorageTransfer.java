@@ -1,5 +1,6 @@
 package cws.core.storage.global;
 
+import cws.core.dag.DAGFile;
 import cws.core.jobs.Job;
 
 /**
@@ -8,10 +9,9 @@ import cws.core.jobs.Job;
 public class GlobalStorageTransfer {
     /** The job this transfer transfers file from/to */
     private Job job;
-    /** Transferred file's name */
-    private String name;
-    /** Size of the transferred file */
-    private long size;
+    /** Transferred file */
+    private DAGFile file;
+
     /**
      * Transfer's duration. It should have proper value after transfer finish. In the meantime it can have some
      * intermediate
@@ -24,10 +24,9 @@ public class GlobalStorageTransfer {
      * @param name - transferred file's name
      * @param size - size of the transferred file TODO(bryk): determine unit
      */
-    public GlobalStorageTransfer(Job job, String name, long size) {
+    public GlobalStorageTransfer(Job job, DAGFile file) {
         this.job = job;
-        this.name = name;
-        this.size = size;
+        this.file = file;
     }
 
     @Override
@@ -44,12 +43,8 @@ public class GlobalStorageTransfer {
         return job;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public long getSize() {
-        return size;
+    public DAGFile getFile() {
+        return file;
     }
 
     public double getDuration() {

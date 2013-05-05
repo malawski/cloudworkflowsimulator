@@ -30,6 +30,7 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGFile;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
@@ -102,8 +103,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     public void shouldAddTransferTaskForEachInputFile() {
         freeVMs.add(createVMMock());
 
-        List<String> inputs = Arrays.asList("file1", "file2");
-        List<String> outputs = Collections.emptyList();
+        List<DAGFile> inputs = Arrays.asList(new DAGFile("file1", 100), new DAGFile("file2", 100));
+        List<DAGFile> outputs = Collections.emptyList();
         Job job = createSimpleJobMock(inputs, outputs);
 
         jobs.add(job);
@@ -118,8 +119,9 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     public void shouldAddTransferTaskForEachOutputFile() {
         freeVMs.add(createVMMock());
 
-        List<String> inputs = Collections.emptyList();
-        List<String> outputs = Arrays.asList("file1", "file2", "file3");
+        List<DAGFile> inputs = Collections.emptyList();
+        List<DAGFile> outputs = Arrays.asList(new DAGFile("file1", 100), new DAGFile("file2", 100), new DAGFile(
+                "file3", 100));
         Job job = createSimpleJobMock(inputs, outputs);
 
         jobs.add(job);
@@ -134,8 +136,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     public void shouldSendInputTransferBeforeAndOutputTransferAfter() {
         freeVMs.add(createVMMock());
 
-        List<String> inputs = Arrays.asList("input-file");
-        List<String> outputs = Arrays.asList("output-file");
+        List<DAGFile> inputs = Arrays.asList(new DAGFile("input-file", 100));
+        List<DAGFile> outputs = Arrays.asList(new DAGFile("output-file", 100));
         Job job = createSimpleJobMock(inputs, outputs);
 
         jobs.add(job);
@@ -163,7 +165,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         }
     }
 
-    private Job createSimpleJobMock(List<String> inputs, List<String> outputs) {
+    private Job createSimpleJobMock(List<DAGFile> inputs, List<DAGFile> outputs) {
         Task task = mock(Task.class);
 
         DAG dag = new DAG();
@@ -184,7 +186,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     }
 
     private Job createSimpleJobMock() {
-        return createSimpleJobMock(new ArrayList<String>(), new ArrayList<String>());
+        return createSimpleJobMock(new ArrayList<DAGFile>(), new ArrayList<DAGFile>());
     }
 
     private VM createVMMock() {

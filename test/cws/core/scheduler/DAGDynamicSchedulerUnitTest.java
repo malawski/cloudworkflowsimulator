@@ -29,6 +29,7 @@ import org.mockito.InOrder;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 
@@ -95,8 +96,8 @@ public class DAGDynamicSchedulerUnitTest {
     public void shouldAddTransferTaskForEachInputFile() {
         freeVMs.add(createVMMock());
 
-        List<String> inputs = Arrays.asList("file1", "file2");
-        List<String> outputs = Collections.emptyList();
+        List<DAGFile> inputs = Arrays.asList(new DAGFile("file1", 100), new DAGFile("file2", 100));
+        List<DAGFile> outputs = Collections.emptyList();
         Job job = createJobMock(inputs, outputs);
 
         jobs.add(job);
@@ -111,8 +112,9 @@ public class DAGDynamicSchedulerUnitTest {
     public void shouldAddTransferTaskForEachOutputFile() {
         freeVMs.add(createVMMock());
 
-        List<String> inputs = Collections.emptyList();
-        List<String> outputs = Arrays.asList("file1", "file2", "file3");
+        List<DAGFile> inputs = Collections.emptyList();
+        List<DAGFile> outputs = Arrays.asList(new DAGFile("file1", 100), new DAGFile("file2", 100), new DAGFile(
+                "file3", 100));
         Job job = createJobMock(inputs, outputs);
 
         jobs.add(job);
@@ -127,8 +129,8 @@ public class DAGDynamicSchedulerUnitTest {
     public void shouldSendInputTransferBeforeAndOutputTransferAfter() {
         freeVMs.add(createVMMock());
 
-        List<String> inputs = Arrays.asList("input-file");
-        List<String> outputs = Arrays.asList("output-file");
+        List<DAGFile> inputs = Arrays.asList(new DAGFile("input-file", 100));
+        List<DAGFile> outputs = Arrays.asList(new DAGFile("output-file", 100));
         Job job = createJobMock(inputs, outputs);
 
         jobs.add(job);
@@ -156,7 +158,7 @@ public class DAGDynamicSchedulerUnitTest {
         }
     }
 
-    private Job createJobMock(List<String> inputs, List<String> outputs) {
+    private Job createJobMock(List<DAGFile> inputs, List<DAGFile> outputs) {
         Task task = mock(Task.class);
         Job job = new Job(cloudsim);
         job.setTask(task);
@@ -170,7 +172,7 @@ public class DAGDynamicSchedulerUnitTest {
     }
 
     private Job createJobMock() {
-        return createJobMock(new ArrayList<String>(), new ArrayList<String>());
+        return createJobMock(new ArrayList<DAGFile>(), new ArrayList<DAGFile>());
     }
 
     private VM createVMMock() {

@@ -96,20 +96,22 @@ public class DAGParser {
                     if (rec.length < 3) {
                         throw new RuntimeException("Invalid INPUTS record: " + line);
                     }
-                    ArrayList<String> inputs = new ArrayList<String>(rec.length - 2);
+                    ArrayList<DAGFile> inputs = new ArrayList<DAGFile>(rec.length - 2);
                     String task = rec[1];
                     for (int i = 2; i < rec.length; i++) {
-                        inputs.add(rec[i]);
+                        DAGFile file = new DAGFile(rec[i], dag.getFileSize(rec[i]));
+                        inputs.add(file);
                     }
                     dag.setInputs(task, inputs);
                 } else if ("OUTPUTS".equalsIgnoreCase(type)) {
                     if (rec.length < 3) {
                         throw new RuntimeException("Invalid OUTPUTS record: " + line);
                     }
-                    ArrayList<String> outputs = new ArrayList<String>(rec.length - 2);
+                    ArrayList<DAGFile> outputs = new ArrayList<DAGFile>(rec.length - 2);
                     String task = rec[1];
                     for (int i = 2; i < rec.length; i++) {
-                        outputs.add(rec[i]);
+                        DAGFile file = new DAGFile(rec[i], dag.getFileSize(rec[i]));
+                        outputs.add(file);
                     }
                     dag.setOutputs(task, outputs);
                 } else {
@@ -203,8 +205,8 @@ public class DAGParser {
                     xmlReader.next(); // to first <uses> or </job>
 
                     // List of input files and output files for the task
-                    ArrayList<String> inputs = new ArrayList<String>();
-                    ArrayList<String> outputs = new ArrayList<String>();
+                    ArrayList<DAGFile> inputs = new ArrayList<DAGFile>();
+                    ArrayList<DAGFile> outputs = new ArrayList<DAGFile>();
 
                     while (!xmlReader.isEndElement()) {
                         // Sanity check
@@ -215,12 +217,13 @@ public class DAGParser {
                         }
 
                         // Parse file info
-                        String file = xmlReader.getAttributeValue(null, "file");
+                        String fileName = xmlReader.getAttributeValue(null, "file");
                         long size = Long.parseLong(xmlReader.getAttributeValue(null, "size"));
                         String link = xmlReader.getAttributeValue(null, "link");
 
                         // Add the file to the dag
-                        dag.addFile(file, size);
+                        dag.addFile(fileName, size);
+                        DAGFile file = new DAGFile(fileName, size);
 
                         // Determine if the file is an input or an output
                         if ("input".equalsIgnoreCase(link)) {
@@ -228,7 +231,7 @@ public class DAGParser {
                         } else if ("output".equalsIgnoreCase(link)) {
                             outputs.add(file);
                         } else {
-                            throw new RuntimeException(String.format("Invalid link '%s' for file '%s'", link, file));
+                            throw new RuntimeException(String.format("Invalid link '%s' for file '%s'", link, fileName));
                         }
 
                         xmlReader.next(); // to </uses>

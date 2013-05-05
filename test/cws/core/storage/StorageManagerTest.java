@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import cws.core.VM;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.Job;
@@ -51,7 +52,7 @@ public abstract class StorageManagerTest {
 
     @Test
     public void testBeforeTaskStartOnJobWithNoFiles() {
-        Mockito.when(task.getInputFiles()).thenReturn(new ArrayList<String>());
+        Mockito.when(task.getInputFiles()).thenReturn(new ArrayList<DAGFile>());
         skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED);
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         CloudSim.startSimulation();
@@ -62,7 +63,7 @@ public abstract class StorageManagerTest {
 
     @Test
     public void testAfterTaskCompletedOnJobWithNoFiles() {
-        Mockito.when(task.getOutputFiles()).thenReturn(new ArrayList<String>());
+        Mockito.when(task.getOutputFiles()).thenReturn(new ArrayList<DAGFile>());
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED);
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
         CloudSim.startSimulation();
@@ -73,9 +74,9 @@ public abstract class StorageManagerTest {
 
     @Test
     public void testBeforeTaskStartOnJobWithTwoFiles() {
-        List<String> files = new ArrayList<String>();
-        files.add("abc.txt");
-        files.add("def.txt");
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        files.add(new DAGFile("abc.txt", 2442));
+        files.add(new DAGFile("def.txt", 327879));
         Mockito.when(task.getInputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED);
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
@@ -87,9 +88,9 @@ public abstract class StorageManagerTest {
 
     @Test
     public void testAfterTaskCompletedOnJobWithTwoFiles() {
-        List<String> files = new ArrayList<String>();
-        files.add("abc.txt");
-        files.add("def.txt");
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        files.add(new DAGFile("abc.txt", 2442));
+        files.add(new DAGFile("def.txt", 327879));
         Mockito.when(task.getOutputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED);
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);

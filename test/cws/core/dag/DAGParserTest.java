@@ -10,12 +10,12 @@ public class DAGParserTest {
 
     @Test
     public void testSmall() {
-        DAG dag = DAGParser.parseDAG(new File("dags/cybershake_small.dag"));
-        assertEquals(dag.numTasks(), 25703);
-        Task t = dag.getTaskById("ID1_8_6");
-        assertEquals(t.getId(), "ID1_8_6");
-        assertEquals(t.getInputFiles().size(), 3);
-        assertEquals(t.getOutputFiles().size(), 2);
+        DAG dag = DAGParser.parseDAG(new File("dags/psmerge_small.dag"));
+        assertEquals(96, dag.numTasks());
+        Task t = dag.getTaskById("merge1.70");
+        assertEquals("merge1.70", t.getId());
+        assertEquals(2, t.getInputFiles().size());
+        assertEquals(1, t.getOutputFiles().size());
     }
 
     @Test

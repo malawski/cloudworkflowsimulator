@@ -22,10 +22,10 @@ public class Task {
     private List<Task> children = new ArrayList<Task>(5);
 
     /** Task's input files */
-    private List<String> inputFiles = null;
+    private List<DAGFile> inputFiles = null;
 
     /** Task's output files */
-    private List<String> outputFiles = null;
+    private List<DAGFile> outputFiles = null;
 
     public Task(String id, String transformation, double size) {
         this.id = id;
@@ -91,19 +91,19 @@ public class Task {
         return children;
     }
 
-    public List<String> getInputFiles() {
+    public List<DAGFile> getInputFiles() {
         return inputFiles;
     }
 
-    public void setInputFiles(List<String> inputs) {
+    public void setInputFiles(List<DAGFile> inputs) {
         this.inputFiles = inputs;
     }
 
-    public List<String> getOutputFiles() {
+    public List<DAGFile> getOutputFiles() {
         return outputFiles;
     }
 
-    public void setOutputFiles(List<String> outputs) {
+    public void setOutputFiles(List<DAGFile> outputs) {
         this.outputFiles = outputs;
     }
 }

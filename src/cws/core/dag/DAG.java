@@ -3,6 +3,8 @@ package cws.core.dag;
 import java.util.HashMap;
 import java.util.List;
 
+import cws.core.dag.exception.DAGFileNotFoundException;
+
 /**
  * 
  * @author Gideon Juve <juve@usc.edu>
@@ -41,12 +43,12 @@ public class DAG {
         c.getParents().add(p);
     }
 
-    public void setInputs(String taskId, List<String> inputs) {
+    public void setInputs(String taskId, List<DAGFile> inputs) {
         Task t = getTaskById(taskId);
         t.setInputFiles(inputs);
     }
 
-    public void setOutputs(String task, List<String> outputs) {
+    public void setOutputs(String task, List<DAGFile> outputs) {
         Task t = getTaskById(task);
         t.setOutputFiles(outputs);
     }
@@ -68,7 +70,7 @@ public class DAG {
 
     public double getFileSize(String name) {
         if (!files.containsKey(name)) {
-            throw new RuntimeException("File not found: " + name);
+            throw new DAGFileNotFoundException(name);
         }
         return files.get(name);
     }

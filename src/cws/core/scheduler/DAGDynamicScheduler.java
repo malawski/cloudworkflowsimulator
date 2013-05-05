@@ -12,6 +12,7 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 
@@ -96,8 +97,8 @@ public class DAGDynamicScheduler implements Scheduler {
             return Collections.emptyList();
         }
 
-        for (String file : task.getOutputFiles()) {
-            jobs.add(createOutputTransferJob(file, vm, job));
+        for (DAGFile file : task.getOutputFiles()) {
+            jobs.add(createOutputTransferJob(file.getName(), vm, job));
         }
 
         return jobs;
@@ -123,8 +124,8 @@ public class DAGDynamicScheduler implements Scheduler {
             return Collections.emptyList();
         }
 
-        for (String file : task.getInputFiles()) {
-            jobs.add(createInputTransferJob(file, vm, job));
+        for (DAGFile file : task.getInputFiles()) {
+            jobs.add(createInputTransferJob(file.getName(), vm, job));
         }
 
         return jobs;
