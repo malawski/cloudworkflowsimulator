@@ -22,14 +22,14 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
     }
 
     /**
-     * Called just before a VM starts a job. You should here get input files to the VM.
+     * Called just before a VM starts a job. You should get here job's input files to the VM.
      * @param job - the job that owns the task that is going to start
      */
     public abstract void onBeforeTaskStart(Job job);
 
     /**
-     * Called just after a job has finished. You should here transfer out output files somewhere or register their names
-     * (it's up to the particular implementation).
+     * Called just after a job has finished. You should here transfer out job's output files somewhere or register their
+     * names (it's up to the particular implementation).
      * @param job - the job that owns the task that has completed
      */
     public abstract void onAfterTaskCompleted(Job job);

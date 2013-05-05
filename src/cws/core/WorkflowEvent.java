@@ -102,4 +102,10 @@ public interface WorkflowEvent {
 
     /** Sent after all output files have been transferred out from a task */
     int STORAGE_ALL_AFTER_TRANSFERS_COMPLETED = 33;
+
+    /** Sent after global storage file read has finished */
+    int GLOBAL_STORAGE_READ_FINISHED = 34;
+
+    /** Sent after global storage file write has finished */
+    int GLOBAL_STORAGE_WRITE_FINISHED = 35;
 }

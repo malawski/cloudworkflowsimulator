@@ -57,7 +57,7 @@ public class CloudSimWrapper {
     }
 
     public void log(String msg) {
-        Log.printLine(clock() + msg);
+        Log.printLine(clock() + " " + msg);
     }
 
     public void disableLogging() {
