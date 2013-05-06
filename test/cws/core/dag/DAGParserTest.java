@@ -7,7 +7,6 @@ import java.io.File;
 import org.junit.Test;
 
 public class DAGParserTest {
-
     @Test
     public void testSmall() {
         DAG dag = DAGParser.parseDAG(new File("dags/psmerge_small.dag"));

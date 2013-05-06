@@ -18,12 +18,14 @@ import cws.core.storage.StorageManagerTest;
  * Tests {@link GlobalStorageManager}
  */
 public class GlobalStorageManagerTest extends StorageManagerTest {
-    private double readSpeed = 123;
-    private double writeSpeed = 321;
+    private GlobalStorageParams params;
 
     @Before
     public void setUp() {
-        storageManager = new GlobalStorageManager(readSpeed, writeSpeed, cloudsim);
+        params = new GlobalStorageParams();
+        params.setReadSpeed(123);
+        params.setWriteSpeed(321);
+        storageManager = new GlobalStorageManager(params, cloudsim);
     }
 
     @Test
@@ -38,7 +40,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
         Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());
-        Assert.assertEquals(sz / readSpeed, time, 0.74);
+        Assert.assertEquals(sz / params.getReadSpeed(), time, 0.74);
         // NOTE(bryk): 0.73 is CloudSim's error. Dunno why...
     }
 
@@ -54,7 +56,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
         Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED), Matchers.any());
-        Assert.assertEquals(sz / writeSpeed, time, 0.74);
+        Assert.assertEquals(sz / params.getWriteSpeed(), time, 0.74);
         // NOTE(bryk): 0.73 is CloudSim's error. Dunno why...
     }
 }

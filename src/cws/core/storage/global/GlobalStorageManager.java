@@ -23,19 +23,15 @@ public class GlobalStorageManager extends StorageManager {
     /** Map of jobs' active writes - the ones that progress at any given moment */
     private Map<Job, List<GlobalStorageTransfer>> writes = new HashMap<Job, List<GlobalStorageTransfer>>();
 
-    /** Average read speed of the storage */
-    private double readSpeed;
-
-    /** Average write speed of the storage */
-    private double writeSpeed;
+    /** Set of parameters for this storage */
+    private GlobalStorageParams params;
 
     /**
      * Initializes GlobalStorageManager with the appropriate parameters. Check their documentation for more information.
      */
-    public GlobalStorageManager(double readSpeed, double writeSpeed, CloudSimWrapper cloudsim) {
+    public GlobalStorageManager(GlobalStorageParams params, CloudSimWrapper cloudsim) {
         super(cloudsim);
-        this.readSpeed = readSpeed;
-        this.writeSpeed = writeSpeed;
+        this.params = params;
     }
 
     /**
@@ -55,7 +51,7 @@ public class GlobalStorageManager extends StorageManager {
             for (DAGFile file : files) {
                 GlobalStorageTransfer read = new GlobalStorageTransfer(job, file);
                 jobTransfers.add(read);
-                double transferTime = file.getSize() / readSpeed;
+                double transferTime = file.getSize() / params.getReadSpeed();
                 getCloudsim().send(getId(), getId(), transferTime, WorkflowEvent.GLOBAL_STORAGE_READ_FINISHED, read);
             }
         }
@@ -78,7 +74,7 @@ public class GlobalStorageManager extends StorageManager {
             for (DAGFile file : files) {
                 GlobalStorageTransfer write = new GlobalStorageTransfer(job, file);
                 jobTransfers.add(write);
-                double transferTime = file.getSize() / writeSpeed;
+                double transferTime = file.getSize() / params.getWriteSpeed();
                 getCloudsim().send(getId(), getId(), transferTime, WorkflowEvent.GLOBAL_STORAGE_WRITE_FINISHED, write);
             }
         }
