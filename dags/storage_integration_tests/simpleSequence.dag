@@ -1,0 +1,15 @@
+# Ignore lines with comments
+FILE in.txt 100
+FILE mid.txt 1000
+FILE out.txt 200
+
+TASK ID000 task1 2000.0
+TASK ID001 task2 40000.0
+
+EDGE ID000 ID001
+
+INPUTS ID000 in.txt
+OUTPUTS ID000 mid.txt
+
+INPUTS ID001 mid.txt
+OUTPUTS ID001 out.txt

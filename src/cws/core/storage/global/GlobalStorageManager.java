@@ -52,6 +52,9 @@ public class GlobalStorageManager extends StorageManager {
                 GlobalStorageTransfer read = new GlobalStorageTransfer(job, file);
                 jobTransfers.add(read);
                 double transferTime = file.getSize() / params.getReadSpeed();
+                getCloudsim().log(
+                        "Global transfer started: " + read.getFile().getName() + ", bytes transferred: "
+                                + read.getFile().getSize() + ", duration: " + read.getDuration());
                 getCloudsim().send(getId(), getId(), transferTime, WorkflowEvent.GLOBAL_STORAGE_READ_FINISHED, read);
             }
         }
@@ -75,6 +78,9 @@ public class GlobalStorageManager extends StorageManager {
                 GlobalStorageTransfer write = new GlobalStorageTransfer(job, file);
                 jobTransfers.add(write);
                 double transferTime = file.getSize() / params.getWriteSpeed();
+                getCloudsim().log(
+                        "Global transfer started: " + write.getFile().getName() + ", bytes transferred: "
+                                + write.getFile().getSize() + ", duration: " + write.getDuration());
                 getCloudsim().send(getId(), getId(), transferTime, WorkflowEvent.GLOBAL_STORAGE_WRITE_FINISHED, write);
             }
         }

@@ -74,8 +74,8 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
         String indent = "    ";
         pw.println();
         pw.println("========== OUTPUT ==========");
-        pw.println("Job ID" + indent + "STATUS" + indent + "Priority" + indent + "VM ID" + indent + "Time" + indent
-                + "Start Time" + indent + "Finish Time");
+        pw.println("  Job ID " + indent + "STATUS  " + indent + "Priority  " + indent + "VM ID  " + indent + "Time  "
+                + indent + "Start Time  " + indent + "Finish Time");
 
         DecimalFormat dft = new DecimalFormat("###.##");
         for (Job job : jobs) {
@@ -84,20 +84,25 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
             if (job.getState() == Job.State.TERMINATED && job.getResult() == Job.Result.SUCCESS) {
                 pw.print("SUCCESS");
                 
-                //FIXME: temporary hack - detecting data transfer job
-                if(job.getDAGJob() == null) continue;
+                String priority = "";
+              //FIXME: temporary hack - detecting data transfer job
+                if (job.getDAGJob() != null) {
+                    priority = String.format("%d", job.getDAGJob().getPriority());
+                }
 
-                pw.println(indent + indent + job.getDAGJob().getPriority() + indent + indent + indent
+                pw.println(indent + indent + priority + indent + indent + indent
                         + job.getVM().getId() + indent + indent + dft.format(job.getDuration()) + indent + indent
                         + dft.format(job.getStartTime()) + indent + indent + dft.format(job.getFinishTime()));
             } else {
                 pw.print("FAILED");
                 
-
+                String priority = "";
                 //FIXME: temporary hack - detecting data transfer job
-                if(job.getDAGJob() == null) continue;
+                if (job.getDAGJob() != null) {
+                    priority = String.format("%d", job.getDAGJob().getPriority());
+                }
                 
-                pw.println(indent + indent + job.getDAGJob().getPriority() + indent + indent + indent
+                pw.println(indent + indent + priority + indent + indent + indent
                         + job.getVM().getId() + indent + indent + dft.format(job.getDuration()) + indent + indent
                         + dft.format(job.getStartTime()) + indent + indent + dft.format(job.getFinishTime()));
 
