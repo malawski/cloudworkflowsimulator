@@ -35,7 +35,7 @@ public abstract class StorageManagerTest {
     @Before
     public void setUpStorageManagerTest() {
         cloudsim = Mockito.spy(new CloudSimWrapper());
-        CloudSim.init(1, null, false);
+        cloudsim.init();
         random = new Random(7);
 
         job = Mockito.mock(Job.class);

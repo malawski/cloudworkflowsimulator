@@ -19,11 +19,11 @@ public class VMFactoryTest {
     public void setUp() {
         // TODO(_mequrel_): change to IoC in the future or to mock
         cloudsim = new CloudSimWrapper();
+        cloudsim.init();
     }
 
     @Test
     public void testCreateVM() {
-        cloudsim.init();
         // To get mean m and stddev s, use:
         // sigma = sqrt(log(1+s^2/m^2))
         // mu = log(m)-0.5*log(1+s^2/m^2)

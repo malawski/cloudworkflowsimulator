@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
@@ -292,7 +291,7 @@ public class VM extends CWSSimEntity {
         // Tell the owner
         getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_STARTED, job);
 
-        getCloudsim().send(getId(), CloudSim.getEntityId("StorageManager"), 0.0,
+        getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
                 WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
 
         // One core is now busy running the job
@@ -305,7 +304,7 @@ public class VM extends CWSSimEntity {
             throw new RuntimeException("Cannot finish job: VM not running");
         }
 
-        getCloudsim().send(getId(), CloudSim.getEntityId("StorageManager"), 0.0,
+        getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
                 WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
     }
 

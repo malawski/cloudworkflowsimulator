@@ -1,3 +1,4 @@
+dist/
 bin
 output
 paper/build
@@ -5,4 +6,8 @@ paper/paper.pdf
 
 # integration tests output some .txt files
 *.txt
+
+# simulation output files
+*.csv
+*.csv[#]
 
