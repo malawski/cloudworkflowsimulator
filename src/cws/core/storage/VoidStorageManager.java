@@ -21,4 +21,9 @@ public class VoidStorageManager extends StorageManager {
     public void onAfterTaskCompleted(Job job) {
         notifyThatAfterTransfersCompleted(job);
     }
+
+    @Override
+    public double getTransferTimeEstimation(Job job) {
+        return 0.0; // instant transfer
+    }
 }

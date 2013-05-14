@@ -21,8 +21,7 @@ public class GlobalStorageTransfer {
 
     /**
      * @param job - the job this transfer transfers file from/to
-     * @param name - transferred file's name
-     * @param size - size of the transferred file TODO(bryk): determine unit
+     * @param file - the transferred file
      */
     public GlobalStorageTransfer(Job job, DAGFile file) {
         this.job = job;

@@ -41,7 +41,7 @@ public class GlobalStorageManager extends StorageManager {
      * @see StorageManager#onBeforeTaskStart(Job)
      */
     @Override
-    public void onBeforeTaskStart(Job job) {
+    protected void onBeforeTaskStart(Job job) {
         List<DAGFile> files = job.getTask().getInputFiles();
         if (files.size() == 0) {
             notifyThatBeforeTransfersCompleted(job);
@@ -64,7 +64,7 @@ public class GlobalStorageManager extends StorageManager {
      * @see StorageManager#onAfterTaskCompleted(Job)
      */
     @Override
-    public void onAfterTaskCompleted(Job job) {
+    protected void onAfterTaskCompleted(Job job) {
         List<DAGFile> files = job.getTask().getOutputFiles();
         if (files.size() == 0) {
             notifyThatAfterTransfersCompleted(job);
@@ -131,5 +131,23 @@ public class GlobalStorageManager extends StorageManager {
             super.onUnknownSimEvent(ev);
             break;
         }
+    }
+
+    /**
+     * Trivial transfer estimation based o read and write speeds. This seems good enough, but we might change the
+     * implementation in the future
+     * 
+     * @see StorageManager#getTransferTimeEstimation(Job)
+     */
+    @Override
+    public double getTransferTimeEstimation(Job job) {
+        double time = 0.0;
+        for (DAGFile file : job.getTask().getInputFiles()) {
+            time += file.getSize() / params.getReadSpeed();
+        }
+        for (DAGFile file : job.getTask().getOutputFiles()) {
+            time += file.getSize() / params.getWriteSpeed();
+        }
+        return time;
     }
 }

@@ -12,6 +12,8 @@ import org.mockito.Mockito;
 
 import cws.core.WorkflowEvent;
 import cws.core.dag.DAGFile;
+import cws.core.dag.Task;
+import cws.core.jobs.Job;
 import cws.core.storage.StorageManagerTest;
 
 /**
@@ -58,5 +60,33 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED), Matchers.any());
         Assert.assertEquals(sz / params.getWriteSpeed(), time, 0.74);
         // NOTE(bryk): 0.73 is CloudSim's error. Dunno why...
+    }
+
+    @Test
+    public void testGlobalTimeInputEstimation() {
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        double sz = 22222;
+        files.add(new DAGFile("abc.txt", sz));
+        Job job = new Job(cloudsim);
+        Task t = new Task("xx", "xx", 222);
+        t.setInputFiles(files);
+        t.setOutputFiles(new ArrayList<DAGFile>());
+        job.setTask(t);
+        double time = storageManager.getTransferTimeEstimation(job);
+        Assert.assertEquals(sz / params.getReadSpeed(), time, 0.00001);
+    }
+
+    @Test
+    public void testGlobalTimeOutputEstimation() {
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        double sz = 22222;
+        files.add(new DAGFile("abc.txt", sz));
+        Job job = new Job(cloudsim);
+        Task t = new Task("xx", "xx", 222);
+        t.setInputFiles(new ArrayList<DAGFile>());
+        t.setOutputFiles(files);
+        job.setTask(t);
+        double time = storageManager.getTransferTimeEstimation(job);
+        Assert.assertEquals(sz / params.getWriteSpeed(), time, 0.00001);
     }
 }

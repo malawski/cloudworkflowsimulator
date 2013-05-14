@@ -11,7 +11,11 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.exception.UnknownWorkflowEventException;
 
 /**
- * TODO(bryk): comment
+ * Abstract class for all storage managers. It should be subclassed and implemented.
+ * 
+ * The basic idea behind every StorageManager is that receives STORAGE_BEFORE_TASK_START and
+ * STORAGE_AFTER_TASK_COMPLETED events with a Job specified. After that it transfers all the files and eventually sends
+ * back STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED and STORAGE_ALL_AFTER_TRANSFERS_COMPLETED events.
  */
 public abstract class StorageManager extends CWSSimEntity implements WorkflowEvent {
     /**
@@ -22,17 +26,23 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
     }
 
     /**
+     * Estimates the sum of all transfers for the given job. Note that the estimations don't need to be 100% accurate.
+     * @param job - the job to estimate transfers for
+     */
+    public abstract double getTransferTimeEstimation(Job job);
+
+    /**
      * Called just before a VM starts a job. You should get here job's input files to the VM.
      * @param job - the job that owns the task that is going to start
      */
-    public abstract void onBeforeTaskStart(Job job);
+    protected abstract void onBeforeTaskStart(Job job);
 
     /**
      * Called just after a job has finished. You should here transfer out job's output files somewhere or register their
      * names (it's up to the particular implementation).
      * @param job - the job that owns the task that has completed
      */
-    public abstract void onAfterTaskCompleted(Job job);
+    protected abstract void onAfterTaskCompleted(Job job);
 
     /**
      * @see SimEntity#processEvent(SimEvent)
@@ -57,7 +67,7 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
      * 
      * @param job - the job for which all input transfers have completed
      */
-    public void notifyThatBeforeTransfersCompleted(Job job) {
+    protected void notifyThatBeforeTransfersCompleted(Job job) {
         getCloudsim().send(getId(), job.getVM().getId(), 0, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, job);
     }
 
@@ -66,7 +76,7 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
      * 
      * @param job - the job for which all output transfers have completed
      */
-    public void notifyThatAfterTransfersCompleted(Job job) {
+    protected void notifyThatAfterTransfersCompleted(Job job) {
         getCloudsim().send(getId(), job.getVM().getId(), 0, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, job);
     }
 
