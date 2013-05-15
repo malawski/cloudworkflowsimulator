@@ -72,15 +72,15 @@ public class DAGDynamicScheduler implements Scheduler {
         List<Job> inputTransferJob = createInputTransferJobs(job, vm);
         List<Job> outputTransferJob = createOutputTransferJobs(job, vm);
 
-        for (Job inputJob : inputTransferJob) {
-            sendJobToVM(engine, vm, inputJob);
-        }
+        // for (Job inputJob : inputTransferJob) {
+        // sendJobToVM(engine, vm, inputJob);
+        // }
 
         sendJobToVM(engine, vm, job);
 
-        for (Job outputJob : outputTransferJob) {
-            sendJobToVM(engine, vm, outputJob);
-        }
+        // for (Job outputJob : outputTransferJob) {
+        // sendJobToVM(engine, vm, outputJob);
+        // }
     }
 
     private void sendJobToVM(WorkflowEngine engine, VM vm, Job job) {

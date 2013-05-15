@@ -50,8 +50,12 @@ public class CloudSimWrapper {
         send(src, dest, delay, tag, null);
     }
 
+    private double lastTime = 0.0;
+
     public void log(String msg) {
-        Log.printLine(clock() + " " + msg);
+
+        Log.printLine((clock() - lastTime) + " (" + clock() + ") " + msg);
+        lastTime = clock();
     }
 
     public void disableLogging() {
