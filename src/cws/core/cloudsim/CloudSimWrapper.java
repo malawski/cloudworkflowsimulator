@@ -8,7 +8,6 @@ import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 
 public class CloudSimWrapper {
-    private boolean isInitialized = false;
 
     public void addEntity(SimEntity entity) {
         CloudSim.addEntity(entity);
@@ -24,14 +23,9 @@ public class CloudSimWrapper {
 
     /**
      * Calls {@link CloudSim#init(int, Calendar, boolean)} with params 1, null, false.
-     * It calls this method only once. If you want to reinitialize CloudSim you need to create a new CloudSimWrapper
-     * instance.
      */
     public void init() {
-        if (!isInitialized) {
-            CloudSim.init(1, null, false);
-            isInitialized = true;
-        }
+        CloudSim.init(1, null, false);
     }
 
     public void startSimulation() {
@@ -70,12 +64,5 @@ public class CloudSimWrapper {
 
     public void print(String string) {
         Log.print(string);
-    }
-
-    /**
-     * @return the isInitialized
-     */
-    public boolean isInitialized() {
-        return isInitialized;
     }
 }

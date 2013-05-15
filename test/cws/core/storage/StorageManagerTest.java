@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import junit.framework.Assert;
+
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +35,7 @@ public abstract class StorageManagerTest {
     @Before
     public void setUpStorageManagerTest() {
         cloudsim = Mockito.spy(new CloudSimWrapper());
-        CloudSim.init(1, null, false);
+        cloudsim.init();
         random = new Random(7);
 
         job = Mockito.mock(Job.class);
@@ -103,6 +105,29 @@ public abstract class StorageManagerTest {
     public void testUnknownMsg() {
         CloudSim.send(storageManager.getId(), storageManager.getId(), random.nextDouble(), 21434243, null);
         CloudSim.startSimulation();
+    }
+
+    @Test
+    public void testTimeEstimationForEmptyTask() {
+        Task t = new Task("xx", "xx", 222);
+        t.setInputFiles(new ArrayList<DAGFile>());
+        t.setOutputFiles(new ArrayList<DAGFile>());
+        job.setTask(t);
+        Assert.assertEquals(0.0, storageManager.getTransferTimeEstimation(job), 0.0);
+    }
+
+    @Test
+    public void testTimeEstimationForSimpleCase() {
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        files.add(new DAGFile("abc.txt", 2442));
+        files.add(new DAGFile("def.txt", 327879));
+        Job job = new Job(cloudsim);
+        Task t = new Task("xx", "xx", 222);
+        t.setInputFiles(files);
+        t.setOutputFiles(files);
+        job.setTask(t);
+        double time = storageManager.getTransferTimeEstimation(job);
+        Assert.assertTrue(time >= 0.0); // just very simple assert, nothing more we can assume
     }
 
     /** Skips event sent to by cloudsim obj. The rest is forwarded to the underlying CloudSim. */

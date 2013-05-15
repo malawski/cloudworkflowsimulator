@@ -45,5 +45,4 @@ public class DAGStats {
     public double getTotalRuntime() {
         return totalRuntime;
     }
-
 }

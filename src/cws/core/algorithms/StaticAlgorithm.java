@@ -463,7 +463,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     @Override
     public void simulate(String logname) {
         cloudsim.init();
-        // TODO(bryk): that's ugly, I know
+        // TODO(bryk): that's ugly, I know. @Mequrel - you should change this.
         new VoidStorageManager(cloudsim);
 
         Cloud cloud = new Cloud(cloudsim);
