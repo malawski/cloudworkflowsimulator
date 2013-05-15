@@ -11,3 +11,7 @@ paper/paper.pdf
 *.csv
 *.csv[#]
 
+# intellij IDE
+.idea/
+cloudworkflowsimulator.iml
+
