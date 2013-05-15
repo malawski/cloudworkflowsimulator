@@ -11,6 +11,8 @@ import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.jobs.Job;
+import cws.core.storage.StorageManager;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -20,9 +22,12 @@ public class SPSS extends StaticAlgorithm {
     /** Tuning parameter for deadline distribution (low alpha = runtime, high alpha = tasks) */
     private double alpha;
 
-    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, CloudSimWrapper cloudsim) {
+    private StorageManager storageManager;
+
+    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, CloudSimWrapper cloudsim, StorageManager storageManager) {
         super(budget, deadline, dags, cloudsim);
         this.alpha = alpha;
+        this.storageManager = storageManager;
     }
 
     /**
@@ -37,16 +42,14 @@ public class SPSS extends StaticAlgorithm {
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
         double minCost = 0.0;
         double totalRuntime = 0.0;
-        for (Task t : order) {
+        for (Task task : order) {
 
             // Initially we assign each VM to the SMALL type
             VMType vm = VMType.SMALL;
-            vmTypes.put(t, vm);
+            vmTypes.put(task, vm);
 
-            // The runtime is just the size of the task (MI) divided by the
-            // MIPS of the VM
-            double runtime = t.getSize();
-            runtimes.put(t, runtime);
+            double runtime = estimateTaskMakespan(task);
+            runtimes.put(task, runtime);
 
             // Compute the minimum cost of running this workflow
             minCost += (runtime / (60 * 60)) * vm.price;
@@ -295,5 +298,19 @@ public class SPSS extends StaticAlgorithm {
         }
 
         return plan;
+    }
+
+    /*
+       The runtime is just the size of the task (MI) divided by the
+        MIPS of the VM
+    */
+    private double estimateTaskMakespan(Task t) {
+        return t.getSize() + estimateTransfer(t);
+    }
+
+    private double estimateTransfer(Task task) {
+        Job job = new Job(getCloudsim());
+        job.setTask(task);
+        return storageManager.getTransferTimeEstimation(job);
     }
 }

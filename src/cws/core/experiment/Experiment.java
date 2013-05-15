@@ -13,6 +13,8 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.StorageManager;
+import cws.core.storage.VoidStorageManager;
 
 public class Experiment {
 
@@ -46,8 +48,9 @@ public class Experiment {
 
         // TODO(_mequrel_): change to IoC in the future
         CloudSimWrapper cloudsim = new CloudSimWrapper();
+        StorageManager storageManager = new VoidStorageManager(cloudsim);
 
-        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim);
+        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim, storageManager);
 
         algorithm.setGenerateLog(false);
 

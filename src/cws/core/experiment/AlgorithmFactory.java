@@ -16,6 +16,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.jobs.UniformRuntimeDistribution;
+import cws.core.storage.StorageManager;
 
 /**
  * Factory for creating algorithms based on experiment description.
@@ -23,7 +24,7 @@ import cws.core.jobs.UniformRuntimeDistribution;
  */
 public class AlgorithmFactory {
 
-    public static Algorithm createAlgorithm(ExperimentDescription e, CloudSimWrapper cloudsim) {
+    public static Algorithm createAlgorithm(ExperimentDescription e, CloudSimWrapper cloudsim, StorageManager storageManager) {
         List<DAG> dags = new ArrayList<DAG>();
         String name = e.getAlgorithmName();
         String dagPath = e.getDagPath();
@@ -64,11 +65,11 @@ public class AlgorithmFactory {
         else if (name.equals("Backtrack"))
             return new Backtrack(budget, deadline, dags, cloudsim);
         else if (name.equals("SPSS"))
-            return new SPSS(budget, deadline, dags, alpha, cloudsim);
+            return new SPSS(budget, deadline, dags, alpha, cloudsim, storageManager);
         else if (name.equals("DPDS"))
             return new DPDS(budget, deadline, dags, price, maxScaling, cloudsim);
         else if (name.equals("WADPDS"))
-            return new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim);
+            return new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
         else
             return null;
 

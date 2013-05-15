@@ -11,6 +11,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
+import cws.core.storage.StorageManager;
 
 /**
  * This scheduler submits workflow ensemble to VMs on FCFS basis.
@@ -21,12 +22,14 @@ import cws.core.jobs.Job;
  */
 public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
-    public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim) {
+    public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim, StorageManager storageManager) {
         super(cloudsim);
+        this.storageManager = storageManager;
     }
 
     private Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
     private Set<DAGJob> rejectedDAGs = new HashSet<DAGJob>();
+    private StorageManager storageManager;
 
     @Override
     public void scheduleJobs(WorkflowEngine engine) {
@@ -139,7 +142,6 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
     /**
      * Estimate budget remaining, including unused $ and running VMs
      * TODO: compute budget consumed/remaining by already admitted workflows
-     * @param dj
      * @param engine
      * @return
      */
@@ -216,7 +218,14 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         double sum = 0.0;
         for (String taskName : dag.getTasks()) {
             sum += dag.getTaskById(taskName).getSize();
+            sum += estimateTransfer(dag.getTaskById(taskName));
         }
         return sum;
+    }
+
+    private double estimateTransfer(Task task) {
+        Job job = new Job(getCloudSim());
+        job.setTask(task);
+        return storageManager.getTransferTimeEstimation(job);
     }
 }

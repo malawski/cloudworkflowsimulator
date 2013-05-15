@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import cws.core.storage.StorageManager;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,11 +37,13 @@ public class DynamicProvisionerDynamicSchedulerTest {
     private String dagPath = "dags/";
 
     private CloudSimWrapper cloudsim;
+    private StorageManager storageManager;
 
     @Before
     public void setUp() {
         // TODO(_mequrel_): change to IoC in the future or to mock
         cloudsim = new CloudSimWrapper();
+        storageManager = new VoidStorageManager(cloudsim);
     }
 
     @Test
@@ -106,7 +109,7 @@ public class DynamicProvisionerDynamicSchedulerTest {
 
         ExperimentDescription param = new ExperimentDescription("test", "DPDS", "output", dagPath, dags, deadline,
                 budget, price, max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);
-        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim);
+        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim, storageManager);
         algorithm.setGenerateLog(true);
         String fileName = param.getRunDirectory() + File.separator + "output-test-DPDS";
         algorithm.simulate(fileName);
@@ -119,7 +122,7 @@ public class DynamicProvisionerDynamicSchedulerTest {
 
         param = new ExperimentDescription("test", "SPSS", "output", dagPath, dags, deadline, budget, price,
                 max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);
-        algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim);
+        algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim, storageManager);
         algorithm.setGenerateLog(true);
         fileName = param.getRunDirectory() + File.separator + "output-test-SPSS";
         algorithm.simulate(fileName);

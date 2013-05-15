@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import cws.core.storage.StorageManager;
+import cws.core.storage.VoidStorageManager;
+import cws.core.storage.global.GlobalStorageManager;
+import cws.core.storage.global.GlobalStorageParams;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
@@ -58,6 +62,7 @@ public class TestRun {
         File inputdir = null; // new File("/Volumes/HDD/SyntheticWorkflows/SIPHT");
         File outputfile = null; // new File("TestRun.dat");
         String distribution = null; // "uniform_unsorted";
+        String storageManagerType = null;
 
         // Arguments with defaults
         Integer ensembleSize = 50;
@@ -98,6 +103,8 @@ public class TestRun {
                     delay = Double.parseDouble(next);
                 } else if ("-failureRate".equals(arg)) {
                     failureRate = Double.parseDouble(next);
+                } else if ("-storage".equals(arg)) {
+                    storageManagerType = next;
                 } else {
                     System.err.println("Illegal argument " + arg);
                     usage();
@@ -133,6 +140,11 @@ public class TestRun {
             usage();
         }
 
+        if (storageManagerType == null) {
+            System.err.println("-storage required");
+            usage();
+        }
+
         // Echo the simulation parameters
         System.out.printf("application = %s\n", application);
         System.out.printf("inputdir = %s\n", inputdir);
@@ -148,6 +160,7 @@ public class TestRun {
 
         // TODO(_mequrel_): change to IoC in the future
         CloudSimWrapper cloudsim = new CloudSimWrapper();
+        cloudsim.init();
 
         // Disable cloudsim logging
         cloudsim.disableLogging();
@@ -226,6 +239,21 @@ public class TestRun {
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
 
+        StorageManager storageManager = null;
+
+        if(storageManagerType.equals("global")) {
+            GlobalStorageParams params = new GlobalStorageParams();
+
+            params.setReadSpeed(100.0);
+            params.setWriteSpeed(50.0);
+
+            storageManager = new GlobalStorageManager(params, cloudsim);
+        }
+        else {
+            storageManager = new VoidStorageManager(cloudsim);
+        }
+
+
         PrintStream fileOut = null;
         try {
             fileOut = new PrintStream(new FileOutputStream(outputfile));
@@ -240,11 +268,11 @@ public class TestRun {
                     System.out.print(".");
                     Algorithm a = null;
                     if ("SPSS".equals(algorithm)) {
-                        a = new SPSS(budget, deadline, dags, alpha, cloudsim);
+                        a = new SPSS(budget, deadline, dags, alpha, cloudsim, storageManager);
                     } else if ("DPDS".equals(algorithm)) {
                         a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim);
                     } else if ("WADPDS".equals(algorithm)) {
-                        a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim);
+                        a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
                     } else {
                         throw new RuntimeException("Unknown algorithm: " + algorithm);
                     }

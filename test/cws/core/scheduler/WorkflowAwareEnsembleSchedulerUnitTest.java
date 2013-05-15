@@ -4,27 +4,23 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import cws.core.storage.StorageManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
-import org.mockito.InOrder;
 
 import cws.core.VM;
 import cws.core.WorkflowEngine;
@@ -39,6 +35,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     WorkflowAwareEnsembleScheduler scheduler;
     WorkflowEngine engine;
     CloudSimWrapper cloudsim;
+    StorageManager storageManager;
 
     Queue<Job> jobs;
     Set<VM> freeVMs;
@@ -48,7 +45,9 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         cloudsim = mock(CloudSimWrapper.class);
         when(cloudsim.clock()).thenReturn(1.0);
 
-        scheduler = new WorkflowAwareEnsembleScheduler(cloudsim);
+        storageManager = mock(StorageManager.class);
+
+        scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, storageManager);
 
         engine = mock(WorkflowEngine.class);
         when(engine.getDeadline()).thenReturn(10.0);
@@ -97,58 +96,6 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
         scheduler.scheduleJobs(engine);
         assertTrue(expected.equals(jobs));
-    }
-
-    @Test
-    public void shouldAddTransferTaskForEachInputFile() {
-        freeVMs.add(createVMMock());
-
-        List<DAGFile> inputs = Arrays.asList(new DAGFile("file1", 100), new DAGFile("file2", 100));
-        List<DAGFile> outputs = Collections.emptyList();
-        Job job = createSimpleJobMock(inputs, outputs);
-
-        jobs.add(job);
-
-        scheduler.scheduleJobs(engine);
-
-        verify(cloudsim, times(3)).send(anyInt(), anyInt(), anyDouble(), anyInt(), any(Job.class));
-
-    }
-
-    @Test
-    public void shouldAddTransferTaskForEachOutputFile() {
-        freeVMs.add(createVMMock());
-
-        List<DAGFile> inputs = Collections.emptyList();
-        List<DAGFile> outputs = Arrays.asList(new DAGFile("file1", 100), new DAGFile("file2", 100), new DAGFile(
-                "file3", 100));
-        Job job = createSimpleJobMock(inputs, outputs);
-
-        jobs.add(job);
-
-        scheduler.scheduleJobs(engine);
-
-        verify(cloudsim, times(4)).send(anyInt(), anyInt(), anyDouble(), anyInt(), any(Job.class));
-
-    }
-
-    @Test
-    public void shouldSendInputTransferBeforeAndOutputTransferAfter() {
-        freeVMs.add(createVMMock());
-
-        List<DAGFile> inputs = Arrays.asList(new DAGFile("input-file", 100));
-        List<DAGFile> outputs = Arrays.asList(new DAGFile("output-file", 100));
-        Job job = createSimpleJobMock(inputs, outputs);
-
-        jobs.add(job);
-
-        scheduler.scheduleJobs(engine);
-
-        InOrder order = inOrder(cloudsim);
-        order.verify(cloudsim).send(anyInt(), anyInt(), anyDouble(), anyInt(), argThat(new IsInputTransferJob()));
-        order.verify(cloudsim).send(anyInt(), anyInt(), anyDouble(), anyInt(), eq(job));
-        order.verify(cloudsim).send(anyInt(), anyInt(), anyDouble(), anyInt(), argThat(new IsOutputTransferJob()));
-
     }
 
     class IsInputTransferJob extends ArgumentMatcher<Job> {

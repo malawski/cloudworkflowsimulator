@@ -1,20 +1,15 @@
 package cws.core.scheduler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.DAGFile;
-import cws.core.dag.Task;
 import cws.core.jobs.Job;
+
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * This scheduler submits jobs to VMs on FCFS basis.
@@ -53,8 +48,10 @@ public class DAGDynamicScheduler implements Scheduler {
      * @param engine
      */
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-        // FIXME(_mequrel_): copying references because when we remove it from list, garbage collector removes VM...
-        // imho it shouldnt working like that
+        /*
+        FIXME(_mequrel_): copying references because when we remove it from list, garbage collector removes VM...
+        imho it shouldn't working like that
+        */
         Set<VM> freeVMs = new HashSet<VM>(engine.getFreeVMs());
 
         while (canBeScheduled(jobs, freeVMs)) {
@@ -69,77 +66,12 @@ public class DAGDynamicScheduler implements Scheduler {
 
         job.setVM(vm);
 
-        List<Job> inputTransferJob = createInputTransferJobs(job, vm);
-        List<Job> outputTransferJob = createOutputTransferJobs(job, vm);
-
-        // for (Job inputJob : inputTransferJob) {
-        // sendJobToVM(engine, vm, inputJob);
-        // }
-
         sendJobToVM(engine, vm, job);
-
-        // for (Job outputJob : outputTransferJob) {
-        // sendJobToVM(engine, vm, outputJob);
-        // }
     }
 
     private void sendJobToVM(WorkflowEngine engine, VM vm, Job job) {
         cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
         cloudsim.log("Submitting job " + job.getTask().getId() + " to VM " + job.getVM().getId());
-    }
-
-    private List<Job> createOutputTransferJobs(Job job, VM vm) {
-        List<Job> jobs = new ArrayList<Job>();
-
-        Task task = job.getTask();
-        // FIXME(_mequrel_): no idea why it could be null, parser should be fixed and this check removed
-        if (task.getOutputFiles() == null) {
-            return Collections.emptyList();
-        }
-
-        for (DAGFile file : task.getOutputFiles()) {
-            jobs.add(createOutputTransferJob(file.getName(), vm, job));
-        }
-
-        return jobs;
-    }
-
-    private Job createOutputTransferJob(String file, VM vm, Job job) {
-        Task dataTask = new Task("output-gs-" + job.getTask().getId() + "-" + file, "data"
-                + job.getTask().getTransformation(), 12.0);
-
-        Job datajob = new Job(cloudsim);
-        datajob.setTask(dataTask);
-        datajob.setOwner(job.getOwner());
-        datajob.setVM(vm);
-        return datajob;
-    }
-
-    private List<Job> createInputTransferJobs(Job job, VM vm) {
-        List<Job> jobs = new ArrayList<Job>();
-
-        Task task = job.getTask();
-        // FIXME(_mequrel_): no idea why it could be null, parser should be fixed and this check removed
-        if (task.getInputFiles() == null) {
-            return Collections.emptyList();
-        }
-
-        for (DAGFile file : task.getInputFiles()) {
-            jobs.add(createInputTransferJob(file.getName(), vm, job));
-        }
-
-        return jobs;
-    }
-
-    private Job createInputTransferJob(String file, VM vm, Job job) {
-        Task dataTask = new Task("input-gs-" + job.getTask().getId() + "-" + file, "data"
-                + job.getTask().getTransformation(), 12.0);
-
-        Job datajob = new Job(cloudsim);
-        datajob.setTask(dataTask);
-        datajob.setOwner(job.getOwner());
-        datajob.setVM(vm);
-        return datajob;
     }
 
     private boolean canBeScheduled(Queue<Job> jobs, Set<VM> freeVMs) {
