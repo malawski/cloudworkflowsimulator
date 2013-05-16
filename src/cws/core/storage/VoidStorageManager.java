@@ -1,6 +1,7 @@
 package cws.core.storage;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.Task;
 import cws.core.jobs.Job;
 
 /**
@@ -23,7 +24,7 @@ public class VoidStorageManager extends StorageManager {
     }
 
     @Override
-    public double getTransferTimeEstimation(Job job) {
+    public double getTransferTimeEstimation(Task task) {
         return 0.0; // instant transfer
     }
 }

@@ -218,14 +218,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         double sum = 0.0;
         for (String taskName : dag.getTasks()) {
             sum += dag.getTaskById(taskName).getSize();
-            sum += estimateTransfer(dag.getTaskById(taskName));
+            sum += storageManager.getTransferTimeEstimation(dag.getTaskById(taskName));
         }
         return sum;
-    }
-
-    private double estimateTransfer(Task task) {
-        Job job = new Job(getCloudSim());
-        job.setTask(task);
-        return storageManager.getTransferTimeEstimation(job);
     }
 }

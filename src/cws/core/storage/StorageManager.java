@@ -8,6 +8,7 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.Task;
 import cws.core.exception.UnknownWorkflowEventException;
 
 /**
@@ -27,9 +28,9 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
 
     /**
      * Estimates the sum of all transfers for the given job. Note that the estimations don't need to be 100% accurate.
-     * @param job - the job to estimate transfers for
+     * @param task - the task to estimate transfers for
      */
-    public abstract double getTransferTimeEstimation(Job job);
+    public abstract double getTransferTimeEstimation(Task task);
 
     /**
      * Called just before a VM starts a job. You should get here job's input files to the VM.

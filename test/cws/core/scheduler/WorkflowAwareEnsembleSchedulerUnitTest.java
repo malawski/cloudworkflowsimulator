@@ -1,7 +1,6 @@
 package cws.core.scheduler;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import cws.core.storage.StorageManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -30,6 +28,7 @@ import cws.core.dag.DAGFile;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
+import cws.core.storage.StorageManager;
 
 public class WorkflowAwareEnsembleSchedulerUnitTest {
     WorkflowAwareEnsembleScheduler scheduler;

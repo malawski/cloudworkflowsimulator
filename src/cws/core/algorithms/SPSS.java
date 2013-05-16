@@ -11,7 +11,6 @@ import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 
 /**
@@ -24,7 +23,8 @@ public class SPSS extends StaticAlgorithm {
 
     private StorageManager storageManager;
 
-    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, CloudSimWrapper cloudsim, StorageManager storageManager) {
+    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, CloudSimWrapper cloudsim,
+            StorageManager storageManager) {
         super(budget, deadline, dags, cloudsim);
         this.alpha = alpha;
         this.storageManager = storageManager;
@@ -301,16 +301,10 @@ public class SPSS extends StaticAlgorithm {
     }
 
     /*
-       The runtime is just the size of the task (MI) divided by the
-        MIPS of the VM
-    */
+     * The runtime is just the size of the task (MI) divided by the
+     * MIPS of the VM
+     */
     private double estimateTaskMakespan(Task t) {
-        return t.getSize() + estimateTransfer(t);
-    }
-
-    private double estimateTransfer(Task task) {
-        Job job = new Job(getCloudsim());
-        job.setTask(task);
-        return storageManager.getTransferTimeEstimation(job);
+        return t.getSize() + storageManager.getTransferTimeEstimation(t);
     }
 }

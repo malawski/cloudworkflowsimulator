@@ -112,8 +112,7 @@ public abstract class StorageManagerTest {
         Task t = new Task("xx", "xx", 222);
         t.setInputFiles(new ArrayList<DAGFile>());
         t.setOutputFiles(new ArrayList<DAGFile>());
-        job.setTask(t);
-        Assert.assertEquals(0.0, storageManager.getTransferTimeEstimation(job), 0.0);
+        Assert.assertEquals(0.0, storageManager.getTransferTimeEstimation(t), 0.0);
     }
 
     @Test
@@ -121,12 +120,10 @@ public abstract class StorageManagerTest {
         List<DAGFile> files = new ArrayList<DAGFile>();
         files.add(new DAGFile("abc.txt", 2442));
         files.add(new DAGFile("def.txt", 327879));
-        Job job = new Job(cloudsim);
         Task t = new Task("xx", "xx", 222);
         t.setInputFiles(files);
         t.setOutputFiles(files);
-        job.setTask(t);
-        double time = storageManager.getTransferTimeEstimation(job);
+        double time = storageManager.getTransferTimeEstimation(t);
         Assert.assertTrue(time >= 0.0); // just very simple assert, nothing more we can assume
     }
 

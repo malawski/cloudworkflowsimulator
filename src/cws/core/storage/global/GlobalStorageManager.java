@@ -9,6 +9,7 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGFile;
+import cws.core.dag.Task;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 
@@ -143,15 +144,15 @@ public class GlobalStorageManager extends StorageManager {
      * Trivial transfer estimation based o read and write speeds. This seems good enough, but we might change the
      * implementation in the future
      * 
-     * @see StorageManager#getTransferTimeEstimation(Job)
+     * @see StorageManager#getTransferTimeEstimation(Task)
      */
     @Override
-    public double getTransferTimeEstimation(Job job) {
+    public double getTransferTimeEstimation(Task task) {
         double time = 0.0;
-        for (DAGFile file : job.getTask().getInputFiles()) {
+        for (DAGFile file : task.getInputFiles()) {
             time += file.getSize() / params.getReadSpeed();
         }
-        for (DAGFile file : job.getTask().getOutputFiles()) {
+        for (DAGFile file : task.getOutputFiles()) {
             time += file.getSize() / params.getWriteSpeed();
         }
         return time;

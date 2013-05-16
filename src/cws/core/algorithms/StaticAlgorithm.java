@@ -202,11 +202,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
         }
 
-        // Sanity check
-        if (admittedDAGs.size() == 0) {
-            System.err.println("WARNING: No DAGs admitted");
-        }
-
         // Submit admitted DAGs
         for (DAG dag : admittedDAGs) {
             submitDAG(dag);
