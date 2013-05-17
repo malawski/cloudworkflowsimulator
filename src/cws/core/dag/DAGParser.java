@@ -83,7 +83,7 @@ public class DAGParser {
                         throw new RuntimeException("Invalid FILE record: " + line);
                     }
                     String name = rec[1];
-                    double size = Double.parseDouble(rec[2]);
+                    long size = Long.parseLong(rec[2]);
                     dag.addFile(name, size);
                 } else if ("EDGE".equalsIgnoreCase(type)) {
                     if (rec.length != 3) {

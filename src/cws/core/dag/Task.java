@@ -7,9 +7,10 @@ import java.util.List;
  * @author Gideon Juve <juve@usc.edu>
  */
 public class Task {
-    // TODO(bryk): document all these fields
     /** Globally uniqe task id */
     private String id = null;
+
+    /** Transformation string taken from some daxes. Not really important and used only for logging. */
     private String transformation = null;
 
     /** Number of MIPS needed to compute this task */

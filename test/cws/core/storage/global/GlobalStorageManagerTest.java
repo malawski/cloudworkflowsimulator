@@ -32,7 +32,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
     @Test
     public void testGlobalStorageReadTransferTime() {
         List<DAGFile> files = new ArrayList<DAGFile>();
-        double sz = 2442;
+        long sz = 2442;
         files.add(new DAGFile("abc.txt", sz));
         Mockito.when(task.getInputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED);
@@ -41,14 +41,14 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
         Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());
-        Assert.assertEquals(sz / params.getReadSpeed(), time, 0.74);
+        Assert.assertEquals(sz / params.getReadSpeed() + params.getLatency(), time, 0.74);
         // NOTE(bryk): 0.73 is CloudSim's error. Dunno why...
     }
 
     @Test
     public void testGlobalStorageWriteTransferTime() {
         List<DAGFile> files = new ArrayList<DAGFile>();
-        double sz = 2442;
+        long sz = 2442;
         files.add(new DAGFile("abc.txt", sz));
         Mockito.when(task.getOutputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED);
@@ -57,14 +57,14 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
         Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED), Matchers.any());
-        Assert.assertEquals(sz / params.getWriteSpeed(), time, 0.74);
+        Assert.assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.74);
         // NOTE(bryk): 0.73 is CloudSim's error. Dunno why...
     }
 
     @Test
     public void testGlobalTimeInputEstimation() {
         List<DAGFile> files = new ArrayList<DAGFile>();
-        double sz = 22222;
+        long sz = 22222;
         files.add(new DAGFile("abc.txt", sz));
         Task t = new Task("xx", "xx", 222);
         t.setInputFiles(files);
@@ -76,7 +76,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
     @Test
     public void testGlobalTimeOutputEstimation() {
         List<DAGFile> files = new ArrayList<DAGFile>();
-        double sz = 22222;
+        long sz = 22222;
         files.add(new DAGFile("abc.txt", sz));
         Task t = new Task("xx", "xx", 222);
         t.setInputFiles(new ArrayList<DAGFile>());

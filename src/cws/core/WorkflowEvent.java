@@ -108,4 +108,10 @@ public interface WorkflowEvent {
 
     /** Sent after global storage file write has finished */
     int GLOBAL_STORAGE_WRITE_FINISHED = 35;
+
+    /** Event indicating the progress of a global storage read */
+    int GLOBAL_STORAGE_READ_PROGRESS = 36;
+
+    /** Event indicating the progress of a global storage write */
+    int GLOBAL_STORAGE_WRITE_PROGRESS = 37;
 }

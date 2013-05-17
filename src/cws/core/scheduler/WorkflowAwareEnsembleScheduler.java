@@ -197,7 +197,6 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
             if (!admittedDJ.isComplete(task))
                 cost += task.getSize() * vmPrice(engine);
         }
-        // TODO(bryk): estimate data transfers
         return cost / 3600.0;
     }
 

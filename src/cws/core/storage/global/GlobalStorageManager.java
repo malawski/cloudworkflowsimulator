@@ -14,7 +14,8 @@ import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 
 /**
- * TODO(bryk): comment
+ * Manager which stores files on a global storage. This should loosely resemble Amazon's S3 storage.
+ * 
  * TODO(bryk): randomize parameters under some distribution
  */
 public class GlobalStorageManager extends StorageManager {
@@ -47,17 +48,7 @@ public class GlobalStorageManager extends StorageManager {
         if (files.size() == 0) {
             notifyThatBeforeTransfersCompleted(job);
         } else {
-            List<GlobalStorageTransfer> jobTransfers = new ArrayList<GlobalStorageTransfer>();
-            reads.put(job, jobTransfers);
-            for (DAGFile file : files) {
-                GlobalStorageTransfer read = new GlobalStorageTransfer(job, file);
-                jobTransfers.add(read);
-                double transferTime = file.getSize() / params.getReadSpeed();
-                getCloudsim().log(
-                        "Global transfer started: " + read.getFile().getName() + ", bytes transferred: "
-                                + read.getFile().getSize() + ", duration: " + read.getDuration());
-                getCloudsim().send(getId(), getId(), transferTime, WorkflowEvent.GLOBAL_STORAGE_READ_FINISHED, read);
-            }
+            startTransfers(files, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS);
         }
     }
 
@@ -73,17 +64,24 @@ public class GlobalStorageManager extends StorageManager {
         if (files.size() == 0) {
             notifyThatAfterTransfersCompleted(job);
         } else {
-            List<GlobalStorageTransfer> jobTransfers = new ArrayList<GlobalStorageTransfer>();
-            writes.put(job, jobTransfers);
-            for (DAGFile file : files) {
-                GlobalStorageTransfer write = new GlobalStorageTransfer(job, file);
-                jobTransfers.add(write);
-                double transferTime = file.getSize() / params.getWriteSpeed();
-                getCloudsim().log(
-                        "Global transfer started: " + write.getFile().getName() + ", bytes transferred: "
-                                + write.getFile().getSize() + ", duration: " + write.getDuration());
-                getCloudsim().send(getId(), getId(), transferTime, WorkflowEvent.GLOBAL_STORAGE_WRITE_FINISHED, write);
-            }
+            startTransfers(files, job, writes, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS);
+        }
+    }
+
+    /**
+     * Starts transfers for the given job.
+     */
+    private void startTransfers(List<DAGFile> files, Job job, Map<Job, List<GlobalStorageTransfer>> transfers,
+            int progressEvent) {
+        List<GlobalStorageTransfer> jobTransfers = new ArrayList<GlobalStorageTransfer>();
+        transfers.put(job, jobTransfers);
+        for (DAGFile file : files) {
+            GlobalStorageTransfer write = new GlobalStorageTransfer(job, file);
+            jobTransfers.add(write);
+            getCloudsim().log(
+                    String.format("Global transfer started: %s, size: %s", write.getFile().getName(), write.getFile()
+                            .getSize()));
+            getCloudsim().send(getId(), getId(), params.getLatency(), progressEvent, write);
         }
     }
 
@@ -134,10 +132,57 @@ public class GlobalStorageManager extends StorageManager {
         case WorkflowEvent.GLOBAL_STORAGE_WRITE_FINISHED:
             onWriteFinished((GlobalStorageTransfer) ev.getData());
             break;
+        case WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS:
+            onReadProgress((GlobalStorageTransfer) ev.getData());
+            break;
+        case WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS:
+            onWriteProgress((GlobalStorageTransfer) ev.getData());
+            break;
         default:
             super.onUnknownSimEvent(ev);
             break;
         }
+    }
+
+    /** Called on GLOBAL_STORAGE_WRITE_PROGRESS event. */
+    private void onWriteProgress(GlobalStorageTransfer write) {
+        if (write.isCompleted()) {
+            getCloudsim().sendNow(getId(), getId(), WorkflowEvent.GLOBAL_STORAGE_WRITE_FINISHED, write);
+        } else {
+            progressTransfer(write, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS, params.getWriteSpeed());
+        }
+    }
+
+    /** Called on GLOBAL_STORAGE_READ_FINISHED event */
+    private void onReadProgress(GlobalStorageTransfer read) {
+        if (read.isCompleted()) {
+            getCloudsim().sendNow(getId(), getId(), WorkflowEvent.GLOBAL_STORAGE_READ_FINISHED, read);
+        } else {
+            progressTransfer(read, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS, params.getReadSpeed());
+        }
+    }
+
+    /**
+     * Progresses transfer by transferring some amount of bytes for params.getChunkTransferTime() time. If there are
+     * less bytes to transfer than we can we transfer for shorter time.
+     * 
+     * @param transfer the transfer to progress
+     * @param progressEvent event sent after this progress
+     * @param speed transfer speed
+     */
+    private void progressTransfer(GlobalStorageTransfer transfer, int progressEvent, double speed) {
+        long bytesTransferred = (long) Math.ceil(speed * params.getChunkTransferTime());
+        double time = 0.0;
+        // There are less bytes to transfer that we want
+        if (bytesTransferred > transfer.getRemainingBytesToTransfer()) {
+            bytesTransferred = transfer.getRemainingBytesToTransfer();
+            time = bytesTransferred / speed;
+        } else {
+            time = params.getChunkTransferTime();
+        }
+        transfer.addDuration(time);
+        transfer.addBytesTransferred(bytesTransferred);
+        getCloudsim().sendToMyself(this, time, progressEvent, transfer);
     }
 
     /**

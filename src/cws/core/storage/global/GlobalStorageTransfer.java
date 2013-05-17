@@ -4,18 +4,19 @@ import cws.core.dag.DAGFile;
 import cws.core.jobs.Job;
 
 /**
- * TODO(bryk): comment
+ * Describes global storage transfer. This can be either read or write.
  */
 public class GlobalStorageTransfer {
     /** The job this transfer transfers file from/to */
     private Job job;
     /** Transferred file */
     private DAGFile file;
+    /** Number of bytes transferred so far */
+    private long bytesTransferred = 0;
 
     /**
      * Transfer's duration. It should have proper value after transfer finish. In the meantime it can have some
-     * intermediate
-     * increasing value
+     * intermediate increasing value.
      */
     private double duration;
 
@@ -26,6 +27,17 @@ public class GlobalStorageTransfer {
     public GlobalStorageTransfer(Job job, DAGFile file) {
         this.job = job;
         this.file = file;
+    }
+
+    /**
+     * @return is the transfer completed? I.e. all bytes are transferred?
+     */
+    public boolean isCompleted() {
+        return bytesTransferred == file.getSize();
+    }
+
+    public long getRemainingBytesToTransfer() {
+        return file.getSize() - bytesTransferred;
     }
 
     @Override
@@ -50,7 +62,11 @@ public class GlobalStorageTransfer {
         return duration;
     }
 
-    public void setDuration(double duration) {
-        this.duration = duration;
+    public void addBytesTransferred(long amountBytes) {
+        bytesTransferred += amountBytes;
+    }
+
+    public void addDuration(double amount) {
+        duration += amount;
     }
 }

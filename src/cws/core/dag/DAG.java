@@ -10,7 +10,7 @@ import cws.core.dag.exception.DAGFileNotFoundException;
  * @author Gideon Juve <juve@usc.edu>
  */
 public class DAG {
-    private HashMap<String, Double> files = new HashMap<String, Double>();
+    private HashMap<String, Long> files = new HashMap<String, Long>();
     private HashMap<String, Task> tasks = new HashMap<String, Task>();
 
     public DAG() {
@@ -23,7 +23,7 @@ public class DAG {
         tasks.put(t.getId(), t);
     }
 
-    public void addFile(String name, double size) {
+    public void addFile(String name, long size) {
         if (size < 0) {
             throw new RuntimeException("Invalid size for file '" + name + "': " + size);
         }
@@ -68,7 +68,7 @@ public class DAG {
         return tasks.get(id);
     }
 
-    public double getFileSize(String name) {
+    public long getFileSize(String name) {
         if (!files.containsKey(name)) {
             throw new DAGFileNotFoundException(name);
         }

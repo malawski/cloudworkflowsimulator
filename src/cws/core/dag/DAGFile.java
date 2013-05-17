@@ -1,13 +1,13 @@
 package cws.core.dag;
 
 /**
- * A file consists of its name and size.
+ * A file consists of its name and size. It's immutable.
  */
 public class DAGFile {
     private String name;
-    private double size;
+    private long size;
 
-    public DAGFile(String name, double size) {
+    public DAGFile(String name, long size) {
         this.name = name;
         this.size = size;
     }
@@ -16,7 +16,7 @@ public class DAGFile {
         return name;
     }
 
-    public double getSize() {
+    public long getSize() {
         return size;
     }
 
