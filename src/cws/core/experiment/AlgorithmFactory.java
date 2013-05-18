@@ -67,7 +67,7 @@ public class AlgorithmFactory {
         else if (name.equals("SPSS"))
             return new SPSS(budget, deadline, dags, alpha, cloudsim, storageManager);
         else if (name.equals("DPDS"))
-            return new DPDS(budget, deadline, dags, price, maxScaling, cloudsim);
+            return new DPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
         else if (name.equals("WADPDS"))
             return new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
         else

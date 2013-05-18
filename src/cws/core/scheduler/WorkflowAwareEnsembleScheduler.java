@@ -219,6 +219,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
             sum += dag.getTaskById(taskName).getSize();
             sum += storageManager.getTransferTimeEstimation(dag.getTaskById(taskName));
         }
+
         return sum;
     }
 }

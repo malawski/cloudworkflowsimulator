@@ -25,7 +25,7 @@ public class SPSS extends StaticAlgorithm {
 
     public SPSS(double budget, double deadline, List<DAG> dags, double alpha, CloudSimWrapper cloudsim,
             StorageManager storageManager) {
-        super(budget, deadline, dags, cloudsim);
+        super(budget, deadline, dags, cloudsim, storageManager);
         this.alpha = alpha;
         this.storageManager = storageManager;
     }

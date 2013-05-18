@@ -202,4 +202,9 @@ public class GlobalStorageManager extends StorageManager {
         }
         return time;
     }
+
+
+    public GlobalStorageParams getParams() {
+        return params;
+    }
 }

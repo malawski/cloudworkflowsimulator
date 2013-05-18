@@ -10,6 +10,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.storage.VoidStorageManager;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -17,7 +18,7 @@ import cws.core.dag.algorithms.TopologicalOrder;
 public class MinMin extends StaticAlgorithm {
 
     public MinMin(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, cloudsim);
+        super(budget, deadline, dags, cloudsim, new VoidStorageManager(cloudsim)); // TODO(mequrel): temporary hack
     }
 
     /**

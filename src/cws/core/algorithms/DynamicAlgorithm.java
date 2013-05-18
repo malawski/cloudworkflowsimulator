@@ -22,7 +22,9 @@ import cws.core.jobs.JobListener;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.jobs.Job.Result;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
+import cws.core.storage.global.GlobalStorageManager;
 
 public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMListener, JobListener {
 
@@ -44,13 +46,17 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     protected long simulationStartWallTime;
     protected long simulationFinishWallTime;
 
+
+    private StorageManager storageManager;
+
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, double price, Scheduler scheduler,
-            Provisioner provisioner, CloudSimWrapper cloudsim) {
+            Provisioner provisioner, CloudSimWrapper cloudsim, StorageManager storageManager) {
         super(budget, deadline, dags);
         this.price = price;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
         this.cloudsim = cloudsim;
+        this.storageManager = storageManager;
     }
 
     @Override
@@ -81,8 +87,15 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     @Override
     public void simulate(String logname) {
         cloudsim.init();
-        // TODO(bryk): that's ugly, I know. @Mequrel - you should change this.
-        new VoidStorageManager(cloudsim);
+
+        if(storageManager instanceof GlobalStorageManager) {
+            storageManager = new GlobalStorageManager(((GlobalStorageManager)storageManager).getParams(), cloudsim);
+        }
+        else {
+            storageManager = new VoidStorageManager(cloudsim);
+        }
+
+        //cloudsim.addEntity(storageManager);
 
         Cloud cloud = new Cloud(cloudsim);
         cloud.addVMListener(this);

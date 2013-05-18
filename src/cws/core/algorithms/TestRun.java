@@ -71,6 +71,7 @@ public class TestRun {
         Double runtimeVariance = 0.0;
         Double delay = 0.0;
         Double failureRate = 0.0;
+        Double storageManagerSpeed = 100000000.0;
 
         try {
             for (int i = 0; i < args.length;) {
@@ -105,6 +106,8 @@ public class TestRun {
                     failureRate = Double.parseDouble(next);
                 } else if ("-storage".equals(arg)) {
                     storageManagerType = next;
+                } else if ("-speed".equals(arg)) {
+                    storageManagerSpeed = Double.parseDouble(next);
                 } else {
                     System.err.println("Illegal argument " + arg);
                     usage();
@@ -244,8 +247,10 @@ public class TestRun {
         if(storageManagerType.equals("global")) {
             GlobalStorageParams params = new GlobalStorageParams();
 
-            params.setReadSpeed(100.0);
-            params.setWriteSpeed(50.0);
+            params.setReadSpeed(storageManagerSpeed);
+            params.setWriteSpeed(storageManagerSpeed);
+            params.setLatency(0.0);
+            //params.setChunkTransferTime();
 
             storageManager = new GlobalStorageManager(params, cloudsim);
         }
@@ -260,7 +265,7 @@ public class TestRun {
             fileOut.println("application,distribution,seed,dags,scale,budget,"
                     + "deadline,algorithm,completed,exponential,linear,"
                     + "planning,simulation,scorebits,cost,jobfinish,dagfinish,"
-                    + "vmfinish,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline");
+                    + "vmfinish,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline,storageType,storageSpeed");
 
             for (double budget = minBudget; budget < maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
@@ -270,7 +275,7 @@ public class TestRun {
                     if ("SPSS".equals(algorithm)) {
                         a = new SPSS(budget, deadline, dags, alpha, cloudsim, storageManager);
                     } else if ("DPDS".equals(algorithm)) {
-                        a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim);
+                        a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
                     } else if ("WADPDS".equals(algorithm)) {
                         a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
                     } else {
@@ -295,12 +300,12 @@ public class TestRun {
                     double simulationTime = a.getSimulationWallTime() / 1.0e9;
 
                     fileOut.printf(
-                            "%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+                            "%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%s,%f\n",
                             application, distribution, seed, ensembleSize, scalingFactor, budget, deadline,
                             a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
                             planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(),
                             a.getActualJobFinishTime(), a.getActualDagFinishTime(), a.getActualVMFinishTime(),
-                            runtimeVariance, delay, failureRate, minBudget, maxBudget, minDeadline, maxDeadline);
+                            runtimeVariance, delay, failureRate, minBudget, maxBudget, minDeadline, maxDeadline, storageManagerType, storageManagerSpeed);
                 }
             }
 

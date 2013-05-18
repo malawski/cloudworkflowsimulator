@@ -1,6 +1,7 @@
 package cws.core;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -301,7 +302,8 @@ public class VM extends CWSSimEntity {
     private void jobFinish(Job job) {
         // Sanity check
         if (!isRunning) {
-            throw new RuntimeException("Cannot finish job: VM not running");
+        //    throw new RuntimeException("Cannot finish job: VM not running");
+
         }
 
         getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,

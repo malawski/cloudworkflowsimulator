@@ -12,6 +12,6 @@ public class WADPDS extends DynamicAlgorithm {
     public WADPDS(double budget, double deadline, List<DAG> dags, double price, double maxScaling,
             CloudSimWrapper cloudsim, StorageManager storageManager) {
         super(budget, deadline, dags, price, new WorkflowAwareEnsembleScheduler(cloudsim, storageManager),
-                new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim), cloudsim);
+                new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim), cloudsim, storageManager);
     }
 }

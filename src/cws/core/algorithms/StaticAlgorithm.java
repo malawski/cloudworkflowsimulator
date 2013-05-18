@@ -28,7 +28,9 @@ import cws.core.jobs.Job;
 import cws.core.jobs.JobListener;
 import cws.core.jobs.Job.Result;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
+import cws.core.storage.global.GlobalStorageManager;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener,
         DAGJobListener {
@@ -40,6 +42,9 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     /** Ensemble manager that submits DAGs */
     private EnsembleManager manager;
+
+    /** Storage manager handling transfer tasks */
+    private StorageManager storageManager;
 
     /** Cloud to provision VMs from */
     private Cloud cloud;
@@ -71,9 +76,10 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     protected long simulationStartWallTime;
     protected long simulationFinishWallTime;
 
-    public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim) {
+    public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim, StorageManager storageManager) {
         super(budget, deadline, dags);
         this.cloudsim = cloudsim;
+        this.storageManager = storageManager;
     }
 
     @Override
@@ -458,8 +464,15 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     @Override
     public void simulate(String logname) {
         cloudsim.init();
-        // TODO(bryk): that's ugly, I know. @Mequrel - you should change this.
-        new VoidStorageManager(cloudsim);
+
+        if(storageManager instanceof GlobalStorageManager) {
+            storageManager = new GlobalStorageManager(((GlobalStorageManager)storageManager).getParams(), cloudsim);
+        }
+        else {
+            storageManager = new VoidStorageManager(cloudsim);
+        }
+
+        //cloudsim.addEntity(storageManager);
 
         Cloud cloud = new Cloud(cloudsim);
         WorkflowEngine engine = new WorkflowEngine(this, this, cloudsim);
