@@ -18,6 +18,8 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.cache.FIFOCacheManager;
+import cws.core.storage.cache.VMCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
 
@@ -39,8 +41,11 @@ public class DAGDynamicSchedulerStorageAwareTest {
         params.setReadSpeed(2.0);
         params.setWriteSpeed(1.0);
 
+        // XXX(bryk): note @mequrel that I've hardcoded FIFO cache here. Change this once you start refactoring this
+        // code.
+        VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
         // TODO(bryk): that's ugly, I know
-        new GlobalStorageManager(params, cloudsim);
+        new GlobalStorageManager(params, cacheManager, cloudsim);
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim);
         engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
@@ -66,8 +71,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
          * .....| out.txt 200B = 200s write
          * 
          */
-        
-        
+
         launchVM();
         List<DAG> dags = loadTestDAG("dags/storage_integration_tests/simpleSequence.dag");
         startSimulation(dags);

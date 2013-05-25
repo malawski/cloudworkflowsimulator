@@ -55,7 +55,7 @@ public abstract class StorageManagerTest {
     @Test
     public void testBeforeTaskStartOnJobWithNoFiles() {
         Mockito.when(task.getInputFiles()).thenReturn(new ArrayList<DAGFile>());
-        skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED);
+        skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         CloudSim.startSimulation();
 
@@ -66,7 +66,7 @@ public abstract class StorageManagerTest {
     @Test
     public void testAfterTaskCompletedOnJobWithNoFiles() {
         Mockito.when(task.getOutputFiles()).thenReturn(new ArrayList<DAGFile>());
-        skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED);
+        skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
         CloudSim.startSimulation();
 
@@ -80,7 +80,7 @@ public abstract class StorageManagerTest {
         files.add(new DAGFile("abc.txt", 2442));
         files.add(new DAGFile("def.txt", 327879));
         Mockito.when(task.getInputFiles()).thenReturn(files);
-        skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED);
+        skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         CloudSim.startSimulation();
 
@@ -94,7 +94,7 @@ public abstract class StorageManagerTest {
         files.add(new DAGFile("abc.txt", 2442));
         files.add(new DAGFile("def.txt", 327879));
         Mockito.when(task.getOutputFiles()).thenReturn(files);
-        skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED);
+        skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
         CloudSim.startSimulation();
         Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
@@ -128,7 +128,7 @@ public abstract class StorageManagerTest {
     }
 
     /** Skips event sent to by cloudsim obj. The rest is forwarded to the underlying CloudSim. */
-    public void skipEvent(int dst, int event) {
+    public static void skipEvent(int dst, int event, CloudSimWrapper cloudsim) {
         Mockito.doNothing().when(cloudsim)
                 .send(Matchers.anyInt(), Matchers.eq(dst), Matchers.anyDouble(), Matchers.eq(event), Matchers.any());
     }
