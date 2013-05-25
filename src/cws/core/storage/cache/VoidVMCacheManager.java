@@ -5,7 +5,9 @@ import cws.core.dag.DAGFile;
 import cws.core.jobs.Job;
 
 /**
- * A VMCacheManager that does nothing - it always says that there is no file in the cache.
+ * A VMCacheManager that does nothing - it always says that there is no file in the cache. <br>
+ * It is a stubby implementation that can be used in tests as well (instead of mocking).
+ * 
  * @see {@link VMCacheManager}
  */
 public class VoidVMCacheManager extends VMCacheManager {

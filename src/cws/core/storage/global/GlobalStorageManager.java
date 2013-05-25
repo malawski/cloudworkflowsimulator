@@ -12,9 +12,12 @@ import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
+import cws.core.storage.cache.VMCacheManager;
 
 /**
- * Manager which stores files on a global storage. This should loosely resemble Amazon's S3 storage.
+ * Manager which stores files on a global storage. This should loosely resemble Amazon's S3 storage.<br>
+ * 
+ * GlobalStorageManager uses {@link VMCacheManager} for caching.
  * 
  * TODO(bryk): randomize parameters under some distribution
  */
@@ -28,12 +31,16 @@ public class GlobalStorageManager extends StorageManager {
     /** Set of parameters for this storage */
     private GlobalStorageParams params;
 
+    /** Cache manager used by this storage */
+    private VMCacheManager cacheManager;
+
     /**
      * Initializes GlobalStorageManager with the appropriate parameters. Check their documentation for more information.
      */
-    public GlobalStorageManager(GlobalStorageParams params, CloudSimWrapper cloudsim) {
+    public GlobalStorageManager(GlobalStorageParams params, VMCacheManager cacheManager, CloudSimWrapper cloudsim) {
         super(cloudsim);
         this.params = params;
+        this.cacheManager = cacheManager;
     }
 
     /**
@@ -48,7 +55,16 @@ public class GlobalStorageManager extends StorageManager {
         if (files.size() == 0) {
             notifyThatBeforeTransfersCompleted(job);
         } else {
-            startTransfers(files, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS);
+            List<DAGFile> notCachedFiles = new ArrayList<DAGFile>();
+            for (DAGFile file : files) {
+                if (!cacheManager.getFileFromCache(file, job)) {
+                    notCachedFiles.add(file);
+                }
+            }
+            startTransfers(notCachedFiles, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS);
+            for (DAGFile file : notCachedFiles) {
+                cacheManager.putFileToCache(file, job);
+            }
         }
     }
 
@@ -65,6 +81,9 @@ public class GlobalStorageManager extends StorageManager {
             notifyThatAfterTransfersCompleted(job);
         } else {
             startTransfers(files, job, writes, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS);
+            for (DAGFile file : files) {
+                cacheManager.putFileToCache(file, job);
+            }
         }
     }
 
@@ -202,7 +221,6 @@ public class GlobalStorageManager extends StorageManager {
         }
         return time;
     }
-
 
     public GlobalStorageParams getParams() {
         return params;

@@ -14,19 +14,23 @@ import cws.core.WorkflowEvent;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.storage.StorageManagerTest;
+import cws.core.storage.cache.VMCacheManager;
+import cws.core.storage.cache.VoidVMCacheManager;
 
 /**
  * Tests {@link GlobalStorageManager}
  */
 public class GlobalStorageManagerTest extends StorageManagerTest {
-    private GlobalStorageParams params;
+    protected GlobalStorageParams params;
+    protected VMCacheManager cacheManager;
 
     @Before
     public void setUp() {
+        cacheManager = new VoidVMCacheManager(cloudsim);
         params = new GlobalStorageParams();
         params.setReadSpeed(123);
         params.setWriteSpeed(321);
-        storageManager = new GlobalStorageManager(params, cloudsim);
+        storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
     }
 
     @Test
