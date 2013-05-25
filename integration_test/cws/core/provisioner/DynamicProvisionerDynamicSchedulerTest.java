@@ -7,10 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 
-import cws.core.storage.StorageManager;
-import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.Cloud;
@@ -18,12 +15,9 @@ import cws.core.EnsembleManager;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
-import cws.core.algorithms.Algorithm;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
-import cws.core.experiment.AlgorithmFactory;
-import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.Experiment;
 import cws.core.experiment.ExperimentDescription;
 import cws.core.experiment.ExperimentResult;
@@ -31,27 +25,19 @@ import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
 import cws.core.scheduler.DAGDynamicScheduler;
 import cws.core.scheduler.EnsembleDynamicScheduler;
+import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 
 public class DynamicProvisionerDynamicSchedulerTest {
     private String dagPath = "dags/";
 
-    private CloudSimWrapper cloudsim;
-    private StorageManager storageManager;
-
-    @Before
-    public void setUp() {
-        // TODO(_mequrel_): change to IoC in the future or to mock
-        cloudsim = new CloudSimWrapper();
-        storageManager = new VoidStorageManager(cloudsim);
-    }
-
     @Test
     public void testProvisionerScheduleDag100x10() {
+        CloudSimWrapper cloudsim = new CloudSimWrapper();
         cloudsim.init();
         Cloud cloud = new Cloud(cloudsim);
-        // TODO(bryk): that's ugly, I know
-        new VoidStorageManager(cloudsim);
+        @SuppressWarnings("unused")
+        StorageManager storageManager = new VoidStorageManager(cloudsim);
 
         SimpleQueueBasedProvisioner provisioner = new SimpleQueueBasedProvisioner(cloudsim);
         provisioner.setCloud(cloud);
@@ -92,40 +78,6 @@ public class DynamicProvisionerDynamicSchedulerTest {
 
         wfLog.printJobs("output/testEnsembleProvisionerDynamicSchedulerDag_CyberShake_100x10");
         wfLog.printVmList("output/testEnsembleProvisionerDynamicSchedulerDag_CyberShake_100x10");
-    }
-
-    @Test
-    public void testGantt() {
-        String dagName = "CyberShake_100.dag";
-        double deadline = 3600.0; // seconds
-        double budget = 10.0;
-        double price = 1.0;
-        int numDAGs = 10;
-        double max_scaling = 1.0;
-
-        String dags[] = new String[numDAGs];
-        for (int i = 0; i < numDAGs; i++)
-            dags[i] = dagName;
-
-        ExperimentDescription param = new ExperimentDescription("test", "DPDS", "output", dagPath, dags, deadline,
-                budget, price, max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);
-        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim, storageManager);
-        algorithm.setGenerateLog(true);
-        String fileName = param.getRunDirectory() + File.separator + "output-test-DPDS";
-        algorithm.simulate(fileName);
-
-        dagPath = "../projects/pegasus/Montage/";
-        dagName = "MONTAGE";
-        dags = DAGListGenerator.generateDAGListParetoUnsorted(new Random(0), dagName, 11);
-        budget = 10.0;
-        deadline = 2000.00; // seconds
-
-        param = new ExperimentDescription("test", "SPSS", "output", dagPath, dags, deadline, budget, price,
-                max_scaling, 0.7, 1, 0.0, 0.0, "constant", 0);
-        algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim, storageManager);
-        algorithm.setGenerateLog(true);
-        fileName = param.getRunDirectory() + File.separator + "output-test-SPSS";
-        algorithm.simulate(fileName);
     }
 
     @Test

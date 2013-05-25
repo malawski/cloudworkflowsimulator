@@ -225,4 +225,8 @@ public class GlobalStorageManager extends StorageManager {
     public GlobalStorageParams getParams() {
         return params;
     }
+
+    public VMCacheManager getCacheManager() {
+        return cacheManager;
+    }
 }

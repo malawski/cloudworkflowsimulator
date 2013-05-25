@@ -10,6 +10,9 @@ import java.util.Random;
 
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
+import cws.core.storage.cache.FIFOCacheManager;
+import cws.core.storage.cache.VMCacheManager;
+import cws.core.storage.cache.VoidCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
 import org.apache.commons.io.IOUtils;
@@ -43,7 +46,8 @@ public class TestRun {
     public static void usage() {
         System.err.printf("Usage: %s -application APP -inputdir DIR " + "\n\t-outputfile FILE -distribution DIST "
                 + "-ensembleSize SIZE \n\t-algorithm ALGO " + "[-scalingFactor FACTOR] [-seed SEED] "
-                + "\n\t[-runtimeVariance VAR] [-delay DELAY] [-failureRate RATE]\n\n", TestRun.class.getName());
+                + "\n\t[-runtimeVariance VAR] [-delay DELAY] "
+                + "[-failureRate RATE] [-storageCache [void(default)|FIFO]]\n\n", TestRun.class.getName());
         System.exit(1);
     }
 
@@ -63,6 +67,8 @@ public class TestRun {
         File outputfile = null; // new File("TestRun.dat");
         String distribution = null; // "uniform_unsorted";
         String storageManagerType = null;
+
+        String storageCacheType = "void";
 
         // Arguments with defaults
         Integer ensembleSize = 50;
@@ -108,6 +114,8 @@ public class TestRun {
                     storageManagerType = next;
                 } else if ("-speed".equals(arg)) {
                     storageManagerSpeed = Double.parseDouble(next);
+                } else if ("-storageCache".equals(arg)) {
+                    storageCacheType = next;
                 } else {
                     System.err.println("Illegal argument " + arg);
                     usage();
@@ -160,6 +168,8 @@ public class TestRun {
         System.out.printf("runtimeVariance = %f\n", runtimeVariance);
         System.out.printf("delay = %f\n", delay);
         System.out.printf("failureRate = %f\n", failureRate);
+        // TODO(bryk): @mequrel: should storageManagerType be here? I believe so.
+        System.out.printf("storageCache = %s\n", storageCacheType);
 
         // TODO(_mequrel_): change to IoC in the future
         CloudSimWrapper cloudsim = new CloudSimWrapper();
@@ -244,20 +254,25 @@ public class TestRun {
 
         StorageManager storageManager = null;
 
-        if(storageManagerType.equals("global")) {
+        VMCacheManager cacheManager = null;
+        if (storageCacheType.equals("FIFO")) {
+            cacheManager = new FIFOCacheManager(cloudsim);
+        } else {
+            cacheManager = new VoidCacheManager(cloudsim);
+        }
+
+        if (storageManagerType.equals("global")) {
             GlobalStorageParams params = new GlobalStorageParams();
 
             params.setReadSpeed(storageManagerSpeed);
             params.setWriteSpeed(storageManagerSpeed);
             params.setLatency(0.0);
-            //params.setChunkTransferTime();
+            // params.setChunkTransferTime();
 
-            storageManager = new GlobalStorageManager(params, cloudsim);
-        }
-        else {
+            storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
+        } else {
             storageManager = new VoidStorageManager(cloudsim);
         }
-
 
         PrintStream fileOut = null;
         try {
@@ -305,7 +320,8 @@ public class TestRun {
                             a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
                             planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(),
                             a.getActualJobFinishTime(), a.getActualDagFinishTime(), a.getActualVMFinishTime(),
-                            runtimeVariance, delay, failureRate, minBudget, maxBudget, minDeadline, maxDeadline, storageManagerType, storageManagerSpeed);
+                            runtimeVariance, delay, failureRate, minBudget, maxBudget, minDeadline, maxDeadline,
+                            storageManagerType, storageManagerSpeed);
                 }
             }
 
