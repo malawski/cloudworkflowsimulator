@@ -10,8 +10,8 @@ import cws.core.jobs.Job;
  * 
  * @see {@link VMCacheManager}
  */
-public class VoidVMCacheManager extends VMCacheManager {
-    public VoidVMCacheManager(CloudSimWrapper cloudsim) {
+public class VoidCacheManager extends VMCacheManager {
+    public VoidCacheManager(CloudSimWrapper cloudsim) {
         super(cloudsim);
     }
 

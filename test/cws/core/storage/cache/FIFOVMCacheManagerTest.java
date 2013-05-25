@@ -9,12 +9,12 @@ import org.mockito.Mockito;
 import cws.core.dag.DAGFile;
 
 /**
- * Tests for {@link FIFOVMCacheManager}
+ * Tests for {@link FIFOCacheManager}
  */
 public class FIFOVMCacheManagerTest extends VMCacheManagerTest {
     @Before
     public void setUp() {
-        cm = new FIFOVMCacheManager(cloudsim);
+        cm = new FIFOCacheManager(cloudsim);
     }
 
     @Test

@@ -12,17 +12,17 @@ import cws.core.dag.DAGFile;
 import cws.core.jobs.Job;
 
 /**
- * TODO(bryk): comment it.
+ * Cache manager which uses FIFO cache strategy for all files.
  */
-public class FIFOVMCacheManager extends VMCacheManager {
-    public FIFOVMCacheManager(CloudSimWrapper cloudsim) {
+public class FIFOCacheManager extends VMCacheManager {
+    public FIFOCacheManager(CloudSimWrapper cloudsim) {
         super(cloudsim);
     }
 
-    private Map<VM, VMCache> cache = new HashMap<VM, FIFOVMCacheManager.VMCache>();
+    private Map<VM, VMCache> cache = new HashMap<VM, FIFOCacheManager.VMCache>();
 
     /**
-     * TODO(bryk): comment it.
+     * Since we use per-VM cache this inner class is convenient.
      */
     private class VMCache {
         private long size = 0;
@@ -36,6 +36,9 @@ public class FIFOVMCacheManager extends VMCacheManager {
             this.remainingSize = this.size;
         }
 
+        /**
+         * Puts the file to the local cache.
+         */
         public void putFileToCache(DAGFile file) {
             if (file.getSize() <= size) {
                 while (remainingSize < file.getSize() && filesSet.size() > 0) {
@@ -51,14 +54,14 @@ public class FIFOVMCacheManager extends VMCacheManager {
             }
         }
 
+        /**
+         * @return true if the file is in the cache, false otherwise.
+         */
         public boolean getFileFromCache(DAGFile file) {
             return filesSet.contains(file);
         }
     }
 
-    /**
-     * TODO(bryk): comment it.
-     */
     @Override
     public void putFileToCache(DAGFile file, Job job) {
         if (cache.get(job.getVM()) == null) {
@@ -67,9 +70,6 @@ public class FIFOVMCacheManager extends VMCacheManager {
         cache.get(job.getVM()).putFileToCache(file);
     }
 
-    /**
-     * TODO(bryk): comment it.
-     */
     @Override
     public boolean getFileFromCache(DAGFile file, Job job) {
         VMCache vmCache = cache.get(job.getVM());
