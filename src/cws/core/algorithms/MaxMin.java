@@ -6,8 +6,9 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 
 public class MaxMin extends MinMin {
-    public MaxMin(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, cloudsim);
+    public MaxMin(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
+            AlgorithmSimulationParams simulationParams) {
+        super(budget, deadline, dags, cloudsim, simulationParams);
     }
 
     /**

@@ -8,25 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import cws.core.storage.StorageManager;
-import cws.core.storage.VoidStorageManager;
-import cws.core.storage.cache.FIFOCacheManager;
-import cws.core.storage.cache.VMCacheManager;
-import cws.core.storage.cache.VoidCacheManager;
-import cws.core.storage.global.GlobalStorageManager;
-import cws.core.storage.global.GlobalStorageParams;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.FailureModel;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.Task;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
+import cws.core.dag.Task;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
 import cws.core.jobs.UniformRuntimeDistribution;
+import cws.core.storage.global.GlobalStorageParams;
 
 public class TestRun {
 
@@ -168,7 +162,8 @@ public class TestRun {
         System.out.printf("runtimeVariance = %f\n", runtimeVariance);
         System.out.printf("delay = %f\n", delay);
         System.out.printf("failureRate = %f\n", failureRate);
-        // TODO(bryk): @mequrel: should storageManagerType be here? I believe so.
+        System.out.printf("storageManagerType = %s\n", storageManagerType);
+        System.out.printf("storageManagerSpeed = %f\n", storageManagerSpeed);
         System.out.printf("storageCache = %s\n", storageCacheType);
 
         // TODO(_mequrel_): change to IoC in the future
@@ -252,13 +247,12 @@ public class TestRun {
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
 
-        StorageManager storageManager = null;
+        AlgorithmSimulationParams algorithmSimulationParams = new AlgorithmSimulationParams();
 
-        VMCacheManager cacheManager = null;
         if (storageCacheType.equals("FIFO")) {
-            cacheManager = new FIFOCacheManager(cloudsim);
+            algorithmSimulationParams.setStorageCacheType(StorageCacheType.FIFO);
         } else {
-            cacheManager = new VoidCacheManager(cloudsim);
+            algorithmSimulationParams.setStorageCacheType(StorageCacheType.VOID);
         }
 
         if (storageManagerType.equals("global")) {
@@ -269,9 +263,10 @@ public class TestRun {
             params.setLatency(0.0);
             // params.setChunkTransferTime();
 
-            storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
+            algorithmSimulationParams.setStorageParams(params);
+            algorithmSimulationParams.setStorageType(StorageType.GLOBAL);
         } else {
-            storageManager = new VoidStorageManager(cloudsim);
+            algorithmSimulationParams.setStorageType(StorageType.VOID);
         }
 
         PrintStream fileOut = null;
@@ -288,11 +283,11 @@ public class TestRun {
                     System.out.print(".");
                     Algorithm a = null;
                     if ("SPSS".equals(algorithm)) {
-                        a = new SPSS(budget, deadline, dags, alpha, cloudsim, storageManager);
+                        a = new SPSS(budget, deadline, dags, alpha, cloudsim, algorithmSimulationParams);
                     } else if ("DPDS".equals(algorithm)) {
-                        a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
+                        a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim, algorithmSimulationParams);
                     } else if ("WADPDS".equals(algorithm)) {
-                        a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
+                        a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, algorithmSimulationParams);
                     } else {
                         throw new RuntimeException("Unknown algorithm: " + algorithm);
                     }

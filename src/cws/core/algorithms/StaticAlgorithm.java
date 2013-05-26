@@ -1,21 +1,8 @@
 package cws.core.algorithms;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeMap;
+import java.util.*;
 
-import cws.core.Cloud;
-import cws.core.EnsembleManager;
-import cws.core.Provisioner;
-import cws.core.Scheduler;
-import cws.core.VM;
-import cws.core.VMListener;
-import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
+import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
@@ -29,23 +16,15 @@ import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.log.WorkflowLog;
 import cws.core.storage.StorageManager;
-import cws.core.storage.VoidStorageManager;
-import cws.core.storage.cache.VMCacheManager;
-import cws.core.storage.global.GlobalStorageManager;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener,
         DAGJobListener {
-
-    private CloudSimWrapper cloudsim;
 
     /** Engine that executes workflows */
     private WorkflowEngine engine;
 
     /** Ensemble manager that submits DAGs */
     private EnsembleManager manager;
-
-    /** Storage manager handling transfer tasks */
-    private StorageManager storageManager;
 
     /** Cloud to provision VMs from */
     private Cloud cloud;
@@ -78,10 +57,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     protected long simulationFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
-            StorageManager storageManager) {
-        super(budget, deadline, dags);
-        this.cloudsim = cloudsim;
-        this.storageManager = storageManager;
+            AlgorithmSimulationParams simulationParams) {
+        super(budget, deadline, dags, simulationParams, cloudsim);
     }
 
     @Override
@@ -105,6 +82,11 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             manager.removeDAGJobListener(this);
         manager = m;
         manager.addDAGJobListener(this);
+    }
+
+    @Override
+    public void setStorageManager(StorageManager storageManager) {
+        this.storageManager = storageManager;
     }
 
     public Plan getPlan() {
@@ -163,13 +145,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     }
 
     /**
-     * @return the cloudsim
-     */
-    protected CloudSimWrapper getCloudsim() {
-        return cloudsim;
-    }
-
-    /**
      * Develop a plan for running as many DAGs as we can
      */
     public void plan() {
@@ -193,7 +168,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         for (Resource r : plan.resources) {
             // Create VM
             VMType type = r.vmtype;
-            VM vm = VMFactory.createVM(type.mips, 1, 1, type.price, cloudsim);
+            VM vm = VMFactory.createVM(type.mips, 1, 1, type.price, getCloudsim());
 
             // Build task<->vm mappings
             LinkedList<Task> vmQueue = new LinkedList<Task>();
@@ -321,7 +296,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         int priority = dags.indexOf(dag);
         DAGJob dagJob = new DAGJob(dag, manager.getId());
         dagJob.setPriority(priority);
-        cloudsim.send(manager.getId(), engine.getId(), 0.0, WorkflowEvent.DAG_SUBMIT, dagJob);
+        getCloudsim().send(manager.getId(), engine.getId(), 0.0, WorkflowEvent.DAG_SUBMIT, dagJob);
     }
 
     @Override
@@ -418,13 +393,13 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     }
 
     private void launchVM(VM vm, double start) {
-        double now = cloudsim.clock();
+        double now = getCloudsim().clock();
         double delay = start - now;
-        cloudsim.send(engine.getId(), cloud.getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
+        getCloudsim().send(engine.getId(), cloud.getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
     }
 
     private void terminateVM(VM vm) {
-        cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
+        getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
     }
 
     private void submitJob(VM vm, Job job) {
@@ -446,7 +421,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         // Submit the job to the VM
         idle.remove(vm);
         job.setVM(vm);
-        cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
+        getCloudsim().send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
     }
 
     @Override
@@ -460,45 +435,15 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             throw new RuntimeException("DAG not finished");
         }
         dagsFinished += 1;
-        actualDagFinishTime = Math.max(cloudsim.clock(), actualDagFinishTime);
+        actualDagFinishTime = Math.max(getCloudsim().clock(), actualDagFinishTime);
     }
 
     @Override
     public void simulate(String logname) {
-        cloudsim.init();
+        getCloudsim().init();
 
-        if (storageManager instanceof GlobalStorageManager) {
-            // XXX(bryk): I can't believe I'm writing this code...
-            VMCacheManager cacheManager = ((GlobalStorageManager) storageManager).getCacheManager();
-            VMCacheManager clone = null;
-            try {
-                clone = cacheManager.getClass().getConstructor(CloudSimWrapper.class).newInstance(cloudsim);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            storageManager = new GlobalStorageManager(((GlobalStorageManager) storageManager).getParams(), clone,
-                    cloudsim);
-        } else {
-            storageManager = new VoidStorageManager(cloudsim);
-        }
-
-        // cloudsim.addEntity(storageManager);
-
-        Cloud cloud = new Cloud(cloudsim);
-        WorkflowEngine engine = new WorkflowEngine(this, this, cloudsim);
-        EnsembleManager manager = new EnsembleManager(engine, cloudsim);
-
-        setCloud(cloud);
-        setEnsembleManager(manager);
-        setWorkflowEngine(engine);
-
-        WorkflowLog log = null;
-        if (shouldGenerateLog()) {
-            log = new WorkflowLog(cloudsim);
-            engine.addJobListener(log);
-            cloud.addVMListener(log);
-            manager.addDAGJobListener(log);
-        }
+        initializeStorage();
+        WorkflowLog log = prepareEnvironment();
 
         planningStartWallTime = System.nanoTime();
 
@@ -506,10 +451,24 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
         simulationStartWallTime = System.nanoTime();
 
-        cloudsim.startSimulation();
+        getCloudsim().startSimulation();
 
         simulationFinishWallTime = System.nanoTime();
 
+        conductSanityChecks();
+
+        printLogs(logname, log);
+    }
+
+    private void printLogs(String logname, WorkflowLog log) {
+        if (shouldGenerateLog()) {
+            log.printJobs(logname);
+            log.printVmList(logname);
+            log.printDAGJobs();
+        }
+    }
+
+    private void conductSanityChecks() {
         // Sanity checks
         if (dagsFinished < numCompletedDAGs()) {
             throw new RuntimeException("Not all DAGs completed");
@@ -522,12 +481,25 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         if (getActualCost() > getBudget()) {
             System.err.println("WARNING: Cost exceeded budget: " + getActualCost() + ">" + getBudget());
         }
+    }
 
+    private WorkflowLog prepareEnvironment() {
+        Cloud cloud = new Cloud(getCloudsim());
+        WorkflowEngine engine = new WorkflowEngine(this, this, getCloudsim());
+        EnsembleManager manager = new EnsembleManager(engine, getCloudsim());
+
+        setCloud(cloud);
+        setEnsembleManager(manager);
+        setWorkflowEngine(engine);
+
+        WorkflowLog log = null;
         if (shouldGenerateLog()) {
-            log.printJobs(logname);
-            log.printVmList(logname);
-            log.printDAGJobs();
+            log = new WorkflowLog(getCloudsim());
+            engine.addJobListener(log);
+            cloud.addVMListener(log);
+            manager.addDAGJobListener(log);
         }
+        return log;
     }
 
     class Slot {

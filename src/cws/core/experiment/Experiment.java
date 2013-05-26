@@ -7,14 +7,15 @@ import java.util.List;
 import java.util.Random;
 
 import cws.core.algorithms.Algorithm;
+import cws.core.algorithms.AlgorithmSimulationParams;
+import cws.core.algorithms.StorageCacheType;
+import cws.core.algorithms.StorageType;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.Task;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
+import cws.core.dag.Task;
 import cws.core.log.WorkflowLog;
-import cws.core.storage.StorageManager;
-import cws.core.storage.VoidStorageManager;
 
 public class Experiment {
 
@@ -49,9 +50,14 @@ public class Experiment {
         // TODO(_mequrel_): change to IoC in the future
         CloudSimWrapper cloudsim = new CloudSimWrapper();
         cloudsim.init();
-        StorageManager storageManager = new VoidStorageManager(cloudsim);
 
-        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim, storageManager);
+        AlgorithmSimulationParams simulationParams = new AlgorithmSimulationParams();
+
+        // TODO(mequrel): should be parametrized
+        simulationParams.setStorageType(StorageType.VOID);
+        simulationParams.setStorageCacheType(StorageCacheType.VOID);
+
+        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim, simulationParams);
 
         algorithm.setGenerateLog(false);
 

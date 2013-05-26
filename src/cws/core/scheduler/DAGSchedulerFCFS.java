@@ -10,6 +10,7 @@ import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.jobs.Job;
+import cws.core.storage.StorageManager;
 
 /**
  * This scheduler submits jobs to VMs on FCFS basis.
@@ -52,5 +53,10 @@ public class DAGSchedulerFCFS implements Scheduler {
     @Override
     public void setWorkflowEngine(WorkflowEngine engine) {
         // do nothing
+    }
+
+    @Override
+    public void setStorageManager(StorageManager storageManager) {
+        // do nothing, we don't need storage manager here
     }
 }

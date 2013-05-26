@@ -1,15 +1,16 @@
 package cws.core.scheduler;
 
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
+
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.jobs.Job;
-
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Set;
+import cws.core.storage.StorageManager;
 
 /**
  * This scheduler submits jobs to VMs on FCFS basis.
@@ -19,6 +20,7 @@ import java.util.Set;
 public class DAGDynamicScheduler implements Scheduler {
 
     private CloudSimWrapper cloudsim;
+    protected StorageManager storageManager;
 
     public DAGDynamicScheduler(CloudSimWrapper cloudsim) {
         this.cloudsim = cloudsim;
@@ -27,6 +29,11 @@ public class DAGDynamicScheduler implements Scheduler {
     @Override
     public void setWorkflowEngine(WorkflowEngine engine) {
         // do nothing
+    }
+
+    @Override
+    public void setStorageManager(StorageManager storageManager) {
+        this.storageManager = storageManager;
     }
 
     @Override
@@ -49,9 +56,9 @@ public class DAGDynamicScheduler implements Scheduler {
      */
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
         /*
-        FIXME(_mequrel_): copying references because when we remove it from list, garbage collector removes VM...
-        imho it shouldn't working like that
-        */
+         * FIXME(_mequrel_): copying references because when we remove it from list, garbage collector removes VM...
+         * imho it shouldn't working like that
+         */
         Set<VM> freeVMs = new HashSet<VM>(engine.getFreeVMs());
 
         while (canBeScheduled(jobs, freeVMs)) {

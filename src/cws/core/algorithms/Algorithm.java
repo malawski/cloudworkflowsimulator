@@ -5,18 +5,33 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.storage.StorageManager;
+import cws.core.storage.VoidStorageManager;
+import cws.core.storage.cache.FIFOCacheManager;
+import cws.core.storage.cache.VMCacheManager;
+import cws.core.storage.cache.VoidCacheManager;
+import cws.core.storage.global.GlobalStorageManager;
 
 public abstract class Algorithm {
+    /** Simulation params like storage manager type, needed to initialize simulation properly **/
+    protected AlgorithmSimulationParams simulationParams;
+    protected CloudSimWrapper cloudsim;
+
     private double budget;
     private double deadline;
     private List<DAG> dags;
     private boolean generateLog = false;
+    protected StorageManager storageManager;
 
-    public Algorithm(double budget, double deadline, List<DAG> dags) {
+    public Algorithm(double budget, double deadline, List<DAG> dags, AlgorithmSimulationParams simulationParams,
+            CloudSimWrapper cloudsim) {
         this.budget = budget;
         this.deadline = deadline;
         this.dags = dags;
+        this.simulationParams = simulationParams;
+        this.cloudsim = cloudsim;
     }
 
     public List<DAG> getDAGs() {
@@ -136,5 +151,28 @@ public abstract class Algorithm {
         }
 
         return b.toString();
+    }
+
+    protected void initializeStorage() {
+
+        VMCacheManager cacheManager;
+        if (simulationParams.getStorageCacheType() == StorageCacheType.FIFO) {
+            cacheManager = new FIFOCacheManager(getCloudsim());
+        } else {
+            cacheManager = new VoidCacheManager(getCloudsim());
+        }
+
+        if (simulationParams.getStorageType() == StorageType.GLOBAL) {
+            storageManager = new GlobalStorageManager(simulationParams.getStorageParams(), cacheManager, getCloudsim());
+        } else {
+            storageManager = new VoidStorageManager(getCloudsim());
+        }
+    }
+
+    /**
+     * @return the cloudsim
+     */
+    protected CloudSimWrapper getCloudsim() {
+        return cloudsim;
     }
 }

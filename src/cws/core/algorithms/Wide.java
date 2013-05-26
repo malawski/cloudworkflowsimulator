@@ -10,8 +10,9 @@ import cws.core.dag.DAG;
  */
 public class Wide extends Backtrack {
 
-    public Wide(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, cloudsim);
+    public Wide(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
+            AlgorithmSimulationParams params) {
+        super(budget, deadline, dags, cloudsim, params);
     }
 
     @Override

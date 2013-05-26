@@ -6,12 +6,11 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.provisioner.SimpleUtilizationBasedProvisioner;
 import cws.core.scheduler.EnsembleDynamicScheduler;
-import cws.core.storage.StorageManager;
 
 public class DPDS extends DynamicAlgorithm {
     public DPDS(double budget, double deadline, List<DAG> dags, double price, double maxScaling,
-            CloudSimWrapper cloudsim, StorageManager storageManager) {
+            CloudSimWrapper cloudsim, AlgorithmSimulationParams simulationParams) {
         super(budget, deadline, dags, price, new EnsembleDynamicScheduler(cloudsim),
-                new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim), cloudsim, storageManager);
+                new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim), cloudsim, simulationParams);
     }
 }
