@@ -15,6 +15,7 @@ import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 import cws.core.storage.VoidStorageManager;
+import cws.core.storage.cache.FIFOCacheManager;
 import cws.core.storage.cache.VoidCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
@@ -170,6 +171,72 @@ public class VMTest {
     }
 
     @Test
+    public void shouldStartNextTaskWithInputFilesAfterUploadingPreviousOutputs() {
+        // TODO(mequrel): problem with GlobalStorage during fetching files... investigation needed
+        double writeSpeed = 60;
+
+        GlobalStorageParams params = new GlobalStorageParams();
+        params.setWriteSpeed(writeSpeed);
+        // TODO(bryk): that's ugly, I know
+        new GlobalStorageManager(params, new VoidCacheManager(cloudsim), cloudsim);
+
+        // first task
+
+        double firstLength = 10.0;
+        Job jobFirst = new Job(cloudsim);
+        Task taskWithOutputFile = new Task(null, null, firstLength);
+
+        int outputFileSizeInBytes = 300;
+        DAGFile file = new DAGFile(null, outputFileSizeInBytes);
+
+        taskWithOutputFile.setInputFiles(Collections.EMPTY_LIST);
+        taskWithOutputFile.setOutputFiles(Arrays.asList(new DAGFile[] { file }));
+        jobFirst.setTask(taskWithOutputFile);
+
+        // second task
+
+        double secondLength = 10.0;
+        Job jobSecond = new Job(cloudsim);
+        Task taskWithInputFile = new Task(null, null, secondLength);
+
+        int inputFileSizeInBytes = 300;
+        DAGFile inputFile = new DAGFile(null, inputFileSizeInBytes);
+
+        taskWithInputFile.setInputFiles(Arrays.asList(new DAGFile[] { inputFile }));
+        taskWithInputFile.setOutputFiles(Collections.EMPTY_LIST);
+        jobSecond.setTask(taskWithInputFile);
+
+        // create VM
+
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        vmStaticParams.setMips(1);
+        vmStaticParams.setCores(1);
+        vmStaticParams.setPrice(0.40);
+
+        VM vm = new VM(100, vmStaticParams, cloudsim);
+
+        // send tasks
+
+        VMDriver driver = new VMDriver(vm, cloudsim);
+        driver.setJobs(new Job[] { jobFirst, jobSecond });
+
+        // expectations
+        double expectedFirstEnded = firstLength + outputFileSizeInBytes / writeSpeed;
+        double expectedSecondStarted = expectedFirstEnded;
+        double expectedSecondEnded = expectedSecondStarted + secondLength + inputFileSizeInBytes / writeSpeed;
+
+        // simulate
+
+        cloudsim.startSimulation();
+
+        // assert times -> cannot be parallelised, everything runs subsequently
+
+        assertEquals(expectedFirstEnded, jobFirst.getFinishTime(), 0.0);
+        assertEquals(expectedSecondStarted, jobSecond.getStartTime(), 0.0);
+        assertEquals(expectedSecondEnded, jobSecond.getFinishTime(), 0.0);
+    }
+
+    @Test
     public void shouldStartNextTaskWithoutInputFilesImmediately() {
         double writeSpeed = 60;
 
@@ -197,6 +264,68 @@ public class VMTest {
         Job jobSecond = new Job(cloudsim);
         Task taskWithoutInputFile = new Task(null, null, secondLength);
         taskWithoutInputFile.setInputFiles(Collections.EMPTY_LIST);
+        taskWithoutInputFile.setOutputFiles(Collections.EMPTY_LIST);
+        jobSecond.setTask(taskWithoutInputFile);
+
+        // create VM
+
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        vmStaticParams.setMips(1);
+        vmStaticParams.setCores(1);
+        vmStaticParams.setPrice(0.40);
+
+        VM vm = new VM(100, vmStaticParams, cloudsim);
+
+        // send tasks
+
+        VMDriver driver = new VMDriver(vm, cloudsim);
+        driver.setJobs(new Job[] { jobFirst, jobSecond });
+
+        // expectations
+        double expectedFirstEnded = firstLength + outputFileSizeInBytes / writeSpeed;
+        double expectedSecondStarted = firstLength;
+        double expectedSecondEnded = firstLength + secondLength;
+
+        // simulate
+
+        cloudsim.startSimulation();
+
+        // assert that overall time is exec1 + exec2 only
+
+        assertEquals(expectedFirstEnded, jobFirst.getFinishTime(), 0.0);
+        assertEquals(expectedSecondStarted, jobSecond.getStartTime(), 0.0);
+        assertEquals(expectedSecondEnded, jobSecond.getFinishTime(), 0.0);
+    }
+
+    @Test
+    public void shouldStartNextTaskWithCashedInputFilesImmediately() {
+        // TODO(mequrel): problem with GlobalStorage during fetching files... investigation needed
+        double writeSpeed = 60;
+
+        GlobalStorageParams params = new GlobalStorageParams();
+        params.setWriteSpeed(writeSpeed);
+        // TODO(bryk): that's ugly, I know
+        new GlobalStorageManager(params, new FIFOCacheManager(cloudsim), cloudsim);
+
+        // first task
+
+        double firstLength = 10.0;
+        Job jobFirst = new Job(cloudsim);
+        Task taskWithOutputFile = new Task(null, null, firstLength);
+
+        int outputFileSizeInBytes = 300;
+        DAGFile file = new DAGFile("input-file", outputFileSizeInBytes);
+
+        taskWithOutputFile.setInputFiles(Collections.EMPTY_LIST);
+        taskWithOutputFile.setOutputFiles(Arrays.asList(new DAGFile[] { file }));
+        jobFirst.setTask(taskWithOutputFile);
+
+        // second task
+
+        double secondLength = 10.0;
+        Job jobSecond = new Job(cloudsim);
+        Task taskWithoutInputFile = new Task(null, null, secondLength);
+        taskWithoutInputFile.setInputFiles(Arrays.asList(new DAGFile[] { file }));
         taskWithoutInputFile.setOutputFiles(Collections.EMPTY_LIST);
         jobSecond.setTask(taskWithoutInputFile);
 
