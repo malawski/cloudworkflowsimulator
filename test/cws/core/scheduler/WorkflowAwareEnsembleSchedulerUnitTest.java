@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import cws.core.VM;
+import cws.core.VMStaticParams;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
@@ -129,6 +130,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     }
 
     private VM createVMMock() {
-        return mock(VM.class);
+        VM vm = mock(VM.class);
+        when(vm.getVmStaticParams()).thenReturn(new VMStaticParams());
+        return vm;
     }
 }

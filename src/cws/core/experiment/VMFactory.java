@@ -4,6 +4,7 @@ import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.FailureModel;
 import cws.core.VM;
+import cws.core.VMStaticParams;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.RuntimeDistribution;
@@ -58,9 +59,9 @@ public class VMFactory {
      * @param cloudSimWrapper - initialized CloudSimWrapper instance. It needs to be inited, because we're creting
      *            storage manager here.
      */
-    public static VM createVM(int mips, int cores, double bandwidth, double price, CloudSimWrapper cloudSimWrapper) {
+    public static VM createVM(double bandwidth, VMStaticParams vmStaticParams, CloudSimWrapper cloudSimWrapper) {
         // TODO(_mequrel_): change to IoC in the future
-        VM vm = new VM(mips, cores, bandwidth, price, cloudSimWrapper);
+        VM vm = new VM(bandwidth, vmStaticParams, cloudSimWrapper);
         vm.setProvisioningDelay(provisioningDelayDistribution.sample());
         vm.setDeprovisioningDelay(deprovisioningDelayDistribution.sample());
         vm.setRuntimeDistribution(runtimeDistribution);

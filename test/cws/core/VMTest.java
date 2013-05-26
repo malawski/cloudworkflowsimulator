@@ -76,7 +76,12 @@ public class VMTest {
         Job j = new Job(cloudsim);
         j.setTask(new Task("task_id", "transformation", 1000));
 
-        VM vm = new VM(100, 1, 100, 0.40, cloudsim);
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        vmStaticParams.setMips(100);
+        vmStaticParams.setCores(1);
+        vmStaticParams.setPrice(0.40);
+
+        VM vm = new VM(100, vmStaticParams, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j });
@@ -95,7 +100,13 @@ public class VMTest {
         j1.setTask(new Task("task_id", "transformation", 1000));
         Job j2 = new Job(cloudsim);
         j2.setTask(new Task("task_id2", "transformation", 1000));
-        VM vm = new VM(100, 1, 100, 0.40, cloudsim);
+
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        vmStaticParams.setMips(100);
+        vmStaticParams.setCores(1);
+        vmStaticParams.setPrice(0.40);
+
+        VM vm = new VM(100, vmStaticParams, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });
@@ -121,7 +132,12 @@ public class VMTest {
         Job j2 = new Job(cloudsim);
         j2.setTask(new Task("task_id2", "transformation", 1000));
 
-        VM vm = new VM(100, 2, 100, 0.40, cloudsim);
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        vmStaticParams.setMips(100);
+        vmStaticParams.setCores(2);
+        vmStaticParams.setPrice(0.40);
+
+        VM vm = new VM(100, vmStaticParams, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });

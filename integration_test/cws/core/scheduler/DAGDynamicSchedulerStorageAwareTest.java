@@ -7,12 +7,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import cws.core.Cloud;
-import cws.core.EnsembleManager;
-import cws.core.Provisioner;
-import cws.core.VM;
-import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
+import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
@@ -105,7 +100,12 @@ public class DAGDynamicSchedulerStorageAwareTest {
     }
 
     protected void launchVM() {
-        VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        vmStaticParams.setMips(1000);
+        vmStaticParams.setCores(1);
+        vmStaticParams.setPrice(1.0);
+
+        VM vm = new VM(1.0, vmStaticParams, cloudsim);
         cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
     }
 

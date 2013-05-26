@@ -4,12 +4,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import cws.core.Provisioner;
-import cws.core.VM;
-import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
+import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.experiment.VMFactory;
 
 public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner implements Provisioner {
 
@@ -50,7 +46,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
         // assuming all VMs are homogeneous
         double vmPrice = 0;
         if (!engine.getAvailableVMs().isEmpty())
-            vmPrice = engine.getAvailableVMs().get(0).getPrice();
+            vmPrice = engine.getAvailableVMs().get(0).getVmStaticParams().getPrice();
 
         // running vms are free + busy
         Set<VM> runningVMs = new HashSet<VM>(engine.getFreeVMs());
@@ -157,7 +153,13 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
         if (!finishing_phase && utilization > UPPER_THRESHOLD
                 && numBusyVMs + numFreeVMS < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 
-            VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0, getCloudSim());
+            VMStaticParams vmStaticParams = new VMStaticParams();
+            vmStaticParams.setMips(1000);
+            vmStaticParams.setCores(1);
+            vmStaticParams.setPrice(1.0);
+
+            VM vm = new VM(1000, vmStaticParams, getCloudSim());
+
             getCloudSim().log(" Starting VM: " + vm.getId());
             getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
 
