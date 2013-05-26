@@ -40,8 +40,14 @@ public abstract class CWSSimEntity extends SimEntity {
         super.send(entityName, delay, cloudSimTag);
     }
 
-    public abstract void processEvent(CWSSimEvent ev);
+    /**
+     * @param ev - the received event.
+     */
+    public void processEvent(CWSSimEvent ev) {
+        // Do nothing by default
+    }
 
+    @Deprecated
     @Override
     public final void processEvent(SimEvent ev) {
         processEvent(new CWSSimEvent(ev));

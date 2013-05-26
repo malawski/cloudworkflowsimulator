@@ -48,6 +48,7 @@ public class Experiment {
 
         // TODO(_mequrel_): change to IoC in the future
         CloudSimWrapper cloudsim = new CloudSimWrapper();
+        cloudsim.init();
         StorageManager storageManager = new VoidStorageManager(cloudsim);
 
         Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim, storageManager);

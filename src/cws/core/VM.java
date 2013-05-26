@@ -1,7 +1,6 @@
 package cws.core;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -15,6 +14,7 @@ import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
+import cws.core.storage.cache.VMCacheManager;
 import cws.core.transfer.Port;
 
 /**
@@ -62,6 +62,12 @@ public class VM extends CWSSimEntity {
 
     /** The number of cores of this VM */
     private int cores;
+
+    /**
+     * The number of bytes on internal disk that can be used as a cache
+     * @see {@link VMCacheManager}
+     */
+    private long cacheSize;
 
     /** Network port for input data */
     private Port inputPort;
@@ -302,7 +308,7 @@ public class VM extends CWSSimEntity {
     private void jobFinish(Job job) {
         // Sanity check
         if (!isRunning) {
-        //    throw new RuntimeException("Cannot finish job: VM not running");
+            // throw new RuntimeException("Cannot finish job: VM not running");
 
         }
 
@@ -416,5 +422,13 @@ public class VM extends CWSSimEntity {
 
     public void setFailureModel(FailureModel failureModel) {
         this.failureModel = failureModel;
+    }
+
+    public long getCacheSize() {
+        return cacheSize;
+    }
+
+    public void setCacheSize(long cacheSize) {
+        this.cacheSize = cacheSize;
     }
 }

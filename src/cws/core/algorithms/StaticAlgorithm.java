@@ -25,11 +25,12 @@ import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.experiment.VMFactory;
 import cws.core.jobs.Job;
-import cws.core.jobs.JobListener;
 import cws.core.jobs.Job.Result;
+import cws.core.jobs.JobListener;
 import cws.core.log.WorkflowLog;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
+import cws.core.storage.cache.VMCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener,
@@ -76,7 +77,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     protected long simulationStartWallTime;
     protected long simulationFinishWallTime;
 
-    public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim, StorageManager storageManager) {
+    public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
+            StorageManager storageManager) {
         super(budget, deadline, dags);
         this.cloudsim = cloudsim;
         this.storageManager = storageManager;
@@ -465,14 +467,22 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     public void simulate(String logname) {
         cloudsim.init();
 
-        if(storageManager instanceof GlobalStorageManager) {
-            storageManager = new GlobalStorageManager(((GlobalStorageManager)storageManager).getParams(), cloudsim);
-        }
-        else {
+        if (storageManager instanceof GlobalStorageManager) {
+            // XXX(bryk): I can't believe I'm writing this code...
+            VMCacheManager cacheManager = ((GlobalStorageManager) storageManager).getCacheManager();
+            VMCacheManager clone = null;
+            try {
+                clone = cacheManager.getClass().getConstructor(CloudSimWrapper.class).newInstance(cloudsim);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            storageManager = new GlobalStorageManager(((GlobalStorageManager) storageManager).getParams(), clone,
+                    cloudsim);
+        } else {
             storageManager = new VoidStorageManager(cloudsim);
         }
 
-        //cloudsim.addEntity(storageManager);
+        // cloudsim.addEntity(storageManager);
 
         Cloud cloud = new Cloud(cloudsim);
         WorkflowEngine engine = new WorkflowEngine(this, this, cloudsim);
