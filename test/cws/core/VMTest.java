@@ -2,15 +2,22 @@ package cws.core;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 import cws.core.storage.VoidStorageManager;
+import cws.core.storage.cache.VoidCacheManager;
+import cws.core.storage.global.GlobalStorageManager;
+import cws.core.storage.global.GlobalStorageParams;
 
 public class VMTest {
 
@@ -67,12 +74,13 @@ public class VMTest {
         // TODO(_mequrel_): change to IoC in the future
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
-        // TODO(bryk): that's ugly, I know
-        new VoidStorageManager(cloudsim);
     }
 
     @Test
     public void testSingleJob() {
+        // TODO(bryk): that's ugly, I know
+        new VoidStorageManager(cloudsim);
+
         Job j = new Job(cloudsim);
         j.setTask(new Task("task_id", "transformation", 1000));
 
@@ -96,6 +104,9 @@ public class VMTest {
 
     @Test
     public void testTwoJobs() {
+        // TODO(bryk): that's ugly, I know
+        new VoidStorageManager(cloudsim);
+
         Job j1 = new Job(cloudsim);
         j1.setTask(new Task("task_id", "transformation", 1000));
         Job j2 = new Job(cloudsim);
@@ -126,6 +137,9 @@ public class VMTest {
 
     @Test
     public void testMultiCoreVM() {
+        // TODO(bryk): that's ugly, I know
+        new VoidStorageManager(cloudsim);
+
         Job j1 = new Job(cloudsim);
         j1.setTask(new Task("task_id1", "transformation", 1000));
 
@@ -154,4 +168,66 @@ public class VMTest {
         assertEquals(0.0, j2.getStartTime(), 0.0);
         assertEquals(10.0, j2.getFinishTime(), 0.0);
     }
+
+    @Test
+    public void shouldStartNextTaskWithoutInputFilesImmediately() {
+        double writeSpeed = 60;
+
+        GlobalStorageParams params = new GlobalStorageParams();
+        params.setWriteSpeed(writeSpeed);
+        // TODO(bryk): that's ugly, I know
+        new GlobalStorageManager(params, new VoidCacheManager(cloudsim), cloudsim);
+
+        // first task
+
+        double firstLength = 10.0;
+        Job jobFirst = new Job(cloudsim);
+        Task taskWithOutputFile = new Task(null, null, firstLength);
+
+        int outputFileSizeInBytes = 300;
+        DAGFile file = new DAGFile(null, outputFileSizeInBytes);
+
+        taskWithOutputFile.setInputFiles(Collections.EMPTY_LIST);
+        taskWithOutputFile.setOutputFiles(Arrays.asList(new DAGFile[] { file }));
+        jobFirst.setTask(taskWithOutputFile);
+
+        // second task
+
+        double secondLength = 10.0;
+        Job jobSecond = new Job(cloudsim);
+        Task taskWithoutInputFile = new Task(null, null, secondLength);
+        taskWithoutInputFile.setInputFiles(Collections.EMPTY_LIST);
+        taskWithoutInputFile.setOutputFiles(Collections.EMPTY_LIST);
+        jobSecond.setTask(taskWithoutInputFile);
+
+        // create VM
+
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        vmStaticParams.setMips(1);
+        vmStaticParams.setCores(1);
+        vmStaticParams.setPrice(0.40);
+
+        VM vm = new VM(100, vmStaticParams, cloudsim);
+
+        // send tasks
+
+        VMDriver driver = new VMDriver(vm, cloudsim);
+        driver.setJobs(new Job[] { jobFirst, jobSecond });
+
+        // expectations
+        double expectedFirstEnded = firstLength + outputFileSizeInBytes / writeSpeed;
+        double expectedSecondStarted = firstLength;
+        double expectedSecondEnded = firstLength + secondLength;
+
+        // simulate
+
+        cloudsim.startSimulation();
+
+        // assert that overall time is exec1 + exec2 only
+
+        assertEquals(expectedFirstEnded, jobFirst.getFinishTime(), 0.0);
+        assertEquals(expectedSecondStarted, jobSecond.getStartTime(), 0.0);
+        assertEquals(expectedSecondEnded, jobSecond.getFinishTime(), 0.0);
+    }
+
 }
