@@ -28,15 +28,14 @@ public class FailureModelTest {
         assertEquals(0.01, computePercentFailures(0.01), 0.001);
         assertEquals(0.05, computePercentFailures(0.05), 0.001);
         assertEquals(0.1, computePercentFailures(0.1), 0.001);
-        assertEquals(0.5, computePercentFailures(0.5), 0.001); // TODO(bryk): this assert fails sometimes - that's
-                                                               // really bad
+        assertEquals(0.5, computePercentFailures(0.5), 0.001);
         assertEquals(0.75, computePercentFailures(0.75), 0.001);
         assertEquals(1.0, computePercentFailures(1.0), 0.001);
     }
 
     @Test
     public void testActualRuntimes() {
-        Random rand = new Random(System.currentTimeMillis());
+        Random rand = new Random(97);
         FailureModel m = new FailureModel(System.currentTimeMillis(), 0.0);
         for (int i = 0; i < 100000; i++) {
             double runtime = rand.nextDouble() * (i + 1);
