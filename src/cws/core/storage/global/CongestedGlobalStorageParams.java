@@ -1,12 +1,17 @@
 package cws.core.storage.global;
 
 /**
- * TODO(bryk):
+ * Parameters used by {@link GlobalStorageManager} to simulate congestion.
+ * @see {@link GlobalStorageParams} for reference
  */
 public class CongestedGlobalStorageParams {
+    /** Congested readSpeed */
     private double readSpeed;
+    /** Congested writeSpeed */
     private double writeSpeed;
+    /** The number of active read */
     private int numReads;
+    /** The number of active writes */
     private int numWrites;
 
     public CongestedGlobalStorageParams(GlobalStorageParams params) {

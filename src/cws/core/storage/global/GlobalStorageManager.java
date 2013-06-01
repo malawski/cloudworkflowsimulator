@@ -28,10 +28,10 @@ public class GlobalStorageManager extends StorageManager {
     /** Map of jobs' active writes - the ones that progress at any given moment */
     private Map<Job, List<GlobalStorageTransfer>> writes = new HashMap<Job, List<GlobalStorageTransfer>>();
 
-    /** Set of parameters for this storage */
+    /** A set of parameters for this storage */
     private GlobalStorageParams params;
 
-    /** TODO(bryk): */
+    /** A set of parameters used to simulate congestion */
     private CongestedGlobalStorageParams congestedParams;
 
     /** Cache manager used by this storage */
@@ -87,29 +87,6 @@ public class GlobalStorageManager extends StorageManager {
             congestedParams.addWrites(files.size());
             updateSpeedCongestion();
         }
-    }
-
-    /** TODO(bryk) */
-    private void updateSpeedCongestion() {
-        double writeSpeed = params.getWriteSpeed();
-        if (congestedParams.getNumWrites() > 0) {
-            writeSpeed = ((double) params.getNumReplicas() * params.getWriteSpeed()) / congestedParams.getNumWrites();
-            if (writeSpeed > params.getWriteSpeed()) {
-                writeSpeed = params.getWriteSpeed();
-            }
-        }
-        congestedParams.setWriteSpeed(writeSpeed);
-
-        double readSpeed = params.getReadSpeed();
-        if (congestedParams.getNumReads() > 0) {
-            readSpeed = ((double) params.getNumReplicas() * params.getReadSpeed()) / congestedParams.getNumReads();
-            if (readSpeed > params.getReadSpeed()) {
-                readSpeed = params.getReadSpeed();
-            }
-        }
-        congestedParams.setReadSpeed(readSpeed);
-        System.out.printf("Num writes: %d, num reads: %d, ws: %f, rs: %f\n", congestedParams.getNumWrites(),
-                congestedParams.getNumReads(), writeSpeed, readSpeed);
     }
 
     /**
@@ -251,6 +228,32 @@ public class GlobalStorageManager extends StorageManager {
             time += file.getSize() / params.getWriteSpeed();
         }
         return time;
+    }
+
+    /**
+     * Simulates congestion.
+     * Updates read and write speeds based on numbers of currently active transfer.
+     */
+    private void updateSpeedCongestion() {
+        double writeSpeed = params.getWriteSpeed();
+        if (congestedParams.getNumWrites() > 0) {
+            writeSpeed = ((double) params.getNumReplicas() * params.getWriteSpeed()) / congestedParams.getNumWrites();
+            if (writeSpeed > params.getWriteSpeed()) {
+                writeSpeed = params.getWriteSpeed();
+            }
+        }
+        congestedParams.setWriteSpeed(writeSpeed);
+
+        double readSpeed = params.getReadSpeed();
+        if (congestedParams.getNumReads() > 0) {
+            readSpeed = ((double) params.getNumReplicas() * params.getReadSpeed()) / congestedParams.getNumReads();
+            if (readSpeed > params.getReadSpeed()) {
+                readSpeed = params.getReadSpeed();
+            }
+        }
+        congestedParams.setReadSpeed(readSpeed);
+        System.out.printf("Num writes: %d, num reads: %d, ws: %f, rs: %f\n", congestedParams.getNumWrites(),
+                congestedParams.getNumReads(), writeSpeed, readSpeed);
     }
 
     public GlobalStorageParams getParams() {
