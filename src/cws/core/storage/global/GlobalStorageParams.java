@@ -11,8 +11,11 @@ public class GlobalStorageParams {
     /** Average write speed of the storage */
     private double writeSpeed;
 
-    /** Average latency for each operation: */
+    /** Average latency for each operation */
     private double latency;
+
+    /** TODO(bryk): */
+    private int numReplicas = 1;
 
     /**
      * Amount of time spent on transferring one chunk of a file. Should be relatively small, but not too small because
@@ -50,5 +53,16 @@ public class GlobalStorageParams {
 
     public void setChunkTransferTime(double chunkTransferTime) {
         this.chunkTransferTime = chunkTransferTime;
+    }
+
+    public int getNumReplicas() {
+        return numReplicas;
+    }
+
+    public void setNumReplicas(int numReplicas) {
+        if (numReplicas < 1) {
+            throw new IllegalArgumentException("Num replicas must be >= 1");
+        }
+        this.numReplicas = numReplicas;
     }
 }
