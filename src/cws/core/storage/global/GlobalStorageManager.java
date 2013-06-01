@@ -31,6 +31,9 @@ public class GlobalStorageManager extends StorageManager {
     /** Set of parameters for this storage */
     private GlobalStorageParams params;
 
+    /** TODO(bryk): */
+    private CongestedGlobalStorageParams congestedParams;
+
     /** Cache manager used by this storage */
     private VMCacheManager cacheManager;
 
@@ -41,6 +44,7 @@ public class GlobalStorageManager extends StorageManager {
         super(cloudsim);
         this.params = params;
         this.cacheManager = cacheManager;
+        this.congestedParams = new CongestedGlobalStorageParams(params);
     }
 
     /**
@@ -62,9 +66,8 @@ public class GlobalStorageManager extends StorageManager {
                 }
             }
             startTransfers(notCachedFiles, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS);
-            for (DAGFile file : notCachedFiles) {
-                cacheManager.putFileToCache(file, job);
-            }
+            congestedParams.addReads(notCachedFiles.size());
+            updateSpeedCongestion();
         }
     }
 
@@ -81,10 +84,32 @@ public class GlobalStorageManager extends StorageManager {
             notifyThatAfterTransfersCompleted(job);
         } else {
             startTransfers(files, job, writes, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS);
-            for (DAGFile file : files) {
-                cacheManager.putFileToCache(file, job);
+            congestedParams.addWrites(files.size());
+            updateSpeedCongestion();
+        }
+    }
+
+    /** TODO(bryk) */
+    private void updateSpeedCongestion() {
+        double writeSpeed = params.getWriteSpeed();
+        if (congestedParams.getNumWrites() > 0) {
+            writeSpeed = ((double) params.getNumReplicas() * params.getWriteSpeed()) / congestedParams.getNumWrites();
+            if (writeSpeed > params.getWriteSpeed()) {
+                writeSpeed = params.getWriteSpeed();
             }
         }
+        congestedParams.setWriteSpeed(writeSpeed);
+
+        double readSpeed = params.getReadSpeed();
+        if (congestedParams.getNumReads() > 0) {
+            readSpeed = ((double) params.getNumReplicas() * params.getReadSpeed()) / congestedParams.getNumReads();
+            if (readSpeed > params.getReadSpeed()) {
+                readSpeed = params.getReadSpeed();
+            }
+        }
+        congestedParams.setReadSpeed(readSpeed);
+        System.out.printf("Num writes: %d, num reads: %d, ws: %f, rs: %f\n", congestedParams.getNumWrites(),
+                congestedParams.getNumReads(), writeSpeed, readSpeed);
     }
 
     /**
@@ -111,6 +136,9 @@ public class GlobalStorageManager extends StorageManager {
         if (onTransferFinished(write, writes)) {
             notifyThatAfterTransfersCompleted(write.getJob());
         }
+        cacheManager.putFileToCache(write.getFile(), write.getJob());
+        congestedParams.removeWrites(1);
+        updateSpeedCongestion();
     }
 
     /**
@@ -120,6 +148,9 @@ public class GlobalStorageManager extends StorageManager {
         if (onTransferFinished(read, reads)) {
             notifyThatBeforeTransfersCompleted(read.getJob());
         }
+        cacheManager.putFileToCache(read.getFile(), read.getJob());
+        congestedParams.removeReads(1);
+        updateSpeedCongestion();
     }
 
     /**
@@ -168,7 +199,7 @@ public class GlobalStorageManager extends StorageManager {
         if (write.isCompleted()) {
             getCloudsim().sendNow(getId(), getId(), WorkflowEvent.GLOBAL_STORAGE_WRITE_FINISHED, write);
         } else {
-            progressTransfer(write, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS, params.getWriteSpeed());
+            progressTransfer(write, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS, congestedParams.getWriteSpeed());
         }
     }
 
@@ -177,7 +208,7 @@ public class GlobalStorageManager extends StorageManager {
         if (read.isCompleted()) {
             getCloudsim().sendNow(getId(), getId(), WorkflowEvent.GLOBAL_STORAGE_READ_FINISHED, read);
         } else {
-            progressTransfer(read, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS, params.getReadSpeed());
+            progressTransfer(read, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS, congestedParams.getReadSpeed());
         }
     }
 
@@ -190,7 +221,7 @@ public class GlobalStorageManager extends StorageManager {
      * @param speed transfer speed
      */
     private void progressTransfer(GlobalStorageTransfer transfer, int progressEvent, double speed) {
-        long bytesTransferred = (long) Math.ceil(speed * params.getChunkTransferTime());
+        double bytesTransferred = speed * params.getChunkTransferTime();
         double time = 0.0;
         // There are less bytes to transfer that we want
         if (bytesTransferred > transfer.getRemainingBytesToTransfer()) {

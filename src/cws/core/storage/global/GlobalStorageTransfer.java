@@ -12,7 +12,7 @@ public class GlobalStorageTransfer {
     /** Transferred file */
     private DAGFile file;
     /** Number of bytes transferred so far */
-    private long bytesTransferred = 0;
+    private double bytesTransferred = 0;
 
     /**
      * Transfer's duration. It should have proper value after transfer finish. In the meantime it can have some
@@ -33,11 +33,15 @@ public class GlobalStorageTransfer {
      * @return is the transfer completed? I.e. all bytes are transferred?
      */
     public boolean isCompleted() {
-        return bytesTransferred == file.getSize();
+        return bytesTransferred >= file.getSize();
     }
 
-    public long getRemainingBytesToTransfer() {
-        return file.getSize() - bytesTransferred;
+    public double getRemainingBytesToTransfer() {
+        double bytes = file.getSize() - bytesTransferred;
+        if (bytes < 0)
+            return 0;
+        else
+            return bytes;
     }
 
     @Override
@@ -62,7 +66,7 @@ public class GlobalStorageTransfer {
         return duration;
     }
 
-    public void addBytesTransferred(long amountBytes) {
+    public void addBytesTransferred(double amountBytes) {
         bytesTransferred += amountBytes;
     }
 
