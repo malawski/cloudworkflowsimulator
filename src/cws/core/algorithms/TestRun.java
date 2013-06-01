@@ -8,6 +8,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.apache.commons.io.IOUtils;
+
+import cws.core.FailureModel;
+import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAG;
+import cws.core.dag.DAGParser;
+import cws.core.dag.DAGStats;
+import cws.core.dag.Task;
+import cws.core.exception.WrongCommandLineArgsException;
+import cws.core.experiment.DAGListGenerator;
+import cws.core.experiment.VMFactory;
+import cws.core.jobs.UniformRuntimeDistribution;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 import cws.core.storage.cache.FIFOCacheManager;
@@ -15,43 +34,119 @@ import cws.core.storage.cache.VMCacheManager;
 import cws.core.storage.cache.VoidCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
-import org.apache.commons.io.IOUtils;
-import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
-
-import cws.core.FailureModel;
-import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.Task;
-import cws.core.dag.DAG;
-import cws.core.dag.DAGParser;
-import cws.core.dag.DAGStats;
-import cws.core.experiment.DAGListGenerator;
-import cws.core.experiment.VMFactory;
-import cws.core.jobs.UniformRuntimeDistribution;
 
 public class TestRun {
 
-    static class ConstantDistribution implements ContinuousDistribution {
-        private double delay;
+    private static final String defaultRuntimeVariance = "0.0";
+    private static final String defaultEnsembleSize = "50";
+    private static final String defaultScalingFactor = "1.0";
+    private static final String defaultDelay = "0.0";
+    private static final String defaultFailureRate = "0.0";
+    private static final String defaultStorageCache = "void";
 
-        public ConstantDistribution(double delay) {
-            this.delay = delay;
-        }
+    private static Options buildOptions() {
+        Options options = new Options();
 
-        @Override
-        public double sample() {
-            return this.delay;
-        }
+        Option seed = new Option("s", "seed", true, "Random number generator seed, defaults to current time in milis");
+        seed.setArgName("SEED");
+        options.addOption(seed);
+
+        Option application = new Option("app", "application", true, "(required) Application name");
+        application.setRequired(true);
+        application.setArgName("APP");
+        options.addOption(application);
+
+        Option inputdir = new Option("id", "input-dir", true, "(required) Input dir");
+        inputdir.setRequired(true);
+        inputdir.setArgName("DIR");
+        options.addOption(inputdir);
+
+        Option outputfile = new Option("of", "output-file", true, "(required) Output file");
+        outputfile.setRequired(true);
+        outputfile.setArgName("FILE");
+        options.addOption(outputfile);
+
+        Option distribution = new Option("dst", "distribution", true, "(required) Distribution");
+        distribution.setRequired(true);
+        distribution.setArgName("DIST");
+        options.addOption(distribution);
+
+        Option ensembleSize = new Option("es", "ensemble-size", true, "Ensemble size, defaults to "
+                + defaultEnsembleSize);
+        ensembleSize.setArgName("SIZE");
+        options.addOption(ensembleSize);
+
+        Option algorithm = new Option("alg", "algorithm", true, "(required) Algorithm");
+        algorithm.setRequired(true);
+        algorithm.setArgName("ALGO");
+        options.addOption(algorithm);
+
+        Option scalingFactor = new Option("sf", "scaling-factor", true, "Scaling factor, defaults to "
+                + defaultScalingFactor);
+        scalingFactor.setArgName("FACTOR");
+        options.addOption(scalingFactor);
+
+        Option runtimeVariance = new Option("rv", "runtime-variance", true, "Runtime variance, defaults to "
+                + defaultRuntimeVariance);
+        runtimeVariance.setArgName("VAR");
+        options.addOption(runtimeVariance);
+
+        Option delay = new Option("dl", "delay", true, "Delay, defaluts to " + defaultDelay);
+        delay.setArgName("DELAY");
+        options.addOption(delay);
+
+        Option failureRate = new Option("fr", "failure-rate", true, "Faliure rate, defaults to " + defaultFailureRate);
+        failureRate.setArgName("RATE");
+        options.addOption(failureRate);
+
+        Option storageCache = new Option("sc", "storage-cache", true, "Storage cache, defaults to "
+                + defaultStorageCache);
+        storageCache.setArgName("CACHE");
+        options.addOption(storageCache);
+
+        Option storageManager = new Option("sm", "storage-manager", true, "(required) Storage manager ");
+        storageManager.setRequired(true);
+        storageManager.setArgName("MRG");
+        options.addOption(storageManager);
+
+        Option storageManagerRead = new Option(null, "storage-manager-read", true,
+                "(required for storage-manager=global) Storage manager read speed");
+        storageManagerRead.setArgName("SPEED");
+        options.addOption(storageManagerRead);
+
+        Option storageManagerWrite = new Option(null, "storage-manager-write", true,
+                "(required for storage-manager=global) Storage manager write speed");
+        storageManagerWrite.setArgName("SPEED");
+        options.addOption(storageManagerWrite);
+
+        return options;
     }
 
-    public static void usage() {
-        System.err.printf("Usage: %s -application APP -inputdir DIR " + "\n\t-outputfile FILE -distribution DIST "
-                + "-ensembleSize SIZE \n\t-algorithm ALGO " + "[-scalingFactor FACTOR] [-seed SEED] "
-                + "\n\t[-runtimeVariance VAR] [-delay DELAY] "
-                + "[-failureRate RATE] [-storageCache [void(default)|FIFO]]\n\n", TestRun.class.getName());
+    private static void printUsage(Options options, String reason) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.setWidth(120);
+        formatter.printHelp(TestRun.class.getName(), "", options, reason);
         System.exit(1);
     }
 
     public static void main(String[] args) {
+        Options options = buildOptions();
+        CommandLine cmd = null;
+        try {
+            CommandLineParser parser = new PosixParser();
+            cmd = parser.parse(options, args);
+        } catch (ParseException exp) {
+            printUsage(options, exp.getMessage());
+        }
+        TestRun testRun = new TestRun();
+        try {
+            testRun.runTest(cmd);
+        } catch (WrongCommandLineArgsException e) {
+            printUsage(options, e.getMessage());
+        }
+    }
+
+    public void runTest(CommandLine args) {
         // These parameters are consistent with previous experiments
         double alpha = 0.7;
         double maxScaling = 1.0;
@@ -61,115 +156,21 @@ public class TestRun {
         double price = 1;
 
         // Arguments with no defaults
-        String algorithm = null; // "SPSS";
-        String application = null; // "SIPHT";
-        File inputdir = null; // new File("/Volumes/HDD/SyntheticWorkflows/SIPHT");
-        File outputfile = null; // new File("TestRun.dat");
-        String distribution = null; // "uniform_unsorted";
-        String storageManagerType = null;
-
-        String storageCacheType = "void";
+        String algorithm = args.getOptionValue("algorithm"); // "SPSS";
+        String application = args.getOptionValue("application"); // "SIPHT";
+        File inputdir = new File(args.getOptionValue("input-dir"));
+        File outputfile = new File(args.getOptionValue("output-file")); // new File("TestRun.dat");
+        String distribution = args.getOptionValue("distribution"); // "uniform_unsorted";
+        String storageManagerType = args.getOptionValue("storage-manager");
 
         // Arguments with defaults
-        Integer ensembleSize = 50;
-        Double scalingFactor = 1.0;
-        Long seed = System.currentTimeMillis();
-        Double runtimeVariance = 0.0;
-        Double delay = 0.0;
-        Double failureRate = 0.0;
-        Double storageManagerSpeed = 100000000.0;
-
-        try {
-            for (int i = 0; i < args.length;) {
-                String arg = args[i++];
-                String next = args[i++];
-
-                if ("-application".equals(arg)) {
-                    application = next;
-                } else if ("-inputdir".equals(arg)) {
-                    inputdir = new File(next);
-                    if (!inputdir.isDirectory()) {
-                        System.err.println("-inputdir not found");
-                        System.exit(1);
-                    }
-                } else if ("-outputfile".equals(arg)) {
-                    outputfile = new File(next);
-                } else if ("-distribution".equals(arg)) {
-                    distribution = next;
-                } else if ("-ensembleSize".equals(arg)) {
-                    ensembleSize = Integer.parseInt(next);
-                } else if ("-scalingFactor".equals(arg)) {
-                    scalingFactor = Double.parseDouble(next);
-                } else if ("-algorithm".equals(arg)) {
-                    algorithm = next;
-                } else if ("-seed".equals(arg)) {
-                    seed = Long.parseLong(next);
-                } else if ("-runtimeVariance".equals(arg)) {
-                    runtimeVariance = Double.parseDouble(next);
-                } else if ("-delay".equals(arg)) {
-                    delay = Double.parseDouble(next);
-                } else if ("-failureRate".equals(arg)) {
-                    failureRate = Double.parseDouble(next);
-                } else if ("-storage".equals(arg)) {
-                    storageManagerType = next;
-                } else if ("-speed".equals(arg)) {
-                    storageManagerSpeed = Double.parseDouble(next);
-                } else if ("-storageCache".equals(arg)) {
-                    storageCacheType = next;
-                } else {
-                    System.err.println("Illegal argument " + arg);
-                    usage();
-                }
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println("Invalid argument");
-            usage();
-        }
-
-        if (application == null) {
-            System.err.println("-application required");
-            usage();
-        }
-
-        if (inputdir == null) {
-            System.err.println("-inputdir required");
-            usage();
-        }
-
-        if (outputfile == null) {
-            System.err.println("-outputfile required");
-            usage();
-        }
-
-        if (distribution == null) {
-            System.err.println("-distribution required");
-            usage();
-        }
-
-        if (ensembleSize == null) {
-            System.err.println("-ensembleSize required");
-            usage();
-        }
-
-        if (storageManagerType == null) {
-            System.err.println("-storage required");
-            usage();
-        }
-
-        // Echo the simulation parameters
-        System.out.printf("application = %s\n", application);
-        System.out.printf("inputdir = %s\n", inputdir);
-        System.out.printf("outputfile = %s\n", outputfile);
-        System.out.printf("distribution = %s\n", distribution);
-        System.out.printf("ensembleSize = %d\n", ensembleSize);
-        System.out.printf("scalingFactor = %f\n", scalingFactor);
-        System.out.printf("algorithm = %s\n", algorithm);
-        System.out.printf("seed = %d\n", seed);
-        System.out.printf("runtimeVariance = %f\n", runtimeVariance);
-        System.out.printf("delay = %f\n", delay);
-        System.out.printf("failureRate = %f\n", failureRate);
-        // TODO(bryk): @mequrel: should storageManagerType be here? I believe so.
-        System.out.printf("storageCache = %s\n", storageCacheType);
+        Integer ensembleSize = Integer.parseInt(args.getOptionValue("ensemble-size", defaultEnsembleSize));
+        Double scalingFactor = Double.parseDouble(args.getOptionValue("scaling-factor", defaultScalingFactor));
+        Long seed = Long.parseLong(args.getOptionValue("seed", System.currentTimeMillis() + ""));
+        Double runtimeVariance = Double.parseDouble(args.getOptionValue("runtime-variance", defaultRuntimeVariance));
+        Double delay = Double.parseDouble(args.getOptionValue("delay", defaultDelay));
+        Double failureRate = Double.parseDouble(args.getOptionValue("failure-rate", defaultFailureRate));
+        String storageCacheType = args.getOptionValue("storage-cache", defaultStorageCache);
 
         // TODO(_mequrel_): change to IoC in the future
         CloudSimWrapper cloudsim = new CloudSimWrapper();
@@ -210,6 +211,50 @@ public class TestRun {
             System.err.println("Unrecognized distribution: " + distribution);
             System.exit(1);
         }
+
+        StorageManager storageManager = null;
+
+        VMCacheManager cacheManager = null;
+        if (storageCacheType.equals("FIFO")) {
+            cacheManager = new FIFOCacheManager(cloudsim);
+        } else {
+            cacheManager = new VoidCacheManager(cloudsim);
+        }
+
+        if (storageManagerType.equals("global")) {
+            GlobalStorageParams params = new GlobalStorageParams();
+
+            if (!args.hasOption("storage-manager-read") || !args.hasOption("storage-manager-write")) {
+                throw new WrongCommandLineArgsException("storage-manager-read and storage-manager-read required");
+            }
+            Double storageManagerRead = Double.parseDouble(args.getOptionValue("storage-manager-read"));
+            Double storageManagerWrite = Double.parseDouble(args.getOptionValue("storage-manager-write"));
+            System.out.printf("storage-manager-read = %f\n", storageManagerRead);
+            System.out.printf("storage-manager-write = %f\n", storageManagerWrite);
+            params.setReadSpeed(storageManagerRead);
+            params.setWriteSpeed(storageManagerWrite);
+            params.setLatency(0.0);
+            // params.setChunkTransferTime();
+
+            storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
+        } else {
+            storageManager = new VoidStorageManager(cloudsim);
+        }
+
+        // Echo the simulation parameters
+        System.out.printf("application = %s\n", application);
+        System.out.printf("inputdir = %s\n", inputdir);
+        System.out.printf("outputfile = %s\n", outputfile);
+        System.out.printf("distribution = %s\n", distribution);
+        System.out.printf("ensembleSize = %d\n", ensembleSize);
+        System.out.printf("scalingFactor = %f\n", scalingFactor);
+        System.out.printf("algorithm = %s\n", algorithm);
+        System.out.printf("seed = %d\n", seed);
+        System.out.printf("runtimeVariance = %f\n", runtimeVariance);
+        System.out.printf("delay = %f\n", delay);
+        System.out.printf("failureRate = %f\n", failureRate);
+        // TODO(bryk): @mequrel: should storageManagerType be here? I believe so.
+        System.out.printf("storageCache = %s\n", storageCacheType);
 
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
@@ -252,28 +297,6 @@ public class TestRun {
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
 
-        StorageManager storageManager = null;
-
-        VMCacheManager cacheManager = null;
-        if (storageCacheType.equals("FIFO")) {
-            cacheManager = new FIFOCacheManager(cloudsim);
-        } else {
-            cacheManager = new VoidCacheManager(cloudsim);
-        }
-
-        if (storageManagerType.equals("global")) {
-            GlobalStorageParams params = new GlobalStorageParams();
-
-            params.setReadSpeed(storageManagerSpeed);
-            params.setWriteSpeed(storageManagerSpeed);
-            params.setLatency(0.0);
-            // params.setChunkTransferTime();
-
-            storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
-        } else {
-            storageManager = new VoidStorageManager(cloudsim);
-        }
-
         PrintStream fileOut = null;
         try {
             fileOut = new PrintStream(new FileOutputStream(outputfile));
@@ -315,13 +338,13 @@ public class TestRun {
                     double simulationTime = a.getSimulationWallTime() / 1.0e9;
 
                     fileOut.printf(
-                            "%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%s,%f\n",
+                            "%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%s\n",
                             application, distribution, seed, ensembleSize, scalingFactor, budget, deadline,
                             a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
                             planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(),
                             a.getActualJobFinishTime(), a.getActualDagFinishTime(), a.getActualVMFinishTime(),
                             runtimeVariance, delay, failureRate, minBudget, maxBudget, minDeadline, maxDeadline,
-                            storageManagerType, storageManagerSpeed);
+                            storageManagerType);
                 }
             }
 
