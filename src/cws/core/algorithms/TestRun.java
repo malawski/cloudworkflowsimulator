@@ -17,7 +17,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 
-import cws.core.FailureModel;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
@@ -26,7 +25,6 @@ import cws.core.dag.Task;
 import cws.core.exception.WrongCommandLineArgsException;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
-import cws.core.jobs.UniformRuntimeDistribution;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 import cws.core.storage.cache.FIFOCacheManager;
@@ -36,12 +34,8 @@ import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
 
 public class TestRun {
-
-    private static final String DEFAULT_RUNTIME_VARIANCE = "0.0";
     private static final String DEFAULT_ENSEMBLE_SIZE = "50";
     private static final String DEFAULT_SCALING_FACTOR = "1.0";
-    private static final String DEFAULT_DELAY = "0.0";
-    private static final String DEFAULT_FAILURE_RATE = "0.0";
     private static final String DEFAULT_STORAGE_CACHE = "void";
 
     private static Options buildOptions() {
@@ -86,19 +80,6 @@ public class TestRun {
         scalingFactor.setArgName("FACTOR");
         options.addOption(scalingFactor);
 
-        Option runtimeVariance = new Option("rv", "runtime-variance", true, "Runtime variance, defaults to "
-                + DEFAULT_RUNTIME_VARIANCE);
-        runtimeVariance.setArgName("VAR");
-        options.addOption(runtimeVariance);
-
-        Option delay = new Option("dl", "delay", true, "Delay, defaluts to " + DEFAULT_DELAY);
-        delay.setArgName("DELAY");
-        options.addOption(delay);
-
-        Option failureRate = new Option("fr", "failure-rate", true, "Faliure rate, defaults to " + DEFAULT_FAILURE_RATE);
-        failureRate.setArgName("RATE");
-        options.addOption(failureRate);
-
         Option storageCache = new Option("sc", "storage-cache", true, "Storage cache, defaults to "
                 + DEFAULT_STORAGE_CACHE);
         storageCache.setArgName("CACHE");
@@ -110,6 +91,7 @@ public class TestRun {
         options.addOption(storageManager);
 
         GlobalStorageParams.buildCliOptions(options);
+        VMFactory.buildCliOptions(options);
         return options;
     }
 
@@ -158,10 +140,9 @@ public class TestRun {
         Integer ensembleSize = Integer.parseInt(args.getOptionValue("ensemble-size", DEFAULT_ENSEMBLE_SIZE));
         Double scalingFactor = Double.parseDouble(args.getOptionValue("scaling-factor", DEFAULT_SCALING_FACTOR));
         Long seed = Long.parseLong(args.getOptionValue("seed", System.currentTimeMillis() + ""));
-        Double runtimeVariance = Double.parseDouble(args.getOptionValue("runtime-variance", DEFAULT_RUNTIME_VARIANCE));
-        Double delay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_DELAY));
-        Double failureRate = Double.parseDouble(args.getOptionValue("failure-rate", DEFAULT_FAILURE_RATE));
         String storageCacheType = args.getOptionValue("storage-cache", DEFAULT_STORAGE_CACHE);
+
+        VMFactory.readCliOptions(args, seed);
 
         // TODO(_mequrel_): change to IoC in the future
         CloudSimWrapper cloudsim = new CloudSimWrapper();
@@ -208,6 +189,7 @@ public class TestRun {
         VMCacheManager cacheManager = null;
         if (storageCacheType.equals("FIFO")) {
             cacheManager = new FIFOCacheManager(cloudsim);
+
         } else {
             cacheManager = new VoidCacheManager(cloudsim);
         }
@@ -228,9 +210,6 @@ public class TestRun {
         System.out.printf("scalingFactor = %f\n", scalingFactor);
         System.out.printf("algorithm = %s\n", algorithm);
         System.out.printf("seed = %d\n", seed);
-        System.out.printf("runtimeVariance = %f\n", runtimeVariance);
-        System.out.printf("delay = %f\n", delay);
-        System.out.printf("failureRate = %f\n", failureRate);
         // TODO(bryk): @mequrel: should storageManagerType be here? I believe so.
         System.out.printf("storageCache = %s\n", storageCacheType);
 
@@ -281,7 +260,7 @@ public class TestRun {
             fileOut.println("application,distribution,seed,dags,scale,budget,"
                     + "deadline,algorithm,completed,exponential,linear,"
                     + "planning,simulation,scorebits,cost,jobfinish,dagfinish,"
-                    + "vmfinish,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline,storageType,storageSpeed");
+                    + "vmfinish,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline,storageType");
 
             for (double budget = minBudget; budget < maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
@@ -298,18 +277,6 @@ public class TestRun {
                         throw new RuntimeException("Unknown algorithm: " + algorithm);
                     }
 
-                    if (runtimeVariance > 0.0) {
-                        VMFactory.setRuntimeDistribution(new UniformRuntimeDistribution(seed, runtimeVariance));
-                    }
-
-                    if (delay > 0.0) {
-                        VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(delay));
-                    }
-
-                    if (failureRate > 0.0) {
-                        VMFactory.setFailureModel(new FailureModel(seed, failureRate));
-                    }
-
                     a.simulate(algorithm);
 
                     double planningTime = a.getPlanningnWallTime() / 1.0e9;
@@ -321,8 +288,8 @@ public class TestRun {
                             a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
                             planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(),
                             a.getActualJobFinishTime(), a.getActualDagFinishTime(), a.getActualVMFinishTime(),
-                            runtimeVariance, delay, failureRate, minBudget, maxBudget, minDeadline, maxDeadline,
-                            storageManagerType);
+                            VMFactory.getRuntimeVariance(), VMFactory.getDelay(), VMFactory.getFailureRate(),
+                            minBudget, maxBudget, minDeadline, maxDeadline, storageManagerType);
                 }
             }
 

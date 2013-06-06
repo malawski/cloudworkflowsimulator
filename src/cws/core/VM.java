@@ -11,6 +11,7 @@ import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.exception.UnknownWorkflowEventException;
+import cws.core.experiment.VMFactory;
 import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
@@ -44,10 +45,6 @@ public class VM extends CWSSimEntity {
 
     private static int next_id = 0;
 
-    public static final double DEFAULT_PROVISIONING_DELAY = 60.0;
-
-    public static final double DEFAULT_DEPROVISIONING_DELAY = 10.0;
-
     /** How many seconds there are in one hour */
     public static final double SECONDS_PER_HOUR = 60 * 60;
 
@@ -67,7 +64,7 @@ public class VM extends CWSSimEntity {
      * The number of bytes on internal disk that can be used as a cache
      * @see {@link VMCacheManager}
      */
-    private long cacheSize;
+    private long cacheSize = VMFactory.DEFAULT_CACHE_SIZE;
 
     /** Network port for input data */
     private Port inputPort;
@@ -100,10 +97,10 @@ public class VM extends CWSSimEntity {
     private double cpuSecondsConsumed;
 
     /** Delay from when the VM is launched until it is ready */
-    private double provisioningDelay = DEFAULT_PROVISIONING_DELAY;
+    private double provisioningDelay = VMFactory.DEFAULT_PROVISIONING_DELAY;
 
     /** Delay from when the VM is terminated until it is no longer charged */
-    private double deprovisioningDelay = DEFAULT_DEPROVISIONING_DELAY;
+    private double deprovisioningDelay = VMFactory.DEFAULT_DEPROVISIONING_DELAY;
 
     /** Varies the actual runtime of tasks according to the specified distribution */
     private RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
