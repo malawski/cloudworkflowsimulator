@@ -172,11 +172,13 @@ public class VMTest {
 
     @Test
     public void shouldStartNextTaskWithInputFilesAfterUploadingPreviousOutputs() {
-        // TODO(mequrel): problem with GlobalStorage during fetching files... investigation needed
         double writeSpeed = 60;
+        double readSpeed = 60;
 
         GlobalStorageParams params = new GlobalStorageParams();
+        params.setReadSpeed(readSpeed);
         params.setWriteSpeed(writeSpeed);
+        
         // TODO(bryk): that's ugly, I know
         new GlobalStorageManager(params, new VoidCacheManager(cloudsim), cloudsim);
 
@@ -187,7 +189,7 @@ public class VMTest {
         Task taskWithOutputFile = new Task(null, null, firstLength);
 
         int outputFileSizeInBytes = 300;
-        DAGFile file = new DAGFile(null, outputFileSizeInBytes);
+        DAGFile file = new DAGFile("output-file", outputFileSizeInBytes);
 
         taskWithOutputFile.setInputFiles(Collections.EMPTY_LIST);
         taskWithOutputFile.setOutputFiles(Arrays.asList(new DAGFile[] { file }));
@@ -200,7 +202,7 @@ public class VMTest {
         Task taskWithInputFile = new Task(null, null, secondLength);
 
         int inputFileSizeInBytes = 300;
-        DAGFile inputFile = new DAGFile(null, inputFileSizeInBytes);
+        DAGFile inputFile = new DAGFile("input-file", inputFileSizeInBytes);
 
         taskWithInputFile.setInputFiles(Arrays.asList(new DAGFile[] { inputFile }));
         taskWithInputFile.setOutputFiles(Collections.EMPTY_LIST);
@@ -215,8 +217,13 @@ public class VMTest {
 
         VM vm = new VM(100, vmStaticParams, cloudsim);
 
+        // prepare tasks
+        
+        jobFirst.setVM(vm);
+        jobSecond.setVM(vm);
+        
         // send tasks
-
+        
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { jobFirst, jobSecond });
 
@@ -238,10 +245,13 @@ public class VMTest {
 
     @Test
     public void shouldStartNextTaskWithoutInputFilesImmediately() {
-        double writeSpeed = 60;
+    	double writeSpeed = 60;
+        double readSpeed = 60;
 
         GlobalStorageParams params = new GlobalStorageParams();
+        params.setReadSpeed(readSpeed);
         params.setWriteSpeed(writeSpeed);
+
         // TODO(bryk): that's ugly, I know
         new GlobalStorageManager(params, new VoidCacheManager(cloudsim), cloudsim);
 
@@ -252,7 +262,7 @@ public class VMTest {
         Task taskWithOutputFile = new Task(null, null, firstLength);
 
         int outputFileSizeInBytes = 300;
-        DAGFile file = new DAGFile(null, outputFileSizeInBytes);
+        DAGFile file = new DAGFile("input-file", outputFileSizeInBytes);
 
         taskWithOutputFile.setInputFiles(Collections.EMPTY_LIST);
         taskWithOutputFile.setOutputFiles(Arrays.asList(new DAGFile[] { file }));
@@ -276,6 +286,11 @@ public class VMTest {
 
         VM vm = new VM(100, vmStaticParams, cloudsim);
 
+        // prepare tasks
+        
+        jobFirst.setVM(vm);
+        jobSecond.setVM(vm);
+        
         // send tasks
 
         VMDriver driver = new VMDriver(vm, cloudsim);
@@ -299,11 +314,13 @@ public class VMTest {
 
     @Test
     public void shouldStartNextTaskWithCashedInputFilesImmediately() {
-        // TODO(mequrel): problem with GlobalStorage during fetching files... investigation needed
-        double writeSpeed = 60;
+    	double writeSpeed = 60;
+        double readSpeed = 60;
 
         GlobalStorageParams params = new GlobalStorageParams();
+        params.setReadSpeed(readSpeed);
         params.setWriteSpeed(writeSpeed);
+
         // TODO(bryk): that's ugly, I know
         new GlobalStorageManager(params, new FIFOCacheManager(cloudsim), cloudsim);
 
@@ -338,6 +355,11 @@ public class VMTest {
 
         VM vm = new VM(100, vmStaticParams, cloudsim);
 
+        // prepare tasks
+        
+        jobFirst.setVM(vm);
+        jobSecond.setVM(vm);
+        
         // send tasks
 
         VMDriver driver = new VMDriver(vm, cloudsim);
