@@ -37,12 +37,12 @@ import cws.core.storage.global.GlobalStorageParams;
 
 public class TestRun {
 
-    private static final String defaultRuntimeVariance = "0.0";
-    private static final String defaultEnsembleSize = "50";
-    private static final String defaultScalingFactor = "1.0";
-    private static final String defaultDelay = "0.0";
-    private static final String defaultFailureRate = "0.0";
-    private static final String defaultStorageCache = "void";
+    private static final String DEFAULT_RUNTIME_VARIANCE = "0.0";
+    private static final String DEFAULT_ENSEMBLE_SIZE = "50";
+    private static final String DEFAULT_SCALING_FACTOR = "1.0";
+    private static final String DEFAULT_DELAY = "0.0";
+    private static final String DEFAULT_FAILURE_RATE = "0.0";
+    private static final String DEFAULT_STORAGE_CACHE = "void";
 
     private static Options buildOptions() {
         Options options = new Options();
@@ -72,7 +72,7 @@ public class TestRun {
         options.addOption(distribution);
 
         Option ensembleSize = new Option("es", "ensemble-size", true, "Ensemble size, defaults to "
-                + defaultEnsembleSize);
+                + DEFAULT_ENSEMBLE_SIZE);
         ensembleSize.setArgName("SIZE");
         options.addOption(ensembleSize);
 
@@ -82,25 +82,25 @@ public class TestRun {
         options.addOption(algorithm);
 
         Option scalingFactor = new Option("sf", "scaling-factor", true, "Scaling factor, defaults to "
-                + defaultScalingFactor);
+                + DEFAULT_SCALING_FACTOR);
         scalingFactor.setArgName("FACTOR");
         options.addOption(scalingFactor);
 
         Option runtimeVariance = new Option("rv", "runtime-variance", true, "Runtime variance, defaults to "
-                + defaultRuntimeVariance);
+                + DEFAULT_RUNTIME_VARIANCE);
         runtimeVariance.setArgName("VAR");
         options.addOption(runtimeVariance);
 
-        Option delay = new Option("dl", "delay", true, "Delay, defaluts to " + defaultDelay);
+        Option delay = new Option("dl", "delay", true, "Delay, defaluts to " + DEFAULT_DELAY);
         delay.setArgName("DELAY");
         options.addOption(delay);
 
-        Option failureRate = new Option("fr", "failure-rate", true, "Faliure rate, defaults to " + defaultFailureRate);
+        Option failureRate = new Option("fr", "failure-rate", true, "Faliure rate, defaults to " + DEFAULT_FAILURE_RATE);
         failureRate.setArgName("RATE");
         options.addOption(failureRate);
 
         Option storageCache = new Option("sc", "storage-cache", true, "Storage cache, defaults to "
-                + defaultStorageCache);
+                + DEFAULT_STORAGE_CACHE);
         storageCache.setArgName("CACHE");
         options.addOption(storageCache);
 
@@ -109,16 +109,7 @@ public class TestRun {
         storageManager.setArgName("MRG");
         options.addOption(storageManager);
 
-        Option storageManagerRead = new Option(null, "storage-manager-read", true,
-                "(required for storage-manager=global) Storage manager read speed");
-        storageManagerRead.setArgName("SPEED");
-        options.addOption(storageManagerRead);
-
-        Option storageManagerWrite = new Option(null, "storage-manager-write", true,
-                "(required for storage-manager=global) Storage manager write speed");
-        storageManagerWrite.setArgName("SPEED");
-        options.addOption(storageManagerWrite);
-
+        GlobalStorageParams.buildCliOptions(options);
         return options;
     }
 
@@ -164,13 +155,13 @@ public class TestRun {
         String storageManagerType = args.getOptionValue("storage-manager");
 
         // Arguments with defaults
-        Integer ensembleSize = Integer.parseInt(args.getOptionValue("ensemble-size", defaultEnsembleSize));
-        Double scalingFactor = Double.parseDouble(args.getOptionValue("scaling-factor", defaultScalingFactor));
+        Integer ensembleSize = Integer.parseInt(args.getOptionValue("ensemble-size", DEFAULT_ENSEMBLE_SIZE));
+        Double scalingFactor = Double.parseDouble(args.getOptionValue("scaling-factor", DEFAULT_SCALING_FACTOR));
         Long seed = Long.parseLong(args.getOptionValue("seed", System.currentTimeMillis() + ""));
-        Double runtimeVariance = Double.parseDouble(args.getOptionValue("runtime-variance", defaultRuntimeVariance));
-        Double delay = Double.parseDouble(args.getOptionValue("delay", defaultDelay));
-        Double failureRate = Double.parseDouble(args.getOptionValue("failure-rate", defaultFailureRate));
-        String storageCacheType = args.getOptionValue("storage-cache", defaultStorageCache);
+        Double runtimeVariance = Double.parseDouble(args.getOptionValue("runtime-variance", DEFAULT_RUNTIME_VARIANCE));
+        Double delay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_DELAY));
+        Double failureRate = Double.parseDouble(args.getOptionValue("failure-rate", DEFAULT_FAILURE_RATE));
+        String storageCacheType = args.getOptionValue("storage-cache", DEFAULT_STORAGE_CACHE);
 
         // TODO(_mequrel_): change to IoC in the future
         CloudSimWrapper cloudsim = new CloudSimWrapper();
@@ -222,20 +213,7 @@ public class TestRun {
         }
 
         if (storageManagerType.equals("global")) {
-            GlobalStorageParams params = new GlobalStorageParams();
-
-            if (!args.hasOption("storage-manager-read") || !args.hasOption("storage-manager-write")) {
-                throw new WrongCommandLineArgsException("storage-manager-read and storage-manager-read required");
-            }
-            Double storageManagerRead = Double.parseDouble(args.getOptionValue("storage-manager-read"));
-            Double storageManagerWrite = Double.parseDouble(args.getOptionValue("storage-manager-write"));
-            System.out.printf("storage-manager-read = %f\n", storageManagerRead);
-            System.out.printf("storage-manager-write = %f\n", storageManagerWrite);
-            params.setReadSpeed(storageManagerRead);
-            params.setWriteSpeed(storageManagerWrite);
-            params.setLatency(0.0);
-            // params.setChunkTransferTime();
-
+            GlobalStorageParams params = GlobalStorageParams.readCliOptions(args);
             storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
         } else {
             storageManager = new VoidStorageManager(cloudsim);

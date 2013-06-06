@@ -252,8 +252,8 @@ public class GlobalStorageManager extends StorageManager {
             }
         }
         congestedParams.setReadSpeed(readSpeed);
-        System.out.printf("Num writes: %d, num reads: %d, ws: %f, rs: %f\n", congestedParams.getNumWrites(),
-                congestedParams.getNumReads(), writeSpeed, readSpeed);
+        //System.out.printf("Num writes: %d, num reads: %d, ws: %f, rs: %f\n", congestedParams.getNumWrites(),
+        //        congestedParams.getNumReads(), writeSpeed, readSpeed);
     }
 
     public GlobalStorageParams getParams() {
