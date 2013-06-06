@@ -82,8 +82,11 @@ public class VMTest {
         // TODO(bryk): that's ugly, I know
         new VoidStorageManager(cloudsim);
 
-        Job j = new Job(cloudsim);
-        j.setTask(new Task("task_id", "transformation", 1000));
+        Job job = new Job(cloudsim);
+        Task task = new Task("task_id", "transformation", 1000);
+        task.setInputFiles(Collections.EMPTY_LIST);
+        task.setOutputFiles(Collections.EMPTY_LIST);
+        job.setTask(task);
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -93,14 +96,14 @@ public class VMTest {
         VM vm = new VM(100, vmStaticParams, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
-        driver.setJobs(new Job[] { j });
+        driver.setJobs(new Job[] { job });
 
         cloudsim.startSimulation();
 
-        assertEquals(0.0, j.getReleaseTime(), 0.0);
-        assertEquals(0.0, j.getSubmitTime(), 0.0);
-        assertEquals(0.0, j.getStartTime(), 0.0);
-        assertEquals(10.0, j.getFinishTime(), 0.0);
+        assertEquals(0.0, job.getReleaseTime(), 0.0);
+        assertEquals(0.0, job.getSubmitTime(), 0.0);
+        assertEquals(0.0, job.getStartTime(), 0.0);
+        assertEquals(10.0, job.getFinishTime(), 0.0);
     }
 
     @Test
@@ -109,9 +112,16 @@ public class VMTest {
         new VoidStorageManager(cloudsim);
 
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id", "transformation", 1000));
+        Task task1 = new Task("task_id", "transformation", 1000);
+        task1.setInputFiles(Collections.EMPTY_LIST);
+        task1.setOutputFiles(Collections.EMPTY_LIST);
+        j1.setTask(task1);
+        
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000));
+        Task task2 = new Task("task_id2", "transformation", 1000);
+        task2.setInputFiles(Collections.EMPTY_LIST);
+        task2.setOutputFiles(Collections.EMPTY_LIST);
+        j2.setTask(task2);
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -142,10 +152,16 @@ public class VMTest {
         new VoidStorageManager(cloudsim);
 
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id1", "transformation", 1000));
-
+        Task task1 = new Task("task_id", "transformation", 1000);
+        task1.setInputFiles(Collections.EMPTY_LIST);
+        task1.setOutputFiles(Collections.EMPTY_LIST);
+        j1.setTask(task1);
+        
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000));
+        Task task2 = new Task("task_id2", "transformation", 1000);
+        task2.setInputFiles(Collections.EMPTY_LIST);
+        task2.setOutputFiles(Collections.EMPTY_LIST);
+        j2.setTask(task2);
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -228,8 +244,8 @@ public class VMTest {
         driver.setJobs(new Job[] { jobFirst, jobSecond });
 
         // expectations
-        double expectedFirstEnded = firstLength + outputFileSizeInBytes / writeSpeed;
-        double expectedSecondStarted = expectedFirstEnded;
+        double expectedFirstEnded = firstLength; 
+        double expectedSecondStarted = expectedFirstEnded  + outputFileSizeInBytes / writeSpeed;;
         double expectedSecondEnded = expectedSecondStarted + secondLength + inputFileSizeInBytes / writeSpeed;
 
         // simulate
@@ -297,7 +313,7 @@ public class VMTest {
         driver.setJobs(new Job[] { jobFirst, jobSecond });
 
         // expectations
-        double expectedFirstEnded = firstLength + outputFileSizeInBytes / writeSpeed;
+        double expectedFirstEnded = firstLength; 
         double expectedSecondStarted = firstLength;
         double expectedSecondEnded = firstLength + secondLength;
 
@@ -366,7 +382,7 @@ public class VMTest {
         driver.setJobs(new Job[] { jobFirst, jobSecond });
 
         // expectations
-        double expectedFirstEnded = firstLength + outputFileSizeInBytes / writeSpeed;
+        double expectedFirstEnded = firstLength;
         double expectedSecondStarted = firstLength;
         double expectedSecondEnded = firstLength + secondLength;
 
