@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 public class FailureModelTest {
 
     private double computePercentFailures(double failureRate) {
-        FailureModel m = new FailureModel(System.currentTimeMillis(), failureRate);
+        FailureModel m = new FailureModel(2123, failureRate);
 
         int samples = 1000000;
         int failures = 0;
@@ -36,7 +36,7 @@ public class FailureModelTest {
     @Test
     public void testActualRuntimes() {
         Random rand = new Random(97);
-        FailureModel m = new FailureModel(System.currentTimeMillis(), 0.0);
+        FailureModel m = new FailureModel(4342, 0.0);
         for (int i = 0; i < 100000; i++) {
             double runtime = rand.nextDouble() * (i + 1);
             double actualRuntime = m.runtimeBeforeFailure(runtime);

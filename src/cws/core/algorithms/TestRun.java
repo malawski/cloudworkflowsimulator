@@ -187,11 +187,12 @@ public class TestRun {
         StorageManager storageManager = null;
 
         VMCacheManager cacheManager = null;
-        if (storageCacheType.equals("FIFO")) {
+        if (storageCacheType.equals("fifo")) {
             cacheManager = new FIFOCacheManager(cloudsim);
-
-        } else {
+        } else if (storageCacheType.equals("void")) {
             cacheManager = new VoidCacheManager(cloudsim);
+        } else {
+            throw new WrongCommandLineArgsException("Wrong storage-cache:" + storageCacheType);
         }
 
         if (storageManagerType.equals("global")) {
@@ -274,7 +275,7 @@ public class TestRun {
                     } else if ("WADPDS".equals(algorithm)) {
                         a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
                     } else {
-                        throw new RuntimeException("Unknown algorithm: " + algorithm);
+                        throw new WrongCommandLineArgsException("Unknown algorithm: " + algorithm);
                     }
 
                     a.simulate(algorithm);

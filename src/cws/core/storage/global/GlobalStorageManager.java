@@ -55,16 +55,15 @@ public class GlobalStorageManager extends StorageManager {
      */
     @Override
     protected void onBeforeTaskStart(Job job) {
-        List<DAGFile> files = job.getTask().getInputFiles();
-        if (files.size() == 0) {
+        List<DAGFile> notCachedFiles = new ArrayList<DAGFile>();
+        for (DAGFile file : job.getTask().getInputFiles()) {
+            if (!cacheManager.getFileFromCache(file, job)) {
+                notCachedFiles.add(file);
+            }
+        }
+        if (notCachedFiles.size() == 0) {
             notifyThatBeforeTransfersCompleted(job);
         } else {
-            List<DAGFile> notCachedFiles = new ArrayList<DAGFile>();
-            for (DAGFile file : files) {
-                if (!cacheManager.getFileFromCache(file, job)) {
-                    notCachedFiles.add(file);
-                }
-            }
             startTransfers(notCachedFiles, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS);
             congestedParams.addReads(notCachedFiles.size());
             updateSpeedCongestion();
@@ -252,8 +251,8 @@ public class GlobalStorageManager extends StorageManager {
             }
         }
         congestedParams.setReadSpeed(readSpeed);
-        //System.out.printf("Num writes: %d, num reads: %d, ws: %f, rs: %f\n", congestedParams.getNumWrites(),
-        //        congestedParams.getNumReads(), writeSpeed, readSpeed);
+        // System.out.printf("Num writes: %d, num reads: %d, ws: %f, rs: %f\n", congestedParams.getNumWrites(),
+        // congestedParams.getNumReads(), writeSpeed, readSpeed);
     }
 
     public GlobalStorageParams getParams() {

@@ -92,7 +92,8 @@ public class VMFactory {
         delay.setArgName("DELAY");
         options.addOption(delay);
 
-        Option cacheSize = new Option("cs", "cache-size", true, "VM cache size, defaluts to " + DEFAULT_CACHE_SIZE);
+        Option cacheSize = new Option("cs", "cache-size", true, "VM cache size, defaluts to " + DEFAULT_CACHE_SIZE
+                + " bytes");
         cacheSize.setArgName("SIZE");
         options.addOption(cacheSize);
 

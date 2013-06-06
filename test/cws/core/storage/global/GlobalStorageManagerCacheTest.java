@@ -70,6 +70,8 @@ public class GlobalStorageManagerCacheTest {
         Mockito.verify(cacheManager).getFileFromCache(df, job); // tried to get ...
         Mockito.verify(cacheManager).putFileToCache(df, job); // and then put
         Mockito.verifyNoMoreInteractions(cacheManager);
+        Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+                Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());
     }
 
     @Test
@@ -84,6 +86,8 @@ public class GlobalStorageManagerCacheTest {
 
         Mockito.verify(cacheManager).getFileFromCache(df, job);
         Mockito.verifyNoMoreInteractions(cacheManager);
+        Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+                Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());
     }
 
     @Test
@@ -97,5 +101,7 @@ public class GlobalStorageManagerCacheTest {
 
         Mockito.verify(cacheManager).putFileToCache(df, job); // only saves to cache
         Mockito.verifyNoMoreInteractions(cacheManager);
+        Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+                Matchers.eq(WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED), Matchers.any());
     }
 }
