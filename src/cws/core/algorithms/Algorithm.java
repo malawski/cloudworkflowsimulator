@@ -6,17 +6,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cws.core.dag.DAG;
+import cws.core.storage.StorageManager;
 
 public abstract class Algorithm {
     private double budget;
     private double deadline;
     private List<DAG> dags;
     private boolean generateLog = false;
+    protected StorageManager storageManager;
 
-    public Algorithm(double budget, double deadline, List<DAG> dags) {
+    public Algorithm(double budget, double deadline, List<DAG> dags, StorageManager manager) {
         this.budget = budget;
         this.deadline = deadline;
         this.dags = dags;
+        this.storageManager = manager;
     }
 
     public List<DAG> getDAGs() {
@@ -136,5 +139,9 @@ public abstract class Algorithm {
         }
 
         return b.toString();
+    }
+
+    public StorageManager getStorageManager() {
+        return storageManager;
     }
 }

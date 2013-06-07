@@ -127,6 +127,32 @@ public abstract class StorageManagerTest {
         Assert.assertTrue(time >= 0.0); // just very simple assert, nothing more we can assume
     }
 
+    @Test
+    public void testStorageMangerUpdatesWriteStatistics() {
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        files.add(new DAGFile("abc.txt", 333));
+        files.add(new DAGFile("def.txt", 444));
+        Mockito.when(task.getOutputFiles()).thenReturn(files);
+        skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
+        CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
+        CloudSim.startSimulation();
+        Assert.assertEquals(777, storageManager.getStorageManagerStatistics().getTotalBytesToWrite());
+        Assert.assertEquals(777, storageManager.getStorageManagerStatistics().getAcutalBytesWritten());
+    }
+
+    @Test
+    public void testStorageMangerUpdatesReadStatistics() {
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        files.add(new DAGFile("abc.txt", 222));
+        files.add(new DAGFile("def.txt", 333));
+        Mockito.when(task.getInputFiles()).thenReturn(files);
+        skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
+        CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
+        CloudSim.startSimulation();
+        Assert.assertEquals(555, storageManager.getStorageManagerStatistics().getTotalBytesToRead());
+        Assert.assertEquals(555, storageManager.getStorageManagerStatistics().getActualBytesRead());
+    }
+
     /** Skips event sent to by cloudsim obj. The rest is forwarded to the underlying CloudSim. */
     public static void skipEvent(int dst, int event, CloudSimWrapper cloudsim) {
         Mockito.doNothing().when(cloudsim)

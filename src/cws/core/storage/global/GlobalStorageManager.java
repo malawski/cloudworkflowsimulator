@@ -115,6 +115,7 @@ public class GlobalStorageManager extends StorageManager {
         cacheManager.putFileToCache(write.getFile(), write.getJob());
         congestedParams.removeWrites(1);
         updateSpeedCongestion();
+        statistics.addActualBytesWritten(write.getFile().getSize());
     }
 
     /**
@@ -127,6 +128,7 @@ public class GlobalStorageManager extends StorageManager {
         cacheManager.putFileToCache(read.getFile(), read.getJob());
         congestedParams.removeReads(1);
         updateSpeedCongestion();
+        statistics.addActualBytesRead(read.getFile().getSize());
     }
 
     /**

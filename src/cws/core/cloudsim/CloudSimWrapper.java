@@ -50,6 +50,13 @@ public class CloudSimWrapper {
     }
 
     /**
+     * @see CloudSim#getEntity(String)
+     */
+    public Object getEntityByName(String name) {
+        return CloudSim.getEntity(name);
+    }
+
+    /**
      * @see CloudSim#send(int, int, double, int, Object)
      */
     public void send(int src, int dest, double delay, int tag, Object data) {

@@ -26,6 +26,7 @@ import cws.core.exception.WrongCommandLineArgsException;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
 import cws.core.storage.StorageManager;
+import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.VoidStorageManager;
 import cws.core.storage.cache.FIFOCacheManager;
 import cws.core.storage.cache.VMCacheManager;
@@ -261,7 +262,9 @@ public class TestRun {
             fileOut.println("application,distribution,seed,dags,scale,budget,"
                     + "deadline,algorithm,completed,exponential,linear,"
                     + "planning,simulation,scorebits,cost,jobfinish,dagfinish,"
-                    + "vmfinish,runtimeVariance,delay,failureRate,minBudget,maxBudget,minDeadline,maxDeadline,storageType");
+                    + "vmfinish,runtimeVariance,delay,failureRate,minBudget," + "maxBudget,minDeadline,maxDeadline,"
+                    + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
+                    + "actualBytesRead,actualBytesWritten,totalBytesTransferred");
 
             for (double budget = minBudget; budget < maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
@@ -283,14 +286,21 @@ public class TestRun {
                     double planningTime = a.getPlanningnWallTime() / 1.0e9;
                     double simulationTime = a.getSimulationWallTime() / 1.0e9;
 
-                    fileOut.printf(
-                            "%s,%s,%d,%d,%f,%f,%f,%s,%d,%.20f,%.20f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%s\n",
-                            application, distribution, seed, ensembleSize, scalingFactor, budget, deadline,
-                            a.getName(), a.numCompletedDAGs(), a.getExponentialScore(), a.getLinearScore(),
-                            planningTime, simulationTime, a.getScoreBitString(), a.getActualCost(),
-                            a.getActualJobFinishTime(), a.getActualDagFinishTime(), a.getActualVMFinishTime(),
+                    fileOut.printf("%s,%s,%d,%d,", application, distribution, seed, ensembleSize);
+                    fileOut.printf("%f,%f,%f,%s,", scalingFactor, budget, deadline, a.getName());
+                    fileOut.printf("%d,%.20f,%.20f,%f,", a.numCompletedDAGs(), a.getExponentialScore(),
+                            a.getLinearScore(), planningTime);
+                    fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, a.getScoreBitString(), a.getActualCost(),
+                            a.getActualJobFinishTime(), a.getActualDagFinishTime());
+                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,%f,", a.getActualVMFinishTime(),
                             VMFactory.getRuntimeVariance(), VMFactory.getDelay(), VMFactory.getFailureRate(),
-                            minBudget, maxBudget, minDeadline, maxDeadline, storageManagerType);
+                            minBudget, maxBudget, minDeadline, maxDeadline);
+
+                    StorageManagerStatistics stats = a.getStorageManager().getStorageManagerStatistics();
+                    fileOut.printf("%s,%d,%d,%d,%d,%d,%d\n", storageManagerType, stats.getTotalBytesToRead(),
+                            stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
+                            stats.getActualBytesRead(), stats.getAcutalBytesWritten(), stats.getActualBytesRead()
+                                    + stats.getAcutalBytesWritten());
                 }
             }
 

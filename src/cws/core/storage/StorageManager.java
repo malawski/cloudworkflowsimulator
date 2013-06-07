@@ -8,6 +8,7 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.exception.UnknownWorkflowEventException;
 
@@ -19,6 +20,9 @@ import cws.core.exception.UnknownWorkflowEventException;
  * back STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED and STORAGE_ALL_AFTER_TRANSFERS_COMPLETED events.
  */
 public abstract class StorageManager extends CWSSimEntity implements WorkflowEvent {
+    /** Statistics associated with this storage manager instance */
+    protected StorageManagerStatistics statistics = new StorageManagerStatistics();
+
     /**
      * Creates new object so that every StorageManager implementation will have the same name.
      */
@@ -45,6 +49,10 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
      */
     protected abstract void onAfterTaskCompleted(Job job);
 
+    public StorageManagerStatistics getStorageManagerStatistics() {
+        return this.statistics;
+    }
+
     /**
      * @see SimEntity#processEvent(SimEvent)
      */
@@ -52,10 +60,18 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
     public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
         case WorkflowEvent.STORAGE_BEFORE_TASK_START:
-            onBeforeTaskStart((Job) ev.getData());
+            Job job = (Job) ev.getData();
+            for (DAGFile file : job.getTask().getInputFiles()) {
+                statistics.addBytesToRead(file.getSize());
+            }
+            onBeforeTaskStart(job);
             break;
         case WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED:
-            onAfterTaskCompleted((Job) ev.getData());
+            Job jobAfter = (Job) ev.getData();
+            for (DAGFile file : jobAfter.getTask().getOutputFiles()) {
+                statistics.addBytesToWrite(file.getSize());
+            }
+            onAfterTaskCompleted(jobAfter);
             break;
         default:
             onUnknownSimEvent(ev);

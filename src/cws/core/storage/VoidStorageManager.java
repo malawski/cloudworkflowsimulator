@@ -1,6 +1,7 @@
 package cws.core.storage;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 
@@ -15,11 +16,17 @@ public class VoidStorageManager extends StorageManager {
 
     @Override
     public void onBeforeTaskStart(Job job) {
+        for (DAGFile file : job.getTask().getInputFiles()) {
+            statistics.addActualBytesRead(file.getSize());
+        }
         notifyThatBeforeTransfersCompleted(job);
     }
 
     @Override
     public void onAfterTaskCompleted(Job job) {
+        for (DAGFile file : job.getTask().getOutputFiles()) {
+            statistics.addActualBytesWritten(file.getSize());
+        }
         notifyThatAfterTransfersCompleted(job);
     }
 

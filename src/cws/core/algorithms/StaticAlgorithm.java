@@ -44,9 +44,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     /** Ensemble manager that submits DAGs */
     private EnsembleManager manager;
 
-    /** Storage manager handling transfer tasks */
-    private StorageManager storageManager;
-
     /** Cloud to provision VMs from */
     private Cloud cloud;
 
@@ -79,9 +76,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
             StorageManager storageManager) {
-        super(budget, deadline, dags);
+        super(budget, deadline, dags, storageManager);
         this.cloudsim = cloudsim;
-        this.storageManager = storageManager;
     }
 
     @Override

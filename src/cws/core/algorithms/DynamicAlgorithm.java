@@ -47,16 +47,13 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     protected long simulationStartWallTime;
     protected long simulationFinishWallTime;
 
-    private StorageManager storageManager;
-
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, double price, Scheduler scheduler,
             Provisioner provisioner, CloudSimWrapper cloudsim, StorageManager storageManager) {
-        super(budget, deadline, dags);
+        super(budget, deadline, dags, storageManager);
         this.price = price;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
         this.cloudsim = cloudsim;
-        this.storageManager = storageManager;
     }
 
     @Override
