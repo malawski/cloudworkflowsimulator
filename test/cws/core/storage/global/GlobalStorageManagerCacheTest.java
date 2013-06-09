@@ -91,6 +91,20 @@ public class GlobalStorageManagerCacheTest {
     }
 
     @Test
+    public void testGlobalStorageMangerUpdatesReadStatistics() {
+        Mockito.doNothing().when(cacheManager).putFileToCache(Matchers.eq(df), Matchers.eq(job));
+        Mockito.when(cacheManager.getFileFromCache(Matchers.eq(df), Matchers.eq(job))).thenReturn(true);
+
+        Mockito.when(task.getInputFiles()).thenReturn(files);
+        StorageManagerTest.skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
+        CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
+        CloudSim.startSimulation();
+
+        Assert.assertEquals(2442, storageManager.getStorageManagerStatistics().getTotalBytesToRead());
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getActualBytesRead());
+    }
+
+    @Test
     public void testStorageCachesOutputFiles() {
         Mockito.doNothing().when(cacheManager).putFileToCache(Matchers.eq(df), Matchers.eq(job));
 

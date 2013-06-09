@@ -9,10 +9,14 @@ public class StorageManagerStatistics {
     private long totalBytesToRead;
     /** Total bytes requested to write */
     private long totalBytesToWrite;
-    /** Actual bytes read */
+    /** Actual bytes read (may be lower than totalFilesToRead beacause of cache) */
     private long actualBytesRead;
-    /** Actual bytes written */
-    private long actualBytesWritten;
+    /** Total number of files requested to read */
+    private int totalFilesToRead;
+    /** Total number of files requested to write */
+    private int totalFilesToWrite;
+    /** Actual number of files read (may be lower than totalFilesToRead beacause of cache) */
+    private int actualFilesRead;
 
     public long getTotalBytesToRead() {
         return totalBytesToRead;
@@ -50,15 +54,39 @@ public class StorageManagerStatistics {
         this.actualBytesRead += num;
     }
 
-    public long getAcutalBytesWritten() {
-        return actualBytesWritten;
+    public int getTotalFilesToRead() {
+        return totalFilesToRead;
     }
 
-    public void setAcutalBytesWritten(long acutalBytesWritten) {
-        this.actualBytesWritten = acutalBytesWritten;
+    public void setTotalFilesToRead(int totalFilesToRead) {
+        this.totalFilesToRead = totalFilesToRead;
     }
 
-    public void addActualBytesWritten(long num) {
-        this.actualBytesWritten += num;
+    public void addTotalFilesToRead(int totalFilesToRead) {
+        this.totalFilesToRead += totalFilesToRead;
+    }
+
+    public int getTotalFilesToWrite() {
+        return totalFilesToWrite;
+    }
+
+    public void setTotalFilesToWrite(int totalFilesToWrite) {
+        this.totalFilesToWrite = totalFilesToWrite;
+    }
+
+    public void addTotalFilesToWrite(int totalFilesToWrite) {
+        this.totalFilesToWrite += totalFilesToWrite;
+    }
+
+    public int getActualFilesRead() {
+        return actualFilesRead;
+    }
+
+    public void setActualFilesRead(int actualFilesRead) {
+        this.actualFilesRead = actualFilesRead;
+    }
+
+    public void addActualFilesRead(int actualFilesRead) {
+        this.actualFilesRead += actualFilesRead;
     }
 }

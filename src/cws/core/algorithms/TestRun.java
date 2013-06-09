@@ -264,7 +264,9 @@ public class TestRun {
                     + "planning,simulation,scorebits,cost,jobfinish,dagfinish,"
                     + "vmfinish,runtimeVariance,delay,failureRate,minBudget," + "maxBudget,minDeadline,maxDeadline,"
                     + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
-                    + "actualBytesRead,actualBytesWritten,totalBytesTransferred");
+                    + "actualBytesRead,actualBytesTransferred,"
+                    + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
+                    + "actualFilesRead,actualFilesTransferred");
 
             for (double budget = minBudget; budget < maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
@@ -297,13 +299,15 @@ public class TestRun {
                             minBudget, maxBudget, minDeadline, maxDeadline);
 
                     StorageManagerStatistics stats = a.getStorageManager().getStorageManagerStatistics();
-                    fileOut.printf("%s,%d,%d,%d,%d,%d,%d\n", storageManagerType, stats.getTotalBytesToRead(),
+                    fileOut.printf("%s,%d,%d,%d,%d,%d,", storageManagerType, stats.getTotalBytesToRead(),
                             stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
-                            stats.getActualBytesRead(), stats.getAcutalBytesWritten(), stats.getActualBytesRead()
-                                    + stats.getAcutalBytesWritten());
+                            stats.getActualBytesRead(), stats.getActualBytesRead() + stats.getTotalBytesToWrite());
+
+                    fileOut.printf("%d,%d,%d,%d,%d\n", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
+                            stats.getTotalFilesToRead() + stats.getTotalFilesToWrite(), stats.getActualFilesRead(),
+                            stats.getActualFilesRead() + stats.getTotalFilesToWrite());
                 }
             }
-
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } finally {

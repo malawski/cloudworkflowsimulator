@@ -137,7 +137,12 @@ public abstract class StorageManagerTest {
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
         CloudSim.startSimulation();
         Assert.assertEquals(777, storageManager.getStorageManagerStatistics().getTotalBytesToWrite());
-        Assert.assertEquals(777, storageManager.getStorageManagerStatistics().getAcutalBytesWritten());
+        Assert.assertEquals(2, storageManager.getStorageManagerStatistics().getTotalFilesToWrite());
+
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getTotalBytesToRead());
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getActualBytesRead());
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getTotalFilesToRead());
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getActualFilesRead());
     }
 
     @Test
@@ -151,6 +156,11 @@ public abstract class StorageManagerTest {
         CloudSim.startSimulation();
         Assert.assertEquals(555, storageManager.getStorageManagerStatistics().getTotalBytesToRead());
         Assert.assertEquals(555, storageManager.getStorageManagerStatistics().getActualBytesRead());
+        Assert.assertEquals(2, storageManager.getStorageManagerStatistics().getTotalFilesToRead());
+        Assert.assertEquals(2, storageManager.getStorageManagerStatistics().getActualFilesRead());
+
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getTotalBytesToWrite());
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getTotalFilesToWrite());
     }
 
     /** Skips event sent to by cloudsim obj. The rest is forwarded to the underlying CloudSim. */

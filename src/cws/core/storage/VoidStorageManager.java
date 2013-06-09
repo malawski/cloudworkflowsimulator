@@ -19,14 +19,12 @@ public class VoidStorageManager extends StorageManager {
         for (DAGFile file : job.getTask().getInputFiles()) {
             statistics.addActualBytesRead(file.getSize());
         }
+        statistics.addActualFilesRead(job.getTask().getInputFiles().size());
         notifyThatBeforeTransfersCompleted(job);
     }
 
     @Override
     public void onAfterTaskCompleted(Job job) {
-        for (DAGFile file : job.getTask().getOutputFiles()) {
-            statistics.addActualBytesWritten(file.getSize());
-        }
         notifyThatAfterTransfersCompleted(job);
     }
 

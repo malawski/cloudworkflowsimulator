@@ -64,6 +64,7 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
             for (DAGFile file : job.getTask().getInputFiles()) {
                 statistics.addBytesToRead(file.getSize());
             }
+            statistics.addTotalFilesToRead(job.getTask().getInputFiles().size());
             onBeforeTaskStart(job);
             break;
         case WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED:
@@ -71,6 +72,7 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
             for (DAGFile file : jobAfter.getTask().getOutputFiles()) {
                 statistics.addBytesToWrite(file.getSize());
             }
+            statistics.addTotalFilesToWrite(jobAfter.getTask().getOutputFiles().size());
             onAfterTaskCompleted(jobAfter);
             break;
         default:
