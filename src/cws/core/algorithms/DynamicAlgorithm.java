@@ -142,7 +142,12 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     private void launchVMs(Cloud cloud, WorkflowEngine engine, int numVMs) {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numVMs; i++) {
-            VM vm = VMFactory.createVM(1000, 1, 1.0, price, cloudsim);
+            VMStaticParams vmStaticParams = new VMStaticParams();
+            vmStaticParams.setMips(1000);
+            vmStaticParams.setCores(1);
+            vmStaticParams.setPrice(price);
+
+            VM vm = VMFactory.createVM(1.0, vmStaticParams, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }

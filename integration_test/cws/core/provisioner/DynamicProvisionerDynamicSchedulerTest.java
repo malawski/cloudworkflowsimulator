@@ -53,7 +53,12 @@ public class DynamicProvisionerDynamicSchedulerTest {
 
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VM vm = new VM(1000, 1, 1.0, 1.0, cloudsim);
+            VMStaticParams vmStaticParams = new VMStaticParams();
+            vmStaticParams.setMips(1000);
+            vmStaticParams.setCores(1);
+            vmStaticParams.setPrice(1.0);
+
+            VM vm = new VM(1.0, vmStaticParams, cloudsim);
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);

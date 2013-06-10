@@ -7,7 +7,6 @@ import org.cloudbus.cloudsim.distributions.LognormalDistr;
 import org.junit.Before;
 import org.junit.Test;
 
-import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.experiment.VMFactory;
 
@@ -38,13 +37,18 @@ public class VMFactoryTest {
         VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
         VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        vmStaticParams.setMips(1000);
+        vmStaticParams.setCores(1);
+        vmStaticParams.setPrice(1.0);
+
         for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0, cloudsim);
+            VM vm = VMFactory.createVM(1.0, vmStaticParams, cloudsim);
             assertTrue(vm.getProvisioningDelay() > 0.0);
             System.out.println(vm.getProvisioningDelay());
         }
         for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(1000, 1, 1.0, 1.0, cloudsim);
+            VM vm = VMFactory.createVM(1.0, vmStaticParams, cloudsim);
             assertTrue(vm.getDeprovisioningDelay() > 0.0);
             System.out.println(vm.getDeprovisioningDelay());
         }

@@ -48,17 +48,14 @@ public class VM extends CWSSimEntity {
     /** How many seconds there are in one hour */
     public static final double SECONDS_PER_HOUR = 60 * 60;
 
+    /** VM parameters like cores number, price for hour **/
+    private VMStaticParams vmStaticParams;
+
     /** The SimEntity that owns this VM */
     private int owner;
 
     /** The Cloud that runs this VM */
     private int cloud;
-
-    /** The processing power of this VM */
-    private int mips;
-
-    /** The number of cores of this VM */
-    private int cores;
 
     /**
      * The number of bytes on internal disk that can be used as a cache
@@ -67,9 +64,11 @@ public class VM extends CWSSimEntity {
     private long cacheSize = VMFactory.DEFAULT_CACHE_SIZE;
 
     /** Network port for input data */
+    // TODO(mequrel): do we need that anymore?
     private Port inputPort;
 
     /** Network port for output data */
+    // TODO(mequrel): do we need that anymore?
     private Port outputPort;
 
     /** Current idle cores */
@@ -86,9 +85,6 @@ public class VM extends CWSSimEntity {
 
     /** Time that the VM was terminated */
     private double terminateTime;
-
-    /** Price per hour of usage */
-    private double price;
 
     /** Is this VM running? */
     private boolean isRunning;
@@ -108,18 +104,17 @@ public class VM extends CWSSimEntity {
     /** Varies the failure rate of tasks according to a specified distribution */
     private FailureModel failureModel = new FailureModel(0, 0.0);
 
-    public VM(int mips, int cores, double bandwidth, double price, CloudSimWrapper cloudsim) {
+    // TODO(mequrel): bandwidth - do we need that anymore?
+    public VM(double bandwidth, VMStaticParams vmStaticParams, CloudSimWrapper cloudsim) {
         super("VM" + (next_id++), cloudsim);
-        this.mips = mips;
-        this.cores = cores;
+        this.vmStaticParams = vmStaticParams;
         this.inputPort = new Port(bandwidth);
         this.outputPort = new Port(bandwidth);
         this.jobs = new LinkedList<Job>();
         this.runningJobs = new HashSet<Job>();
-        this.idleCores = cores;
+        this.idleCores = vmStaticParams.getCores();
         this.launchTime = -1.0;
         this.terminateTime = -1.0;
-        this.price = price;
         this.isRunning = false;
         this.cpuSecondsConsumed = 0.0;
     }
@@ -148,7 +143,7 @@ public class VM extends CWSSimEntity {
         double hours = getRuntime() / SECONDS_PER_HOUR;
         hours = Math.ceil(hours);
         // Log.printLine(CloudSim.clock() + " VM " + getId() + " cost " + hours * price);
-        return hours * price;
+        return hours * vmStaticParams.getPrice();
     }
 
     public boolean isRunning() {
@@ -161,7 +156,7 @@ public class VM extends CWSSimEntity {
 
     /** cpu_seconds / (runtime * cores) */
     public double getUtilization() {
-        double totalCPUSeconds = getRuntime() * cores;
+        double totalCPUSeconds = getRuntime() * vmStaticParams.getCores();
         return cpuSecondsConsumed / totalCPUSeconds;
     }
 
@@ -194,7 +189,7 @@ public class VM extends CWSSimEntity {
     private void launchVM() {
         // Reset dynamic state
         jobs.clear();
-        idleCores = cores;
+        idleCores = vmStaticParams.getCores();
         cpuSecondsConsumed = 0.0;
 
         // VM can now accept jobs
@@ -222,7 +217,7 @@ public class VM extends CWSSimEntity {
 
         // Reset dynamic state
         jobs.clear();
-        idleCores = cores;
+        idleCores = vmStaticParams.getCores();
     }
 
     private void jobSubmit(Job job) {
@@ -245,7 +240,7 @@ public class VM extends CWSSimEntity {
     private void allInputsTrasferred(Job job) {
         // Compute the duration of the job on this VM
         double size = job.getTask().getSize();
-        double predictedRuntime = size / mips;
+        double predictedRuntime = size / vmStaticParams.getMips();
 
         // Compute actual runtime
         double actualRuntime = this.runtimeDistribution.getActualRuntime(predictedRuntime);
@@ -361,14 +356,6 @@ public class VM extends CWSSimEntity {
         return this.outputPort;
     }
 
-    public int getMIPS() {
-        return this.mips;
-    }
-
-    public int getCores() {
-        return cores;
-    }
-
     public int getIdleCores() {
         return idleCores;
     }
@@ -397,12 +384,8 @@ public class VM extends CWSSimEntity {
         return terminateTime;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public double getPrice() {
-        return price;
+    public VMStaticParams getVmStaticParams() {
+        return vmStaticParams;
     }
 
     public RuntimeDistribution getRuntimeDistribution() {
@@ -427,5 +410,9 @@ public class VM extends CWSSimEntity {
 
     public void setCacheSize(long cacheSize) {
         this.cacheSize = cacheSize;
+    }
+
+    public void setVmStaticParams(VMStaticParams vmStaticParams) {
+        this.vmStaticParams = vmStaticParams;
     }
 }
