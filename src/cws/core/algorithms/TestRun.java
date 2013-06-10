@@ -8,13 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 
 import cws.core.cloudsim.CloudSimWrapper;
@@ -25,13 +19,7 @@ import cws.core.dag.Task;
 import cws.core.exception.WrongCommandLineArgsException;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
-import cws.core.storage.StorageManager;
 import cws.core.storage.StorageManagerStatistics;
-import cws.core.storage.VoidStorageManager;
-import cws.core.storage.cache.FIFOCacheManager;
-import cws.core.storage.cache.VMCacheManager;
-import cws.core.storage.cache.VoidCacheManager;
-import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
 
 public class TestRun {
@@ -185,22 +173,23 @@ public class TestRun {
             System.exit(1);
         }
 
-        StorageManager storageManager = null;
+        AlgorithmSimulationParams algorithmSimulationParams = new AlgorithmSimulationParams();
 
-        VMCacheManager cacheManager = null;
         if (storageCacheType.equals("fifo")) {
-            cacheManager = new FIFOCacheManager(cloudsim);
+            algorithmSimulationParams.setStorageCacheType(StorageCacheType.FIFO);
         } else if (storageCacheType.equals("void")) {
-            cacheManager = new VoidCacheManager(cloudsim);
+            algorithmSimulationParams.setStorageCacheType(StorageCacheType.VOID);
         } else {
             throw new WrongCommandLineArgsException("Wrong storage-cache:" + storageCacheType);
         }
 
         if (storageManagerType.equals("global")) {
             GlobalStorageParams params = GlobalStorageParams.readCliOptions(args);
-            storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
+
+            algorithmSimulationParams.setStorageParams(params);
+            algorithmSimulationParams.setStorageType(StorageType.GLOBAL);
         } else {
-            storageManager = new VoidStorageManager(cloudsim);
+            algorithmSimulationParams.setStorageType(StorageType.VOID);
         }
 
         // Echo the simulation parameters
@@ -212,7 +201,7 @@ public class TestRun {
         System.out.printf("scalingFactor = %f\n", scalingFactor);
         System.out.printf("algorithm = %s\n", algorithm);
         System.out.printf("seed = %d\n", seed);
-        // TODO(bryk): @mequrel: should storageManagerType be here? I believe so.
+        System.out.printf("storageManagerType = %s\n", storageManagerType);
         System.out.printf("storageCache = %s\n", storageCacheType);
 
         double minTime = Double.MAX_VALUE;
@@ -274,11 +263,11 @@ public class TestRun {
                     System.out.print(".");
                     Algorithm a = null;
                     if ("SPSS".equals(algorithm)) {
-                        a = new SPSS(budget, deadline, dags, alpha, cloudsim, storageManager);
+                        a = new SPSS(budget, deadline, dags, alpha, cloudsim, algorithmSimulationParams);
                     } else if ("DPDS".equals(algorithm)) {
-                        a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
+                        a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim, algorithmSimulationParams);
                     } else if ("WADPDS".equals(algorithm)) {
-                        a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, storageManager);
+                        a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, algorithmSimulationParams);
                     } else {
                         throw new WrongCommandLineArgsException("Unknown algorithm: " + algorithm);
                     }

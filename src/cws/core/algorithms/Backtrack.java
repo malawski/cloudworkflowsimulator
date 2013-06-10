@@ -8,15 +8,15 @@ import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.storage.VoidStorageManager;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
  */
 public class Backtrack extends StaticAlgorithm {
 
-    public Backtrack(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, cloudsim, new VoidStorageManager(cloudsim)); // TODO(mequrel): temporary hack
+    public Backtrack(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
+            AlgorithmSimulationParams simulationParams) {
+        super(budget, deadline, dags, cloudsim, simulationParams);
     }
 
     /**
@@ -97,8 +97,8 @@ public class Backtrack extends StaticAlgorithm {
         return best;
     }
 
-    boolean planDAG(DAG dag, Plan plan, HashMap<Task, Double> runtimes,
-            HashMap<Task, Double> deadlines, HashMap<Task, VMType> vmTypes) {
+    boolean planDAG(DAG dag, Plan plan, HashMap<Task, Double> runtimes, HashMap<Task, Double> deadlines,
+            HashMap<Task, VMType> vmTypes) {
 
         TopologicalOrder order = new TopologicalOrder(dag);
 

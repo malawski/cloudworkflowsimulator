@@ -4,28 +4,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import cws.core.Cloud;
-import cws.core.EnsembleManager;
-import cws.core.Provisioner;
-import cws.core.Scheduler;
-import cws.core.VM;
-import cws.core.VMListener;
-import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
+import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.DAGJobListener;
 import cws.core.experiment.VMFactory;
 import cws.core.jobs.Job;
+import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.jobs.SimpleJobFactory;
-import cws.core.jobs.Job.Result;
 import cws.core.log.WorkflowLog;
-import cws.core.storage.StorageManager;
-import cws.core.storage.VoidStorageManager;
-import cws.core.storage.cache.VMCacheManager;
-import cws.core.storage.global.GlobalStorageManager;
 
 public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMListener, JobListener {
 
@@ -33,8 +22,6 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
     private Scheduler scheduler;
     private Provisioner provisioner;
-
-    private CloudSimWrapper cloudsim;
 
     private List<DAG> completedDAGs = new LinkedList<DAG>();
 
@@ -48,12 +35,11 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     protected long simulationFinishWallTime;
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, double price, Scheduler scheduler,
-            Provisioner provisioner, CloudSimWrapper cloudsim, StorageManager storageManager) {
-        super(budget, deadline, dags, storageManager);
+            Provisioner provisioner, CloudSimWrapper cloudsim, AlgorithmSimulationParams simulationParams) {
+        super(budget, deadline, dags, simulationParams, cloudsim);
         this.price = price;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
-        this.cloudsim = cloudsim;
     }
 
     @Override
@@ -83,26 +69,27 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
     @Override
     public void simulate(String logname) {
-        // TODO(bryk): @mequrel you are re-initing cloudsim here, remember...
+        // re-initing cloudsim here, watch out...
         cloudsim.init();
 
-        if (storageManager instanceof GlobalStorageManager) {
-            // XXX(bryk): I can't believe I'm writing this code...
-            VMCacheManager cacheManager = ((GlobalStorageManager) storageManager).getCacheManager();
-            VMCacheManager clone = null;
-            try {
-                clone = cacheManager.getClass().getConstructor(CloudSimWrapper.class).newInstance(cloudsim);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            storageManager = new GlobalStorageManager(((GlobalStorageManager) storageManager).getParams(), clone,
-                    cloudsim);
-        } else {
-            storageManager = new VoidStorageManager(cloudsim);
-        }
+        initializeStorage();
 
-        // cloudsim.addEntity(storageManager);
+        SimulationEnvironment simulationEnvironment = prepareEnvironment();
 
+        simulationStartWallTime = System.nanoTime();
+
+        cloudsim.startSimulation();
+
+        simulationFinishWallTime = System.nanoTime();
+
+        printLogs(logname, simulationEnvironment);
+
+        setResults(simulationEnvironment.getEngine());
+
+        conductSanityChecks(simulationEnvironment.getNumVMs());
+    }
+
+    private SimulationEnvironment prepareEnvironment() {
         Cloud cloud = new Cloud(cloudsim);
         cloud.addVMListener(this);
         provisioner.setCloud(cloud);
@@ -114,10 +101,23 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         engine.addJobListener(this);
 
         scheduler.setWorkflowEngine(engine);
+        scheduler.setStorageManager(storageManager);
 
         EnsembleManager em = new EnsembleManager(getDAGs(), engine, cloudsim);
         em.addDAGJobListener(this);
 
+        WorkflowLog log = initializeLogger(cloud, engine, em);
+
+        int numVMs = determineVMsNumber();
+
+        printEstimations(numVMs);
+
+        launchVMs(cloud, engine, numVMs);
+
+        return new SimulationEnvironment(numVMs, log, engine);
+    }
+
+    private WorkflowLog initializeLogger(Cloud cloud, WorkflowEngine engine, EnsembleManager em) {
         WorkflowLog log = null;
         if (shouldGenerateLog()) {
             log = new WorkflowLog(cloudsim);
@@ -125,7 +125,10 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
             cloud.addVMListener(log);
             em.addDAGJobListener(log);
         }
+        return log;
+    }
 
+    private int determineVMsNumber() {
         // Calculate estimated number of VMs to consume budget evenly before deadline
         // ceiling is used to start more vms so that the budget is consumed just before deadline
         int numVMs = (int) Math.ceil(Math.floor(getBudget()) / Math.ceil((getDeadline() / (60 * 60))) / price);
@@ -133,23 +136,27 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         // Check if we can afford at least one VM
         if (getBudget() < price)
             numVMs = 0;
+        return numVMs;
+    }
 
-        cloudsim.log(" Estimated num of VMs " + numVMs);
-        cloudsim.log(" Total budget " + getBudget());
-
-        // Launch VMs
+    private void launchVMs(Cloud cloud, WorkflowEngine engine, int numVMs) {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numVMs; i++) {
             VM vm = VMFactory.createVM(1000, 1, 1.0, price, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
+    }
 
-        simulationStartWallTime = System.nanoTime();
+    private void printEstimations(int numVMs) {
+        cloudsim.log(" Estimated num of VMs " + numVMs);
+        cloudsim.log(" Total budget " + getBudget());
+    }
 
-        cloudsim.startSimulation();
-
-        simulationFinishWallTime = System.nanoTime();
+    private void printLogs(String logname, SimulationEnvironment environment) {
+        WorkflowEngine engine = environment.getEngine();
+        WorkflowLog log = environment.getLog();
+        int numVMs = environment.getNumVMs();
 
         if (shouldGenerateLog()) {
             log.printJobs(logname);
@@ -157,11 +164,11 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
             log.printDAGJobs();
         }
 
-        cloudsim.log(" Estimated num of VMs " + numVMs);
-        cloudsim.log(" Total budget " + getBudget());
+        printEstimations(numVMs);
         cloudsim.log(" Total cost " + engine.getCost());
+    }
 
-        // Set results
+    private void setResults(WorkflowEngine engine) {
         actualCost = engine.getCost();
 
         for (DAGJob dj : engine.getAllDags()) {
@@ -169,7 +176,9 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
                 completedDAGs.add(dj.getDAG());
             }
         }
+    }
 
+    private void conductSanityChecks(int numVMs) {
         if (actualDagFinishTime > getDeadline()) {
             System.err.println("WARNING: Exceeded deadline: " + actualDagFinishTime + ">" + getDeadline() + " budget: "
                     + getBudget() + " Estimated num of VMs " + numVMs);
@@ -229,5 +238,30 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         if (job.getResult() == Result.SUCCESS) {
             actualJobFinishTime = Math.max(actualJobFinishTime, job.getFinishTime());
         }
+    }
+
+    private class SimulationEnvironment {
+        private WorkflowEngine engine;
+        private WorkflowLog log;
+        private int numVMs;
+
+        public SimulationEnvironment(int numVMs, WorkflowLog log, WorkflowEngine engine) {
+            this.numVMs = numVMs;
+            this.log = log;
+            this.engine = engine;
+        }
+
+        public WorkflowEngine getEngine() {
+            return engine;
+        }
+
+        public WorkflowLog getLog() {
+            return log;
+        }
+
+        public int getNumVMs() {
+            return numVMs;
+        }
+
     }
 }
