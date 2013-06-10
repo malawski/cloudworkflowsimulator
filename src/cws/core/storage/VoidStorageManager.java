@@ -1,6 +1,7 @@
 package cws.core.storage;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 
@@ -11,6 +12,11 @@ import cws.core.jobs.Job;
 public class VoidStorageManager extends StorageManager {
     public VoidStorageManager(CloudSimWrapper cloudsim) {
         super(cloudsim);
+    }
+
+    @Override
+    public boolean isInCache(DAGFile file, Job job) {
+        return false;
     }
 
     @Override

@@ -204,6 +204,11 @@ public class GlobalStorageManager extends StorageManager {
         getCloudsim().sendToMyself(this, time, progressEvent, transfer);
     }
 
+    @Override
+    public boolean isInCache(DAGFile file, Job job) {
+        return getCacheManager().getFileFromCache(file, job);
+    }
+
     /**
      * Trivial transfer estimation based o read and write speeds. This seems good enough, but we might change the
      * implementation in the future

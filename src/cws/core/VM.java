@@ -10,10 +10,12 @@ import org.cloudbus.cloudsim.core.predicates.PredicateType;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
 import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
+import cws.core.storage.StorageManager;
 import cws.core.storage.cache.VMCacheManager;
 import cws.core.transfer.Port;
 
@@ -53,6 +55,8 @@ public class VM extends CWSSimEntity {
 
     /** VM parameters like cores number, price for hour **/
     private VMStaticParams vmStaticParams;
+
+    private StorageManager storageManager = ResourceLocator.getStorageManager();
 
     /** The SimEntity that owns this VM */
     private int owner;
@@ -107,9 +111,9 @@ public class VM extends CWSSimEntity {
     /** Varies the failure rate of tasks according to a specified distribution */
     private FailureModel failureModel = new FailureModel(0, 0.0);
 
-	private LinkedList<Job> transferQueue = new LinkedList<Job>();
+    private LinkedList<Job> transferQueue = new LinkedList<Job>();
 
-	private boolean isAnyTransferActive;
+    private boolean isAnyTransferActive;
 
     // TODO(mequrel): bandwidth - do we need that anymore?
     public VM(double bandwidth, VMStaticParams vmStaticParams, CloudSimWrapper cloudsim) {
@@ -193,17 +197,16 @@ public class VM extends CWSSimEntity {
         }
     }
 
+    private void allOutputsTransferred(Job job) {
+        isAnyTransferActive = false;
 
-	private void allOutputsTransferred(Job job) {
-		isAnyTransferActive = false;
-		
-		if(!transferQueue.isEmpty()) {
-			Job awaitedJob = transferQueue.poll();
-			jobStart(awaitedJob);
-		}
-	}
+        if (!transferQueue.isEmpty()) {
+            Job awaitedJob = transferQueue.poll();
+            jobStart(awaitedJob);
+        }
+    }
 
-	private void launchVM() {
+    private void launchVM() {
         // Reset dynamic state
         jobs.clear();
         idleCores = vmStaticParams.getCores();
@@ -255,8 +258,8 @@ public class VM extends CWSSimEntity {
     }
 
     private void allInputsTrasferred(Job job) {
-    	isAnyTransferActive = false;    	
-    	
+        isAnyTransferActive = false;
+
         // Compute the duration of the job on this VM
         double size = job.getTask().getSize();
         double predictedRuntime = size / vmStaticParams.getMips();
@@ -273,13 +276,12 @@ public class VM extends CWSSimEntity {
         } else {
             job.setResult(Job.Result.SUCCESS);
         }
-        
 
         getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
     }
 
-	private void finishJob(Job job) {
-		// remove from the running set
+    private void finishJob(Job job) {
+        // remove from the running set
         runningJobs.remove(job);
 
         // Complete the job
@@ -293,15 +295,13 @@ public class VM extends CWSSimEntity {
         idleCores++;
 
         getCloudsim().log(" Finished job " + job.getID() + " on VM " + job.getVM().getId());
-        
+
         // Tell the owner
         getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
 
         // We may be able to start more jobs now
         startJobs();
-	}
-
-    
+    }
 
     private void jobStart(Job job) {
         getCloudsim().log(" Starting job " + job.getID() + " on VM " + job.getVM().getId());
@@ -313,7 +313,7 @@ public class VM extends CWSSimEntity {
 
         // One core is now busy running the job
         idleCores--;
-        
+
         // Tell the owner
         getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_STARTED, job);
 
@@ -321,25 +321,24 @@ public class VM extends CWSSimEntity {
         getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
                 WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
 
-     
     }
 
     private void jobFinish(Job job) {
         // Sanity check
-    	
-    	//TODO(mequrel): commented out because it prevented storage too run. 
-    	// it is possible that it was due to some error
-    	
+
+        // TODO(mequrel): commented out because it prevented storage too run.
+        // it is possible that it was due to some error
+
         if (!isRunning) {
             // throw new RuntimeException("Cannot finish job: VM not running");
 
         }
 
         isAnyTransferActive = true;
-        
+
         getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
                 WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
-        
+
         finishJob(job);
     }
 
@@ -347,23 +346,38 @@ public class VM extends CWSSimEntity {
         // While there are still idle jobs and cores
         while (jobs.size() > 0 && idleCores > 0 && transferQueue.isEmpty()) {
             Job nextJobInQueue = jobs.poll();
-            
-            if(hasNoInputFiles(nextJobInQueue) || transferIsNotActive()) {
-            	jobStart(nextJobInQueue);
-            }
-            else {
-            	transferQueue.push(nextJobInQueue);
+
+            if (allInputsAlreadyOnVM(nextJobInQueue) || transferIsNotActive()) {
+                jobStart(nextJobInQueue);
+            } else {
+                transferQueue.push(nextJobInQueue);
             }
         }
     }
 
-	private boolean transferIsNotActive() {
-		return !isAnyTransferActive;
-	}
+    private boolean transferIsNotActive() {
+        return !isAnyTransferActive;
+    }
 
-	private boolean hasNoInputFiles(Job nextJobInQueue) {
-		return nextJobInQueue.getTask().getInputFiles().isEmpty();
-	}
+    private boolean allInputsAlreadyOnVM(Job job) {
+        return hasNoInputFiles(job) || allInputsInCache(job);
+    }
+
+    private boolean allInputsInCache(Job job) {
+        job.setVM(this);
+
+        for (DAGFile dagFile : job.getTask().getInputFiles()) {
+            if (!storageManager.isInCache(dagFile, job)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean hasNoInputFiles(Job nextJobInQueue) {
+        return nextJobInQueue.getTask().getInputFiles().isEmpty();
+    }
 
     public void setDeprovisioningDelay(double deprovisioningDelay) {
         this.deprovisioningDelay = deprovisioningDelay;

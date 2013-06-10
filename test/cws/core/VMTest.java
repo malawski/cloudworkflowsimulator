@@ -14,8 +14,10 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
+import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 import cws.core.storage.cache.FIFOCacheManager;
+import cws.core.storage.cache.VMCacheManager;
 import cws.core.storage.cache.VoidCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
@@ -116,7 +118,7 @@ public class VMTest {
         task1.setInputFiles(Collections.EMPTY_LIST);
         task1.setOutputFiles(Collections.EMPTY_LIST);
         j1.setTask(task1);
-        
+
         Job j2 = new Job(cloudsim);
         Task task2 = new Task("task_id2", "transformation", 1000);
         task2.setInputFiles(Collections.EMPTY_LIST);
@@ -156,7 +158,7 @@ public class VMTest {
         task1.setInputFiles(Collections.EMPTY_LIST);
         task1.setOutputFiles(Collections.EMPTY_LIST);
         j1.setTask(task1);
-        
+
         Job j2 = new Job(cloudsim);
         Task task2 = new Task("task_id2", "transformation", 1000);
         task2.setInputFiles(Collections.EMPTY_LIST);
@@ -194,9 +196,9 @@ public class VMTest {
         GlobalStorageParams params = new GlobalStorageParams();
         params.setReadSpeed(readSpeed);
         params.setWriteSpeed(writeSpeed);
-        
-        // TODO(bryk): that's ugly, I know
-        new GlobalStorageManager(params, new VoidCacheManager(cloudsim), cloudsim);
+
+        StorageManager storageManager = new GlobalStorageManager(params, new VoidCacheManager(cloudsim), cloudsim);
+        ResourceLocator.setStorageManager(storageManager);
 
         // first task
 
@@ -234,18 +236,19 @@ public class VMTest {
         VM vm = new VM(100, vmStaticParams, cloudsim);
 
         // prepare tasks
-        
+
         jobFirst.setVM(vm);
         jobSecond.setVM(vm);
-        
+
         // send tasks
-        
+
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { jobFirst, jobSecond });
 
         // expectations
-        double expectedFirstEnded = firstLength; 
-        double expectedSecondStarted = expectedFirstEnded  + outputFileSizeInBytes / writeSpeed;;
+        double expectedFirstEnded = firstLength;
+        double expectedSecondStarted = expectedFirstEnded + outputFileSizeInBytes / writeSpeed;
+        ;
         double expectedSecondEnded = expectedSecondStarted + secondLength + inputFileSizeInBytes / writeSpeed;
 
         // simulate
@@ -261,15 +264,15 @@ public class VMTest {
 
     @Test
     public void shouldStartNextTaskWithoutInputFilesImmediately() {
-    	double writeSpeed = 60;
+        double writeSpeed = 60;
         double readSpeed = 60;
 
         GlobalStorageParams params = new GlobalStorageParams();
         params.setReadSpeed(readSpeed);
         params.setWriteSpeed(writeSpeed);
 
-        // TODO(bryk): that's ugly, I know
-        new GlobalStorageManager(params, new VoidCacheManager(cloudsim), cloudsim);
+        StorageManager storageManager = new GlobalStorageManager(params, new VoidCacheManager(cloudsim), cloudsim);
+        ResourceLocator.setStorageManager(storageManager);
 
         // first task
 
@@ -303,17 +306,17 @@ public class VMTest {
         VM vm = new VM(100, vmStaticParams, cloudsim);
 
         // prepare tasks
-        
+
         jobFirst.setVM(vm);
         jobSecond.setVM(vm);
-        
+
         // send tasks
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { jobFirst, jobSecond });
 
         // expectations
-        double expectedFirstEnded = firstLength; 
+        double expectedFirstEnded = firstLength;
         double expectedSecondStarted = firstLength;
         double expectedSecondEnded = firstLength + secondLength;
 
@@ -330,15 +333,16 @@ public class VMTest {
 
     @Test
     public void shouldStartNextTaskWithCashedInputFilesImmediately() {
-    	double writeSpeed = 60;
+        double writeSpeed = 60;
         double readSpeed = 60;
 
         GlobalStorageParams params = new GlobalStorageParams();
         params.setReadSpeed(readSpeed);
         params.setWriteSpeed(writeSpeed);
 
-        // TODO(bryk): that's ugly, I know
-        new GlobalStorageManager(params, new FIFOCacheManager(cloudsim), cloudsim);
+        VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
+        StorageManager storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
+        ResourceLocator.setStorageManager(storageManager);
 
         // first task
 
@@ -371,11 +375,13 @@ public class VMTest {
 
         VM vm = new VM(100, vmStaticParams, cloudsim);
 
+        vm.setCacheSize(10000000000000L);
+
         // prepare tasks
-        
+
         jobFirst.setVM(vm);
         jobSecond.setVM(vm);
-        
+
         // send tasks
 
         VMDriver driver = new VMDriver(vm, cloudsim);

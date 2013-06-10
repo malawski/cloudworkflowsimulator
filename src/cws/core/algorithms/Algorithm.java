@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import cws.core.ResourceLocator;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.storage.StorageManager;
@@ -167,6 +168,8 @@ public abstract class Algorithm {
         } else {
             storageManager = new VoidStorageManager(getCloudsim());
         }
+
+        ResourceLocator.setStorageManager(storageManager);
     }
 
     /**

@@ -3,13 +3,14 @@ package cws.core.storage;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 
-import cws.core.jobs.Job;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.exception.UnknownWorkflowEventException;
+import cws.core.jobs.Job;
 
 /**
  * Abstract class for all storage managers. It should be subclassed and implemented.
@@ -25,6 +26,8 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
     public StorageManager(CloudSimWrapper cloudsim) {
         super("StorageManager", cloudsim);
     }
+
+    public abstract boolean isInCache(DAGFile file, Job job);
 
     /**
      * Estimates the sum of all transfers for the given job. Note that the estimations don't need to be 100% accurate.
