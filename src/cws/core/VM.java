@@ -16,7 +16,6 @@ import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
 import cws.core.storage.cache.VMCacheManager;
-import cws.core.transfer.Port;
 
 /**
  * A VM is a virtual machine that executes Jobs.
@@ -63,14 +62,6 @@ public class VM extends CWSSimEntity {
      */
     private long cacheSize = VMFactory.DEFAULT_CACHE_SIZE;
 
-    /** Network port for input data */
-    // TODO(mequrel): do we need that anymore?
-    private Port inputPort;
-
-    /** Network port for output data */
-    // TODO(mequrel): do we need that anymore?
-    private Port outputPort;
-
     /** Current idle cores */
     private int idleCores;
 
@@ -104,12 +95,9 @@ public class VM extends CWSSimEntity {
     /** Varies the failure rate of tasks according to a specified distribution */
     private FailureModel failureModel = new FailureModel(0, 0.0);
 
-    // TODO(mequrel): bandwidth - do we need that anymore?
-    public VM(double bandwidth, VMStaticParams vmStaticParams, CloudSimWrapper cloudsim) {
+    public VM(VMStaticParams vmStaticParams, CloudSimWrapper cloudsim) {
         super("VM" + (next_id++), cloudsim);
         this.vmStaticParams = vmStaticParams;
-        this.inputPort = new Port(bandwidth);
-        this.outputPort = new Port(bandwidth);
         this.jobs = new LinkedList<Job>();
         this.runningJobs = new HashSet<Job>();
         this.idleCores = vmStaticParams.getCores();
@@ -346,14 +334,6 @@ public class VM extends CWSSimEntity {
 
     public void setCloud(int cloud) {
         this.cloud = cloud;
-    }
-
-    public Port getInputPort() {
-        return this.inputPort;
-    }
-
-    public Port getOutputPort() {
-        return this.outputPort;
     }
 
     public int getIdleCores() {

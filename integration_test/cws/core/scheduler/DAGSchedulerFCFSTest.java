@@ -48,12 +48,9 @@ public class DAGSchedulerFCFSTest {
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMStaticParams vmStaticParams = new VMStaticParams();
-            vmStaticParams.setMips(1000);
-            vmStaticParams.setCores(1);
-            vmStaticParams.setPrice(1.0);
+            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
 
-            VM vm = new VM(1.0, vmStaticParams, cloudsim);
+            VM vm = new VM(vmStaticParams, cloudsim);
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
@@ -70,12 +67,9 @@ public class DAGSchedulerFCFSTest {
     public void testScheduleDag() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMStaticParams vmStaticParams = new VMStaticParams();
-            vmStaticParams.setMips(1000);
-            vmStaticParams.setCores(1);
-            vmStaticParams.setPrice(1.0);
+            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
 
-            VM vm = new VM(1.0, vmStaticParams, cloudsim);
+            VM vm = new VM(vmStaticParams, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
@@ -104,12 +98,9 @@ public class DAGSchedulerFCFSTest {
     public void testScheduleDag100() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMStaticParams vmStaticParams = new VMStaticParams();
-            vmStaticParams.setMips(1000);
-            vmStaticParams.setCores(1);
-            vmStaticParams.setPrice(1.0);
+            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
 
-            VM vm = new VM(1.0, vmStaticParams, cloudsim);
+            VM vm = new VM(vmStaticParams, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }

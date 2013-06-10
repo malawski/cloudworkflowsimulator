@@ -100,12 +100,9 @@ public class DAGDynamicSchedulerStorageAwareTest {
     }
 
     protected void launchVM() {
-        VMStaticParams vmStaticParams = new VMStaticParams();
-        vmStaticParams.setMips(1000);
-        vmStaticParams.setCores(1);
-        vmStaticParams.setPrice(1.0);
+        VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
 
-        VM vm = new VM(1.0, vmStaticParams, cloudsim);
+        VM vm = new VM(vmStaticParams, cloudsim);
         cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
     }
 

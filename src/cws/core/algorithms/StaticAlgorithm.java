@@ -172,7 +172,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             vmStaticParams.setMips(type.mips);
             vmStaticParams.setCores(1);
             vmStaticParams.setPrice(type.price);
-            VM vm = VMFactory.createVM(1, vmStaticParams, getCloudsim());
+            VM vm = VMFactory.createVM(vmStaticParams, getCloudsim());
 
             // Build task<->vm mappings
             LinkedList<Task> vmQueue = new LinkedList<Task>();

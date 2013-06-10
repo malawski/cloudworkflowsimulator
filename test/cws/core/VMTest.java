@@ -81,7 +81,7 @@ public class VMTest {
         vmStaticParams.setCores(1);
         vmStaticParams.setPrice(0.40);
 
-        VM vm = new VM(100, vmStaticParams, cloudsim);
+        VM vm = new VM(vmStaticParams, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j });
@@ -106,7 +106,7 @@ public class VMTest {
         vmStaticParams.setCores(1);
         vmStaticParams.setPrice(0.40);
 
-        VM vm = new VM(100, vmStaticParams, cloudsim);
+        VM vm = new VM(vmStaticParams, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });
@@ -137,7 +137,7 @@ public class VMTest {
         vmStaticParams.setCores(2);
         vmStaticParams.setPrice(0.40);
 
-        VM vm = new VM(100, vmStaticParams, cloudsim);
+        VM vm = new VM(vmStaticParams, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });

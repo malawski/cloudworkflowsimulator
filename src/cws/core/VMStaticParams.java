@@ -38,4 +38,16 @@ public class VMStaticParams implements Cloneable {
     public void setPrice(double price) {
         this.price = price;
     }
+
+    /**
+     * Extracted defaults appearing in many places throughout the project
+     * @return
+     */
+    public static VMStaticParams getDefaults() {
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        vmStaticParams.setMips(1000);
+        vmStaticParams.setCores(1);
+        vmStaticParams.setPrice(1.0);
+        return vmStaticParams;
+    }
 }

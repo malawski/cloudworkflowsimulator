@@ -153,12 +153,8 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
         if (!finishing_phase && utilization > UPPER_THRESHOLD
                 && numBusyVMs + numFreeVMS < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 
-            VMStaticParams vmStaticParams = new VMStaticParams();
-            vmStaticParams.setMips(1000);
-            vmStaticParams.setCores(1);
-            vmStaticParams.setPrice(1.0);
-
-            VM vm = new VM(1000, vmStaticParams, getCloudSim());
+            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
+            VM vm = new VM(vmStaticParams, getCloudSim());
 
             getCloudSim().log(" Starting VM: " + vm.getId());
             getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);

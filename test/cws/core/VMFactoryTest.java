@@ -37,18 +37,15 @@ public class VMFactoryTest {
         VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
         VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
-        VMStaticParams vmStaticParams = new VMStaticParams();
-        vmStaticParams.setMips(1000);
-        vmStaticParams.setCores(1);
-        vmStaticParams.setPrice(1.0);
+        VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
 
         for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(1.0, vmStaticParams, cloudsim);
+            VM vm = VMFactory.createVM(vmStaticParams, cloudsim);
             assertTrue(vm.getProvisioningDelay() > 0.0);
             System.out.println(vm.getProvisioningDelay());
         }
         for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(1.0, vmStaticParams, cloudsim);
+            VM vm = VMFactory.createVM(vmStaticParams, cloudsim);
             assertTrue(vm.getDeprovisioningDelay() > 0.0);
             System.out.println(vm.getDeprovisioningDelay());
         }
