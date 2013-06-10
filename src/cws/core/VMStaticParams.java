@@ -19,8 +19,9 @@ public class VMStaticParams implements Cloneable {
         return mips;
     }
 
-    public void setMips(int mips) {
+    public VMStaticParams setMips(int mips) {
         this.mips = mips;
+        return this;
     }
 
     public int getCores() {
@@ -31,12 +32,14 @@ public class VMStaticParams implements Cloneable {
         return price;
     }
 
-    public void setCores(int cores) {
+    public VMStaticParams setCores(int cores) {
         this.cores = cores;
+        return this;
     }
 
-    public void setPrice(double price) {
+    public VMStaticParams setPrice(double price) {
         this.price = price;
+        return this;
     }
 
     /**
@@ -44,10 +47,6 @@ public class VMStaticParams implements Cloneable {
      * @return
      */
     public static VMStaticParams getDefaults() {
-        VMStaticParams vmStaticParams = new VMStaticParams();
-        vmStaticParams.setMips(1000);
-        vmStaticParams.setCores(1);
-        vmStaticParams.setPrice(1.0);
-        return vmStaticParams;
+        return new VMStaticParams().setMips(1000).setCores(1).setPrice(1.0);
     }
 }
