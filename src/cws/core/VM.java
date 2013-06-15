@@ -268,7 +268,7 @@ public class VM extends CWSSimEntity {
     }
 
     private void jobStart(Job job) {
-        getCloudsim().log(" Starting job " + job.getID() + " on VM " + job.getVM().getId());
+        getCloudsim().log(" Starting job " + job.getTask().getId() + " on VM " + job.getVM().getId());
         // The job is now running
         job.setStartTime(getCloudsim().clock());
         job.setState(Job.State.RUNNING);
