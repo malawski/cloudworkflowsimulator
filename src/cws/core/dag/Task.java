@@ -23,10 +23,10 @@ public class Task {
     private List<Task> children = new ArrayList<Task>(5);
 
     /** Task's input files */
-    private List<DAGFile> inputFiles = null;
+    private List<DAGFile> inputFiles = new ArrayList<DAGFile>();
 
     /** Task's output files */
-    private List<DAGFile> outputFiles = null;
+    private List<DAGFile> outputFiles = new ArrayList<DAGFile>();
 
     public Task(String id, String transformation, double size) {
         this.id = id;
@@ -96,15 +96,15 @@ public class Task {
         return inputFiles;
     }
 
-    public void setInputFiles(List<DAGFile> inputs) {
-        this.inputFiles = inputs;
+    public void addInputFiles(List<DAGFile> inputs) {
+        this.inputFiles.addAll(inputs);
     }
 
     public List<DAGFile> getOutputFiles() {
         return outputFiles;
     }
 
-    public void setOutputFiles(List<DAGFile> outputs) {
-        this.outputFiles = outputs;
+    public void addOutputFiles(List<DAGFile> outputs) {
+        this.outputFiles.addAll(outputs);
     }
 }

@@ -8,10 +8,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import cws.core.*;
+import cws.core.Cloud;
+import cws.core.EnsembleManager;
+import cws.core.VM;
+import cws.core.VMStaticParams;
+import cws.core.WorkflowEngine;
+import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
@@ -25,7 +29,6 @@ import cws.core.scheduler.EnsembleDynamicScheduler;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 
-@Ignore
 public class DynamicProvisionerDynamicSchedulerTest {
     private String dagPath = "dags/";
 

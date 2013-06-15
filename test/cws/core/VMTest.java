@@ -10,11 +10,13 @@ import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
+import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 
 public class VMTest {
-
     private CloudSimWrapper cloudsim;
+    @SuppressWarnings("unused")
+    private StorageManager storageManager;
 
     private class VMDriver extends CWSSimEntity {
         private VM vm;
@@ -56,19 +58,13 @@ public class VMTest {
             }
             }
         }
-
-        @Override
-        public void shutdownEntity() {
-        }
     }
 
     @Before
     public void setUp() {
-        // TODO(_mequrel_): change to IoC in the future
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
-        // TODO(bryk): that's ugly, I know
-        new VoidStorageManager(cloudsim);
+        storageManager = new VoidStorageManager(cloudsim);
     }
 
     @Test

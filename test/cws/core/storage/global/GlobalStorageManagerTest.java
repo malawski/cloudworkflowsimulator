@@ -174,8 +174,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         long sz = 22222;
         files.add(new DAGFile("abc.txt", sz));
         Task t = new Task("xx", "xx", 222);
-        t.setInputFiles(files);
-        t.setOutputFiles(new ArrayList<DAGFile>());
+        t.addInputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
         Assert.assertEquals(sz / params.getReadSpeed(), time, 0.00001);
     }
@@ -186,8 +185,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         long sz = 22222;
         files.add(new DAGFile("abc.txt", sz));
         Task t = new Task("xx", "xx", 222);
-        t.setInputFiles(new ArrayList<DAGFile>());
-        t.setOutputFiles(files);
+        t.addOutputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
         Assert.assertEquals(sz / params.getWriteSpeed(), time, 0.00001);
     }

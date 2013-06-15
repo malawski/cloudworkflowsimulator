@@ -45,12 +45,12 @@ public class DAG {
 
     public void setInputs(String taskId, List<DAGFile> inputs) {
         Task t = getTaskById(taskId);
-        t.setInputFiles(inputs);
+        t.addInputFiles(inputs);
     }
 
     public void setOutputs(String task, List<DAGFile> outputs) {
         Task t = getTaskById(task);
-        t.setOutputFiles(outputs);
+        t.addOutputFiles(outputs);
     }
 
     public int numTasks() {

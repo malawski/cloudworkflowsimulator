@@ -110,8 +110,6 @@ public abstract class StorageManagerTest {
     @Test
     public void testTimeEstimationForEmptyTask() {
         Task t = new Task("xx", "xx", 222);
-        t.setInputFiles(new ArrayList<DAGFile>());
-        t.setOutputFiles(new ArrayList<DAGFile>());
         Assert.assertEquals(0.0, storageManager.getTransferTimeEstimation(t), 0.0);
     }
 
@@ -121,8 +119,8 @@ public abstract class StorageManagerTest {
         files.add(new DAGFile("abc.txt", 2442));
         files.add(new DAGFile("def.txt", 327879));
         Task t = new Task("xx", "xx", 222);
-        t.setInputFiles(files);
-        t.setOutputFiles(files);
+        t.addInputFiles(files);
+        t.addOutputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
         Assert.assertTrue(time >= 0.0); // just very simple assert, nothing more we can assume
     }
