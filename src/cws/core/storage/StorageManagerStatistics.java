@@ -22,20 +22,12 @@ public class StorageManagerStatistics {
         return totalBytesToRead;
     }
 
-    public void setTotalBytesToRead(long totalBytesRead) {
-        this.totalBytesToRead = totalBytesRead;
-    }
-
     public void addBytesToRead(long num) {
         this.totalBytesToRead += num;
     }
 
     public long getTotalBytesToWrite() {
         return totalBytesToWrite;
-    }
-
-    public void setTotalBytesToWrite(long totalBytesWritten) {
-        this.totalBytesToWrite = totalBytesWritten;
     }
 
     public void addBytesToWrite(long num) {
@@ -46,20 +38,12 @@ public class StorageManagerStatistics {
         return actualBytesRead;
     }
 
-    public void setActualBytesRead(long actualBytesRead) {
-        this.actualBytesRead = actualBytesRead;
-    }
-
     public void addActualBytesRead(long num) {
         this.actualBytesRead += num;
     }
 
     public int getTotalFilesToRead() {
         return totalFilesToRead;
-    }
-
-    public void setTotalFilesToRead(int totalFilesToRead) {
-        this.totalFilesToRead = totalFilesToRead;
     }
 
     public void addTotalFilesToRead(int totalFilesToRead) {
@@ -70,20 +54,12 @@ public class StorageManagerStatistics {
         return totalFilesToWrite;
     }
 
-    public void setTotalFilesToWrite(int totalFilesToWrite) {
-        this.totalFilesToWrite = totalFilesToWrite;
-    }
-
     public void addTotalFilesToWrite(int totalFilesToWrite) {
         this.totalFilesToWrite += totalFilesToWrite;
     }
 
     public int getActualFilesRead() {
         return actualFilesRead;
-    }
-
-    public void setActualFilesRead(int actualFilesRead) {
-        this.actualFilesRead = actualFilesRead;
     }
 
     public void addActualFilesRead(int actualFilesRead) {

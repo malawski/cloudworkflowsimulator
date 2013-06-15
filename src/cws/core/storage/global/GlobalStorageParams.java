@@ -4,7 +4,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import cws.core.exception.WrongCommandLineArgsException;
+import cws.core.exception.IllegalCWSArgumentException;
 
 /**
  * Class containing all parameters for {@link GlobalStorageManager}
@@ -63,7 +63,7 @@ public class GlobalStorageParams {
     public static GlobalStorageParams readCliOptions(CommandLine args) {
         GlobalStorageParams params = new GlobalStorageParams();
         if (!args.hasOption("storage-manager-read") || !args.hasOption("storage-manager-write")) {
-            throw new WrongCommandLineArgsException(
+            throw new IllegalCWSArgumentException(
                     "storage-manager-read and storage-manager-read required for GlobalStorageManager");
         }
         params.readSpeed = Double.parseDouble(args.getOptionValue("storage-manager-read"));
@@ -119,7 +119,7 @@ public class GlobalStorageParams {
 
     public void setNumReplicas(int numReplicas) {
         if (numReplicas < 1) {
-            throw new IllegalArgumentException("Num replicas must be >= 1");
+            throw new IllegalCWSArgumentException("Num replicas must be >= 1");
         }
         this.numReplicas = numReplicas;
     }

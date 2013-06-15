@@ -16,7 +16,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
 import cws.core.dag.Task;
-import cws.core.exception.WrongCommandLineArgsException;
+import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.experiment.DAGListGenerator;
 import cws.core.experiment.VMFactory;
 import cws.core.storage.StorageManagerStatistics;
@@ -27,7 +27,7 @@ public class TestRun {
     private static final String DEFAULT_SCALING_FACTOR = "1.0";
     private static final String DEFAULT_STORAGE_CACHE = "void";
 
-    private static Options buildOptions() {
+    public static Options buildOptions() {
         Options options = new Options();
 
         Option seed = new Option("s", "seed", true, "Random number generator seed, defaults to current time in milis");
@@ -103,7 +103,7 @@ public class TestRun {
         TestRun testRun = new TestRun();
         try {
             testRun.runTest(cmd);
-        } catch (WrongCommandLineArgsException e) {
+        } catch (IllegalCWSArgumentException e) {
             printUsage(options, e.getMessage());
         }
     }
@@ -180,7 +180,7 @@ public class TestRun {
         } else if (storageCacheType.equals("void")) {
             algorithmSimulationParams.setStorageCacheType(StorageCacheType.VOID);
         } else {
-            throw new WrongCommandLineArgsException("Wrong storage-cache:" + storageCacheType);
+            throw new IllegalCWSArgumentException("Wrong storage-cache:" + storageCacheType);
         }
 
         if (storageManagerType.equals("global")) {
@@ -269,7 +269,7 @@ public class TestRun {
                     } else if ("WADPDS".equals(algorithm)) {
                         a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, algorithmSimulationParams);
                     } else {
-                        throw new WrongCommandLineArgsException("Unknown algorithm: " + algorithm);
+                        throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithm);
                     }
 
                     a.simulate(algorithm);

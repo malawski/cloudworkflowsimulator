@@ -141,6 +141,22 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
     @Test
     public void testGlobalStorageComplexReadCongestion() {
+        params.setNumReplicas(1000);
+        long size = 2313244;
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        files.add(new DAGFile("abc.txt", size));
+        Mockito.when(task.getInputFiles()).thenReturn(files);
+        skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
+        CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
+        double time = CloudSim.startSimulation();
+
+        Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+                Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());
+        Assert.assertEquals(size / params.getReadSpeed() + params.getLatency(), time, 1.0);
+    }
+
+    @Test
+    public void testGlobalStorageSimpleReadCongestion() {
         long size = 100000;
         int numSmaller = 10;
         Job job2 = Mockito.mock(Job.class);
