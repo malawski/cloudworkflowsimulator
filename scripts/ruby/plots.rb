@@ -10,7 +10,7 @@ require 'set'
 
 
 class Tasks
-  attr_reader :xlo, :xhi, :y, :ids, :types, :distinct_types
+  attr_reader :task_start_time, :computation_start_time, :computation_finish_time, :task_finish_time, :y, :ids, :types, :distinct_types
   
   def read_tasks (filename)
     
@@ -20,19 +20,24 @@ class Tasks
     @distinct_types = Set.new
 
     str.each do |line|
-      data = line.scanf("%d %d %f %f")
-      jobs[data[0]] = [data [1], data[2], data[3]]
+      data = line.scanf("%d %d %f %f %f %f")
+      jobId = data[0]
+      jobs[jobId] = [data[1], data[2], data[3], data[4], data[5]]
     end
 
-    @xlo = Array.new
-    @xhi = Array.new
+    @task_start_time = Array.new
+    @computation_start_time = Array.new
+    @computation_finish_time = Array.new
+    @task_finish_time = Array.new
     @y = Array.new
     @ids = Array.new
     @types = Array.new
 
     jobs.keys.each do |id|
-      @xlo[id] = jobs[id][1]
-      @xhi[id] = jobs[id][2]
+      @task_start_time[id] = jobs[id][1]
+      @computation_start_time[id] = jobs[id][2]
+      @computation_finish_time[id] = jobs[id][3]
+      @task_finish_time[id] = jobs[id][4]
       @y[id] = jobs[id][0]
       @ids[id] = id
       #@types[id] = jobs[id][0]
@@ -85,8 +90,6 @@ def plot_schedule (filename)
 
   Gnuplot.open do |gp|
     Gnuplot::Plot.new( gp ) do |plot|
-
-      print "hello\n"
 
       #plot.title  "Schedule " + File.basename(filename)
       plot.xlabel "Time"
@@ -148,17 +151,28 @@ def plot_schedule (filename)
       #tasks.distinct_types.to_a.sort.each do |type|
         # puts type
         # here we do filtering based on type (e.g. priority)
-        dataset = Gnuplot::DataSet.new( [tasks.xlo, tasks.y, tasks.xlo, tasks.xhi] ) do |ds|
-          #ds.using = "($5==#{type} ? $1 : NaN):2:3:4:($2-0.4):($2+0.4)"
-          ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
-          ds.with = "boxxyerrorbars fs solid 0.55"
-          #ds.with = "boxxyerrorbars fillstyle solid 0.8 ls #{type+1} "
-          #ds.title = "Job type #{type}"
-        end
-        data.push(dataset)
-      #end
 
-                    
+
+
+      input_makespans = Gnuplot::DataSet.new( [tasks.task_start_time, tasks.y, tasks.task_start_time, tasks.computation_start_time] ) do |ds|
+        ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
+        ds.with = "boxxyerrorbars fs solid 0.55"
+      end
+
+      computational_makespans = Gnuplot::DataSet.new( [tasks.computation_start_time, tasks.y, tasks.computation_start_time, tasks.computation_finish_time] ) do |ds|
+        ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
+        ds.with = "boxxyerrorbars fs solid 0.55"
+      end
+
+      output_makespans = Gnuplot::DataSet.new( [tasks.computation_finish_time, tasks.y, tasks.computation_finish_time, tasks.task_finish_time] ) do |ds|
+        ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
+        ds.with = "boxxyerrorbars fs solid 0.55"
+      end
+
+      data.push(input_makespans)
+      data.push(computational_makespans)
+      data.push(output_makespans)
+
       plot.data = data
       
     end
