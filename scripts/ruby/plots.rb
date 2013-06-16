@@ -3,17 +3,20 @@ require 'rubygems'
 require 'gnuplot'
 require 'set'
 
-
 # Plot Gantt charts from CloudSim log files using Gnuplot
-# 
-# Author: Maciej Malawski
-
+#
+# Script needs input in format [jobId, VM, inputsStartTime, computationalTaskStartTime, computationalTaskEndTime, outputsEndTime]:
+#
+# Example:
+#    00007 12 31.6 32.5 38.9 40.9
+#    00017 4 29.3 30.1 32.8 38.9
+#
+# This format is consistent with output of script prepare_data_for_gantt.py which converts cloudsim log to desired input format
 
 class Tasks
-  attr_reader :task_start_time, :computation_start_time, :computation_finish_time, :task_finish_time, :y, :ids, :types, :distinct_types
+  attr_reader :task_start_time, :computation_start_time, :computation_finish_time, :task_finish_time, :vm, :ids, :types, :distinct_types
   
   def read_tasks (filename)
-    
     str = `cat #{filename}.txt`
 
     jobs = Hash.new
@@ -29,7 +32,7 @@ class Tasks
     @computation_start_time = Array.new
     @computation_finish_time = Array.new
     @task_finish_time = Array.new
-    @y = Array.new
+    @vm = Array.new
     @ids = Array.new
     @types = Array.new
 
@@ -38,60 +41,28 @@ class Tasks
       @computation_start_time[id] = jobs[id][2]
       @computation_finish_time[id] = jobs[id][3]
       @task_finish_time[id] = jobs[id][4]
-      @y[id] = jobs[id][0]
+      @vm[id] = jobs[id][0]
       @ids[id] = id
       #@types[id] = jobs[id][0]
       #@distinct_types.add(jobs[id][0])
     end
   end
-  
-  
 end
 
-
-def read_array (filter)
-  str = `#{filter}`
-
-  cols = Array.new
-
-  str.each do |line|
-    row = line.split
-    if cols[0]==nil
-      # create array of columns
-      for i in 0..row.size-1
-        cols[i]=Array.new
-      end
-    end
-    for i in 0..row.size-1
-        cols[i].push row[i]
-    end
+def createGanttSeries (startsList, finishesList, rows)
+  return Gnuplot::DataSet.new( [startsList, rows, startsList, finishesList] ) do |ds|
+    ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
+    ds.with = "boxxyerrorbars fs solid 0.55"
   end
-  return cols
 end
-  
-
 
 def plot_schedule (filename)
-
   tasks = Tasks.new
   tasks.read_tasks(filename)
-  
-  # change this to plot VMs
-  # vms = read_array("cat #{filename}-vms.txt | grep -e '[0-9]'  ")
-  vms = {}
-  
-  ymax = vms.length + 0.8
-  
-  #inputs = read_array("cat #{filename}-inputs-transfer.txt | grep -e '[0-9]'  ")
-
-  #outputs = read_array("cat #{filename}-outputs-transfer.txt | grep -e '[0-9]'  ")
-    
-
 
   Gnuplot.open do |gp|
     Gnuplot::Plot.new( gp ) do |plot|
-
-      #plot.title  "Schedule " + File.basename(filename)
+     #plot.title  "Schedule " + File.basename(filename)
       plot.xlabel "Time"
       plot.ylabel "VM"
       #plot.xtics 3600
@@ -99,8 +70,6 @@ def plot_schedule (filename)
       #plot.yrange "[-0.8:#{ymax}]"
       #plot.terminal 'pdfcairo size 5,1.5 font "arial,8" linewidth 1'
       #plot.terminal 'pdf size 11,8.5 font "arial,6" linewidth 1'
-      #plot.output filename + ".pdf"
-      #puts "Saving plot to file: " + filename + ".pdf"
       #plot.set "key right outside"
       plot.set "key off"
       #plot.noytics
@@ -118,10 +87,19 @@ def plot_schedule (filename)
       plot.set "style line 10 lc rgb 'green' lt 1 lw 1"
       plot.set "style fill border lc rgb 'black'"
       plot.terminal "png size 1024,768"
-      #plot.output 'output/' + dag + deadline + ".png"
       plot.output filename + ".png"
 
       data = Array.new
+
+      input_makespans = createGanttSeries(tasks.task_start_time, tasks.computation_start_time, tasks.vm)
+      computational_makespans = createGanttSeries(tasks.computation_start_time, tasks.computation_finish_time, tasks.vm)
+      output_makespans = createGanttSeries(tasks.computation_finish_time, tasks.task_finish_time, tasks.vm)
+
+      data.push(input_makespans)
+      data.push(computational_makespans)
+      data.push(output_makespans)
+
+      plot.data = data
 
       #vmset = Gnuplot::DataSet.new( vms ) do |ds|
         #ds.using = "2:1:2:3:($1-0.5):($1+0.5)"
@@ -146,37 +124,6 @@ def plot_schedule (filename)
       #end
       
       #data.push(outputset) if outputs.size > 0
-      
-            
-      #tasks.distinct_types.to_a.sort.each do |type|
-        # puts type
-        # here we do filtering based on type (e.g. priority)
-
-
-
-      input_makespans = Gnuplot::DataSet.new( [tasks.task_start_time, tasks.y, tasks.task_start_time, tasks.computation_start_time] ) do |ds|
-        ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
-        ds.with = "boxxyerrorbars fs solid 0.55"
-      end
-
-      computational_makespans = Gnuplot::DataSet.new( [tasks.computation_start_time, tasks.y, tasks.computation_start_time, tasks.computation_finish_time] ) do |ds|
-        ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
-        ds.with = "boxxyerrorbars fs solid 0.55"
-      end
-
-      output_makespans = Gnuplot::DataSet.new( [tasks.computation_finish_time, tasks.y, tasks.computation_finish_time, tasks.task_finish_time] ) do |ds|
-        ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
-        ds.with = "boxxyerrorbars fs solid 0.55"
-      end
-
-      data.push(input_makespans)
-      data.push(computational_makespans)
-      data.push(output_makespans)
-
-      plot.data = data
-      
     end
-
   end
-
 end
