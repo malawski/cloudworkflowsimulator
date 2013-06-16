@@ -243,6 +243,8 @@ public class VM extends CWSSimEntity {
             job.setResult(Job.Result.SUCCESS);
         }
 
+        getCloudsim().log(
+                "Starting computational part of job " + job.getTask().getId() + " on VM " + job.getVM().getId());
         getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
     }
 
@@ -291,6 +293,9 @@ public class VM extends CWSSimEntity {
             // throw new RuntimeException("Cannot finish job: VM not running");
 
         }
+
+        getCloudsim().log(
+                "Computational part of job " + job.getTask().getId() + " on VM " + job.getVM().getId() + " finished");
 
         getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
                 WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
