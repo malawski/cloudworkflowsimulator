@@ -14,14 +14,14 @@ class Tasks
   
   def read_tasks (filename)
     
-    str = `cat #{filename}.txt | grep SUCCESS`
+    str = `cat #{filename}.txt`
 
     jobs = Hash.new
     @distinct_types = Set.new
 
     str.each do |line|
-      data = line.scanf(" %d   SUCCESS  %d %d %f %f %f")
-      jobs[data[0]] = [data [1], data[2], data[4], data[5]]
+      data = line.scanf("%d %d %f %f")
+      jobs[data[0]] = [data [1], data[2], data[3]]
     end
 
     @xlo = Array.new
@@ -31,12 +31,12 @@ class Tasks
     @types = Array.new
 
     jobs.keys.each do |id|
-      @xlo[id] = jobs[id][2]
-      @xhi[id] = jobs[id][3]
-      @y[id] = jobs[id][1]
+      @xlo[id] = jobs[id][1]
+      @xhi[id] = jobs[id][2]
+      @y[id] = jobs[id][0]
       @ids[id] = id
-      @types[id] = jobs[id][0]
-      @distinct_types.add(jobs[id][0])
+      #@types[id] = jobs[id][0]
+      #@distinct_types.add(jobs[id][0])
     end
   end
   
@@ -77,29 +77,31 @@ def plot_schedule (filename)
   
   ymax = vms.length + 0.8
   
-  inputs = read_array("cat #{filename}-inputs-transfer.txt | grep -e '[0-9]'  ")
+  #inputs = read_array("cat #{filename}-inputs-transfer.txt | grep -e '[0-9]'  ")
 
-  outputs = read_array("cat #{filename}-outputs-transfer.txt | grep -e '[0-9]'  ")
+  #outputs = read_array("cat #{filename}-outputs-transfer.txt | grep -e '[0-9]'  ")
     
-  
+
 
   Gnuplot.open do |gp|
     Gnuplot::Plot.new( gp ) do |plot|
+
+      print "hello\n"
 
       #plot.title  "Schedule " + File.basename(filename)
       plot.xlabel "Time"
       plot.ylabel "VM"
       #plot.xtics 3600
-      #plot.ytics 50
+      plot.ytics 1
       #plot.yrange "[-0.8:#{ymax}]"
-      plot.terminal 'pdfcairo size 5,1.5 font "arial,8" linewidth 1'
+      #plot.terminal 'pdfcairo size 5,1.5 font "arial,8" linewidth 1'
       #plot.terminal 'pdf size 11,8.5 font "arial,6" linewidth 1'
-      plot.output filename + ".pdf"
+      #plot.output filename + ".pdf"
       #puts "Saving plot to file: " + filename + ".pdf"
       #plot.set "key right outside"
       plot.set "key off"
-      plot.noytics
-      plot.noxtics
+      #plot.noytics
+      #plot.noxtics
       #plot.set "grid"
       plot.set "style line 1 lc rgb 'grey10' lt 1 lw 1"
       plot.set "style line 2 lc rgb 'brown' lt 1 lw 1"
@@ -112,48 +114,49 @@ def plot_schedule (filename)
       plot.set "style line 9 lc rgb 'blue' lt 1 lw 1"
       plot.set "style line 10 lc rgb 'green' lt 1 lw 1"
       plot.set "style fill border lc rgb 'black'"
-      #plot.terminal "png size 1024,768"
+      plot.terminal "png size 1024,768"
       #plot.output 'output/' + dag + deadline + ".png"
-      #plot.output filename + ".png"
+      plot.output filename + ".png"
 
       data = Array.new
 
-      vmset = Gnuplot::DataSet.new( vms ) do |ds|
-        ds.using = "2:1:2:3:($1-0.5):($1+0.5)"
-        ds.with = "boxxyerrorbars fs solid 0.55 noborder"
-        ds.title = 'VMs'
-      end
+      #vmset = Gnuplot::DataSet.new( vms ) do |ds|
+        #ds.using = "2:1:2:3:($1-0.5):($1+0.5)"
+        #ds.with = "boxxyerrorbars fs solid 0.55 noborder"
+        #ds.title = 'VMs'
+      #end
       
-      data.push(vmset) if vms.size > 0
+      #data.push(vmset) if vms.size > 0
       
-      inputset = Gnuplot::DataSet.new( inputs ) do |ds|
-        ds.using = "2:1:2:3:($1-0.3):($1+0.3)"
-        ds.with = "boxxyerrorbars fs solid 0.55 "
-        ds.title = 'Inputs'
-      end
+      #inputset = Gnuplot::DataSet.new( inputs ) do |ds|
+      #  ds.using = "2:1:2:3:($1-0.3):($1+0.3)"
+      #  ds.with = "boxxyerrorbars fs solid 0.55 "
+      #  ds.title = 'Inputs'
+      #end
       
-      data.push(inputset) if inputs.size > 0
+      #data.push(inputset) if inputs.size > 0
 
-      outputset = Gnuplot::DataSet.new( outputs ) do |ds|
-        ds.using = "2:1:2:3:($1-0.3):($1+0.3)"
-        ds.with = "boxxyerrorbars fs solid 0.55 "
-        ds.title = 'Outputs'
-      end
+      #outputset = Gnuplot::DataSet.new( outputs ) do |ds|
+      #  ds.using = "2:1:2:3:($1-0.3):($1+0.3)"
+      #  ds.with = "boxxyerrorbars fs solid 0.55 "
+      #  ds.title = 'Outputs'
+      #end
       
-      data.push(outputset) if outputs.size > 0
+      #data.push(outputset) if outputs.size > 0
       
             
-      tasks.distinct_types.to_a.sort.each do |type|
+      #tasks.distinct_types.to_a.sort.each do |type|
         # puts type
         # here we do filtering based on type (e.g. priority)
-        dataset = Gnuplot::DataSet.new( [tasks.xlo, tasks.y, tasks.xlo, tasks.xhi, tasks.types] ) do |ds|
-          ds.using = "($5==#{type} ? $1 : NaN):2:3:4:($2-0.4):($2+0.4)"
-          #ds.with = "boxxyerrorbars fs solid 0.55"
-          ds.with = "boxxyerrorbars fillstyle solid 0.8 ls #{type+1} "
-          ds.title = "Job type #{type}"
+        dataset = Gnuplot::DataSet.new( [tasks.xlo, tasks.y, tasks.xlo, tasks.xhi] ) do |ds|
+          #ds.using = "($5==#{type} ? $1 : NaN):2:3:4:($2-0.4):($2+0.4)"
+          ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
+          ds.with = "boxxyerrorbars fs solid 0.55"
+          #ds.with = "boxxyerrorbars fillstyle solid 0.8 ls #{type+1} "
+          #ds.title = "Job type #{type}"
         end
         data.push(dataset)
-      end
+      #end
 
                     
       plot.data = data

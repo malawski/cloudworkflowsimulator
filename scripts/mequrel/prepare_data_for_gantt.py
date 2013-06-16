@@ -15,8 +15,8 @@ Input format:
 
 Output format [jobId, VM, startTime, endTime]:
 
-ID00007 12 32.587238909999996 38.587238909999996
-ID00017 4 36.587238909999996 39.587238909999996
+00007 12 32.587238909999996 38.587238909999996
+00017 4 36.587238909999996 39.587238909999996
 
 """
 
@@ -37,8 +37,8 @@ def main():
     printTasks();
 
 
-startedTaskPattern = r"\d+.\d+ \((\d+.\d+)\)\s+Starting job (\w+) on VM (\d+)"
-finishedTaskPattern = r"\d+.\d+ \((\d+.\d+)\)\s+Job (\w+) finished on VM (\d+)"
+startedTaskPattern = r"\d+.\d+ \((\d+.\d+)\)\s+Starting job ID(\d+) on VM (\d+)"
+finishedTaskPattern = r"\d+.\d+ \((\d+.\d+)\)\s+Job ID(\d+) finished on VM (\d+)"
 
 tasks = {}
 
