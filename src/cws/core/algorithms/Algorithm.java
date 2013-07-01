@@ -153,25 +153,22 @@ public abstract class Algorithm {
         return b.toString();
     }
 
-    protected void initializeStorage() {
-
+    public static StorageManager initializeStorage(AlgorithmSimulationParams simulationParams, CloudSimWrapper cloudsim) {
         VMCacheManager cacheManager;
         if (simulationParams.getStorageCacheType() == StorageCacheType.FIFO) {
-            cacheManager = new FIFOCacheManager(getCloudsim());
+            cacheManager = new FIFOCacheManager(cloudsim);
         } else {
-            cacheManager = new VoidCacheManager(getCloudsim());
+            cacheManager = new VoidCacheManager(cloudsim);
         }
-
+        StorageManager storageManager;
         if (simulationParams.getStorageType() == StorageType.GLOBAL) {
-            storageManager = new GlobalStorageManager(simulationParams.getStorageParams(), cacheManager, getCloudsim());
+            storageManager = new GlobalStorageManager(simulationParams.getStorageParams(), cacheManager, cloudsim);
         } else {
-            storageManager = new VoidStorageManager(getCloudsim());
+            storageManager = new VoidStorageManager(cloudsim);
         }
+        return storageManager;
     }
 
-    /**
-     * @return the cloudsim
-     */
     protected CloudSimWrapper getCloudsim() {
         return cloudsim;
     }

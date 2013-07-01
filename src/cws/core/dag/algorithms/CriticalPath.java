@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cws.core.dag.Task;
+import cws.core.storage.StorageManager;
 
 /**
  * Compute longest path using topological order,
@@ -14,22 +15,17 @@ public class CriticalPath {
     private Map<Task, Double> eft;
     private Double length = null;
 
-    public CriticalPath(TopologicalOrder order) {
-        this(order, null);
+    public CriticalPath(TopologicalOrder order, StorageManager storageManager) {
+        this(order, null, storageManager);
     }
 
-    public CriticalPath(TopologicalOrder order, Map<Task, Double> runtimes) {
+    public CriticalPath(TopologicalOrder order, Map<Task, Double> runtimes, StorageManager storageManager) {
         this.eft = new HashMap<Task, Double>();
 
-        /*
-         * XXX By default use the task size as its runtime. This is not strictly
-         * correct because the size is in MI and the runtime depends on the VM
-         * type that the task runs on.
-         */
         if (runtimes == null) {
             runtimes = new HashMap<Task, Double>();
             for (Task task : order) {
-                runtimes.put(task, task.getSize());
+                runtimes.put(task, task.getPredictedRuntime(storageManager));
             }
         }
 
@@ -49,7 +45,7 @@ public class CriticalPath {
     /**
      * @return Earliest finish time of task
      */
-    public double eft(Task task) {
+    public double getEarliestFinishTime(Task task) {
         return eft.get(task);
     }
 
@@ -60,7 +56,7 @@ public class CriticalPath {
         if (length == null) { // Cache
             double len = 0.0;
             for (Task task : eft.keySet()) {
-                double eft = eft(task);
+                double eft = getEarliestFinishTime(task);
                 if (eft > len)
                     len = eft;
             }

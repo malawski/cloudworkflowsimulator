@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import cws.core.algorithms.VMType;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -70,7 +71,7 @@ public class VMTest {
     @Test
     public void testSingleJob() {
         Job j = new Job(cloudsim);
-        j.setTask(new Task("task_id", "transformation", 1000));
+        j.setTask(new Task("task_id", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -93,9 +94,9 @@ public class VMTest {
     @Test
     public void testTwoJobs() {
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id", "transformation", 1000));
+        j1.setTask(new Task("task_id", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000));
+        j2.setTask(new Task("task_id2", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -123,10 +124,10 @@ public class VMTest {
     @Test
     public void testMultiCoreVM() {
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id1", "transformation", 1000));
+        j1.setTask(new Task("task_id1", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
 
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000));
+        j2.setTask(new Task("task_id2", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);

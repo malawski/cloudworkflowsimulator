@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import cws.core.dag.exception.DAGFileNotFoundException;
+import cws.core.storage.StorageManager;
 
 /**
  * 
@@ -12,9 +13,6 @@ import cws.core.dag.exception.DAGFileNotFoundException;
 public class DAG {
     private HashMap<String, Long> files = new HashMap<String, Long>();
     private HashMap<String, Task> tasks = new HashMap<String, Task>();
-
-    public DAG() {
-    }
 
     public void addTask(Task t) {
         if (tasks.containsKey(t.getId())) {
@@ -41,6 +39,18 @@ public class DAG {
         }
         p.getChildren().add(c);
         c.getParents().add(p);
+    }
+
+    public double getRuntimeSum() {
+        return getRuntimeSum(null);
+    }
+
+    public double getRuntimeSum(StorageManager storageManager) {
+        double sum = 0.0;
+        for (String taskName : getTasks()) {
+            sum += getTaskById(taskName).getPredictedRuntime(storageManager);
+        }
+        return sum;
     }
 
     public void setInputs(String taskId, List<DAGFile> inputs) {

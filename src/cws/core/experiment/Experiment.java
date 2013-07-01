@@ -24,9 +24,7 @@ public class Experiment {
      * @param param experiment description
      * @return results
      */
-
     public ExperimentResult runExperiment(ExperimentDescription param) {
-
         long startTime = System.nanoTime();
 
         ExperimentResult result = new ExperimentResult();
@@ -83,7 +81,7 @@ public class Experiment {
 
         int finished = algorithm.numCompletedDAGs();
         for (DAG dag : algorithm.getCompletedDAGs()) {
-            sizes.add(sumRuntime(dag));
+            sizes.add(dag.getRuntimeSum(algorithm.getStorageManager()));
         }
         priorities = algorithm.completedDAGPriorities();
         result.setNumFinishedDAGs(finished);
@@ -94,17 +92,6 @@ public class Experiment {
         result.setScoreBitString(algorithm.getScoreBitString());
 
         return result;
-    }
-
-    /**
-     * @return The total runtime of all tasks in the workflow
-     */
-    public double sumRuntime(DAG dag) {
-        double sum = 0.0;
-        for (String taskName : dag.getTasks()) {
-            sum += dag.getTaskById(taskName).getSize();
-        }
-        return sum;
     }
 
     /**
@@ -121,7 +108,6 @@ public class Experiment {
      * @param max_scaling max autoscaling factor
      * @param runID id of this series
      */
-
     public static void generateSeries(String runDirectory, String group, String dagPath, String[] dags, double budget,
             double price, double N, double step, double start, double max_scaling, double alpha, double taskDilatation,
             double runtimeVariation, double delay, String distribution, int runID) {
@@ -143,9 +129,7 @@ public class Experiment {
                 String fileName = "input-" + param.getFileName() + ".properties";
                 param.storeProperties(runDirectory + File.separator + fileName);
             }
-
         }
-
     }
 
     /**
@@ -159,13 +143,9 @@ public class Experiment {
      * @param max_scaling max autoscaling factor
      * @param runID id of this series
      */
-
     public static void generateSeries(String runDirectory, String group, String dagPath, String dagName,
             int ensembleSize, String distribution, String algorithms[], double price, double max_scaling, double alpha,
             double taskDilatation, double runtimeVariation, double delay, int runID) {
-
-        // WARNING: These parameters are fixed in the algorithm! Don't change here only!
-        double mips = 1;
 
         new File(runDirectory).mkdir();
 
@@ -211,13 +191,14 @@ public class Experiment {
                 }
             }
 
-            DAGStats s = new DAGStats(dag, mips, price);
+            // TODO(bryk): introduce storage manager here
+            DAGStats stats = new DAGStats(dag, null);
 
-            minTime = Math.min(minTime, s.getCriticalPath());
-            minCost = Math.min(minCost, s.getMinCost());
+            minTime = Math.min(minTime, stats.getCriticalPath());
+            minCost = Math.min(minCost, stats.getMinCost());
 
-            maxTime += s.getCriticalPath();
-            maxCost += s.getMinCost();
+            maxTime += stats.getCriticalPath();
+            maxCost += stats.getMinCost();
         }
 
         int nbudgets = 10;
@@ -236,10 +217,8 @@ public class Experiment {
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
 
         // we add 0.00001 as epsilon to avoid rounding errors
-
         for (double budget = minBudget; budget <= maxBudget + 0.00001; budget += budgetStep) {
             for (double deadline = minDeadline; deadline <= maxDeadline + 0.00001; deadline += deadlineStep) {
-
                 for (String alg : algorithms) {
                     ExperimentDescription param = new ExperimentDescription(group, alg, runDirectory, dagPath,
                             dagNames, deadline, budget, price, max_scaling, alpha, taskDilatation, runtimeVariation,
@@ -249,7 +228,6 @@ public class Experiment {
                 }
             }
         }
-
     }
 
     /**
@@ -266,7 +244,6 @@ public class Experiment {
         String fileName = "result-" + param.getFileName() + "-result.txt";
 
         WorkflowLog.stringToFile(result.formatResult(), param.getRunDirectory() + File.separator + fileName);
-
     }
 
     /**

@@ -169,9 +169,9 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             // Create VM
             VMType type = r.vmtype;
             VMStaticParams vmStaticParams = new VMStaticParams();
-            vmStaticParams.setMips(type.mips);
+            vmStaticParams.setMips(type.getMips());
             vmStaticParams.setCores(1);
-            vmStaticParams.setPrice(type.price);
+            vmStaticParams.setPrice(type.getPrice());
             VM vm = VMFactory.createVM(vmStaticParams, getCloudsim());
 
             // Build task<->vm mappings
@@ -261,7 +261,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
          * as the total runtime of those tasks.
          */
         double[] shares = new double[numlevels];
-        CriticalPath path = new CriticalPath(order, runtimes);
+        CriticalPath path = new CriticalPath(order, runtimes, storageManager);
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
@@ -446,7 +446,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     public void simulate(String logname) {
         getCloudsim().init();
 
-        initializeStorage();
+        Algorithm.initializeStorage(simulationParams, cloudsim);
         WorkflowLog log = prepareEnvironment();
 
         planningStartWallTime = System.nanoTime();
@@ -504,6 +504,47 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             manager.addDAGJobListener(log);
         }
         return log;
+    }
+
+    /**
+     * TODO(bryk): comment
+     * @param dag
+     * @param vmTypes
+     * @param runtimes
+     * @return
+     * @throws NoFeasiblePlan
+     */
+    protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, VMType> vmTypes,
+            HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
+        TopologicalOrder order = new TopologicalOrder(dag);
+        double minCost = 0.0;
+        double totalRuntime = 0.0;
+        for (Task t : order) {
+            vmTypes.put(t, t.getVmType());
+
+            // The runtime is just the size of the task (MI) divided by the
+            // MIPS of the VM
+            double runtime = t.getPredictedRuntime(storageManager);
+            runtimes.put(t, runtime);
+
+            // Compute the minimum cost of running this workflow
+            minCost += (runtime / t.getVmType().getMips()) * t.getVmType().getPrice();
+            totalRuntime += runtime;
+        }
+
+        System.out.println(" Min Cost: " + minCost);
+        System.out.println(" Total Runtime: " + totalRuntime);
+
+        // Make sure a plan is feasible given the deadline and available VMs
+        // FIXME Later we will assign each task to its fastest VM type before this
+        CriticalPath path = new CriticalPath(order, runtimes, storageManager);
+        double criticalPath = path.getCriticalPathLength();
+        System.out.println(" Critical path: " + criticalPath);
+        if (criticalPath > getDeadline() + getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay()) {
+            throw new NoFeasiblePlan("Best critical path (" + criticalPath + ") " + "> deadline (" + getDeadline()
+                    + ")");
+        }
+        return order;
     }
 
     class Slot {
@@ -569,11 +610,11 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         }
 
         public double getCostWith(double start, double end) {
-            return getHoursWith(start, end) * vmtype.price;
+            return getHoursWith(start, end) * vmtype.getPrice();
         }
 
         public double getCost() {
-            return getHours() * vmtype.price;
+            return getHours() * vmtype.getPrice();
         }
 
         public double getUtilization() {

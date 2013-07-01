@@ -19,13 +19,13 @@ public class Wide extends Backtrack {
     public void plan() {
         // Estimate number of nodes we can use
         double hours = getDeadline() / (60 * 60);
-        double nodeHours = getBudget() / VMType.SMALL.price;
+        double nodeHours = getBudget() / VMType.DEFAULT_VM_TYPE.getPrice();
         int N = (int) Math.floor(nodeHours / hours);
 
         // Add them to the initial plan
         Plan plan = getPlan();
         for (int i = 0; i < N; i++) {
-            plan.resources.add(new Resource(VMType.SMALL));
+            plan.resources.add(new Resource(VMType.DEFAULT_VM_TYPE));
         }
 
         super.plan();

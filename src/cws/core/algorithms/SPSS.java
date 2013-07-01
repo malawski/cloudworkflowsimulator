@@ -1,11 +1,14 @@
 package cws.core.algorithms;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
-import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
 
 /**
@@ -27,39 +30,9 @@ public class SPSS extends StaticAlgorithm {
      */
     @Override
     Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
-        TopologicalOrder order = new TopologicalOrder(dag);
-
-        // Initial task assignment
         HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
-        double minCost = 0.0;
-        double totalRuntime = 0.0;
-        for (Task task : order) {
-
-            // Initially we assign each VM to the SMALL type
-            VMType vm = VMType.SMALL;
-            vmTypes.put(task, vm);
-
-            double runtime = estimateTaskMakespan(task);
-            runtimes.put(task, runtime);
-
-            // Compute the minimum cost of running this workflow
-            minCost += (runtime / (60 * 60)) * vm.price;
-            totalRuntime += runtime;
-        }
-
-        getCloudsim().log(" Min Cost: " + minCost);
-        getCloudsim().log(" Total Runtime: " + totalRuntime);
-
-        // Make sure a plan is feasible given the deadline and available VMs
-        // FIXME Later we will assign each task to its fastest VM type before this
-        CriticalPath path = new CriticalPath(order, runtimes);
-        double criticalPath = path.getCriticalPathLength();
-        getCloudsim().log(" Critical path: " + criticalPath);
-        if (criticalPath > getDeadline() + getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay()) {
-            throw new NoFeasiblePlan("Best critical path (" + criticalPath + ") " + "> deadline (" + getDeadline()
-                    + ")");
-        }
+        TopologicalOrder order = computeTopologicalOrder(dag, vmTypes, runtimes);
 
         /**
          * FIXME Later we will determine the best VM type for each task
@@ -290,13 +263,5 @@ public class SPSS extends StaticAlgorithm {
         }
 
         return plan;
-    }
-
-    /*
-     * The runtime is just the size of the task (MI) divided by the
-     * MIPS of the VM
-     */
-    private double estimateTaskMakespan(Task t) {
-        return t.getSize() + storageManager.getTransferTimeEstimation(t);
     }
 }

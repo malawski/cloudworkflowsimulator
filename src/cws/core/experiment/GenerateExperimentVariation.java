@@ -39,11 +39,8 @@ public class GenerateExperimentVariation {
         int numRunIDs = 10;
 
         for (String distribution : distributions) {
-
             for (runID = 0; runID < numRunIDs; runID++) {
-
                 for (double runtimeVariation : runtimeVariations) {
-
                     runDirectory = String.format("run-%03d-%s-v%2.2f-%s", runID, distribution, runtimeVariation, group);
 
                     dagPath = "../projects/pegasus/Montage/";
@@ -71,10 +68,7 @@ public class GenerateExperimentVariation {
                     Experiment.generateSeries(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
                             algorithms, price, maxScaling, alpha, taskDilatation, runtimeVariation, delay, runID);
                 }
-
             }
         }
-
     }
-
 }

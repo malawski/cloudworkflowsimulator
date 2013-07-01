@@ -17,6 +17,8 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.io.IOUtils;
 
+import cws.core.algorithms.VMType;
+
 /**
  * This class parses simulation DAGs from files in various formats.
  * 
@@ -77,7 +79,7 @@ public class DAGParser {
                     String id = rec[1];
                     String xform = rec[2];
                     double size = Double.parseDouble(rec[3]);
-                    dag.addTask(new Task(id, xform, size));
+                    dag.addTask(new Task(id, xform, size, VMType.DEFAULT_VM_TYPE));
                 } else if ("FILE".equalsIgnoreCase(type)) {
                     if (rec.length != 3) {
                         throw new RuntimeException("Invalid FILE record: " + line);
@@ -200,7 +202,7 @@ public class DAGParser {
                     String transformation = String.format("%s::%s:%s", ns, name, version);
 
                     // Add the task to the dag
-                    dag.addTask(new Task(id, transformation, runtime));
+                    dag.addTask(new Task(id, transformation, runtime, VMType.DEFAULT_VM_TYPE));
 
                     xmlReader.next(); // to first <uses> or </job>
 

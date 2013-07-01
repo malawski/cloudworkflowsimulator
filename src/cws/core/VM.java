@@ -290,8 +290,7 @@ public class VM extends CWSSimEntity {
     private void jobFinish(Job job) {
         // Sanity check
         if (!isRunning) {
-            // throw new RuntimeException("Cannot finish job: VM not running");
-
+            throw new RuntimeException("Cannot finish job: VM not running");
         }
 
         getCloudsim().log(

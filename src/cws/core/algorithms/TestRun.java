@@ -8,7 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 
 import cws.core.cloudsim.CloudSimWrapper;
@@ -113,10 +119,6 @@ public class TestRun {
         double alpha = 0.7;
         double maxScaling = 1.0;
 
-        // WARNING: These parameters are fixed in the algorithm! Don't change here only!
-        double mips = 1;
-        double price = 1;
-
         // Arguments with no defaults
         String algorithm = args.getOptionValue("algorithm"); // "SPSS";
         String application = args.getOptionValue("application"); // "SIPHT";
@@ -173,23 +175,22 @@ public class TestRun {
             System.exit(1);
         }
 
-        AlgorithmSimulationParams algorithmSimulationParams = new AlgorithmSimulationParams();
+        AlgorithmSimulationParams simulationParams = new AlgorithmSimulationParams();
 
         if (storageCacheType.equals("fifo")) {
-            algorithmSimulationParams.setStorageCacheType(StorageCacheType.FIFO);
+            simulationParams.setStorageCacheType(StorageCacheType.FIFO);
         } else if (storageCacheType.equals("void")) {
-            algorithmSimulationParams.setStorageCacheType(StorageCacheType.VOID);
+            simulationParams.setStorageCacheType(StorageCacheType.VOID);
         } else {
             throw new IllegalCWSArgumentException("Wrong storage-cache:" + storageCacheType);
         }
 
         if (storageManagerType.equals("global")) {
             GlobalStorageParams params = GlobalStorageParams.readCliOptions(args);
-
-            algorithmSimulationParams.setStorageParams(params);
-            algorithmSimulationParams.setStorageType(StorageType.GLOBAL);
+            simulationParams.setStorageParams(params);
+            simulationParams.setStorageType(StorageType.GLOBAL);
         } else {
-            algorithmSimulationParams.setStorageType(StorageType.VOID);
+            simulationParams.setStorageType(StorageType.VOID);
         }
 
         // Echo the simulation parameters
@@ -222,7 +223,7 @@ public class TestRun {
                 }
             }
 
-            DAGStats s = new DAGStats(dag, mips, price);
+            DAGStats s = new DAGStats(dag, Algorithm.initializeStorage(simulationParams, cloudsim));
 
             minTime = Math.min(minTime, s.getCriticalPath());
             minCost = Math.min(minCost, s.getMinCost());
@@ -263,11 +264,13 @@ public class TestRun {
                     System.out.print(".");
                     Algorithm a = null;
                     if ("SPSS".equals(algorithm)) {
-                        a = new SPSS(budget, deadline, dags, alpha, cloudsim, algorithmSimulationParams);
+                        a = new SPSS(budget, deadline, dags, alpha, cloudsim, simulationParams);
                     } else if ("DPDS".equals(algorithm)) {
-                        a = new DPDS(budget, deadline, dags, price, maxScaling, cloudsim, algorithmSimulationParams);
+                        a = new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, cloudsim,
+                                simulationParams);
                     } else if ("WADPDS".equals(algorithm)) {
-                        a = new WADPDS(budget, deadline, dags, price, maxScaling, cloudsim, algorithmSimulationParams);
+                        a = new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, cloudsim,
+                                simulationParams);
                     } else {
                         throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithm);
                     }

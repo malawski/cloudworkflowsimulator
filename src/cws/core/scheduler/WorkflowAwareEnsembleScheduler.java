@@ -131,8 +131,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
      * @return
      */
     private double estimateCost(DAGJob dj, WorkflowEngine engine) {
-        double sumRuntime = sumRuntime(dj.getDAG());
-        double vmPrice = vmPrice(engine);
+        double sumRuntime = dj.getDAG().getRuntimeSum(storageManager);
+        double vmPrice = getVmPrice(engine);
         return vmPrice * sumRuntime / 3600.0;
     }
 
@@ -143,7 +143,6 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
      * @return
      */
     private double estimateBudgetRemaining(WorkflowEngine engine) {
-
         // remaining budget for starting new vms
         double rn = engine.getBudget() - engine.getCost();
         if (rn < 0)
@@ -192,7 +191,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
             if (!admittedDJ.isComplete(task))
-                cost += task.getSize() * vmPrice(engine);
+                cost += task.getPredictedRuntime(storageManager) * getVmPrice(engine);
         }
         return cost / 3600.0;
     }
@@ -200,23 +199,10 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
     /**
      * @return the price of VM hour, assuming that all the vms are homogeneous
      */
-    private double vmPrice(WorkflowEngine engine) {
+    private double getVmPrice(WorkflowEngine engine) {
         double vmPrice = 0;
         if (!engine.getAvailableVMs().isEmpty())
             vmPrice = engine.getAvailableVMs().get(0).getVmStaticParams().getPrice();
         return vmPrice;
-    }
-
-    /**
-     * @return The total runtime of all tasks in the workflow
-     */
-    public double sumRuntime(DAG dag) {
-        double sum = 0.0;
-        for (String taskName : dag.getTasks()) {
-            sum += dag.getTaskById(taskName).getSize();
-            sum += storageManager.getTransferTimeEstimation(dag.getTaskById(taskName));
-        }
-
-        return sum;
     }
 }

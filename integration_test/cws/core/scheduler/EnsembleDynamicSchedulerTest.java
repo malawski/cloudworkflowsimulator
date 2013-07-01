@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.*;
+import cws.core.algorithms.VMType;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
@@ -76,7 +77,7 @@ public class EnsembleDynamicSchedulerTest {
 
         DAG dag = new DAG();
         for (int i = 0; i < 100; i++) {
-            Task task = new Task("TASK" + i, "transformation", (i % 10));
+            Task task = new Task("TASK" + i, "transformation", (i % 10), VMType.DEFAULT_VM_TYPE);
             dag.addTask(task);
         }
 

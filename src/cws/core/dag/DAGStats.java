@@ -4,13 +4,14 @@ import java.util.HashMap;
 
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.storage.StorageManager;
 
 public class DAGStats {
     private double minCost;
     private double criticalPath;
     private double totalRuntime;
 
-    public DAGStats(DAG dag, double mips, double price) {
+    public DAGStats(DAG dag, StorageManager storageManager) {
         TopologicalOrder order = new TopologicalOrder(dag);
 
         minCost = 0.0;
@@ -18,19 +19,16 @@ public class DAGStats {
 
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
         for (Task t : order) {
-
-            // The runtime is just the size of the task (MI) divided by the
-            // MIPS of the VM
-            double runtime = t.getSize() / mips;
+            double runtime = t.getPredictedRuntime(storageManager);
             runtimes.put(t, runtime);
 
             // Compute the minimum cost of running this workflow
-            minCost += (runtime / (60 * 60)) * price;
+            minCost += (runtime / (60 * 60)) * t.getVmType().getPrice();
             totalRuntime += runtime;
         }
 
         // Make sure a plan is feasible given the deadline and available VMs
-        CriticalPath path = new CriticalPath(order, runtimes);
+        CriticalPath path = new CriticalPath(order, runtimes, storageManager);
         criticalPath = path.getCriticalPathLength();
     }
 

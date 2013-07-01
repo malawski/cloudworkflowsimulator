@@ -3,6 +3,9 @@ package cws.core.dag;
 import java.util.ArrayList;
 import java.util.List;
 
+import cws.core.algorithms.VMType;
+import cws.core.storage.StorageManager;
+
 /**
  * @author Gideon Juve <juve@usc.edu>
  */
@@ -28,15 +31,14 @@ public class Task {
     /** Task's output files */
     private List<DAGFile> outputFiles = new ArrayList<DAGFile>();
 
-    public Task(String id, String transformation, double size) {
+    /** TODO(bryk): */
+    private VMType vmType;
+
+    public Task(String id, String transformation, double size, VMType vmType) {
         this.id = id;
         this.transformation = transformation;
-        this.setSize(size);
-        // SIPHT workflows have tasks with 0.0 size so we commented out this condition
-        // if (size <= 0) {
-        // throw new RuntimeException(
-        // "Invalid size for task "+id+" ("+transformation+"): "+size);
-        // }
+        this.size = size;
+        this.vmType = vmType;
     }
 
     /**
@@ -66,6 +68,20 @@ public class Task {
     @Override
     public String toString() {
         return "<Task id=" + getId() + ">";
+    }
+
+    /**
+     * TODO(bryk):
+     * @param mips
+     * @param storageManager
+     * @return
+     */
+    public double getPredictedRuntime(StorageManager storageManager) {
+        double runtime = getSize() / vmType.getMips();
+        if (storageManager != null) {
+            runtime += storageManager.getTransferTimeEstimation(this);
+        }
+        return runtime;
     }
 
     public double getSize() {
@@ -106,5 +122,9 @@ public class Task {
 
     public void addOutputFiles(List<DAGFile> outputs) {
         this.outputFiles.addAll(outputs);
+    }
+
+    public VMType getVmType() {
+        return vmType;
     }
 }

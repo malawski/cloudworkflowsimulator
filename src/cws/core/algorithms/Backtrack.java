@@ -6,7 +6,6 @@ import java.util.List;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
-import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
 
 /**
@@ -24,41 +23,9 @@ public class Backtrack extends StaticAlgorithm {
      */
     @Override
     Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
-        TopologicalOrder order = new TopologicalOrder(dag);
-
-        // Initial task assignment
         HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
-        double minCost = 0.0;
-        double totalRuntime = 0.0;
-        for (Task t : order) {
-
-            // Initially we assign each VM to the SMALL type
-            VMType vm = VMType.SMALL;
-            vmTypes.put(t, vm);
-
-            // The runtime is just the size of the task (MI) divided by the
-            // MIPS of the VM
-            double runtime = t.getSize() / vm.mips;
-            runtimes.put(t, runtime);
-
-            // Compute the minimum cost of running this workflow
-            minCost += (runtime / (60 * 60)) * vm.price;
-            totalRuntime += runtime;
-        }
-
-        System.out.println(" Min Cost: " + minCost);
-        System.out.println(" Total Runtime: " + totalRuntime);
-
-        // Make sure a plan is feasible given the deadline and available VMs
-        // FIXME Later we will assign each task to its fastest VM type before this
-        CriticalPath path = new CriticalPath(order, runtimes);
-        double criticalPath = path.getCriticalPathLength();
-        System.out.println(" Critical path: " + criticalPath);
-        if (criticalPath > getDeadline() + getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay()) {
-            throw new NoFeasiblePlan("Best critical path (" + criticalPath + ") " + "> deadline (" + getDeadline()
-                    + ")");
-        }
+        TopologicalOrder order = computeTopologicalOrder(dag, vmTypes, runtimes);
 
         /*
          * FIXME Later we will determine the best VM type for each task
@@ -90,7 +57,7 @@ public class Backtrack extends StaticAlgorithm {
             best = new Plan(currentPlan);
             N++;
             for (int i = 0; i < N; i++) {
-                best.resources.add(new Resource(VMType.SMALL));
+                best.resources.add(new Resource(VMType.DEFAULT_VM_TYPE));
             }
         } while (best.getCost() <= getBudget());
 
