@@ -4,6 +4,11 @@ output
 paper/build
 paper/paper.pdf
 
+# graphs
+*.jpg
+*.jpeg
+*.png
+
 # integration tests output some .txt files
 *.txt
 
