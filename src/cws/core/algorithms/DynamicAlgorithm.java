@@ -72,7 +72,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         // re-initing cloudsim here, watch out...
         cloudsim.init();
 
-        Algorithm.initializeStorage(simulationParams, cloudsim);
+        storageManager = Algorithm.initializeStorage(simulationParams, cloudsim);
 
         SimulationEnvironment simulationEnvironment = prepareEnvironment();
 

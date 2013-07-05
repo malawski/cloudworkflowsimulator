@@ -446,7 +446,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     public void simulate(String logname) {
         getCloudsim().init();
 
-        Algorithm.initializeStorage(simulationParams, cloudsim);
+        storageManager = Algorithm.initializeStorage(simulationParams, cloudsim);
         WorkflowLog log = prepareEnvironment();
 
         planningStartWallTime = System.nanoTime();
@@ -507,39 +507,26 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     }
 
     /**
-     * TODO(bryk): comment
-     * @param dag
-     * @param vmTypes
-     * @param runtimes
-     * @return
-     * @throws NoFeasiblePlan
+     * Computes and returns {@link TopologicalOrder} for the given parameters.
+     * @param dag DAG with tasks
+     * @param vmTypes hash map of Task -> VMType
+     * @param runtimes hash map of Task -> predicted runtime
+     * @return TopologicalOrder
+     * @throws NoFeasiblePlan when best critical path > deadline
      */
     protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, VMType> vmTypes,
             HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
         TopologicalOrder order = new TopologicalOrder(dag);
-        double minCost = 0.0;
-        double totalRuntime = 0.0;
         for (Task t : order) {
             vmTypes.put(t, t.getVmType());
-
-            // The runtime is just the size of the task (MI) divided by the
-            // MIPS of the VM
             double runtime = t.getPredictedRuntime(storageManager);
             runtimes.put(t, runtime);
-
-            // Compute the minimum cost of running this workflow
-            minCost += (runtime / t.getVmType().getMips()) * t.getVmType().getPrice();
-            totalRuntime += runtime;
         }
-
-        System.out.println(" Min Cost: " + minCost);
-        System.out.println(" Total Runtime: " + totalRuntime);
 
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = new CriticalPath(order, runtimes, storageManager);
         double criticalPath = path.getCriticalPathLength();
-        System.out.println(" Critical path: " + criticalPath);
         if (criticalPath > getDeadline() + getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay()) {
             throw new NoFeasiblePlan("Best critical path (" + criticalPath + ") " + "> deadline (" + getDeadline()
                     + ")");

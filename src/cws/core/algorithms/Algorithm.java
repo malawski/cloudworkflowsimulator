@@ -149,7 +149,6 @@ public abstract class Algorithm {
                 b.append("0");
             }
         }
-
         return b.toString();
     }
 

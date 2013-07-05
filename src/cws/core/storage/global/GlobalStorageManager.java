@@ -222,6 +222,7 @@ public class GlobalStorageManager extends StorageManager {
     @Override
     public double getTransferTimeEstimation(Task task) {
         double time = 0.0;
+        // TODO(bryk): add latency here
         for (DAGFile file : task.getInputFiles()) {
             time += file.getSize() / params.getReadSpeed();
         }

@@ -120,7 +120,7 @@ public class TestRun {
         double maxScaling = 1.0;
 
         // Arguments with no defaults
-        String algorithm = args.getOptionValue("algorithm"); // "SPSS";
+        String algorithmName = args.getOptionValue("algorithm"); // "SPSS";
         String application = args.getOptionValue("application"); // "SIPHT";
         File inputdir = new File(args.getOptionValue("input-dir"));
         File outputfile = new File(args.getOptionValue("output-file")); // new File("TestRun.dat");
@@ -200,7 +200,7 @@ public class TestRun {
         System.out.printf("distribution = %s\n", distribution);
         System.out.printf("ensembleSize = %d\n", ensembleSize);
         System.out.printf("scalingFactor = %f\n", scalingFactor);
-        System.out.printf("algorithm = %s\n", algorithm);
+        System.out.printf("algorithm = %s\n", algorithmName);
         System.out.printf("seed = %d\n", seed);
         System.out.printf("storageManagerType = %s\n", storageManagerType);
         System.out.printf("storageCache = %s\n", storageCacheType);
@@ -219,7 +219,7 @@ public class TestRun {
             if (scalingFactor > 1.0) {
                 for (String tid : dag.getTasks()) {
                     Task t = dag.getTaskById(tid);
-                    t.setSize(t.getSize() * scalingFactor);
+                    t.scaleSize(scalingFactor);
                 }
             }
 
@@ -262,35 +262,36 @@ public class TestRun {
                 System.out.println();
                 for (double deadline = minDeadline; deadline < maxDeadline + (deadlineStep / 2.0); deadline += deadlineStep) {
                     System.out.print(".");
-                    Algorithm a = null;
-                    if ("SPSS".equals(algorithm)) {
-                        a = new SPSS(budget, deadline, dags, alpha, cloudsim, simulationParams);
-                    } else if ("DPDS".equals(algorithm)) {
-                        a = new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, cloudsim,
-                                simulationParams);
-                    } else if ("WADPDS".equals(algorithm)) {
-                        a = new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, cloudsim,
-                                simulationParams);
+                    Algorithm algorithm = null;
+                    if ("SPSS".equals(algorithmName)) {
+                        algorithm = new SPSS(budget, deadline, dags, alpha, cloudsim, simulationParams);
+                    } else if ("DPDS".equals(algorithmName)) {
+                        algorithm = new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling,
+                                cloudsim, simulationParams);
+                    } else if ("WADPDS".equals(algorithmName)) {
+                        algorithm = new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling,
+                                cloudsim, simulationParams);
                     } else {
-                        throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithm);
+                        throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
                     }
 
-                    a.simulate(algorithm);
+                    algorithm.simulate(algorithmName);
 
-                    double planningTime = a.getPlanningnWallTime() / 1.0e9;
-                    double simulationTime = a.getSimulationWallTime() / 1.0e9;
+                    double planningTime = algorithm.getPlanningnWallTime() / 1.0e9;
+                    double simulationTime = algorithm.getSimulationWallTime() / 1.0e9;
 
                     fileOut.printf("%s,%s,%d,%d,", application, distribution, seed, ensembleSize);
-                    fileOut.printf("%f,%f,%f,%s,", scalingFactor, budget, deadline, a.getName());
-                    fileOut.printf("%d,%.20f,%.20f,%f,", a.numCompletedDAGs(), a.getExponentialScore(),
-                            a.getLinearScore(), planningTime);
-                    fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, a.getScoreBitString(), a.getActualCost(),
-                            a.getActualJobFinishTime(), a.getActualDagFinishTime());
-                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,%f,", a.getActualVMFinishTime(),
+                    fileOut.printf("%f,%f,%f,%s,", scalingFactor, budget, deadline, algorithm.getName());
+                    fileOut.printf("%d,%.20f,%.20f,%f,", algorithm.numCompletedDAGs(), algorithm.getExponentialScore(),
+                            algorithm.getLinearScore(), planningTime);
+                    fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, algorithm.getScoreBitString(),
+                            algorithm.getActualCost(), algorithm.getActualJobFinishTime(),
+                            algorithm.getActualDagFinishTime());
+                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,%f,", algorithm.getActualVMFinishTime(),
                             VMFactory.getRuntimeVariance(), VMFactory.getDelay(), VMFactory.getFailureRate(),
                             minBudget, maxBudget, minDeadline, maxDeadline);
 
-                    StorageManagerStatistics stats = a.getStorageManager().getStorageManagerStatistics();
+                    StorageManagerStatistics stats = algorithm.getStorageManager().getStorageManagerStatistics();
                     fileOut.printf("%s,%d,%d,%d,%d,%d,", storageManagerType, stats.getTotalBytesToRead(),
                             stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
                             stats.getActualBytesRead(), stats.getActualBytesRead() + stats.getTotalBytesToWrite());

@@ -31,7 +31,7 @@ public class Task {
     /** Task's output files */
     private List<DAGFile> outputFiles = new ArrayList<DAGFile>();
 
-    /** TODO(bryk): */
+    /** VMType that this task runs on */
     private VMType vmType;
 
     public Task(String id, String transformation, double size, VMType vmType) {
@@ -67,21 +67,22 @@ public class Task {
 
     @Override
     public String toString() {
-        return "<Task id=" + getId() + ">";
+        return "<task id=" + getId() + ">";
     }
 
     /**
-     * TODO(bryk):
-     * @param mips
-     * @param storageManager
-     * @return
+     * Returns task's predicted runtime. It is based on task's vmType and provided storage manager. <br>
+     * Note that the estimation is trivial and may not be accurate during congestion and it doesn't include runtime
+     * variance.
+     * @param storageManager manager used to estimate transfers
+     * @return task's predicted runtime as a double
      */
     public double getPredictedRuntime(StorageManager storageManager) {
-        double runtime = getSize() / vmType.getMips();
-        if (storageManager != null) {
-            runtime += storageManager.getTransferTimeEstimation(this);
-        }
-        return runtime;
+        return getSize() / vmType.getMips() + storageManager.getTransferTimeEstimation(this);
+    }
+
+    public void scaleSize(double scalingFactor) {
+        size *= scalingFactor;
     }
 
     public double getSize() {

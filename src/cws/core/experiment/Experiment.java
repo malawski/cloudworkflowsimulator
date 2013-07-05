@@ -187,7 +187,7 @@ public class Experiment {
             if (taskDilatation > 1.0) {
                 for (String tid : dag.getTasks()) {
                     Task t = dag.getTaskById(tid);
-                    t.setSize(t.getSize() * taskDilatation);
+                    t.scaleSize(taskDilatation);
                 }
             }
 

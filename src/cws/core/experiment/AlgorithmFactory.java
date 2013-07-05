@@ -30,7 +30,7 @@ public class AlgorithmFactory {
             double dilatationFactor = e.getTaskDilatation();
             for (String tid : dag.getTasks()) {
                 Task t = dag.getTaskById(tid);
-                t.setSize(t.getSize() * dilatationFactor);
+                t.scaleSize(dilatationFactor);
             }
         }
 
