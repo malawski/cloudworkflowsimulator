@@ -18,6 +18,7 @@ import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 
 public class EnsembleDynamicSchedulerTest {
@@ -27,6 +28,8 @@ public class EnsembleDynamicSchedulerTest {
     private WorkflowEngine engine;
     private Cloud cloud;
     private WorkflowLog jobLog;
+    @SuppressWarnings("unused")
+    private StorageManager storageManager;
 
     @Before
     public void setUp() {
@@ -34,8 +37,7 @@ public class EnsembleDynamicSchedulerTest {
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
 
-        // TODO(bryk): that's ugly, I know
-        new VoidStorageManager(cloudsim);
+        storageManager = new VoidStorageManager(cloudsim);
         provisioner = null;
         scheduler = new EnsembleDynamicScheduler(cloudsim);
         engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);

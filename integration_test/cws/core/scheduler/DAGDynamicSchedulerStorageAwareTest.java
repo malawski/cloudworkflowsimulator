@@ -13,6 +13,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
+import cws.core.storage.StorageManager;
 import cws.core.storage.cache.FIFOCacheManager;
 import cws.core.storage.cache.VMCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
@@ -25,6 +26,8 @@ public class DAGDynamicSchedulerStorageAwareTest {
     private WorkflowEngine engine;
     private Cloud cloud;
     private WorkflowLog jobLog;
+    @SuppressWarnings("unused")
+    private StorageManager storageManager;
 
     @Before
     public void setUp() {
@@ -39,8 +42,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
         // XXX(bryk): note @mequrel that I've hardcoded FIFO cache here. Change this once you start refactoring this
         // code.
         VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
-        // TODO(bryk): that's ugly, I know
-        new GlobalStorageManager(params, cacheManager, cloudsim);
+        storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim);
         engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
