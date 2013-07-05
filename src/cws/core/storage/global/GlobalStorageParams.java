@@ -12,7 +12,7 @@ import cws.core.exception.IllegalCWSArgumentException;
 public class GlobalStorageParams {
     private static final int DEFAULT_NUM_REPLICAS = 1;
 
-    private static final double DEFAULT_LATENCY = 1;
+    private static final double DEFAULT_LATENCY = 0.01;
 
     private static final double DEFAULT_CHUNK_TRANSFER_TIME = 1;
 

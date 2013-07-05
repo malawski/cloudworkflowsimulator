@@ -193,7 +193,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         Task t = new Task("xx", "xx", 222, VMType.DEFAULT_VM_TYPE);
         t.addInputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
-        Assert.assertEquals(sz / params.getReadSpeed(), time, 0.00001);
+        Assert.assertEquals(sz / params.getReadSpeed() + params.getLatency(), time, 0.00001);
     }
 
     @Test
@@ -204,6 +204,6 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         Task t = new Task("xx", "xx", 222, VMType.DEFAULT_VM_TYPE);
         t.addOutputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
-        Assert.assertEquals(sz / params.getWriteSpeed(), time, 0.00001);
+        Assert.assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.00001);
     }
 }
