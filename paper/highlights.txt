@@ -1,0 +1,16 @@
+We define the problem of scheduling prioritized workflow ensembles 
+under budget and deadline constraints on IaaS cloud infrastructure.
+ 
+We analyze and develop several dynamic (online) and static (offline) 
+algorithms for task scheduling and resource provisioning that rely on workflow 
+structure information  and estimates of task runtimes.
+ 
+We evaluate these algorithms using a simulator based on 
+CloudSim, which models the infrastructure and the 
+application, taking into account uncertainties in task runtime estimates, 
+provisioning delays, and failures.
+
+We discuss the performance of the algorithms on a set of
+synthetic workflow ensembles based on important, real scientific
+applications, using a broad range of different application scenarios and
+varying constraint values.

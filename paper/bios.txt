@@ -1,0 +1,69 @@
+Maciej Malawski holds Ph.D. in Computer Science, M.Sc.
+in Computer Science and in Physics. He is an assistant 
+professor and a researcher at the
+Department of Computer Science AGH and at ACC Cyfronet
+AGH, Krakow, Poland. In 2011-13 he was a postdoc and a 
+visiting faculty at Center for Research Computing, 
+University of Notre Dame, USA. 
+He is coauthor of over 50 international
+publications including journal and conference
+papers, and book chapters. He participated in EU ICT Cross-
+Grid, ViroLab, CoreGrid and VPH-Share projects. His scientific
+interests include parallel computing, grid and cloud
+systems, distributed service- and component-based computing,
+and scientific applications.
+
+Gideon Juve is a Computer Scientist at the 
+USC Information Sciences Institute. 
+He earned B.S., M.S., and Ph.D. degrees in Computer Science 
+from the University of Southern California. 
+His research focuses on resource management 
+techniques for scientific workflows in clusters, grids, and clouds.
+
+
+Ewa Deelman is a Research Associate Professor 
+at the USC Computer Science Department 
+and a Project Leader at the USC Information Sciences Institute. 
+Dr. Deelman’s research interests include the design and exploration 
+of collaborative, distributed scientific environments, 
+with particular emphasis on workflow management 
+as well as the management of large amounts of data and metadata. 
+At ISI, Dr. Deelman is leading the Pegasus project, 
+which designs and implements workflow mapping techniques 
+for large-scale applications running in distributed environments. 
+Pegasus is being used today in a number of scientific disciplines, 
+enabling researches to formulate complex computations in a declarative way. 
+Over the years, Dr. Deelman worked with a number of application domains 
+including astronomy, bioinformatics, earthquake science, 
+gravitational-wave physics, and others. 
+As part of these collaborations, new advances in computer science 
+and in the domain sciences were made. For example, the data intensive 
+workflows in LIGO (gravitational-wave physics) motivated new 
+workflow analysis algorithms that minimize workflow data 
+footprint during execution. On the other hand, 
+improvements in the scalability of workflows enabled SCEC scientists 
+(earthquake science) to develop new physics-based seismic hazard maps 
+of Southern California. In 2007, Dr. Deelman edited a book on workflow research: 
+“Workflows in e-Science: Scientific Workflows for Grids”, 
+published by Springer. She is also the founder of the annual 
+Workshop on Workflows in Support of Large-Scale Science, 
+which is held in conjunction with the Super Computing conference. 
+In 1997 Dr. Deelman received her Ph.D. in Computer Science 
+from the Rensselaer Polytechnic Institute.
+
+
+
+Jarek Nabrzyski received his Ph.D. and M.Sc. in Computer
+Science and Engineering from Poznan University of Technology,
+Poland. Currently he is director of the Center for
+Research Computing and concurrent associate professor
+at the Department of Computer Science and Engineering
+at the University of Notre Dame. He co-authored over 50
+publications in international journals and conferences, one
+co-edited book and several conference proceedings. His
+scientific interests include operations research, resource
+management in distributed and cloud computing systems,
+scientific applications and multi-criteria decision support
+systems. Nabrzyski manages a multidisciplinary team of 35 
+research staff consisting of computational scientists, 
+HPC engineers and research programmers.
