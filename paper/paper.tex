@@ -69,22 +69,23 @@ scientific workflows; workflow ensembles; cloud computing; resource provisioning
 
 Large-scale scientific workflows, usually represented as Directed Acyclic Graphs
 (DAGs), are an important class of applications that lead to challenging problems
-in resource management on grid and cloud infrastructures. What becomes more
-important, workflows for large computational problems are often composed of
-several inter-related workflows grouped into {\em ensembles}.  Workflows in an
-ensemble typically have a similar structure, but they differ in their input
-data, number of tasks, and individual task sizes.
+in resource management on grid and cloud infrastructures. In addition, workflows
+for large computational problems are often composed of several inter-related
+workflows grouped into {\em ensembles}. Workflows in an ensemble typically have
+a similar structure, but they differ in their input data, number of tasks, and
+individual task sizes.
 
 There are many applications that require scientific workflow ensembles.
 CyberShake~\cite{Callaghan2011}, for example, uses ensembles to generate seismic
 hazard maps.  Each workflow in a CyberShake ensemble generates a hazard curve
 for a particular geographic location, and several hazard curves are combined to
-create a hazard map.  In the recent study of 2013 CyberShake generates a map that
-requires an ensemble of 286 workflows.  Similarly, users of
-Montage~\cite{Deelman2008} often need several workflows  with different
-parameters to generate a set of image mosaics that can be combined  into a
-single, large mosaic. The Galactic Plane ensemble, which generates several
-mosaics of the  entire sky in different wavelengths, consists of 17 workflows,
+create a hazard map.  In a 2013 study, CyberShake was used to generate a set
+of hazard maps over 286 sites that required an ensemble of 2288
+workflows~\cite{CyberShake13.4}. Similarly, users of Montage~\cite{Deelman2008}
+often need several workflows  with different parameters to generate a set of
+image mosaics that can be combined  into a single, large mosaic. The Galactic
+Plane ensemble~\cite{GalacticPlane}, which generates several mosaics of the
+entire sky in different wavelengths, consists of 17 workflows,
 each of which contains 900 sub-workflows.  Another ensemble example is the
 Periodograms application~\cite{Vockler2011}, which searches for extrasolar
 planets by detecting periodic dips in the light intensity of their host star.
@@ -95,7 +96,7 @@ Kepler satellite data required three ensembles of 15 workflows.
 
 Workflows in an ensemble may differ not only in their parameters, but also in
 their priority. For example, in CyberShake some geographic locations may be in heavily
-populated areas or in strategic locations such as power plants, while others
+populated areas or have sensitive facilities such as power plants, while others
 may be less important. Scientists typically prioritize the workflows in such
 an ensemble so that important workflows are finished first. This enables them
 to see critical results early, and helps them to choose the most important
@@ -1029,9 +1030,9 @@ suggests that, in general, for fine-grained workflows the dynamic algorithms
 will produce better scores, and for coarse-grained workflows SPSS will produce
 better scores.
 
-The granularity of the workflow tasks should be discussed in the context of the
+The granularity of the workflow tasks should be discussed in relation to the
 length of the cloud billing cycle. In this paper we assumed that the resources
-are charged for hourly time slots, as is the case of VM instances on Amazon EC2.
+are billed by the hour, as is the case of VM instances on Amazon EC2.
 However, there are cloud providers that have higher billing frequency, e.g.
 every 5 minutes in the case of
 CloudSigma\footnote{\url{http://www.cloudsigma.com}} or every 1 minute in the
@@ -1146,8 +1147,8 @@ the SPSS plan has some room to expand without exceeding the deadline.
 Figure~\ref{fig:variances-scores} shows relative performance as a percentage of
 the number of high scores achieved by each algorithm as the error increases. As
 in Figure~\ref{fig:completed-budgets} and ~\ref{fig:completed-deadlines} we show
-results for CyberShake and LIGO as representatives of fine grained and coarse
-grained workflows. The figure shows that, for this experiment, the scores remain
+results for CyberShake and LIGO as representatives of fine-grained and
+coarse-grained workflows. The figure shows that, for this experiment, the scores remain
 the same as the error increases. This is a result of the way the error is
 applied. Since the error is selected uniformly from $-p$ to $+p$ it is equally
 likely that the error will be positive as negative. Therefore, applying the
@@ -1420,10 +1421,9 @@ than both dynamic algorithms. However, when conditions are less than perfect,
 the static plans produced by SPSS are disrupted and it frequently exceeds the
 budget and deadline constraints. In comparison, the dynamic algorithms are able
 to adapt to a wide variety of conditions, and rarely exceed the constraints even
-with long delays, poor estimates, and high failure rates. This, however, comes
-at the cost of being able to complete less workflows than SPSS. Alternatively, a
-user may decide to accept that the budget and deadline constraints are exceeded,
-as long as more work is completed.
+with long delays, poor estimates, and high failure rates. However, this comes
+at the cost of not being able to complete as many workflows as SPSS in ideal
+conditions.
 
 In addition, we found that SPSS tends to perform better on coarse-grained
 workflows than the dynamic algorithms. For wide, fine-grained workflows, such
