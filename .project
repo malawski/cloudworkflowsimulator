@@ -21,4 +21,11 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.dltk.ruby.core.nature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>paper/fleqn.clo</name>
+			<type>1</type>
+			<location>/usr/share/texlive/texmf-dist/tex/latex/base/fleqn.clo</location>
+		</link>
+	</linkedResources>
 </projectDescription>
