@@ -20,3 +20,6 @@ paper/paper.pdf
 .idea/
 cloudworkflowsimulator.iml
 
+# vi
+*.swp
+
