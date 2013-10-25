@@ -1,12 +1,13 @@
 package cws.core.experiment;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
+
+import cws.core.algorithms.AlgorithmSimulationParams;
 
 /**
  * Class representing a single experiment of submitting a given
@@ -14,38 +15,61 @@ import org.apache.commons.io.IOUtils;
  * @author malawski
  */
 public class ExperimentDescription {
-    // name of group this experiment belongs to
+    /** The name of group this experiment belongs to. */
     private String group;
-    // name of algorithm to use
+
+    /** The name of algorithm to use. */
     private String algorithmName;
-    // directory of input and output files for this experiment
+
+    /** The directory of input and output files for this experiment. */
     private String runDirectory;
-    // path to DAG files
+
+    /** The path to DAG files. */
     private String dagPath;
-    // array of dag file names
+
+    /** The array of dag file names. */
     private String[] dags;
-    // deadline in hours
+
+    /** The deadline in hours. */
     private double deadline;
-    // budget in $
+
+    /** The budget in $. */
     private double budget;
-    // VM hour price in $
+
+    /** The VM hour price in $. */
     private double price;
-    // max autoscaling factor for provisioner
+
+    /** The max autoscaling factor for provisioner. */
     private double maxScaling;
-    // alpha parameter for SPSS
+
+    /** The alpha parameter for SPSS. */
     private double alpha;
-    // runID used to distinguish e.g. different random seeds
+
+    /** The runID used to distinguish e.g. different random seeds. */
     private int runID;
-    // task runtimes from the dag are multiplied by this factor; this parameter is useful to control the task
-    // granularity
+
+    /**
+     * The task runtimes from the dag are multiplied by this factor; this parameter is useful to control the task
+     * granularity.
+     */
     private double taskDilatation;
-    // defines the maximum relative difference between estimated and actual task runtime, e.g. 0.50 means that task can
-    // run 50% longer than a given estimate
+
+    /**
+     * Defines the maximum relative difference between estimated and actual task runtime, e.g. 0.50 means that task can
+     * run 50% longer than a given estimate.
+     */
     private double runtimeVariation;
-    // provisioning delay in seconds
+
+    /** The provisioning delay in seconds. */
     private double delay;
-    // distribution of ensembles
+
+    /** The distribution of ensembles. */
     private String distribution;
+
+    /**
+     * The algorithm simulation params.
+     */
+    private AlgorithmSimulationParams simulationParams;
 
     /**
      * This description creates ensemble of workflows given in the dags array.
@@ -218,29 +242,30 @@ public class ExperimentDescription {
     }
 
     public void storeProperties(String fileName) {
-        Properties p = new Properties();
-        p.setProperty("group", group);
-        p.setProperty("algorithmName", algorithmName);
-        p.setProperty("runDirectory", runDirectory);
-        p.setProperty("dagPath", dagPath);
-        p.setProperty("dags", dagsToString());
-        p.setProperty("deadline", "" + deadline);
-        p.setProperty("budget", "" + budget);
-        p.setProperty("price", "" + price);
-        p.setProperty("maxScaling", "" + maxScaling);
-        p.setProperty("alpha", "" + alpha);
-        p.setProperty("runID", "" + runID);
-        p.setProperty("fileName", getFileName());
-        p.setProperty("taskDilatation", "" + taskDilatation);
-        p.setProperty("runtimeVariation", "" + runtimeVariation);
-        p.setProperty("delay", "" + delay);
-        p.setProperty("distribution", getDistribution());
+        Properties properties = new Properties();
+        properties.setProperty("group", group);
+        properties.setProperty("algorithmName", algorithmName);
+        properties.setProperty("runDirectory", runDirectory);
+        properties.setProperty("dagPath", dagPath);
+        properties.setProperty("dags", dagsToString());
+        properties.setProperty("deadline", "" + deadline);
+        properties.setProperty("budget", "" + budget);
+        properties.setProperty("price", "" + price);
+        properties.setProperty("maxScaling", "" + maxScaling);
+        properties.setProperty("alpha", "" + alpha);
+        properties.setProperty("runID", "" + runID);
+        properties.setProperty("fileName", getFileName());
+        properties.setProperty("taskDilatation", "" + taskDilatation);
+        properties.setProperty("runtimeVariation", "" + runtimeVariation);
+        properties.setProperty("delay", "" + delay);
+        properties.setProperty("distribution", getDistribution());
+        if (simulationParams != null) {
+            simulationParams.storeProperties(properties);
+        }
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(fileName);
-            p.store(out, "");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            properties.store(out, "");
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -249,31 +274,32 @@ public class ExperimentDescription {
     }
 
     private void readProperties(String fileName) {
-        Properties p = new Properties();
+        Properties properties = new Properties();
         FileInputStream in = null;
         try {
             in = new FileInputStream(fileName);
-            p.load(in);
+            properties.load(in);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(in);
         }
-        group = p.getProperty("group");
-        algorithmName = p.getProperty("algorithmName");
-        runDirectory = p.getProperty("runDirectory");
-        dagPath = p.getProperty("dagPath");
-        dags = dagsFromString(p.getProperty("dags"));
-        deadline = Double.parseDouble(p.getProperty("deadline"));
-        budget = Double.parseDouble(p.getProperty("budget"));
-        price = Double.parseDouble(p.getProperty("price"));
-        maxScaling = Double.parseDouble(p.getProperty("maxScaling"));
-        alpha = Double.parseDouble(p.getProperty("alpha"));
-        runID = Integer.parseInt(p.getProperty("runID"));
-        taskDilatation = Double.parseDouble(p.getProperty("taskDilatation"));
-        runtimeVariation = Double.parseDouble(p.getProperty("runtimeVariation"));
-        delay = Double.parseDouble(p.getProperty("delay"));
-        distribution = p.getProperty("distribution");
+        group = properties.getProperty("group");
+        algorithmName = properties.getProperty("algorithmName");
+        runDirectory = properties.getProperty("runDirectory");
+        dagPath = properties.getProperty("dagPath");
+        dags = dagsFromString(properties.getProperty("dags"));
+        deadline = Double.parseDouble(properties.getProperty("deadline"));
+        budget = Double.parseDouble(properties.getProperty("budget"));
+        price = Double.parseDouble(properties.getProperty("price"));
+        maxScaling = Double.parseDouble(properties.getProperty("maxScaling"));
+        alpha = Double.parseDouble(properties.getProperty("alpha"));
+        runID = Integer.parseInt(properties.getProperty("runID"));
+        taskDilatation = Double.parseDouble(properties.getProperty("taskDilatation"));
+        runtimeVariation = Double.parseDouble(properties.getProperty("runtimeVariation"));
+        delay = Double.parseDouble(properties.getProperty("delay"));
+        distribution = properties.getProperty("distribution");
+        simulationParams = AlgorithmSimulationParams.readProperties(properties);
     }
 
     private String[] dagsFromString(String property) {
@@ -287,7 +313,7 @@ public class ExperimentDescription {
         return s.toString();
     }
 
-    /*
+    /**
      * Creates a unique file name based on the values of the properties
      */
     public String getFileName() {
@@ -296,5 +322,13 @@ public class ExperimentDescription {
                 + getAlpha() + "t" + getTaskDilatation() + "v" + getRuntimeVariation() + "l" + getDelay() + "r" + runID;
 
         return fileName;
+    }
+
+    public AlgorithmSimulationParams getSimulationParams() {
+        return simulationParams;
+    }
+
+    public void setSimulationParams(AlgorithmSimulationParams simulationParams) {
+        this.simulationParams = simulationParams;
     }
 }

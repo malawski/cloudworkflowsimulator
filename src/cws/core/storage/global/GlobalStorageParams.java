@@ -1,5 +1,7 @@
 package cws.core.storage.global;
 
+import java.util.Properties;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -58,6 +60,25 @@ public class GlobalStorageParams {
                 "Global storage file chunk transfer time, defaults to " + DEFAULT_CHUNK_TRANSFER_TIME);
         ctt.setArgName("TIME");
         options.addOption(ctt);
+    }
+
+    public void storeProperties(Properties properties) {
+        properties.setProperty("readSpeed", "" + readSpeed);
+        properties.setProperty("writeSpeed", "" + writeSpeed);
+        properties.setProperty("chunkTransferTime", "" + chunkTransferTime);
+        properties.setProperty("latency", "" + latency);
+        properties.setProperty("numReplicas", "" + numReplicas);
+    }
+
+    public static GlobalStorageParams readProperties(Properties properties) {
+        GlobalStorageParams params = new GlobalStorageParams();
+        params.readSpeed = Double.valueOf(properties.getProperty("readSpeed"));
+        params.writeSpeed = Double.valueOf(properties.getProperty("writeSpeed"));
+        params.chunkTransferTime = Double.valueOf(properties.getProperty("chunkTransferTime",
+                DEFAULT_CHUNK_TRANSFER_TIME + ""));
+        params.latency = Double.valueOf(properties.getProperty("latency", DEFAULT_LATENCY + ""));
+        params.numReplicas = Integer.valueOf(properties.getProperty("numReplicas", DEFAULT_NUM_REPLICAS + ""));
+        return params;
     }
 
     public static GlobalStorageParams readCliOptions(CommandLine args) {

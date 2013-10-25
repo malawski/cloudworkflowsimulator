@@ -8,26 +8,25 @@ package cws.core.experiment;
  * 
  * @author malawski
  */
-public class GenerateExperimentConstant {
-
+public class GenerateExperimentConstant extends AbstractGenerateExperiment {
     public static void main(String[] args) {
-        String dagPath;
-        String dagName;
-        double price = 1.0;
-        double maxScaling = 0.0;
-        String group = "constant";
-        double alpha = 0.7;
-        String runDirectory = "run-02-constant";
-        int maxHours;
-        int step;
-        int start;
-        int runID = 0;
-        double taskDilatation = 1.0;
-        double runtimeVariation = 0.0;
-        double delay = 0.0;
-        String distribution = "constant";
+        new GenerateExperimentConstant().generate(args);
+    }
 
-        dagPath = "../projects/pegasus/Montage/";
+    @Override
+    public void doGenerate() {
+        price = 1.0;
+        maxScaling = 0.0;
+        group = "constant";
+        alpha = 0.7;
+        runDirectory = "run-02-constant";
+        runID = 0;
+        taskDilatation = 1.0;
+        runtimeVariation = 0.0;
+        delay = 0.0;
+        distribution = "constant";
+
+        dagPath = dagPathPrefix + "Montage/";
         dagName = "MONTAGE";
 
         String[] dags = DAGListGenerator.generateDAGListConstant(dagName, 1000, 100);
@@ -39,12 +38,9 @@ public class GenerateExperimentConstant {
         // double[] budgets= {10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0};
         double[] budgets = { 40.0, 80.0, 120.0, 160.0, 200.0 };
 
-        for (double budget : budgets) {
-            Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start,
-                    maxScaling, alpha, taskDilatation, runtimeVariation, delay, distribution, runID);
-        }
+        generateSeries(budgets, dags);
 
-        dagPath = "../projects/pegasus/CyberShake/";
+        dagPath = dagPathPrefix + "CyberShake/";
         dagName = "CYBERSHAKE";
 
         dags = DAGListGenerator.generateDAGListConstant(dagName, 1000, 100);
@@ -57,12 +53,9 @@ public class GenerateExperimentConstant {
         // budgets = new double[] {10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0, 120.0, 140.0};
         budgets = new double[] { 50.0, 150.0, 250.0, 350.0, 450.0 };
 
-        for (double budget : budgets) {
-            Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start,
-                    maxScaling, alpha, taskDilatation, runtimeVariation, delay, distribution, runID);
-        }
+        generateSeries(budgets, dags);
 
-        dagPath = "../projects/pegasus/LIGO/";
+        dagPath = dagPathPrefix + "LIGO/";
         dagName = "LIGO";
 
         dags = DAGListGenerator.generateDAGListConstant(dagName, 1000, 100);
@@ -75,12 +68,9 @@ public class GenerateExperimentConstant {
         // budgets = new double[] {200.0, 400.0, 600.0, 800.0, 1000.0, 1200.0, 1400.0, 1600.0, 1800.0, 2000.0};
         budgets = new double[] { 500.0, 1000.0, 1500.0, 2000.0, 2500.0 };
 
-        for (double budget : budgets) {
-            Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start,
-                    maxScaling, alpha, taskDilatation, runtimeVariation, delay, distribution, runID);
-        }
+        generateSeries(budgets, dags);
 
-        dagPath = "../projects/pegasus/Genome/";
+        dagPath = dagPathPrefix + "Genome/";
         dagName = "GENOME";
 
         dags = DAGListGenerator.generateDAGListConstant(dagName, 1000, 100);
@@ -94,12 +84,9 @@ public class GenerateExperimentConstant {
         // 20000.0};
         budgets = new double[] { 5000.0, 10000.0, 15000.0, 20000.0, 25000.0 };
 
-        for (double budget : budgets) {
-            Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start,
-                    maxScaling, alpha, taskDilatation, runtimeVariation, delay, distribution, runID);
-        }
+        generateSeries(budgets, dags);
 
-        dagPath = "../projects/pegasus/SIPHT/";
+        dagPath = dagPathPrefix + "SIPHT/";
         dagName = "SIPHT";
 
         dags = DAGListGenerator.generateDAGListConstant(dagName, 1000, 100);
@@ -112,9 +99,6 @@ public class GenerateExperimentConstant {
         // double[] budgets= {200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1100.0};
         budgets = new double[] { 500.0, 1000.0, 1500.0, 2000.0, 2500.0 };
 
-        for (double budget : budgets) {
-            Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start,
-                    maxScaling, alpha, taskDilatation, runtimeVariation, delay, distribution, runID);
-        }
+        generateSeries(budgets, dags);
     }
 }

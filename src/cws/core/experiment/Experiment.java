@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Random;
 
 import cws.core.algorithms.Algorithm;
-import cws.core.algorithms.AlgorithmSimulationParams;
-import cws.core.algorithms.StorageCacheType;
-import cws.core.algorithms.StorageType;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
@@ -41,13 +38,7 @@ public class Experiment {
 
         cloudsim.init();
 
-        AlgorithmSimulationParams simulationParams = new AlgorithmSimulationParams();
-
-        // TODO(mequrel): should be parametrized
-        simulationParams.setStorageType(StorageType.VOID);
-        simulationParams.setStorageCacheType(StorageCacheType.VOID);
-
-        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim, simulationParams);
+        Algorithm algorithm = AlgorithmFactory.createAlgorithm(param, cloudsim);
 
         algorithm.setGenerateLog(false);
 
@@ -250,16 +241,6 @@ public class Experiment {
     /**
      * Generates a series constructing dags array by repeating the same DAG file numDAGs times.
      * Sets runID to 0.
-     * 
-     * @param dagPath
-     * @param dagName
-     * @param budget
-     * @param price
-     * @param numDAGs
-     * @param N
-     * @param step
-     * @param start
-     * @param max_scaling
      */
     public static void generateConstantSeries(String runDirectory, String group, String dagPath, String dagName,
             double budget, double price, int numDAGs, double N, double step, double start, double max_scaling,

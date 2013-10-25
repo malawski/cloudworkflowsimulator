@@ -15,10 +15,10 @@ import cws.core.storage.cache.VoidCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
 
 public abstract class Algorithm {
-    /** Simulation params like storage manager type, needed to initialize simulation properly **/
+    /** Simulation params like storage manager type, needed to initialize simulation properly. **/
     protected AlgorithmSimulationParams simulationParams;
-    protected CloudSimWrapper cloudsim;
 
+    protected CloudSimWrapper cloudsim;
     private double budget;
     private double deadline;
     private List<DAG> dags;

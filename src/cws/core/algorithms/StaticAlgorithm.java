@@ -446,7 +446,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     public void simulate(String logname) {
         getCloudsim().init();
 
-        storageManager = Algorithm.initializeStorage(simulationParams, cloudsim);
+        storageManager = initializeStorage(simulationParams, cloudsim);
         WorkflowLog log = prepareEnvironment();
 
         planningStartWallTime = System.nanoTime();
