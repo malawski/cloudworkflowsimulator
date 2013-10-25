@@ -116,7 +116,5 @@ public class GenerateExperimentConstant {
             Experiment.generateSeries(runDirectory, group, dagPath, dags, budget, price, maxHours, step, start,
                     maxScaling, alpha, taskDilatation, runtimeVariation, delay, distribution, runID);
         }
-
     }
-
 }

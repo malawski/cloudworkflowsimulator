@@ -75,6 +75,7 @@ public class DynamicProvisionerDynamicSchedulerTest {
         // FIXME (_mequrel): looks awkward, a comment should be added or some logic inversed
         new EnsembleManager(dags, engine, cloudsim);
 
+        cloudsim.disableLogging();
         cloudsim.startSimulation();
 
         assertEquals(0, engine.getQueuedJobs().size());
@@ -233,7 +234,6 @@ public class DynamicProvisionerDynamicSchedulerTest {
 
     @Test
     public void testMaxScaling() {
-
         String dagName = "GENOME.n.1000.0.dag";
 
         double price = 1.0;
@@ -324,7 +324,9 @@ public class DynamicProvisionerDynamicSchedulerTest {
 
     public void runTestExperiment(ExperimentDescription param) {
         Experiment experiment = new Experiment();
-        ExperimentResult result = experiment.runExperiment(param);
+        CloudSimWrapper cloudsim = new CloudSimWrapper();
+        cloudsim.disableLogging();
+        ExperimentResult result = experiment.runExperiment(param, cloudsim);
 
         assertTrue(result.getCost() <= result.getBudget());
         assertTrue(result.getNumBusyVMs() == 0);

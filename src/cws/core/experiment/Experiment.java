@@ -20,33 +20,25 @@ import cws.core.log.WorkflowLog;
 public class Experiment {
 
     /**
-     * Runs experiment given its description
-     * @param param experiment description
+     * Runs experiment given its description.
+     * @param param The experiment description.
      * @return results
      */
     public ExperimentResult runExperiment(ExperimentDescription param) {
+        return runExperiment(param, new CloudSimWrapper());
+    }
+
+    /**
+     * Runs experiment given its description.
+     * @param param The experiment description.
+     * @param cloudsim The cloudsim instance.
+     * @return results
+     */
+    public ExperimentResult runExperiment(ExperimentDescription param, CloudSimWrapper cloudsim) {
         long startTime = System.nanoTime();
 
         ExperimentResult result = new ExperimentResult();
 
-        // initialize distributions
-
-        // To get mean m and stddev s, use:
-        // sigma = sqrt(log(1+s^2/m^2))
-        // mu = log(m)-0.5*log(1+s^2/m^2)
-        // For mean = 60 and stddev = 10: mu = 4.080645 sigma = 0.1655264
-        // For mean = 20 and stddev = 5: mu = 2.96542, sigma = 0.09975135
-
-        // ContinuousDistribution provisioningDelayDistribution = new LognormalDistr(new
-        // java.util.Random(param.getRunID()),4.080645, 0.1655264);
-        // ContinuousDistribution deprovisioningDelayDistribution = new LognormalDistr(new
-        // java.util.Random(param.getRunID()), 2.96542, 0.09975135);
-
-        // VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
-        // VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
-
-        // TODO(_mequrel_): change to IoC in the future
-        CloudSimWrapper cloudsim = new CloudSimWrapper();
         cloudsim.init();
 
         AlgorithmSimulationParams simulationParams = new AlgorithmSimulationParams();
@@ -60,9 +52,6 @@ public class Experiment {
         algorithm.setGenerateLog(false);
 
         String fileName = param.getRunDirectory() + File.separator + "output-" + param.getFileName();
-
-        // String fName = param.getRunDirectory() + File.separator + "result-" +
-        // param.getAlgorithmName()+"-"+param.getDags()[0]+"x"+param.getDags().length+"d"+param.getDeadline()+"b"+param.getBudget()+"m"+param.getMax_scaling();
 
         long simulationStartTime = System.nanoTime();
         algorithm.simulate(fileName);
@@ -111,7 +100,6 @@ public class Experiment {
     public static void generateSeries(String runDirectory, String group, String dagPath, String[] dags, double budget,
             double price, double N, double step, double start, double max_scaling, double alpha, double taskDilatation,
             double runtimeVariation, double delay, String distribution, int runID) {
-
         double deadline;
 
         new File(runDirectory).mkdir();
@@ -146,11 +134,7 @@ public class Experiment {
     public static void generateSeries(String runDirectory, String group, String dagPath, String dagName,
             int ensembleSize, String distribution, String algorithms[], double price, double max_scaling, double alpha,
             double taskDilatation, double runtimeVariation, double delay, int runID) {
-
         new File(runDirectory).mkdir();
-
-        // String algorithms[] = {"SPSS", "DPDS", "WADPDS", "MaxMin", "Wide", "Backtrack"};
-        // String algorithms[] = {"SPSS", "DPDS", "WADPDS"};
 
         String[] dagNames = null;
 
@@ -247,134 +231,7 @@ public class Experiment {
     }
 
     /**
-     * This was the previously used method for running a series of experiments in a single execution.
-     * @param group
-     * @param dagPath
-     * @param dags
-     * @param budget
-     * @param price
-     * @param N
-     * @param step
-     * @param start
-     * @param max_scaling
-     * @param alpha
-     * @param runID
-     */
-    public static void runOldSeries(String group, String dagPath, String[] dags, double budget, double price, int N,
-            int step, int start, double max_scaling, double alpha, int runID) {
-
-        double deadline;
-        ExperimentResult resultsSPSS[] = new ExperimentResult[N + 1];
-        ExperimentResult resultsAware[] = new ExperimentResult[N + 1];
-        ExperimentResult resultsSimple[] = new ExperimentResult[N + 1];
-
-        for (int i = start; i <= N; i += step) {
-            deadline = 3600 * i; // seconds
-            Experiment experiment = new Experiment();
-
-            resultsSPSS[i] = experiment.runExperiment(new ExperimentDescription(group, "SPSS", "output", dagPath, dags,
-                    deadline, budget, price, max_scaling, alpha, 1.0, 0.0, 0.0, "pareto-sorted", runID));
-            resultsAware[i] = experiment.runExperiment(new ExperimentDescription(group, "WADPDS", "output", dagPath,
-                    dags, deadline, budget, price, max_scaling, alpha, 1.0, 0.0, 0.0, "pareto-sorted", runID));
-            resultsSimple[i] = experiment.runExperiment(new ExperimentDescription(group, "DPDS", "output", dagPath,
-                    dags, deadline, budget, price, max_scaling, alpha, 1.0, 0.0, 0.0, "pareto-sorted", runID));
-        }
-
-        // write number of dags finished
-
-        StringBuffer outSPSS = new StringBuffer();
-        StringBuffer outAware = new StringBuffer();
-        StringBuffer outSimple = new StringBuffer();
-
-        for (int i = start; i <= N; i += step) {
-            outSPSS.append(resultsSPSS[i].getDeadline() + "  " + resultsSPSS[i].getNumFinishedDAGs() + "\n");
-            outAware.append(resultsAware[i].getDeadline() + "  " + resultsAware[i].getNumFinishedDAGs() + "\n");
-            outSimple.append(resultsSimple[i].getDeadline() + "  " + resultsSimple[i].getNumFinishedDAGs() + "\n");
-
-        }
-
-        WorkflowLog.stringToFile(outSPSS.toString(), group + dags[0] + "b" + budget + "h" + start + "-" + N + "m"
-                + max_scaling + "run" + runID + "-outputSPSS.txt");
-        WorkflowLog.stringToFile(outAware.toString(), group + dags[0] + "b" + budget + "h" + start + "-" + N + "m"
-                + max_scaling + "run" + runID + "-outputAware.txt");
-        WorkflowLog.stringToFile(outSimple.toString(), group + dags[0] + "b" + budget + "h" + start + "-" + N + "m"
-                + max_scaling + "run" + runID + "-outputSimple.txt");
-
-        // write priorities of dags finished
-
-        StringBuffer prioritiesSPSS = new StringBuffer();
-        StringBuffer prioritiesAware = new StringBuffer();
-        StringBuffer prioritiesSimple = new StringBuffer();
-
-        for (int i = start; i <= N; i += step) {
-            prioritiesSPSS.append(resultsSPSS[i].formatPriorities());
-            prioritiesAware.append(resultsAware[i].formatPriorities());
-            prioritiesSimple.append(resultsSimple[i].formatPriorities());
-        }
-
-        WorkflowLog.stringToFile(prioritiesSPSS.toString(), group + dags[0] + "b" + budget + "h" + start + "-" + N
-                + "m" + max_scaling + "run" + runID + "-prioritiesSPSS.txt");
-        WorkflowLog.stringToFile(prioritiesAware.toString(), group + dags[0] + "b" + budget + "h" + start + "-" + N
-                + "m" + max_scaling + "run" + runID + "-prioritiesAware.txt");
-        WorkflowLog.stringToFile(prioritiesSimple.toString(), group + dags[0] + "b" + budget + "h" + start + "-" + N
-                + "m" + max_scaling + "run" + runID + "-prioritiesSimple.txt");
-
-        // write sizes of dags finished
-
-        StringBuffer sizesSPSS = new StringBuffer();
-        StringBuffer sizesAware = new StringBuffer();
-        StringBuffer sizesSimple = new StringBuffer();
-
-        for (int i = start; i <= N; i += step) {
-            sizesSPSS.append(resultsSPSS[i].formatSizes());
-            sizesAware.append(resultsAware[i].formatSizes());
-            sizesSimple.append(resultsSimple[i].formatSizes());
-        }
-
-        WorkflowLog.stringToFile(sizesSPSS.toString(), group + dags[0] + "b" + budget + "h" + start + "-" + N + "m"
-                + max_scaling + "run" + runID + "-sizesSPSS.txt");
-        WorkflowLog.stringToFile(sizesAware.toString(), group + dags[0] + "b" + budget + "h" + start + "-" + N + "m"
-                + max_scaling + "run" + runID + "-sizesAware.txt");
-        WorkflowLog.stringToFile(sizesSimple.toString(), group + dags[0] + "b" + budget + "h" + start + "-" + N + "m"
-                + max_scaling + "run" + runID + "-sizesSimple.txt");
-    }
-
-    /**
-     * 
-     * Generates a series of experiments, sets runID = 0
-     * 
-     * @param dagPath
-     * @param dags
-     * @param budget
-     * @param price
-     * @param N
-     * @param step
-     * @param start
-     * @param max_scaling
-     */
-
-    // public static void generateSeries(String runDirectory, String group, String dagPath, String[] dags, double
-    // budget, double price,
-    // int N, int step, int start, double max_scaling, double alpha, double taskDilatation) {
-    //
-    // generateSeries(runDirectory, group, dagPath, dags, budget, price, N, step, start, max_scaling, alpha,
-    // taskDilatation, 0);
-    // }
-
-    /**
-     * 
      * Generates a series constructing dags array by repeating the same DAG file numDAGs times.
-     * 
-     * @param dagPath
-     * @param dagName
-     * @param budget
-     * @param price
-     * @param numDAGs
-     * @param N
-     * @param step
-     * @param start
-     * @param max_scaling
-     * @param runID
      */
     public static void generateSeries(String runDirectory, String group, String dagPath, String dagName, double budget,
             double price, int numDAGs, double N, double step, double start, double max_scaling, double alpha,

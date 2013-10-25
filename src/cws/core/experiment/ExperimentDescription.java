@@ -14,7 +14,6 @@ import org.apache.commons.io.IOUtils;
  * @author malawski
  */
 public class ExperimentDescription {
-
     // name of group this experiment belongs to
     private String group;
     // name of algorithm to use
@@ -275,7 +274,6 @@ public class ExperimentDescription {
         runtimeVariation = Double.parseDouble(p.getProperty("runtimeVariation"));
         delay = Double.parseDouble(p.getProperty("delay"));
         distribution = p.getProperty("distribution");
-
     }
 
     private String[] dagsFromString(String property) {
@@ -298,7 +296,5 @@ public class ExperimentDescription {
                 + getAlpha() + "t" + getTaskDilatation() + "v" + getRuntimeVariation() + "l" + getDelay() + "r" + runID;
 
         return fileName;
-
     }
-
 }
