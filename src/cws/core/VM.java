@@ -200,7 +200,7 @@ public class VM extends CWSSimEntity {
         for (Job job : jobs) {
             job.setResult(Job.Result.FAILURE);
             getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
-            getCloudsim().log(" Terminating job " + job.getID() + " on VM " + job.getVM().getId());
+            getCloudsim().log("Terminating job " + job.getID() + " on VM " + job.getVM().getId());
         }
 
         // Reset dynamic state
@@ -270,7 +270,7 @@ public class VM extends CWSSimEntity {
     }
 
     private void jobStart(Job job) {
-        getCloudsim().log(" Starting job " + job.getTask().getId() + " on VM " + job.getVM().getId());
+        getCloudsim().log("Starting job " + job.getTask().getId() + " on VM " + job.getVM().getId());
         // The job is now running
         job.setStartTime(getCloudsim().clock());
         job.setState(Job.State.RUNNING);

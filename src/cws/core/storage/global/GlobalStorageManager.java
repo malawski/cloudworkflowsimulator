@@ -64,7 +64,7 @@ public class GlobalStorageManager extends StorageManager {
         if (notCachedFiles.size() == 0) {
             notifyThatBeforeTransfersCompleted(job);
         } else {
-            startTransfers(notCachedFiles, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS);
+            startTransfers(notCachedFiles, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS, "read");
             congestedParams.addReads(notCachedFiles.size());
             updateSpeedCongestion();
         }
@@ -82,7 +82,7 @@ public class GlobalStorageManager extends StorageManager {
         if (files.size() == 0) {
             notifyThatAfterTransfersCompleted(job);
         } else {
-            startTransfers(files, job, writes, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS);
+            startTransfers(files, job, writes, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS, "write");
             congestedParams.addWrites(files.size());
             updateSpeedCongestion();
         }
@@ -90,17 +90,22 @@ public class GlobalStorageManager extends StorageManager {
 
     /**
      * Starts transfers for the given job.
+     * @param files - the files to start transfers for.
+     * @param job - the job that starts the transfers.
+     * @param transfers - the map with active transfers this transfer belongs to (e.g. writes or reads).
+     * @param progressEvent - the event that will be sent upon transfer start.
+     * @param transferType - the type of this transfer, e.g. "write".
      */
     private void startTransfers(List<DAGFile> files, Job job, Map<Job, List<GlobalStorageTransfer>> transfers,
-            int progressEvent) {
+            int progressEvent, String transferType) {
         List<GlobalStorageTransfer> jobTransfers = new ArrayList<GlobalStorageTransfer>();
         transfers.put(job, jobTransfers);
         for (DAGFile file : files) {
             GlobalStorageTransfer write = new GlobalStorageTransfer(job, file);
             jobTransfers.add(write);
-            getCloudsim().log(
-                    String.format("Global transfer started: %s, size: %s", write.getFile().getName(), write.getFile()
-                            .getSize()));
+            String logMsg = String.format("Global %s transfer started: %s, size: %s", transferType, write.getFile()
+                    .getName(), write.getFile().getSize());
+            getCloudsim().log(logMsg);
             getCloudsim().send(getId(), getId(), params.getLatency(), progressEvent, write);
         }
     }
@@ -109,7 +114,7 @@ public class GlobalStorageManager extends StorageManager {
      * Called after a write has finished. Logs message. If all writes have completed then notifies appropriate VM.
      */
     private void onWriteFinished(GlobalStorageTransfer write) {
-        if (onTransferFinished(write, writes)) {
+        if (onTransferFinished(write, writes, "write")) {
             notifyThatAfterTransfersCompleted(write.getJob());
         }
         cacheManager.putFileToCache(write.getFile(), write.getJob());
@@ -121,7 +126,7 @@ public class GlobalStorageManager extends StorageManager {
      * Called after a read has finished. Logs message. If all reads have completed then notifies appropriate VM.
      */
     private void onReadFinished(GlobalStorageTransfer read) {
-        if (onTransferFinished(read, reads)) {
+        if (onTransferFinished(read, reads, "read")) {
             notifyThatBeforeTransfersCompleted(read.getJob());
         }
         cacheManager.putFileToCache(read.getFile(), read.getJob());
@@ -133,14 +138,16 @@ public class GlobalStorageManager extends StorageManager {
 
     /**
      * Cleans up after transfer's finish.
-     * @param transfer - the transfer that has finished
-     * @param transfers - map with active transfers this transfer belongs to (e.g. writes or reads)
-     * @return true if this was the last transfer in the job, false otherwise
+     * @param transfer - the transfer that has finished.
+     * @param transfers - the map with active transfers this transfer belongs to (e.g. writes or reads).
+     * @param transferType - the type of this transfer, e.g. "write".
+     * @return true if this was the last transfer in the job, false otherwise.
      */
-    private boolean onTransferFinished(GlobalStorageTransfer transfer, Map<Job, List<GlobalStorageTransfer>> transfers) {
-        getCloudsim().log(
-                "Global transfer finished: " + transfer.getFile().getName() + ", bytes transferred: "
-                        + transfer.getFile().getSize() + ", duration: " + transfer.getDuration());
+    private boolean onTransferFinished(GlobalStorageTransfer transfer, Map<Job, List<GlobalStorageTransfer>> transfers,
+            String transferType) {
+        String logMsg = String.format("Global %s transfer finished: %s, bytes transferred: %d, duration: %f",
+                transferType, transfer.getFile().getName(), transfer.getFile().getSize(), transfer.getDuration());
+        getCloudsim().log(logMsg);
         List<GlobalStorageTransfer> jobTransfers = transfers.get(transfer.getJob());
         jobTransfers.remove(transfer);
         if (jobTransfers.isEmpty()) {
