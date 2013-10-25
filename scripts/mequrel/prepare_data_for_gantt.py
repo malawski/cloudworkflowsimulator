@@ -105,7 +105,6 @@ def maybeFinishedComputation(line):
 
 def maybeStartedComputation(line):
     match = re.match(startedComputationPattern, line)
-
     if match:
         time = match.group(1)
         id = match.group(2)
