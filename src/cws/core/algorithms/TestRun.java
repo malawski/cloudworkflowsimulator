@@ -32,6 +32,7 @@ public class TestRun {
     private static final String DEFAULT_ENSEMBLE_SIZE = "50";
     private static final String DEFAULT_SCALING_FACTOR = "1.0";
     private static final String DEFAULT_STORAGE_CACHE = "void";
+    private static final String DEFAULT_ENABLE_LOGGING = "false";
 
     public static Options buildOptions() {
         Options options = new Options();
@@ -85,6 +86,11 @@ public class TestRun {
         storageManager.setArgName("MRG");
         options.addOption(storageManager);
 
+        Option enableLogging = new Option("el", "enable-logging", true, "Whether to enable logging, defaults to "
+                + DEFAULT_ENABLE_LOGGING);
+        enableLogging.setArgName("BOOL");
+        options.addOption(enableLogging);
+
         GlobalStorageParams.buildCliOptions(options);
         VMFactory.buildCliOptions(options);
         return options;
@@ -132,6 +138,7 @@ public class TestRun {
         Double scalingFactor = Double.parseDouble(args.getOptionValue("scaling-factor", DEFAULT_SCALING_FACTOR));
         Long seed = Long.parseLong(args.getOptionValue("seed", System.currentTimeMillis() + ""));
         String storageCacheType = args.getOptionValue("storage-cache", DEFAULT_STORAGE_CACHE);
+        Boolean enableLogging = Boolean.valueOf(args.getOptionValue("enable-logging", DEFAULT_ENABLE_LOGGING));
 
         VMFactory.readCliOptions(args, seed);
 
@@ -140,7 +147,9 @@ public class TestRun {
         cloudsim.init();
 
         // Disable cloudsim logging
-        cloudsim.disableLogging();
+        if (!enableLogging) {
+            cloudsim.disableLogging();
+        }
 
         // Determine the distribution
         String[] names = null;
