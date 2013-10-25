@@ -13,39 +13,47 @@ import sys
 
 
 def main():
+    if len(sys.argv) != 2:
+        print('Invalid number of params. 1 param expected (filename).')
+        return
+
     filename = sys.argv[1]
-    infile = open(filename, "r")
+    infile = open(filename, 'r')
 
     for line in infile:
         task = parse(line)
-        validate(task)
+        result = validate_task(task)
+
+        if not result.is_valid:
+            print(result.message)
 
     infile.close()
 
+#TODO(mequrel): Maybe should change output to null or something more meaningful.
+MISSING_VALUE = -1.0
 
-def validate(task):
-    if task.task_start == -1.0:
-        print("INVALID INPUT: task {} hasn't started at all".format(task.id))
-        return
+class TaskValidationResult(object):
+    def __init__(self, is_valid, message = ''):
+        self.is_valid = is_valid
+        self.message = message
 
-    if task.task_end == -1.0:
-        print("INVALID INPUT: task {} hasn't finished at all".format(task.id))
-        return
+def validate_task(task):
+    if task.task_start == MISSING_VALUE:
+        return TaskValidationResult(False, 'task {} hasn\'t started at all'.format(task.id))
 
-    if task.computation_start == -1.0:
-        print("INVALID INPUT: task {} hasn't started computation at all".format(task.id))
-        return
+    if task.task_end == MISSING_VALUE:
+        return TaskValidationResult(False, 'task {} hasn\'t finished at all'.format(task.id))
 
-    if task.computation_end == -1.0:
-        print("INVALID INPUT: task {} hasn't finished computation at all".format(task.id))
-        return
+    if task.computation_start == MISSING_VALUE:
+        return TaskValidationResult(False, 'task {} hasn\'t started computation at all'.format(task.id))
 
-    if not ( task.task_start <= task.computation_start <= task.computation_end <= task.task_end ):
-        print("INVALID INPUT: task {} doesn't hold time order".format(task.id))
-        print(
-        "    {} <= {} <= {} <= {}".format(task.task_start, task.computation_start, task.computation_end, task.task_end))
-        return
+    if task.computation_end == MISSING_VALUE:
+        return TaskValidationResult(False, 'task {} hasn\'t finished computation at all'.format(task.id))
 
+    if not task.task_start <= task.computation_start <= task.computation_end <= task.task_end:
+        return TaskValidationResult(False, 'task {} doesn\'t hold time order'.format(task.id))
+
+    return TaskValidationResult(True)
 
 class InvalidInputFormatException(Exception):
     pass
@@ -62,7 +70,7 @@ class Task:
 
 
 def parse(line):
-    split_line = line.split(" ")
+    split_line = line.split(' ')
     if len(split_line) != 6:
         raise InvalidInputFormatException()
 
@@ -78,6 +86,6 @@ def parse(line):
 
     return task
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 
