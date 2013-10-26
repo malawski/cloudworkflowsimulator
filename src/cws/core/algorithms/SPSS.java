@@ -20,7 +20,7 @@ public class SPSS extends StaticAlgorithm {
     private double alpha;
 
     public SPSS(double budget, double deadline, List<DAG> dags, double alpha, CloudSimWrapper cloudsim,
-            AlgorithmSimulationParams simulationParams) {
+            StorageSimulationParams simulationParams) {
         super(budget, deadline, dags, cloudsim, simulationParams);
         this.alpha = alpha;
     }

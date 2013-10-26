@@ -6,24 +6,27 @@ import java.util.Properties;
 
 import cws.core.storage.global.GlobalStorageParams;
 
-public class AlgorithmSimulationParams {
+/**
+ * Storage related parameters for simulations.
+ */
+public class StorageSimulationParams {
     private StorageType storageType;
     private GlobalStorageParams storageParams;
     private StorageCacheType storageCacheType;
 
-    public AlgorithmSimulationParams(StorageType storageType, GlobalStorageParams storageParams,
+    public StorageSimulationParams(StorageType storageType, GlobalStorageParams storageParams,
             StorageCacheType storageCacheType) {
         this.storageType = storageType;
         this.storageParams = storageParams;
         this.storageCacheType = storageCacheType;
     }
 
-    public AlgorithmSimulationParams() {
+    public StorageSimulationParams() {
     }
 
     /**
-     * TODO(bryk):
-     * @param properties
+     * Saves this params to the given properties file.
+     * @param properties The properties file to save params to.
      */
     public void storeProperties(Properties properties) {
         properties.setProperty("storageType", storageType.toString());
@@ -34,8 +37,7 @@ public class AlgorithmSimulationParams {
     }
 
     /**
-     * TODO(bryk): Document it.
-     * @return
+     * @return The file name suffix based on this params.
      */
     public String getName() {
         String ret = "-" + storageType + "_" + storageCacheType;
@@ -45,14 +47,16 @@ public class AlgorithmSimulationParams {
         return ret;
     }
 
-    public static List<AlgorithmSimulationParams> getAllSimulationParams() {
-        List<AlgorithmSimulationParams> ret = new ArrayList<AlgorithmSimulationParams>();
-        AlgorithmSimulationParams voidAll = new AlgorithmSimulationParams(StorageType.VOID, null, StorageCacheType.VOID);
+    /**
+     * @return All simulation params permutations.
+     */
+    public static List<StorageSimulationParams> getAllSimulationParams() {
+        List<StorageSimulationParams> ret = new ArrayList<StorageSimulationParams>();
+        StorageSimulationParams voidAll = new StorageSimulationParams(StorageType.VOID, null, StorageCacheType.VOID);
         ret.add(voidAll);
         for (GlobalStorageParams gstorageParam : GlobalStorageParams.getAllGlobalStorageParams()) {
             for (StorageCacheType cache : StorageCacheType.values()) {
-                AlgorithmSimulationParams gstorage = new AlgorithmSimulationParams(StorageType.GLOBAL, gstorageParam,
-                        cache);
+                StorageSimulationParams gstorage = new StorageSimulationParams(StorageType.GLOBAL, gstorageParam, cache);
                 ret.add(gstorage);
             }
         }
@@ -60,12 +64,12 @@ public class AlgorithmSimulationParams {
     }
 
     /**
-     * TODO(bryk):
-     * @param properties
-     * @return
+     * Reads simulation params from a properties file.
+     * @param properties The properties file to read from.
+     * @return Newly created simulation params instance.
      */
-    public static AlgorithmSimulationParams readProperties(Properties properties) {
-        AlgorithmSimulationParams params = new AlgorithmSimulationParams();
+    public static StorageSimulationParams readProperties(Properties properties) {
+        StorageSimulationParams params = new StorageSimulationParams();
         if (properties.getProperty("storageType") != null)
             params.storageType = StorageType.valueOf(properties.getProperty("storageType"));
         if (properties.getProperty("storageCacheType") != null)

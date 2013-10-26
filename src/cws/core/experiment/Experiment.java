@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 import cws.core.algorithms.Algorithm;
-import cws.core.algorithms.AlgorithmSimulationParams;
+import cws.core.algorithms.StorageSimulationParams;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
@@ -98,7 +98,7 @@ public class Experiment {
         for (double i = start; i <= N; i += step) {
             double deadline = 3600 * i; // seconds
             for (String alg : algorithms) {
-                for (AlgorithmSimulationParams algorithmParams : AlgorithmSimulationParams.getAllSimulationParams()) {
+                for (StorageSimulationParams algorithmParams : StorageSimulationParams.getAllSimulationParams()) {
                     ExperimentDescription param = new ExperimentDescription(group, alg, runDirectory, dagPath, dags,
                             deadline, budget, price, max_scaling, alpha, taskDilatation, runtimeVariation, delay,
                             distribution, runID);
@@ -150,51 +150,51 @@ public class Experiment {
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
         double maxTime = 0.0;
+        for (StorageSimulationParams algorithmParams : StorageSimulationParams.getAllSimulationParams()) {
+            CloudSimWrapper cloudsim = new CloudSimWrapper();
+            cloudsim.init();
+            List<DAG> dags = new ArrayList<DAG>();
+            for (String name : dagNames) {
+                String fileName = dagPath + File.separator + name;
+                // System.out.println(fileName);
+                DAG dag = DAGParser.parseDAG(new File(fileName));
+                dags.add(dag);
 
-        List<DAG> dags = new ArrayList<DAG>();
-        for (String name : dagNames) {
-            String fileName = dagPath + File.separator + name;
-            // System.out.println(fileName);
-            DAG dag = DAGParser.parseDAG(new File(fileName));
-            dags.add(dag);
-
-            if (taskDilatation > 1.0) {
-                for (String tid : dag.getTasks()) {
-                    Task t = dag.getTaskById(tid);
-                    t.scaleSize(taskDilatation);
+                if (taskDilatation > 1.0) {
+                    for (String tid : dag.getTasks()) {
+                        Task t = dag.getTaskById(tid);
+                        t.scaleSize(taskDilatation);
+                    }
                 }
+
+                DAGStats stats = new DAGStats(dag, Algorithm.initializeStorage(algorithmParams, cloudsim));
+
+                minTime = Math.min(minTime, stats.getCriticalPath());
+                minCost = Math.min(minCost, stats.getMinCost());
+
+                maxTime += stats.getCriticalPath();
+                maxCost += stats.getMinCost();
             }
 
-            // TODO(bryk): introduce storage manager here
-            DAGStats stats = new DAGStats(dag, null);
+            int nbudgets = 3; // TODO(bryk): Parametrize.
+            int ndeadlines = 3; // TODO(bryk): Parametrize.
 
-            minTime = Math.min(minTime, stats.getCriticalPath());
-            minCost = Math.min(minCost, stats.getMinCost());
+            double minBudget = Math.ceil(minCost);
+            double maxBudget = Math.ceil(maxCost);
+            double budgetStep = (maxBudget - minBudget) / (nbudgets - 1);
 
-            maxTime += stats.getCriticalPath();
-            maxCost += stats.getMinCost();
-        }
+            double minDeadline = Math.ceil(minTime);
+            double maxDeadline = Math.ceil(maxTime);
+            double deadlineStep = (maxDeadline - minDeadline) / (ndeadlines - 1);
 
-        int nbudgets = 10;
-        int ndeadlines = 10;
+            System.out.printf("application = %s, distribution = %s\n", dagName, distribution);
+            System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
+            System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
 
-        double minBudget = Math.ceil(minCost);
-        double maxBudget = Math.ceil(maxCost);
-        double budgetStep = (maxBudget - minBudget) / (nbudgets - 1);
-
-        double minDeadline = Math.ceil(minTime);
-        double maxDeadline = Math.ceil(maxTime);
-        double deadlineStep = (maxDeadline - minDeadline) / (ndeadlines - 1);
-
-        System.out.printf("application = %s, distribution = %s\n", dagName, distribution);
-        System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
-        System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
-
-        // we add 0.00001 as epsilon to avoid rounding errors
-        for (double budget = minBudget; budget <= maxBudget + 0.00001; budget += budgetStep) {
-            for (double deadline = minDeadline; deadline <= maxDeadline + 0.00001; deadline += deadlineStep) {
-                for (String alg : algorithms) {
-                    for (AlgorithmSimulationParams algorithmParams : AlgorithmSimulationParams.getAllSimulationParams()) {
+            // we add 0.00001 as epsilon to avoid rounding errors
+            for (double budget = minBudget; budget <= maxBudget + 0.00001; budget += budgetStep) {
+                for (double deadline = minDeadline; deadline <= maxDeadline + 0.00001; deadline += deadlineStep) {
+                    for (String alg : algorithms) {
                         ExperimentDescription param = new ExperimentDescription(group, alg, runDirectory, dagPath,
                                 dagNames, deadline, budget, price, max_scaling, alpha, taskDilatation,
                                 runtimeVariation, delay, distribution, runID);

@@ -105,8 +105,7 @@ public class GlobalStorageParams {
     }
 
     /**
-     * TODO(bryk): Document it.
-     * @return
+     * @return Properties file name prefix based on this prams' state.
      */
     public String getName() {
         return "rs_" + readSpeed + "ws_" + writeSpeed + "ctt_" + chunkTransferTime + "l_" + latency + "nr_"
@@ -114,8 +113,7 @@ public class GlobalStorageParams {
     }
 
     /**
-     * TODO(bryk): Document it.
-     * @return
+     * @return All global storage params permutations.
      */
     public static List<GlobalStorageParams> getAllGlobalStorageParams() {
         List<GlobalStorageParams> ret = new ArrayList<GlobalStorageParams>();

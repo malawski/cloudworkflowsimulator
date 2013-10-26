@@ -9,7 +9,7 @@ import cws.core.scheduler.WorkflowAwareEnsembleScheduler;
 
 public class WADPDS extends DynamicAlgorithm {
     public WADPDS(double budget, double deadline, List<DAG> dags, double price, double maxScaling,
-            CloudSimWrapper cloudsim, AlgorithmSimulationParams simulationParams) {
+            CloudSimWrapper cloudsim, StorageSimulationParams simulationParams) {
         super(budget, deadline, dags, price, new WorkflowAwareEnsembleScheduler(cloudsim),
                 new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim), cloudsim, simulationParams);
     }

@@ -171,7 +171,7 @@ public class TestRun {
             System.exit(1);
         }
 
-        AlgorithmSimulationParams simulationParams = new AlgorithmSimulationParams();
+        StorageSimulationParams simulationParams = new StorageSimulationParams();
 
         if (storageCacheType.equals("fifo")) {
             simulationParams.setStorageCacheType(StorageCacheType.FIFO);
@@ -301,7 +301,7 @@ public class TestRun {
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
-            CloudSimWrapper cloudsim, AlgorithmSimulationParams simulationParams, List<DAG> dags, double budget,
+            CloudSimWrapper cloudsim, StorageSimulationParams simulationParams, List<DAG> dags, double budget,
             double deadline) {
         if ("SPSS".equals(algorithmName)) {
             return new SPSS(budget, deadline, dags, alpha, cloudsim, simulationParams);

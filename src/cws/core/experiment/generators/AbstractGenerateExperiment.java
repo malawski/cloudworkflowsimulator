@@ -6,7 +6,7 @@ import cws.core.experiment.Experiment;
  * Tests series of ensembles consisting of workflows form workflow generator.
  * https://confluence.pegasus.isi.edu/display/pegasus/WorkflowGenerator
  * 
- * TODO(bryk): Docuemnt it.
+ * Abstract class extended by experiment input generators.
  */
 public abstract class AbstractGenerateExperiment {
     protected String dagPathPrefix;
@@ -27,8 +27,8 @@ public abstract class AbstractGenerateExperiment {
     protected int runID = 0;
 
     /**
-     * TODO(bryk): Document it.
-     * @param args
+     * Generates experiment prams and saves it to file. DAG path prefix should be provided as program's param.
+     * @param args Program's params.
      */
     public void generate(String[] args) {
         if (args.length != 1) {
@@ -41,14 +41,14 @@ public abstract class AbstractGenerateExperiment {
     }
 
     /**
-     * TODO(bryk): Document it.
+     * Should be overriden and actually generate experiment params.
      */
     protected abstract void doGenerate();
 
     /**
-     * TODO(bryk): Document it.
-     * @param budgets
-     * @param dags
+     * Generates series of params based on the given budget, dags and internal properties.
+     * @param budgets The array of budgets.
+     * @param dags The array of DAGs.
      */
     protected void generateSeries(double[] budgets, String dags[]) {
         for (double budget : budgets) {

@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 
-import cws.core.algorithms.AlgorithmSimulationParams;
+import cws.core.algorithms.StorageSimulationParams;
 
 /**
  * Class representing a single experiment of submitting a given
@@ -69,7 +69,7 @@ public class ExperimentDescription {
     /**
      * The algorithm simulation params.
      */
-    private AlgorithmSimulationParams simulationParams;
+    private StorageSimulationParams simulationParams;
 
     /**
      * This description creates ensemble of workflows given in the dags array.
@@ -87,7 +87,6 @@ public class ExperimentDescription {
      * @param taskDilatation task runtimes from the dag are multiplied by this factor; this parameter is useful to
      *            control the task granularity
      */
-
     public ExperimentDescription(String group, String algorithmName, String runDirectory, String dagPath,
             String[] dags, double deadline, double budget, double price, double maxScaling, double alpha,
             double taskDilatation, double runtimeVariation, double delay, String distribution, int runID) {
@@ -299,7 +298,7 @@ public class ExperimentDescription {
         runtimeVariation = Double.parseDouble(properties.getProperty("runtimeVariation"));
         delay = Double.parseDouble(properties.getProperty("delay"));
         distribution = properties.getProperty("distribution");
-        simulationParams = AlgorithmSimulationParams.readProperties(properties);
+        simulationParams = StorageSimulationParams.readProperties(properties);
     }
 
     private String[] dagsFromString(String property) {
@@ -328,11 +327,11 @@ public class ExperimentDescription {
         return fileName;
     }
 
-    public AlgorithmSimulationParams getSimulationParams() {
+    public StorageSimulationParams getSimulationParams() {
         return simulationParams;
     }
 
-    public void setSimulationParams(AlgorithmSimulationParams simulationParams) {
+    public void setSimulationParams(StorageSimulationParams simulationParams) {
         this.simulationParams = simulationParams;
     }
 }

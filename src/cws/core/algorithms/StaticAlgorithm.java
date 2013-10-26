@@ -57,7 +57,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     protected long simulationFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
-            AlgorithmSimulationParams simulationParams) {
+            StorageSimulationParams simulationParams) {
         super(budget, deadline, dags, simulationParams, cloudsim);
     }
 
