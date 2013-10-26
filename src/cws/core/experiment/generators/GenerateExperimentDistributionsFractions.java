@@ -37,27 +37,27 @@ public class GenerateExperimentDistributionsFractions extends AbstractGenerateEx
 
                 dagPath = dagPathPrefix + "Montage/";
                 dagName = "MONTAGE";
-                Experiment.generateSeries(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
+                Experiment.generateSeriesWithCriticalPath(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
                         algorithms, price, maxScaling, alpha, taskDilatation, runtimeVariation, delay, runID);
 
                 dagPath = dagPathPrefix + "CyberShake/";
                 dagName = "CYBERSHAKE";
-                Experiment.generateSeries(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
+                Experiment.generateSeriesWithCriticalPath(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
                         algorithms, price, maxScaling, alpha, taskDilatation, runtimeVariation, delay, runID);
 
                 dagPath = dagPathPrefix + "LIGO/";
                 dagName = "LIGO";
-                Experiment.generateSeries(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
+                Experiment.generateSeriesWithCriticalPath(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
                         algorithms, price, maxScaling, alpha, taskDilatation, runtimeVariation, delay, runID);
 
                 dagPath = dagPathPrefix + "Genome/";
                 dagName = "GENOME";
-                Experiment.generateSeries(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
+                Experiment.generateSeriesWithCriticalPath(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
                         algorithms, price, maxScaling, alpha, taskDilatation, runtimeVariation, delay, runID);
 
                 dagPath = dagPathPrefix + "SIPHT/";
                 dagName = "SIPHT";
-                Experiment.generateSeries(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
+                Experiment.generateSeriesWithCriticalPath(runDirectory, group, dagPath, dagName, ensemble_size, distribution,
                         algorithms, price, maxScaling, alpha, taskDilatation, runtimeVariation, delay, runID);
             }
         }

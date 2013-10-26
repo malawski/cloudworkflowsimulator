@@ -317,10 +317,14 @@ public class ExperimentDescription {
      * Creates a unique file name based on the values of the properties
      */
     public String getFileName() {
+        String simParamsName = "no_storage";
+        if (simulationParams != null) {
+            simParamsName = simulationParams.getName();
+        }
         String fileName = group + "-" + getAlgorithmName() + "-" + getDistribution() + "-" + getDags()[0] + "x"
                 + getDags().length + "d" + getDeadline() + "b" + getBudget() + "m" + getMax_scaling() + "a"
-                + getAlpha() + "t" + getTaskDilatation() + "v" + getRuntimeVariation() + "l" + getDelay() + "r" + runID;
-
+                + getAlpha() + "t" + getTaskDilatation() + "v" + getRuntimeVariation() + "l" + getDelay() + "r" + runID
+                + simParamsName;
         return fileName;
     }
 

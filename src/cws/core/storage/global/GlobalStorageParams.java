@@ -1,5 +1,7 @@
 package cws.core.storage.global;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
@@ -100,6 +102,32 @@ public class GlobalStorageParams {
         System.out.printf("chunk-transfer-time = %f\n", params.chunkTransferTime);
         System.out.printf("num-replicas = %d\n", params.numReplicas);
         return params;
+    }
+
+    /**
+     * TODO(bryk): Document it.
+     * @return
+     */
+    public String getName() {
+        return "rs_" + readSpeed + "ws_" + writeSpeed + "ctt_" + chunkTransferTime + "l_" + latency + "nr_"
+                + numReplicas;
+    }
+
+    /**
+     * TODO(bryk): Document it.
+     * @return
+     */
+    public static List<GlobalStorageParams> getAllGlobalStorageParams() {
+        List<GlobalStorageParams> ret = new ArrayList<GlobalStorageParams>();
+        for (double ws = 10000; ws <= 100000; ws *= 10) {
+            for (double rs = 10000; rs <= 100000; rs *= 10) {
+                GlobalStorageParams gs = new GlobalStorageParams();
+                gs.setReadSpeed(rs);
+                gs.setWriteSpeed(ws);
+                ret.add(gs);
+            }
+        }
+        return ret;
     }
 
     public double getReadSpeed() {

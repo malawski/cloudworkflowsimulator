@@ -1,5 +1,7 @@
 package cws.core.algorithms;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import cws.core.storage.global.GlobalStorageParams;
@@ -17,6 +19,61 @@ public class AlgorithmSimulationParams {
     }
 
     public AlgorithmSimulationParams() {
+    }
+
+    /**
+     * TODO(bryk):
+     * @param properties
+     */
+    public void storeProperties(Properties properties) {
+        properties.setProperty("storageType", storageType.toString());
+        properties.setProperty("storageCacheType", storageCacheType.toString());
+        if (storageParams != null) {
+            storageParams.storeProperties(properties);
+        }
+    }
+
+    /**
+     * TODO(bryk): Document it.
+     * @return
+     */
+    public String getName() {
+        String ret = "-" + storageType + "_" + storageCacheType;
+        if (storageParams != null) {
+            ret += storageParams.getName();
+        }
+        return ret;
+    }
+
+    public static List<AlgorithmSimulationParams> getAllSimulationParams() {
+        List<AlgorithmSimulationParams> ret = new ArrayList<AlgorithmSimulationParams>();
+        AlgorithmSimulationParams voidAll = new AlgorithmSimulationParams(StorageType.VOID, null, StorageCacheType.VOID);
+        ret.add(voidAll);
+        for (GlobalStorageParams gstorageParam : GlobalStorageParams.getAllGlobalStorageParams()) {
+            for (StorageCacheType cache : StorageCacheType.values()) {
+                AlgorithmSimulationParams gstorage = new AlgorithmSimulationParams(StorageType.GLOBAL, gstorageParam,
+                        cache);
+                ret.add(gstorage);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * TODO(bryk):
+     * @param properties
+     * @return
+     */
+    public static AlgorithmSimulationParams readProperties(Properties properties) {
+        AlgorithmSimulationParams params = new AlgorithmSimulationParams();
+        if (properties.getProperty("storageType") != null)
+            params.storageType = StorageType.valueOf(properties.getProperty("storageType"));
+        if (properties.getProperty("storageCacheType") != null)
+            params.storageCacheType = StorageCacheType.valueOf(properties.getProperty("storageCacheType"));
+        if (params.storageType == StorageType.GLOBAL) {
+            params.storageParams = GlobalStorageParams.readProperties(properties);
+        }
+        return params;
     }
 
     public StorageCacheType getStorageCacheType() {
@@ -41,38 +98,5 @@ public class AlgorithmSimulationParams {
 
     public void setStorageCacheType(StorageCacheType storageCacheType) {
         this.storageCacheType = storageCacheType;
-    }
-
-    /**
-     * TODO(bryk):
-     * @param properties
-     */
-    public void storeProperties(Properties properties) {
-        if (storageType != null) {
-            properties.setProperty("storageType", storageType.toString());
-        }
-        if (storageCacheType != null) {
-            properties.setProperty("storageCacheType", storageCacheType.toString());
-        }
-        if (storageParams != null) {
-            storageParams.storeProperties(properties);
-        }
-    }
-
-    /**
-     * TODO(bryk):
-     * @param properties
-     * @return
-     */
-    public static AlgorithmSimulationParams readProperties(Properties properties) {
-        AlgorithmSimulationParams params = new AlgorithmSimulationParams();
-        if (properties.getProperty("storageType") != null)
-            params.storageType = StorageType.valueOf(properties.getProperty("storageType"));
-        if (properties.getProperty("storageCacheType") != null)
-            params.storageCacheType = StorageCacheType.valueOf(properties.getProperty("storageCacheType"));
-        if (params.storageType == StorageType.GLOBAL) {
-            params.storageParams = GlobalStorageParams.readProperties(properties);
-        }
-        return params;
     }
 }

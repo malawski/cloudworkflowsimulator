@@ -3,8 +3,10 @@ package cws.core.experiment.generators;
 import cws.core.experiment.Experiment;
 
 /**
- * Tests series of ensembles consisting of workflows form workflow generator
+ * Tests series of ensembles consisting of workflows form workflow generator.
  * https://confluence.pegasus.isi.edu/display/pegasus/WorkflowGenerator
+ * 
+ * TODO(bryk): Docuemnt it.
  */
 public abstract class AbstractGenerateExperiment {
     protected String dagPathPrefix;
@@ -24,6 +26,10 @@ public abstract class AbstractGenerateExperiment {
     protected double maxHours;
     protected int runID = 0;
 
+    /**
+     * TODO(bryk): Document it.
+     * @param args
+     */
     public void generate(String[] args) {
         if (args.length != 1) {
             System.err.println("Required param: dagPathPrefix");
@@ -34,13 +40,21 @@ public abstract class AbstractGenerateExperiment {
         }
     }
 
+    /**
+     * TODO(bryk): Document it.
+     */
     protected abstract void doGenerate();
 
+    /**
+     * TODO(bryk): Document it.
+     * @param budgets
+     * @param dags
+     */
     protected void generateSeries(double[] budgets, String dags[]) {
         for (double budget : budgets) {
-            Experiment.generateSeries(runDirectory, group, dagPath, dags, budget * taskDilatation, price, maxHours,
-                    stepHours, startHours, maxScaling, alpha, taskDilatation, runtimeVariation, delay, distribution,
-                    runID);
+            Experiment.generateDeadlineBasedSeries(runDirectory, group, dagPath, dags, budget * taskDilatation, price,
+                    maxHours, stepHours, startHours, maxScaling, alpha, taskDilatation, runtimeVariation, delay,
+                    distribution, runID);
         }
     }
 }

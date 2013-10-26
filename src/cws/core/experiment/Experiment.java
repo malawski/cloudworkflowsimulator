@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 import cws.core.algorithms.Algorithm;
+import cws.core.algorithms.AlgorithmSimulationParams;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
@@ -88,25 +89,23 @@ public class Experiment {
      * @param max_scaling max autoscaling factor
      * @param runID id of this series
      */
-    public static void generateSeries(String runDirectory, String group, String dagPath, String[] dags, double budget,
-            double price, double N, double step, double start, double max_scaling, double alpha, double taskDilatation,
-            double runtimeVariation, double delay, String distribution, int runID) {
-        double deadline;
-
+    public static void generateDeadlineBasedSeries(String runDirectory, String group, String dagPath, String[] dags,
+            double budget, double price, double N, double step, double start, double max_scaling, double alpha,
+            double taskDilatation, double runtimeVariation, double delay, String distribution, int runID) {
         new File(runDirectory).mkdir();
 
-        // String algorithms[] = {"SPSS", "DPDS", "WADPDS", "MaxMin", "Wide", "Backtrack"};
         String algorithms[] = { "SPSS", "DPDS", "WADPDS" };
-
         for (double i = start; i <= N; i += step) {
-            deadline = 3600 * i; // seconds
-
+            double deadline = 3600 * i; // seconds
             for (String alg : algorithms) {
-                ExperimentDescription param = new ExperimentDescription(group, alg, runDirectory, dagPath, dags,
-                        deadline, budget, price, max_scaling, alpha, taskDilatation, runtimeVariation, delay,
-                        distribution, runID);
-                String fileName = "input-" + param.getFileName() + ".properties";
-                param.storeProperties(runDirectory + File.separator + fileName);
+                for (AlgorithmSimulationParams algorithmParams : AlgorithmSimulationParams.getAllSimulationParams()) {
+                    ExperimentDescription param = new ExperimentDescription(group, alg, runDirectory, dagPath, dags,
+                            deadline, budget, price, max_scaling, alpha, taskDilatation, runtimeVariation, delay,
+                            distribution, runID);
+                    param.setSimulationParams(algorithmParams);
+                    String fileName = "input-" + param.getFileName() + ".properties";
+                    param.storeProperties(runDirectory + File.separator + fileName);
+                }
             }
         }
     }
@@ -122,9 +121,9 @@ public class Experiment {
      * @param max_scaling max autoscaling factor
      * @param runID id of this series
      */
-    public static void generateSeries(String runDirectory, String group, String dagPath, String dagName,
-            int ensembleSize, String distribution, String algorithms[], double price, double max_scaling, double alpha,
-            double taskDilatation, double runtimeVariation, double delay, int runID) {
+    public static void generateSeriesWithCriticalPath(String runDirectory, String group, String dagPath,
+            String dagName, int ensembleSize, String distribution, String algorithms[], double price,
+            double max_scaling, double alpha, double taskDilatation, double runtimeVariation, double delay, int runID) {
         new File(runDirectory).mkdir();
 
         String[] dagNames = null;
@@ -195,11 +194,14 @@ public class Experiment {
         for (double budget = minBudget; budget <= maxBudget + 0.00001; budget += budgetStep) {
             for (double deadline = minDeadline; deadline <= maxDeadline + 0.00001; deadline += deadlineStep) {
                 for (String alg : algorithms) {
-                    ExperimentDescription param = new ExperimentDescription(group, alg, runDirectory, dagPath,
-                            dagNames, deadline, budget, price, max_scaling, alpha, taskDilatation, runtimeVariation,
-                            delay, distribution, runID);
-                    String fileName = "input-" + param.getFileName() + ".properties";
-                    param.storeProperties(runDirectory + File.separator + fileName);
+                    for (AlgorithmSimulationParams algorithmParams : AlgorithmSimulationParams.getAllSimulationParams()) {
+                        ExperimentDescription param = new ExperimentDescription(group, alg, runDirectory, dagPath,
+                                dagNames, deadline, budget, price, max_scaling, alpha, taskDilatation,
+                                runtimeVariation, delay, distribution, runID);
+                        param.setSimulationParams(algorithmParams);
+                        String fileName = "input-" + param.getFileName() + ".properties";
+                        param.storeProperties(runDirectory + File.separator + fileName);
+                    }
                 }
             }
         }
@@ -233,8 +235,8 @@ public class Experiment {
         for (int i = 0; i < numDAGs; i++)
             dags[i] = dagName;
 
-        generateSeries(runDirectory, group, dagPath, dags, budget, price, N, step, start, max_scaling, alpha,
-                taskDilatation, runtimeVariation, delay, distribution, runID);
+        generateDeadlineBasedSeries(runDirectory, group, dagPath, dags, budget, price, N, step, start, max_scaling,
+                alpha, taskDilatation, runtimeVariation, delay, distribution, runID);
 
     }
 
