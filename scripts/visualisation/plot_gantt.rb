@@ -1,4 +1,14 @@
-# TODO(mequrel): add description
+# Plots gantt charts for given scheduling logs.
+#
+# Has three modes:
+#   - Result mode. Useful to distinguish failed and retried tasks.
+#   - Workflow mode. Useful to distinguish tasks from different workflows.
+#   - Storage mode. Useful to distinguish upload, download and computational part of task.
+# 
+# Examples of usage:
+#   $ ruby plot_gantt.rb tests/test1.log results
+#   $ ruby plot_gantt.rb tests/test1.log workflow
+#   $ ruby plot_gantt.rb tests/test1.log storage
 
 require 'scanf.rb'
 require 'rubygems'
@@ -91,23 +101,23 @@ def read_log_from_file(filename)
   return read_log(file_content)
 end
 
-COLORS_QUANTITY = 4
-
 class GanttPlotter
   def initialize()
     @data = []
     @colors = {
-      :red => 1,
-      :blue => 2,
-      :green => 3,
-      :orange => 4,
-      :brown => 5, 
-      :dark_grey => 6
+      :red => 'red',
+      :blue => 'grey90',
+      :green => 'green',
+      :orange => 'orange',
+      :brown => 'brown', 
+      :dark_grey => 'grey10'
     }
     @types = {
       :dotted => 0,
       :straight => 1
     }
+    @styles = {}
+    @style_next_id = 1
   end
 
   def create_gantt_series (startsList, finishesList, rows, line_style, title)
@@ -119,7 +129,7 @@ class GanttPlotter
   end
 
   def get_line_style(color, type)
-    return @colors[color] + COLORS_QUANTITY * @types[type] 
+    return @styles[[color, type]]
   end
 
   def add_series(series, title, color, type=:straight)
@@ -127,20 +137,33 @@ class GanttPlotter
     started_row = series[:started]
     finished_row = series[:finished]
 
+    add_style_line_if_not_exist color, type
     line_style = get_line_style color, type
 
     makespans = create_gantt_series(started_row, finished_row, vm_row, line_style, title)
     @data.push(makespans)
   end
 
-  def add_style_line(plot, style_id, color, type)
-    int_type = @types[type]
-    plot.set "style line #{style_id} lc rgb '#{color}' lt #{int_type} lw 1"
+  def add_style_line_if_not_exist(color, type)
+    key = [color, type]
+    if not @styles.has_key? key
+      @styles[key] = @style_next_id
+      @style_next_id += 1
+    end
   end
 
   def plot(filename)
     Gnuplot.open do |gp|
       Gnuplot::Plot.new( gp ) do |plot|
+        @styles.each do |key, style_id|
+          color, type = key
+          gp_type = @types[type]
+          gp_color = @colors[color]
+          plot.set "style line #{style_id} lc rgb '#{gp_color}' lt #{gp_type} lw 1"
+        end
+        plot.set "style fill border lc rgb 'black'"
+        
+
         #plot.title  "Schedule " + File.basename(filename)
         plot.xlabel "Time"
         plot.ylabel "VM"
@@ -154,16 +177,6 @@ class GanttPlotter
         #plot.noytics
         #plot.noxtics
         #plot.set "grid"
-        add_style_line(plot, 6, 'grey90', :straight)
-        add_style_line(plot, 1, 'red', :dotted)
-        add_style_line(plot, 3, 'green', :dotted)
-        add_style_line(plot, 5, 'red', :straight)
-        add_style_line(plot, 7, 'green', :straight)
-        add_style_line(plot, 8, 'orange', :straight)
-        add_style_line(plot, 9, 'brown', :straight)
-        add_style_line(plot, 10, 'grey10', :straight)
-
-        plot.set "style fill border lc rgb 'black'"
         plot.terminal "png size 1024,768"
         plot.output filename + ".png"
 
@@ -241,13 +254,12 @@ type = ARGV[1]
 output_filename = "test"
 
 logs = read_log_from_file(log_filename)
-filename = "test"
 
 case type
 when "results"
-  plot_result_schedule(logs, filename)
+  plot_result_schedule(logs, output_filename)
 when "workflows"
-  plot_workflow_schedule(logs, filename)
+  plot_workflow_schedule(logs, output_filename)
 when "storage"
-  plot_storage_schedule(logs, filename)
+  plot_storage_schedule(logs, output_filename)
 end
