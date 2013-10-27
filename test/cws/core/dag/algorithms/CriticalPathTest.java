@@ -53,7 +53,7 @@ public class CriticalPathTest {
 
     @Test
     public void test() {
-        DAG dag = DAGParser.parseDAG(new File("dags/test.dag"));
+        DAG dag = DAGParser.parseDAG(new File("dags/test1.dag"));
         TopologicalOrder order = new TopologicalOrder(dag);
         CriticalPath cp = new CriticalPath(order, storageManager);
         assertEquals(21, cp.getCriticalPathLength(), 0.00001);
