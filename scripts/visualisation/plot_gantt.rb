@@ -91,92 +91,163 @@ def read_log_from_file(filename)
   return read_log(file_content)
 end
 
-def createGanttSeries (startsList, finishesList, rows)
-  return Gnuplot::DataSet.new( [startsList, rows, startsList, finishesList] ) do |ds|
-    ds.using = "($1):2:3:4:($2-0.4):($2+0.4)"
-    ds.with = "boxxyerrorbars fs solid 0.55"
+COLORS_QUANTITY = 4
+
+class GanttPlotter
+  def initialize()
+    @data = []
+    @colors = {
+      :red => 1,
+      :blue => 2,
+      :green => 3,
+      :orange => 4,
+      :brown => 5, 
+      :dark_grey => 6
+    }
+    @types = {
+      :dotted => 0,
+      :straight => 1
+    }
   end
-end
 
-def plot_schedule (logs, filename)
-  Gnuplot.open do |gp|
-    Gnuplot::Plot.new( gp ) do |plot|
-     #plot.title  "Schedule " + File.basename(filename)
-      plot.xlabel "Time"
-      plot.ylabel "VM"
-      #plot.xtics 3600
-      plot.ytics 1
-      #plot.yrange "[-0.8:#{ymax}]"
-      #plot.terminal 'pdfcairo size 5,1.5 font "arial,8" linewidth 1'
-      #plot.terminal 'pdf size 11,8.5 font "arial,6" linewidth 1'
-      #plot.set "key right outside"
-      plot.set "key off"
-      #plot.noytics
-      #plot.noxtics
-      #plot.set "grid"
-      plot.set "style line 1 lc rgb 'grey10' lt 1 lw 1"
-      plot.set "style line 2 lc rgb 'brown' lt 1 lw 1"
-      plot.set "style line 3 lc rgb 'orange' lt 1 lw 1"
-      plot.set "style line 4 lc rgb 'blue' lt 1 lw 1"
-      plot.set "style line 5 lc rgb 'green' lt 1 lw 1"
-      plot.set "style line 6 lc rgb 'grey10' lt 1 lw 1"
-      plot.set "style line 7 lc rgb 'brown' lt 1 lw 1"
-      plot.set "style line 8 lc rgb 'orange' lt 1 lw 1"
-      plot.set "style line 9 lc rgb 'blue' lt 1 lw 1"
-      plot.set "style line 10 lc rgb 'green' lt 1 lw 1"
-      plot.set "style fill border lc rgb 'black'"
-      plot.terminal "png size 1024,768"
-      plot.output filename + ".png"
+  def create_gantt_series (startsList, finishesList, rows, line_style, title)
+    return Gnuplot::DataSet.new( [startsList, rows, startsList, finishesList] ) do |ds|
+      ds.using = "($1):2:3:4:($2-0.4):($2+0.4):yticlabels(2) ls #{line_style}"
+      ds.with = "boxxyerrorbars fs solid 0.55"
+      ds.title = title
+    end
+  end
 
-      data = []
+  def get_line_style(color, type)
+    return @colors[color] + COLORS_QUANTITY * @types[type] 
+  end
 
-      tasks = logs[:tasks]
+  def add_series(series, title, color, type=:straight)
+    vm_row = series[:vms].collect { |vm| vm.sub("VM", "").to_i }
+    started_row = series[:started]
+    finished_row = series[:finished]
 
-      started_row = tasks.collect { |task| task.started }
-      finished_row = tasks.collect { |task| task.finished }
-      vm_row = tasks.collect { |task| task.vm[2].to_i }
-      puts vm_row
+    line_style = get_line_style color, type
 
-      makespans = createGanttSeries(started_row, finished_row, vm_row)
+    makespans = create_gantt_series(started_row, finished_row, vm_row, line_style, title)
+    @data.push(makespans)
+  end
 
-      data.push(makespans)
+  def add_style_line(plot, style_id, color, type)
+    int_type = @types[type]
+    plot.set "style line #{style_id} lc rgb '#{color}' lt #{int_type} lw 1"
+  end
 
-      # input_makespans = createGanttSeries(tasks.task_start_time, tasks.computation_start_time, tasks.vm)
-      # computational_makespans = createGanttSeries(tasks.computation_start_time, tasks.computation_finish_time, tasks.vm)
-      # output_makespans = createGanttSeries(tasks.computation_finish_time, tasks.task_finish_time, tasks.vm)
+  def plot(filename)
+    Gnuplot.open do |gp|
+      Gnuplot::Plot.new( gp ) do |plot|
+        #plot.title  "Schedule " + File.basename(filename)
+        plot.xlabel "Time"
+        plot.ylabel "VM"
+        #plot.xtics 3600
+        plot.ytics 1
+        #plot.yrange "[-0.8:#{ymax}]"
+        #plot.terminal 'pdfcairo size 5,1.5 font "arial,8" linewidth 1'
+        #plot.terminal 'pdf size 11,8.5 font "arial,6" linewidth 1'
+        plot.set "key right outside"
+        # plot.set "key off"
+        #plot.noytics
+        #plot.noxtics
+        #plot.set "grid"
+        add_style_line(plot, 6, 'grey90', :straight)
+        add_style_line(plot, 1, 'red', :dotted)
+        add_style_line(plot, 3, 'green', :dotted)
+        add_style_line(plot, 5, 'red', :straight)
+        add_style_line(plot, 7, 'green', :straight)
+        add_style_line(plot, 8, 'orange', :straight)
+        add_style_line(plot, 9, 'brown', :straight)
+        add_style_line(plot, 10, 'grey10', :straight)
 
-      # data.push(input_makespans)
-      # data.push(computational_makespans)
-      # data.push(output_makespans)
+        plot.set "style fill border lc rgb 'black'"
+        plot.terminal "png size 1024,768"
+        plot.output filename + ".png"
 
-      plot.data = data
-
-      #vmset = Gnuplot::DataSet.new( vms ) do |ds|
-        #ds.using = "2:1:2:3:($1-0.5):($1+0.5)"
-        #ds.with = "boxxyerrorbars fs solid 0.55 noborder"
-        #ds.title = 'VMs'
-      #end
-
-      #data.push(vmset) if vms.size > 0
-
-      #inputset = Gnuplot::DataSet.new( inputs ) do |ds|
-      #  ds.using = "2:1:2:3:($1-0.3):($1+0.3)"
-      #  ds.with = "boxxyerrorbars fs solid 0.55 "
-      #  ds.title = 'Inputs'
-      #end
-
-      #data.push(inputset) if inputs.size > 0
-
-      #outputset = Gnuplot::DataSet.new( outputs ) do |ds|
-      #  ds.using = "2:1:2:3:($1-0.3):($1+0.3)"
-      #  ds.with = "boxxyerrorbars fs solid 0.55 "
-      #  ds.title = 'Outputs'
-      #end
-
-      #data.push(outputset) if outputs.size > 0
+        plot.data = @data
+      end
     end
   end
 end
 
-logs = read_log_from_file(ARGV[0])
-plot_schedule(logs, "test")
+def get_task_series(tasks)
+  return {
+    :vms => tasks.collect { |task| task.vm },
+    :started => tasks.collect { |task| task.started },
+    :finished => tasks.collect { |task| task.finished }
+  }
+end
+
+def plot_result_schedule (logs, filename)
+  plotter = GanttPlotter.new
+
+  vms = logs[:vms].values
+  provisioning_series = {
+    :vms => vms.collect { |vm| vm.id },
+    :started => vms.collect { |vm| vm.started },
+    :finished => vms.collect { |vm| vm.finished }
+  }
+  plotter.add_series provisioning_series, "VM idle", :blue
+ 
+  tasks = logs[:tasks]
+
+  finished_tasks = tasks.select { |task| task.result.include? "OK" and not task.result.include? "RETRY" }
+  plotter.add_series get_task_series(finished_tasks), "Done", :green
+
+  failed_tasks = tasks.select { |task| task.result.include? "FAILED" and not task.result.include? "RETRY"  }
+  plotter.add_series get_task_series(failed_tasks), "Failed", :red
+
+  retried_finished_tasks = tasks.select { |task| task.result.include? "OK" and task.result.include? "RETRY" }
+  plotter.add_series get_task_series(retried_finished_tasks), "Retry", :green, :dotted
+
+  retried_failed_tasks = tasks.select { |task| task.result.include? "FAILED" and task.result.include? "RETRY" }
+  plotter.add_series get_task_series(retried_failed_tasks), "Retry failed", :red, :dotted
+
+  plotter.plot(filename)
+end
+
+def plot_workflow_schedule(logs, filename)
+  plotter = GanttPlotter.new
+
+  vms = logs[:vms].values
+  provisioning_series = {
+    :vms => vms.collect { |vm| vm.id },
+    :started => vms.collect { |vm| vm.started },
+    :finished => vms.collect { |vm| vm.finished }
+  }
+  plotter.add_series provisioning_series, "VM idle", :blue
+ 
+  tasks = logs[:tasks]
+  tasks_by_workflow = tasks.group_by { |task| task.workflow }
+
+  workflows = logs[:workflows].values
+
+  colors = [:red, :green, :orange, :dark_grey, :brown]
+
+  workflows.reverse.each_with_index do |workflow, i|
+    color = colors[i % colors.length]
+    workflow_tasks = tasks_by_workflow[workflow.id]
+    plotter.add_series get_task_series(workflow_tasks), "#{workflow.id} (#{workflow.priority})" , color
+  end
+
+  plotter.plot(filename)
+end
+
+log_filename = ARGV[0]
+type = ARGV[1]
+output_filename = "test"
+
+logs = read_log_from_file(log_filename)
+filename = "test"
+
+case type
+when "results"
+  plot_result_schedule(logs, filename)
+when "workflows"
+  plot_workflow_schedule(logs, filename)
+when "storage"
+  plot_storage_schedule(logs, filename)
+end
