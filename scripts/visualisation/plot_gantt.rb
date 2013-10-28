@@ -8,7 +8,7 @@
 # Examples of usage:
 #   $ ruby plot_gantt.rb tests/test1.log results
 #   $ ruby plot_gantt.rb tests/test1.log workflow
-#   $ ruby plot_gantt.rb tests/test1.log storage
+#   $ ruby plot_gantt.rb tests/test2.log storage
 
 require 'scanf.rb'
 require 'rubygems'
@@ -26,6 +26,18 @@ class TaskLog
   end
 
   attr_reader :workflow, :id, :vm, :started, :finished, :result
+end
+
+class TransferLog
+  def initialize(id, vm, started, finished, direction)
+    @id = id
+    @vm = vm
+    @started = started
+    @finished = finished
+    @direction = direction
+  end
+
+  attr_reader :id, :vm, :started, :finished, :direction
 end
 
 class VMLog
@@ -89,10 +101,23 @@ def read_log(file_content)
     current_line += 1
   end
 
+  transfers_number = lines[current_line].to_i
+  current_line += 1
+
+  transfers = []
+
+  for i in 0...transfers_number
+    transfer_info = lines[current_line].split
+    transfer = TransferLog.new(transfer_info[0], transfer_info[1], transfer_info[2].to_f, transfer_info[3].to_f, transfer_info[4])
+    transfers.push(transfer)
+    current_line += 1
+  end
+
   return {
     :vms => vms,
     :workflows => workflows,
-    :tasks => tasks
+    :tasks => tasks,
+    :transfers => transfers
   }
 end
 
@@ -245,6 +270,30 @@ def plot_workflow_schedule(logs, filename)
     workflow_tasks = tasks_by_workflow[workflow.id]
     plotter.add_series get_task_series(workflow_tasks), "#{workflow.id} (#{workflow.priority})" , color
   end
+
+  plotter.plot(filename)
+end
+
+def plot_storage_schedule(logs, filename)
+  plotter = GanttPlotter.new
+
+  vms = logs[:vms].values
+  provisioning_series = {
+    :vms => vms.collect { |vm| vm.id },
+    :started => vms.collect { |vm| vm.started },
+    :finished => vms.collect { |vm| vm.finished }
+  }
+  plotter.add_series provisioning_series, "VM idle", :blue
+ 
+  tasks = logs[:tasks]
+  plotter.add_series get_task_series(tasks), "Computation", :dark_grey
+
+  transfers = logs[:transfers]
+  input_transfers = transfers.select { |transfer| transfer.direction == "UPLOAD" }
+  plotter.add_series get_task_series(input_transfers), "Upload", :orange
+
+  output_transfers = transfers.select { |transfer| transfer.direction == "DOWNLOAD" }
+  plotter.add_series get_task_series(output_transfers), "Download", :green
 
   plotter.plot(filename)
 end

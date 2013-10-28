@@ -1,0 +1,25 @@
+FILE in.txt 100
+FILE out.txt 10
+FILE id1.1.txt 20
+FILE id1.2.txt 20
+FILE id2id4.txt 30
+FILE id3id4.txt 40
+
+TASK ID1 preprocess 3.0
+TASK ID2 process 3.0
+TASK ID3 process 3.0
+TASK ID4 postprocess 5.0
+
+EDGE ID1 ID2
+EDGE ID1 ID3
+EDGE ID2 ID4
+EDGE ID3 ID4
+
+INPUTS ID1 in.txt
+INPUTS ID2 id1.1.txt id1.2.txt
+INPUTS ID3 id1.1.txt
+INPUTS ID4 id2id4.txt id3id4.txt
+OUTPUTS ID1 id1.1.txt id1.2.txt
+OUTPUTS ID2 id2id4.txt
+OUTPUTS ID3 id3id4.txt
+OUTPUTS ID4 out.txt
