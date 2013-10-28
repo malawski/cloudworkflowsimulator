@@ -162,6 +162,10 @@ class GanttPlotter
     started_row = series[:started]
     finished_row = series[:finished]
 
+    if vm_row.empty?
+      return
+    end
+
     add_style_line_if_not_exist color, type
     line_style = get_line_style color, type
 
