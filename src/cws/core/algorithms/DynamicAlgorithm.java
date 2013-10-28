@@ -9,12 +9,12 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.DAGJobListener;
-import cws.core.experiment.VMFactory;
 import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
+import cws.core.provisioner.VMFactory;
 
 public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMListener, JobListener {
 

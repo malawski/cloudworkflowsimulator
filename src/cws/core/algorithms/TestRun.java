@@ -19,12 +19,12 @@ import org.apache.commons.io.IOUtils;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGListGenerator;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
 import cws.core.dag.Task;
 import cws.core.exception.IllegalCWSArgumentException;
-import cws.core.experiment.DAGListGenerator;
-import cws.core.experiment.VMFactory;
+import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 

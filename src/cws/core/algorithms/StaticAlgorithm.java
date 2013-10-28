@@ -10,11 +10,11 @@ import cws.core.dag.DAGJobListener;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.experiment.VMFactory;
 import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.log.WorkflowLog;
+import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManager;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener,

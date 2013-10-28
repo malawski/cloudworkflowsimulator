@@ -5,7 +5,6 @@ import java.util.Set;
 
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.experiment.VMFactory;
 
 public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements Provisioner {
 

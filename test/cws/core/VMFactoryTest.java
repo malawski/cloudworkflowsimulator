@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.experiment.VMFactory;
+import cws.core.provisioner.VMFactory;
 
 public class VMFactoryTest {
 
