@@ -190,8 +190,8 @@ class GanttPlotter
           gp_color = @colors[color]
           plot.set "style line #{style_id} lc rgb '#{gp_color}' lt #{gp_type} lw 1"
         end
-        plot.set "style fill border lc rgb 'black'"
-        
+        # plot.set "style fill border lc rgb 'black'"
+        plot.set "style fill"
 
         #plot.title  "Schedule " + File.basename(filename)
         plot.xlabel "Time"
@@ -206,7 +206,7 @@ class GanttPlotter
         #plot.noytics
         #plot.noxtics
         #plot.set "grid"
-        plot.terminal "png size 1024,768"
+        plot.terminal "png size 10240,7680"
         plot.output filename + ".png"
 
         plot.data = @data
@@ -264,6 +264,8 @@ def plot_workflow_schedule(logs, filename)
  
   tasks = logs[:tasks]
   tasks_by_workflow = tasks.group_by { |task| task.workflow }
+
+  # TODO(mequrel): sort by priorities
 
   workflows = logs[:workflows].values
 

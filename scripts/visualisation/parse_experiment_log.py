@@ -6,41 +6,52 @@ import StringIO
 
 import log_parser
 
-TaskLog = namedtuple('TaskLog', 'workflow id vm started finished result')
+TaskLog = namedtuple('TaskLog', 'job_id workflow task_id vm started finished result')
 TransferLog = namedtuple('TransferLog', 'id vm started finished direction')
 VMLog = namedtuple('VMLog', 'id started finished')
 Workflow = namedtuple('Workflow', 'id priority')
 
-TaskStartedEvent = namedtuple('TaskStartedEvent', 'id vm timestamp')
-TaskFinishedEvent = namedtuple('TaskFinishedEvent', 'id vm timestamp')
+TaskStartedEvent = namedtuple('TaskStartedEvent', 'job_id workflow task_id vm timestamp')
+TaskFinishedEvent = namedtuple('TaskFinishedEvent', 'job_id workflow task_id vm timestamp')
+TaskCrashedEvent = namedtuple('TaskCrashedEvent', 'job_id workflow task_id vm timestamp')
 
 TransferStartedEvent = namedtuple('TransferStartedEvent', 'id timestamp')
 TransferFinishedEvent = namedtuple('TransferFinishedEvent', 'id timestamp')
 
 PATTERNS = [
     # log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\w+)\)\s+Starting job ID(?P<id>\d+) on VM (?P<vm>\d+)', type=JobStartedEvent),
-    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Starting computational part of job ID(?P<id>\d+) on VM (?P<vm>\d+)', type=TaskStartedEvent),
-    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Computational part of job ID(?P<id>\d+) on VM (?P<vm>\d+) finished', type=TaskFinishedEvent),    
+    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Starting computational part of job (?P<job_id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+)', type=TaskStartedEvent),
+    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Computational part of job (?P<job_id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+) finished', type=TaskFinishedEvent),    
+    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Job (?P<job_id>\d+) \(task_id = (?P<task_id>\w+), workflow_id = (?P<workflow>\w+)\) failed on VM (?P<vm>\d+). Resubmitting...', type=TaskCrashedEvent),    
 
     log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Global transfer started: (?P<id>(\w|\.)+), size: (\d+)', type=TransferStartedEvent),    
     log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Global transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)', type=TransferFinishedEvent),    
+
+    log_parser.Pattern(regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (.*)', type=Workflow)
 ]
 
 def get_task_log_from_events(events):
     started = None
     finished = None
+    result = None
 
     for event in events:
+        workflow = event.workflow
+        vm = event.vm
+        task_id = event.task_id
+        job_id = event.job_id
+
         if isinstance(event, TaskStartedEvent):
             started = event.timestamp
-            vm = event.vm
-            task_id = event.id
         elif isinstance(event, TaskFinishedEvent):
             finished = event.timestamp
-            vm = event.vm
-            task_id = event.id
+            result = 'OK'
+        elif isinstance(event, TaskCrashedEvent):
+            finished = event.timestamp
+            result = 'FAILED'
 
-    return TaskLog(workflow='default', id=task_id, vm=vm, started=started, finished=finished, result='OK')
+
+    return TaskLog(workflow=workflow, task_id=task_id, job_id=job_id, vm=vm, started=started, finished=finished, result=result)
 
 def get_transfer_log_from_events(events):
     started = None
@@ -89,7 +100,7 @@ class ExecutionLog(object):
 
         output.write('{}\n'.format(len(self.events[EventType.TASK])))
         for task_event in self.events[EventType.TASK]:
-            output.write('{} {} {} {} {} {}\n'.format(task_event.workflow, task_event.id, task_event.vm, task_event.started, task_event.finished, task_event.result))
+            output.write('{} {} {} {} {} {}\n'.format(task_event.workflow, task_event.task_id, task_event.vm, task_event.started, task_event.finished, task_event.result))
 
         output.write('{}\n'.format(len(self.events[EventType.TRANSFER])))
         for transfer_event in self.events[EventType.TRANSFER]:
@@ -109,12 +120,16 @@ def main():
     events = parser.parse(filename)
 
     log = ExecutionLog()
-    log.add_workflow(Workflow(id='default', priority=20))
 
-    task_events = [event for event in events if isinstance(event, TaskStartedEvent) or isinstance(event, TaskFinishedEvent)]
+    workflows = [event for event in events if isinstance(event, Workflow)]
 
-    task_events = sorted(task_events, key=attrgetter('id'))
-    for task_id, group in groupby(task_events, attrgetter('id')):
+    for workflow in workflows:
+        log.add_workflow(workflow)
+
+    task_events = [event for event in events if isinstance(event, TaskStartedEvent) or isinstance(event, TaskFinishedEvent) or isinstance(event, TaskCrashedEvent)]
+
+    task_events = sorted(task_events, key=attrgetter('job_id'))
+    for job_id, group in groupby(task_events, attrgetter('job_id')):
         task_log = get_task_log_from_events(group)
         
         log.add_event(EventType.TASK, task_log)

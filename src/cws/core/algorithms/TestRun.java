@@ -32,7 +32,7 @@ public class TestRun {
     private static final String DEFAULT_ENSEMBLE_SIZE = "50";
     private static final String DEFAULT_SCALING_FACTOR = "1.0";
     private static final String DEFAULT_STORAGE_CACHE = "void";
-    private static final String DEFAULT_ENABLE_LOGGING = "false";
+    private static final String DEFAULT_ENABLE_LOGGING = "true";
 
     public static Options buildOptions() {
         Options options = new Options();
@@ -209,9 +209,15 @@ public class TestRun {
         double maxTime = 0.0;
 
         List<DAG> dags = new ArrayList<DAG>();
+        int workflow_id = 0;
         for (String name : names) {
-            System.out.println(name);
             DAG dag = DAGParser.parseDAG(new File(name));
+            dag.setId(new Integer(workflow_id).toString());
+            System.out.println(String.format(
+                    "Workflow %d, priority = %d, filename = %s",
+                    workflow_id, workflow_id, name
+                    ));
+            workflow_id++;
             dags.add(dag);
 
             if (scalingFactor > 1.0) {
