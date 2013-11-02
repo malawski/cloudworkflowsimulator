@@ -6,6 +6,7 @@ if [ $# -lt 1 ]; then
 fi
 
 ARGS=$1
-echo $ARGS
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-java -cp "../../lib/*:../../bin/*:../../bin/" cws.core.algorithms.TestRun $ARGS
+echo java -cp "${DIR}/../../lib/*:${DIR}/../../bin/*:${DIR}/../../bin/" cws.core.algorithms.TestRun $ARGS
+java -cp "${DIR}/../../lib/*:${DIR}/../../bin/*:${DIR}/../../bin/" cws.core.algorithms.TestRun $ARGS
