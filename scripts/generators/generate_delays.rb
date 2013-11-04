@@ -2,10 +2,11 @@
 # Generates inputs for experiments with diferent failure rates
 # 
 # Author: Maciej Malawski
+require 'pathname'
 
 if ARGV.length == 0 then
   puts "Usage: ruby generate_delays.rb <DAG location prefix>"
-  exit -1
+  exit(-1)
 end
 
 dag_prefix = ARGV[0]
@@ -50,7 +51,9 @@ for seed in 0..9 do
     end
   end
   f.close
-  mydir = File.dirname(__FILE__)
-  puts mydir + "/../runners/run_simulation_set_locally.sh " + file_name
-  # puts "qsub -pe smp 2 -q short -t 1-#{task_id}  /afs/crc.nd.edu/user/m/mmalawsk/cloudworkflowsimulator/run_test_sge.sh " + file_name
+  mydir = Pathname.new(File.dirname(__FILE__)).realpath
+  script_file = mydir + Pathname.new("../runners/run_simulation_set_locally.sh")
+  input_file = mydir + Pathname.new(file_name)
+  puts "echo \"#{script_file} #{input_file}\" | qsub -pe smp 2 -q l_test -t 1-#{task_id}"
 end
+
