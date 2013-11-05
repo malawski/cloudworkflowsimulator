@@ -3,13 +3,20 @@
 # 
 # Author: Maciej Malawski
 require 'pathname'
+require 'fileutils'
 
-if ARGV.length == 0 then
-  puts "Usage: ruby generate_delays.rb <DAG location prefix>"
+if ARGV.length < 2 then
+  puts "Usage: ruby generate_delays.rb <DAG location prefix> <generated files directory> <optional queue name>"
   exit(-1)
 end
 
 dag_prefix = ARGV[0]
+out_prefix = Pathname.new(ARGV[1])
+queue_name = "l_short"
+if ARGV.length > 2 then
+  queue_name = ARGV[2]
+end
+
 prefix = "finish-delays-test"
 applications = ["CYBERSHAKE", "GENOME", "LIGO", "MONTAGE", "SIPHT"]
 input_dirs = {"CYBERSHAKE" => "CyberShake", "GENOME" => "Genome", "LIGO" => "LIGO", "MONTAGE" => "Montage", "SIPHT" => "SIPHT"}
@@ -23,13 +30,14 @@ id = 0
 
 for seed in 0..9 do
   task_id = 0
-  run_dir = "run-%s-%02d" % [prefix, seed]
+  run_dir_name = "run-%s-%02d" % [prefix, seed]
+  run_dir = out_prefix + Pathname.new(run_dir_name)
   begin 
-    Dir.mkdir run_dir
+    FileUtils.mkdir_p run_dir
   rescue
   end
-  file_name = run_dir + "/" + run_dir + ".txt"
-  f = File.open(file_name, "w")
+  file_name = run_dir + Pathname.new(run_dir_name + ".txt")
+  f = File.open("#{file_name}", "w")
   for delay in delays do
     for application in applications do
       for algorithm in algorithms do
@@ -54,6 +62,6 @@ for seed in 0..9 do
   mydir = Pathname.new(File.dirname(__FILE__)).realpath
   script_file = mydir + Pathname.new("../runners/run_simulation_set_locally.sh")
   input_file = mydir + Pathname.new(file_name)
-  puts "echo \"#{script_file} #{input_file}\" | qsub -pe smp 2 -q l_test -t 1-#{task_id}"
+  puts "echo \"#{script_file} #{input_file}\" | qsub -q #{queue_name}"
 end
 
