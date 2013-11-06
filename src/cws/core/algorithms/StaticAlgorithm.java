@@ -385,7 +385,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         Task task = vmqueue.peek();
         if (task == null) {
             // No more tasks
-            terminateVM(vm);
+            getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
         } else {
             // If job for task is ready
             if (readyJobs.containsKey(task)) {
@@ -400,10 +400,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         double now = getCloudsim().clock();
         double delay = start - now;
         getCloudsim().send(engine.getId(), cloud.getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
-    }
-
-    private void terminateVM(VM vm) {
-        getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
     }
 
     private void submitJob(VM vm, Job job) {

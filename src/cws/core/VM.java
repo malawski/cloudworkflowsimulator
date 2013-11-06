@@ -4,9 +4,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.cloudbus.cloudsim.core.predicates.Predicate;
-import org.cloudbus.cloudsim.core.predicates.PredicateType;
-
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -77,8 +74,8 @@ public class VM extends CWSSimEntity {
     /** Time that the VM was terminated */
     private double terminateTime;
 
-    /** Is this VM running? */
-    private boolean isRunning;
+    /** Has this VM been terminated? */
+    private boolean isTerminated;
 
     /** Number of CPU seconds consumed by jobs on this VM */
     private double cpuSecondsConsumed;
@@ -103,8 +100,8 @@ public class VM extends CWSSimEntity {
         this.idleCores = vmStaticParams.getCores();
         this.launchTime = -1.0;
         this.terminateTime = -1.0;
-        this.isRunning = false;
         this.cpuSecondsConsumed = 0.0;
+        this.isTerminated = false;
     }
 
     /**
@@ -130,12 +127,7 @@ public class VM extends CWSSimEntity {
     public double getCost() {
         double hours = getRuntime() / SECONDS_PER_HOUR;
         hours = Math.ceil(hours);
-        // Log.printLine(CloudSim.clock() + " VM " + getId() + " cost " + hours * price);
         return hours * vmStaticParams.getPrice();
-    }
-
-    public boolean isRunning() {
-        return isRunning;
     }
 
     public double getCPUSecondsConsumed() {
@@ -150,27 +142,29 @@ public class VM extends CWSSimEntity {
 
     @Override
     public void processEvent(CWSSimEvent ev) {
-        switch (ev.getTag()) {
-        case WorkflowEvent.VM_LAUNCH:
-            launchVM();
-            break;
-        case WorkflowEvent.VM_TERMINATE:
-            terminateVM();
-            break;
-        case WorkflowEvent.JOB_SUBMIT:
-            jobSubmit((Job) ev.getData());
-            break;
-        case WorkflowEvent.JOB_FINISHED:
-            jobFinish((Job) ev.getData());
-            break;
-        case WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED:
-            allInputsTrasferred((Job) ev.getData());
-            break;
-        case WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED:
-            allOutputsTransferred((Job) ev.getData());
-            break;
-        default:
-            throw new UnknownWorkflowEventException("Unknown event: " + ev);
+        if (!isTerminated) {
+            switch (ev.getTag()) {
+            case WorkflowEvent.VM_LAUNCH:
+                launchVM();
+                break;
+            case WorkflowEvent.VM_TERMINATE:
+                terminateVM();
+                break;
+            case WorkflowEvent.JOB_SUBMIT:
+                jobSubmit((Job) ev.getData());
+                break;
+            case WorkflowEvent.JOB_FINISHED:
+                jobFinish((Job) ev.getData());
+                break;
+            case WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED:
+                allInputsTrasferred((Job) ev.getData());
+                break;
+            case WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED:
+                allOutputsTransferred((Job) ev.getData());
+                break;
+            default:
+                throw new UnknownWorkflowEventException("Unknown event: " + ev);
+            }
         }
     }
 
@@ -179,18 +173,11 @@ public class VM extends CWSSimEntity {
         jobs.clear();
         idleCores = vmStaticParams.getCores();
         cpuSecondsConsumed = 0.0;
-
-        // VM can now accept jobs
-        isRunning = true;
     }
 
     private void terminateVM() {
         // Can no longer accept jobs
-        isRunning = false;
-
-        // cancel future events
-        Predicate p = new PredicateType(WorkflowEvent.JOB_FINISHED);
-        getCloudsim().cancelAll(getId(), p);
+        isTerminated = true;
 
         // Move running jobs back to the queue...
         jobs.addAll(runningJobs);
@@ -209,11 +196,6 @@ public class VM extends CWSSimEntity {
     }
 
     private void jobSubmit(Job job) {
-        // Sanity check
-        if (!isRunning) {
-            throw new RuntimeException("Cannot execute jobs: VM not running");
-        }
-
         job.setSubmitTime(getCloudsim().clock());
         job.setState(Job.State.IDLE);
         job.setVM(this);
@@ -288,11 +270,6 @@ public class VM extends CWSSimEntity {
     }
 
     private void jobFinish(Job job) {
-        // Sanity check
-        if (!isRunning) {
-            throw new RuntimeException("Cannot finish job: VM not running");
-        }
-
         getCloudsim().log(
                 "Computational part of job " + job.getTask().getId() + " on VM " + job.getVM().getId() + " finished");
 
@@ -398,5 +375,9 @@ public class VM extends CWSSimEntity {
 
     public void setVmStaticParams(VMStaticParams vmStaticParams) {
         this.vmStaticParams = vmStaticParams;
+    }
+
+    public boolean isTerminated() {
+        return this.isTerminated;
     }
 }
