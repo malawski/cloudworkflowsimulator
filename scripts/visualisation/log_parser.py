@@ -3,7 +3,7 @@
 from collections import namedtuple
 import re
 
-Pattern = namedtuple('LogPattern', 'regex type')
+Pattern = namedtuple('LogPattern', 'regex type set_values')
 
 class LogParser(object):
   def __init__(self):
@@ -17,7 +17,8 @@ class LogParser(object):
       matched = re.match(pattern.regex, line.strip())
       if matched:
         groups = matched.groupdict()
-        return pattern.type(**groups)
+        values = dict(pattern.set_values.items() + groups.items())
+        return pattern.type(**values)
 
     return None
 

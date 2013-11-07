@@ -6,52 +6,61 @@ import StringIO
 
 import log_parser
 
-TaskLog = namedtuple('TaskLog', 'job_id workflow task_id vm started finished result')
+TaskLog = namedtuple('TaskLog', 'id workflow task_id vm started finished result')
 TransferLog = namedtuple('TransferLog', 'id vm started finished direction')
 VMLog = namedtuple('VMLog', 'id started finished')
 Workflow = namedtuple('Workflow', 'id priority')
-
-TaskStartedEvent = namedtuple('TaskStartedEvent', 'job_id workflow task_id vm timestamp')
-TaskFinishedEvent = namedtuple('TaskFinishedEvent', 'job_id workflow task_id vm timestamp')
-TaskCrashedEvent = namedtuple('TaskCrashedEvent', 'job_id workflow task_id vm timestamp')
 
 TransferStartedEvent = namedtuple('TransferStartedEvent', 'id timestamp')
 TransferFinishedEvent = namedtuple('TransferFinishedEvent', 'id timestamp')
 
 PATTERNS = [
-    # log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\w+)\)\s+Starting job ID(?P<id>\d+) on VM (?P<vm>\d+)', type=JobStartedEvent),
-    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Starting computational part of job (?P<job_id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+)', type=TaskStartedEvent),
-    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Computational part of job (?P<job_id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+) finished', type=TaskFinishedEvent),    
-    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Job (?P<job_id>\d+) \(task_id = (?P<task_id>\w+), workflow_id = (?P<workflow>\w+)\) failed on VM (?P<vm>\d+). Resubmitting...', type=TaskCrashedEvent),    
+    log_parser.Pattern(
+            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Starting computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+)',
+            type=TaskLog,
+            set_values={'finished': None, 'result': None}),
+    log_parser.Pattern(
+            regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+) finished',
+            type=TaskLog,
+            set_values={'started': None, 'result': 'OK'}),    
+    log_parser.Pattern(
+            regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow_id = (?P<workflow>\w+)\) failed on VM (?P<vm>\d+). Resubmitting...',
+            type=TaskLog,
+            set_values={'started': None, 'result': 'FAILED'}),    
 
-    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Global transfer started: (?P<id>(\w|\.)+), size: (\d+)', type=TransferStartedEvent),    
-    log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Global transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)', type=TransferFinishedEvent),    
+    # log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Global transfer started: (?P<id>(\w|\.)+), size: (\d+)', type=TransferStartedEvent),    
+    # log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Global transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)', type=TransferFinishedEvent),    
 
-    log_parser.Pattern(regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (.*)', type=Workflow)
+    # log_parser.Pattern(regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (.*)', type=Workflow)
 ]
 
-def get_task_log_from_events(events):
-    started = None
-    finished = None
-    result = None
+# TODO(mequrel): change to something more readable (comprehension list)
+def merge_tuples_regarding_nones(tuple1, tuple2):
+    dict1 = tuple1.__dict__
+    dict2 = tuple2.__dict__
+    result_dict = {}
+    for key, value in dict1.items():
+        if value is None:
+            if dict2[key] is None:
+                result_dict[key] = None
+            else:
+                result_dict[key] = dict2[key]
 
-    for event in events:
-        workflow = event.workflow
-        vm = event.vm
-        task_id = event.task_id
-        job_id = event.job_id
+        else:
+            result_dict[key] = value
 
-        if isinstance(event, TaskStartedEvent):
-            started = event.timestamp
-        elif isinstance(event, TaskFinishedEvent):
-            finished = event.timestamp
-            result = 'OK'
-        elif isinstance(event, TaskCrashedEvent):
-            finished = event.timestamp
-            result = 'FAILED'
+    return TaskLog(**result_dict)
 
+def group_by_id(events):
+    events = sorted(events, key=attrgetter('id'))
+    return groupby(events, attrgetter('id'))
 
-    return TaskLog(workflow=workflow, task_id=task_id, job_id=job_id, vm=vm, started=started, finished=finished, result=result)
+def glue_fissured_events(events):
+    result = []
+    for event_id, same_id_events in group_by_id(events):
+        event = reduce(merge_tuples_regarding_nones, same_id_events)
+        result.append(event)
+    return result
 
 def get_transfer_log_from_events(events):
     started = None
@@ -126,12 +135,10 @@ def main():
     for workflow in workflows:
         log.add_workflow(workflow)
 
-    task_events = [event for event in events if isinstance(event, TaskStartedEvent) or isinstance(event, TaskFinishedEvent) or isinstance(event, TaskCrashedEvent)]
+    task_events = [event for event in events if isinstance(event, TaskLog)]
+    task_events = glue_fissured_events(task_events)
 
-    task_events = sorted(task_events, key=attrgetter('job_id'))
-    for job_id, group in groupby(task_events, attrgetter('job_id')):
-        task_log = get_task_log_from_events(group)
-        
+    for task_log in task_events:
         log.add_event(EventType.TASK, task_log)
 
     transfer_events = [event for event in events if isinstance(event, TransferStartedEvent) or isinstance(event, TransferFinishedEvent)]
