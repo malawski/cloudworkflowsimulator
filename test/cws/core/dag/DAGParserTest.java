@@ -19,7 +19,7 @@ public class DAGParserTest {
 
     @Test
     public void testTiny() {
-        DAG dag = DAGParser.parseDAG(new File("dags/test.dag"));
+        DAG dag = DAGParser.parseDAG(new File("dags/test1.dag"));
         assertEquals(4, dag.numTasks());
     }
 

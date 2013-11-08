@@ -1,0 +1,9 @@
+TASK ID1 preprocess 3.0
+TASK ID2 process 3.0
+TASK ID3 process 3.0
+TASK ID4 postprocess 5.0
+
+EDGE ID1 ID2
+EDGE ID1 ID3
+EDGE ID2 ID4
+EDGE ID3 ID4

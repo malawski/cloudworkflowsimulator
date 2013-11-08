@@ -241,8 +241,12 @@ public class WorkflowEngine extends CWSSimEntity {
         // If the job failed
         if (j.getResult() == Job.Result.FAILURE) {
             // Retry the job
-            getCloudsim()
-                    .log(" Job " + j.getTask().getId() + " failed on VM " + j.getVM().getId() + " resubmitting...");
+            getCloudsim().log(String.format(
+                    " Job %d (task_id = %s, workflow_id = %s) failed on VM %s. Resubmitting...",
+                    j.getID(),
+                    j.getTask().getId(),
+                    j.getDAGJob().getDAG().getId(),
+                    j.getVM().getId()));
             Job retry = jobFactory.createJob(dj, t, getId(), getCloudsim());
             VM vm = j.getVM();
             // add to free if contained in busy set
