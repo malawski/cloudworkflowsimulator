@@ -32,8 +32,10 @@ PATTERNS = [
             regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Global transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
             type=TransferLog,
             set_values={'finished': None}),
-
-    # log_parser.Pattern(regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (.*)', type=Workflow)
+    log_parser.Pattern(
+            regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (.*)',
+            type=Workflow,
+            set_values={}),
 ]
 
 # TODO(mequrel): change to something more readable (comprehension list)
