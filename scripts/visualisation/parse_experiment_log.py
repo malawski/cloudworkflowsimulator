@@ -11,9 +11,6 @@ TransferLog = namedtuple('TransferLog', 'id vm started finished direction')
 VMLog = namedtuple('VMLog', 'id started finished')
 Workflow = namedtuple('Workflow', 'id priority')
 
-TransferStartedEvent = namedtuple('TransferStartedEvent', 'id timestamp')
-TransferFinishedEvent = namedtuple('TransferFinishedEvent', 'id timestamp')
-
 PATTERNS = [
     log_parser.Pattern(
             regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Starting computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+)',
@@ -27,9 +24,14 @@ PATTERNS = [
             regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow_id = (?P<workflow>\w+)\) failed on VM (?P<vm>\d+). Resubmitting...',
             type=TaskLog,
             set_values={'started': None, 'result': 'FAILED'}),    
-
-    # log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Global transfer started: (?P<id>(\w|\.)+), size: (\d+)', type=TransferStartedEvent),    
-    # log_parser.Pattern(regex=r'\d+.\d+ \((?P<timestamp>\d+.\d+)\)\s+Global transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)', type=TransferFinishedEvent),    
+    log_parser.Pattern(
+            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global transfer started: (?P<id>(\w|\.)+), size: (\d+)',
+            type=TransferLog,
+            set_values={'finished': None}),
+    log_parser.Pattern(
+            regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Global transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
+            type=TransferLog,
+            set_values={'finished': None}),
 
     # log_parser.Pattern(regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (.*)', type=Workflow)
 ]
@@ -45,7 +47,6 @@ def merge_tuples_regarding_nones(tuple1, tuple2):
                 result_dict[key] = None
             else:
                 result_dict[key] = dict2[key]
-
         else:
             result_dict[key] = value
 
@@ -61,23 +62,6 @@ def glue_fissured_events(events):
         event = reduce(merge_tuples_regarding_nones, same_id_events)
         result.append(event)
     return result
-
-def get_transfer_log_from_events(events):
-    started = None
-    finished = None
-
-    vm = 1
-    for event in events:
-        if isinstance(event, TransferStartedEvent):
-            started = event.timestamp
-            # vm = event.vm
-            file_id = event.id
-        elif isinstance(event, TransferFinishedEvent):
-            finished = event.timestamp
-            # vm = event.vm
-            file_id = event.id
-
-    return TransferLog(id=file_id, vm=vm, started=started, finished=finished, direction='UPLOAD')
 
 class EventType(object):
     TASK, TRANSFER, VM = range(3)
@@ -141,23 +125,15 @@ def main():
     for task_log in task_events:
         log.add_event(EventType.TASK, task_log)
 
-    transfer_events = [event for event in events if isinstance(event, TransferStartedEvent) or isinstance(event, TransferFinishedEvent)]
+    transfer_events = [event for event in events if isinstance(event, TransferLog)]
+    transfer_events = glue_fissured_events(transfer_events)
 
+    # TODO(mequrel): That id key may not be unique. Should be checked.
 
-    # TODO(mequrel): That key may not be unique. Should be fixed.
-    def get_transfer_key(transfer):
-        return transfer.id
-        # return transfer.id, transfer.vm
-
-    transfer_events = sorted(transfer_events, key=get_transfer_key)
-    for transfer_id, group in groupby(transfer_events, get_transfer_key):
-        transfer_log = get_transfer_log_from_events(group)
-
+    for transfer_log in transfer_events:
         log.add_event(EventType.TRANSFER, transfer_log)
 
     print log.dumps()
-
-
 
 
 if __name__ == "__main__":
