@@ -174,6 +174,8 @@ public class VM extends CWSSimEntity {
         jobs.clear();
         idleCores = vmStaticParams.getCores();
         cpuSecondsConsumed = 0.0;
+
+        getCloudsim().log(String.format("VM %d started", getId()));
     }
 
     private void terminateVM() {
@@ -194,6 +196,7 @@ public class VM extends CWSSimEntity {
         // Reset dynamic state
         jobs.clear();
         idleCores = vmStaticParams.getCores();
+        getCloudsim().log(String.format("VM %d terminated", getId()));
     }
 
     private void jobSubmit(Job job) {

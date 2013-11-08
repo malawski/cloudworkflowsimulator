@@ -25,13 +25,22 @@ PATTERNS = [
             type=TaskLog,
             set_values={'started': None, 'result': 'FAILED'}),    
     log_parser.Pattern(
-            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global transfer started: (?P<id>(\w|\.)+), size: (\d+)',
+            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global (read|write) transfer started: (?P<id>(\w|\.)+), size: (\d+)',
             type=TransferLog,
+            set_values={'finished': None, 'vm': 1, 'direction': 'UPLOAD'}),
+    log_parser.Pattern(
+            regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Global (read|write) transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
+            type=TransferLog,
+            set_values={'started': None, 'vm': 1, 'direction': 'UPLOAD'}),
+    # TODO (mequrel): add UPLOAD / DOWNLOAD distinction, add VM
+    log_parser.Pattern(
+            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) started',
+            type=VMLog,
             set_values={'finished': None}),
     log_parser.Pattern(
-            regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Global transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
-            type=TransferLog,
-            set_values={'finished': None}),
+            regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) terminated',
+            type=VMLog,
+            set_values={'started': None}),
     log_parser.Pattern(
             regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (.*)',
             type=Workflow,
@@ -40,6 +49,8 @@ PATTERNS = [
 
 # TODO(mequrel): change to something more readable (comprehension list)
 def merge_tuples_regarding_nones(tuple1, tuple2):
+    tuple_type = type(tuple1)
+
     dict1 = tuple1.__dict__
     dict2 = tuple2.__dict__
     result_dict = {}
@@ -52,7 +63,7 @@ def merge_tuples_regarding_nones(tuple1, tuple2):
         else:
             result_dict[key] = value
 
-    return TaskLog(**result_dict)
+    return tuple_type(**result_dict)
 
 def group_by_id(events):
     events = sorted(events, key=attrgetter('id'))
@@ -134,6 +145,12 @@ def main():
 
     for transfer_log in transfer_events:
         log.add_event(EventType.TRANSFER, transfer_log)
+
+    vm_events = [event for event in events if isinstance(event, VMLog)]
+    vm_events = glue_fissured_events(vm_events)
+
+    for vm_log in vm_events:
+        log.add_event(EventType.VM, vm_log)
 
     print log.dumps()
 
