@@ -154,7 +154,7 @@ for seed in seeds do
   if local then
     comm = "#{script_file} #{input_file}"
   else 
-    comm "echo \"#{script_file} #{input_file}\" | qsub -q #{queue_name}"
+    comm = "echo \"#{script_file} #{input_file}\" | qsub -q #{queue_name}"
   end
   if run then
     puts "Running: #{comm}"
