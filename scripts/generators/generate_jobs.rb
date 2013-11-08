@@ -27,6 +27,7 @@ ensemble_size = 20
 variation = 0.0
 seeds = [0, 1, 2]
 queue_name = "l_short"
+qsub_params = ""
 local = false
 run = false
 
@@ -83,8 +84,11 @@ OptionParser.new do |opts|
       "defaults to #{latencies.join(',')}") do |val|
     latencies = val
   end
-  opts.on("--queue-name NAME", Array, "Optional queue name, defaults to \"#{queue_name}\"") do |val|
-    seeds = val
+  opts.on("--queue-name NAME", String, "Optional queue name, defaults to \"#{queue_name}\"") do |val|
+    queue_name = val
+  end
+  opts.on("--qsub-params PARAMS", String, "Optional additional qsub parameters, defaults to empty string") do |val|
+    qsub_params = val
   end
   opts.on("--failure-rate RATE", Float, "Optional failure rate, defaults to \"#{failure_rate}\"") do |val|
     failure_rate = val
@@ -180,7 +184,8 @@ for seed in seeds do
   if local then
     bash_command = "#{absolute_running_script_path} #{absolute_input_file_path}"
   else 
-    bash_command = "echo \"#{absolute_running_script_path} #{absolute_input_file_path}\" | qsub -q #{queue_name}"
+    bash_command = "echo \"#{absolute_running_script_path} #{absolute_input_file_path}\" " +
+      "| qsub -q #{queue_name} #{qsub_params}"
   end
   if run then
     puts "Running: #{bash_command}"
