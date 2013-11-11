@@ -24,12 +24,10 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
 
     public SimpleUtilizationBasedProvisioner(double maxScaling, CloudSimWrapper cloudsim) {
         super(maxScaling, cloudsim);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     public void provisionResources(WorkflowEngine engine) {
-
         // when called for the first time it should obtain the initial number of VMs
         if (initialNumVMs == 0)
             initialNumVMs = engine.getAvailableVMs().size();
@@ -41,8 +39,7 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
         double time = getCloudSim().clock();
         double cost = engine.getCost();
 
-        getCloudSim().log(" Provisioner: Budget consumed " + cost);
-
+        // NOTE(bryk): Watch for out this code.
         // assuming all VMs are homogeneous
         double vmPrice = 0;
         if (!engine.getAvailableVMs().isEmpty())
@@ -74,9 +71,6 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
         }
 
         int numVMsCompleting = completingVMs.size();
-
-        getCloudSim().log(" Provisioner: number of instances : " + numVMsRunning);
-        getCloudSim().log(" Provisioner: number of instances completing: " + numVMsCompleting);
 
         // if we are close to the budget
         if (budget - cost < vmPrice * numVMsCompleting || time > deadline) {
@@ -139,7 +133,9 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
         double numBusyVMs = engine.getBusyVMs().size();
         double utilization = numBusyVMs / (numFreeVMS + numBusyVMs);
 
-        getCloudSim().log(" Provisioner: utilization: " + utilization);
+        getCloudSim().log(
+                "Provisioner: utilization: " + utilization + ", budget consumed: " + cost + ", number of instances: "
+                        + numVMsRunning + ", number of instances completing: " + numVMsCompleting);
 
         // if we are close to constraints we should not provision new vms
         boolean finishing_phase = budget - cost <= vmPrice * numVMsRunning || time > deadline;

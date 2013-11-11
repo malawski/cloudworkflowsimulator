@@ -48,7 +48,7 @@ public class WorkflowEngine extends CWSSimEntity {
     protected Set<VM> freeVMs = new HashSet<VM>();
 
     /** The set of busy VMs, i.e. the ones which execute jobs */
-    protected Set<VM> busyVMs = new HashSet<VM>();
+    private Set<VM> busyVMs = new HashSet<VM>();
 
     /** The list of unmatched ready jobs */
     private LinkedList<Job> queue = new LinkedList<Job>();
@@ -82,6 +82,8 @@ public class WorkflowEngine extends CWSSimEntity {
      */
     double budget = Double.MAX_VALUE;
 
+    private boolean provisioningRequestSend = false;
+
     public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler, CloudSimWrapper cloudsim) {
         super("WorkflowEngine" + (next_id++), cloudsim);
         this.jobFactory = jobFactory;
@@ -95,13 +97,6 @@ public class WorkflowEngine extends CWSSimEntity {
     }
 
     @Override
-    public void startEntity() {
-        // send the first provisioning request
-        // it should be sent after dag submissions events
-        getCloudsim().send(getId(), this.getId(), 0.0001, WorkflowEvent.PROVISIONING_REQUEST);
-    }
-
-    @Override
     public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
         case WorkflowEvent.VM_LAUNCHED:
@@ -112,6 +107,10 @@ public class WorkflowEngine extends CWSSimEntity {
             break;
         case WorkflowEvent.DAG_SUBMIT:
             dagSubmit((DAGJob) ev.getData());
+            if (!this.provisioningRequestSend) {
+                this.provisioningRequestSend = true;
+                this.sendNow(this.getId(), WorkflowEvent.PROVISIONING_REQUEST);
+            }
             break;
         case WorkflowEvent.JOB_STARTED:
             jobStarted((Job) ev.getData());
@@ -201,6 +200,9 @@ public class WorkflowEngine extends CWSSimEntity {
         for (JobListener jl : jobListeners) {
             jl.jobStarted(j);
         }
+        VM vm = j.getVM();
+        if (freeVMs.remove(vm))
+            busyVMs.add(vm);
     }
 
     private void jobFinished(Job j) {
@@ -241,12 +243,9 @@ public class WorkflowEngine extends CWSSimEntity {
         // If the job failed
         if (j.getResult() == Job.Result.FAILURE) {
             // Retry the job
-            getCloudsim().log(String.format(
-                    " Job %d (task_id = %s, workflow_id = %s) failed on VM %s. Resubmitting...",
-                    j.getID(),
-                    j.getTask().getId(),
-                    j.getDAGJob().getDAG().getId(),
-                    j.getVM().getId()));
+            getCloudsim().log(
+                    String.format(" Job %d (task_id = %s, workflow_id = %s) failed on VM %s. Resubmitting...",
+                            j.getID(), j.getTask().getId(), j.getDAGJob().getDAG().getId(), j.getVM().getId()));
             Job retry = jobFactory.createJob(dj, t, getId(), getCloudsim());
             VM vm = j.getVM();
             // add to free if contained in busy set
