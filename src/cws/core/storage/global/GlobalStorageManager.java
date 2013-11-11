@@ -103,8 +103,8 @@ public class GlobalStorageManager extends StorageManager {
         for (DAGFile file : files) {
             GlobalStorageTransfer write = new GlobalStorageTransfer(job, file);
             jobTransfers.add(write);
-            String logMsg = String.format("Global %s transfer started: %s, size: %s", transferType, write.getFile()
-                    .getName(), write.getFile().getSize());
+            String logMsg = String.format("Global %s transfer started: %s, size: %s, vm: %s", transferType, write.getFile()
+                    .getName(), write.getFile().getSize(), job.getVM().getId());
             getCloudsim().log(logMsg);
             getCloudsim().send(getId(), getId(), params.getLatency(), progressEvent, write);
         }
