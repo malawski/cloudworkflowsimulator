@@ -23,7 +23,7 @@ import cws.core.storage.cache.VMCacheManager;
  * It has an input Port that is used to transfer data to the VM, and an output
  * Port that is used to transfer data from the VM. Both ports have the same
  * bandwidth.
- *
+ * 
  * Jobs can be queued and are executed in FIFO order. The scheduling is
  * space shared.
  * 
@@ -229,12 +229,9 @@ public class VM extends CWSSimEntity {
             job.setResult(Job.Result.SUCCESS);
         }
 
-        getCloudsim().log(String.format(
-                "Starting computational part of job %s (task_id = %s, workflow = %s) on VM %s",
-                job.getID(),
-                job.getTask().getId(),
-                job.getDAGJob().getDAG().getId(),
-                job.getVM().getId()));
+        getCloudsim().log(
+                String.format("Starting computational part of job %s (task_id = %s, workflow = %s) on VM %s",
+                        job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.getVM().getId()));
 
         getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
     }
@@ -280,12 +277,11 @@ public class VM extends CWSSimEntity {
 
     private void jobFinish(Job job) {
 
-        getCloudsim().log(String.format(
-                "Computational part of job %s (task_id = %s, workflow = %s) on VM %s finished",
-                job.getID(),
-                job.getTask().getId(),
-                job.getDAGJob().getDAG().getId(),
-                job.getVM().getId()));
+        getCloudsim().log(
+                String.format(
+                        "Computational part of job %s (task_id = %s, workflow = %s, retry = %s) on VM %s finished", job
+                                .getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(), job
+                                .getVM().getId()));
 
         getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
                 WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
