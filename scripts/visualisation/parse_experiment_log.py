@@ -25,15 +25,15 @@ PATTERNS = [
             type=TaskLog,
             set_values={'started': None, 'result': 'FAILED'}),    
     log_parser.Pattern(
-            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global write transfer started: (?P<id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+)',
+            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global write transfer (?P<id>\d+) started: ((\w|\.)+), size: (\d+), vm: (?P<vm>\d+)',
             type=TransferLog,
             set_values={'finished': None, 'direction': 'UPLOAD'}),
     log_parser.Pattern(
-            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global read transfer started: (?P<id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+)',
+            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global read transfer (?P<id>\d+) started: ((\w|\.)+), size: (\d+), vm: (?P<vm>\d+)',
             type=TransferLog,
             set_values={'finished': None, 'direction': 'DOWNLOAD'}),
     log_parser.Pattern(
-            regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Global (read|write) transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
+            regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Global (read|write) transfer (?P<id>\d+) finished: ((\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
             type=TransferLog,
             set_values={'started': None, 'vm': None, 'direction': None}),
     log_parser.Pattern(
@@ -139,15 +139,15 @@ def main():
     task_events = glue_fissured_events(task_events)
 
     for task_log in task_events:
-        log.add_event(EventType.TASK, task_log)
+        if task_log.finished is not None:
+            log.add_event(EventType.TASK, task_log)
 
     transfer_events = [event for event in events if isinstance(event, TransferLog)]
     transfer_events = glue_fissured_events(transfer_events)
 
-    # TODO(mequrel): That id key may not be unique. Should be checked.
-
     for transfer_log in transfer_events:
-        log.add_event(EventType.TRANSFER, transfer_log)
+        if transfer_log.finished is not None:
+            log.add_event(EventType.TRANSFER, transfer_log)
 
     vm_events = [event for event in events if isinstance(event, VMLog)]
     vm_events = glue_fissured_events(vm_events)
