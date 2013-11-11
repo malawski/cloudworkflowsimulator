@@ -2,6 +2,8 @@ package cws.core;
 
 import static org.junit.Assert.assertEquals;
 
+import cws.core.dag.DAG;
+import cws.core.dag.DAGJob;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,6 +74,7 @@ public class VMTest {
     public void testSingleJob() {
         Job j = new Job(cloudsim);
         j.setTask(new Task("task_id", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -95,8 +98,10 @@ public class VMTest {
     public void testTwoJobs() {
         Job j1 = new Job(cloudsim);
         j1.setTask(new Task("task_id", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j1.setDAGJob(new DAGJob(new DAG(), 1));
         Job j2 = new Job(cloudsim);
         j2.setTask(new Task("task_id2", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j2.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -125,9 +130,11 @@ public class VMTest {
     public void testMultiCoreVM() {
         Job j1 = new Job(cloudsim);
         j1.setTask(new Task("task_id1", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j1.setDAGJob(new DAGJob(new DAG(), 1));
 
         Job j2 = new Job(cloudsim);
         j2.setTask(new Task("task_id2", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j2.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);

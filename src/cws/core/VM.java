@@ -23,7 +23,7 @@ import cws.core.storage.cache.VMCacheManager;
  * It has an input Port that is used to transfer data to the VM, and an output
  * Port that is used to transfer data from the VM. Both ports have the same
  * bandwidth.
- * 
+ *
  * Jobs can be queued and are executed in FIFO order. The scheduling is
  * space shared.
  * 
@@ -389,5 +389,13 @@ public class VM extends CWSSimEntity {
 
     public void setVmStaticParams(VMStaticParams vmStaticParams) {
         this.vmStaticParams = vmStaticParams;
+    }
+
+    public boolean isTerminated() {
+        return isTerminated;
+    }
+
+    public void setTerminated(boolean terminated) {
+        isTerminated = terminated;
     }
 }

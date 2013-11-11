@@ -20,7 +20,7 @@ public class TopologicalOrderTest {
 
     @Test
     public void test() {
-        DAG dag = DAGParser.parseDAG(new File("dags/test1.dag"));
+        DAG dag = DAGParser.parseDAG(new File("dags/test.dag"));
         checkTopologicalSort(dag);
     }
 
