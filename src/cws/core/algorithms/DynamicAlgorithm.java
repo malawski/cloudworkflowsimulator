@@ -9,12 +9,12 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.DAGJobListener;
-import cws.core.experiment.VMFactory;
 import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
+import cws.core.provisioner.VMFactory;
 
 public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMListener, JobListener {
 
@@ -35,7 +35,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     protected long simulationFinishWallTime;
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, double price, Scheduler scheduler,
-            Provisioner provisioner, CloudSimWrapper cloudsim, AlgorithmSimulationParams simulationParams) {
+            Provisioner provisioner, CloudSimWrapper cloudsim, StorageSimulationParams simulationParams) {
         super(budget, deadline, dags, simulationParams, cloudsim);
         this.price = price;
         this.provisioner = provisioner;
@@ -72,7 +72,7 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         // re-initing cloudsim here, watch out...
         cloudsim.init();
 
-        storageManager = Algorithm.initializeStorage(simulationParams, cloudsim);
+        storageManager = initializeStorage(simulationParams, cloudsim);
 
         SimulationEnvironment simulationEnvironment = prepareEnvironment();
 

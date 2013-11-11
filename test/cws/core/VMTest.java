@@ -2,6 +2,8 @@ package cws.core;
 
 import static org.junit.Assert.assertEquals;
 
+import cws.core.dag.DAG;
+import cws.core.dag.DAGJob;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,6 +74,7 @@ public class VMTest {
     public void testSingleJob() {
         Job j = new Job(cloudsim);
         j.setTask(new Task("task_id", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -95,8 +98,10 @@ public class VMTest {
     public void testTwoJobs() {
         Job j1 = new Job(cloudsim);
         j1.setTask(new Task("task_id", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j1.setDAGJob(new DAGJob(new DAG(), 1));
         Job j2 = new Job(cloudsim);
         j2.setTask(new Task("task_id2", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j2.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -125,9 +130,11 @@ public class VMTest {
     public void testMultiCoreVM() {
         Job j1 = new Job(cloudsim);
         j1.setTask(new Task("task_id1", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j1.setDAGJob(new DAGJob(new DAG(), 1));
 
         Job j2 = new Job(cloudsim);
         j2.setTask(new Task("task_id2", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j2.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMStaticParams vmStaticParams = new VMStaticParams();
         vmStaticParams.setMips(100);
@@ -150,5 +157,81 @@ public class VMTest {
         assertEquals(0.0, j2.getSubmitTime(), 0.0);
         assertEquals(0.0, j2.getStartTime(), 0.0);
         assertEquals(10.0, j2.getFinishTime(), 0.0);
+    }
+
+    @Test
+    public void testVMShouldNotStartAutomatically() {
+        VMStaticParams vmStaticParams = new VMStaticParams();
+
+        VM vm = new VM(vmStaticParams, cloudsim);
+        cloudsim.startSimulation();
+
+        assertEquals(false, vm.isTerminated());
+    }
+
+    @Test
+    public void testVMShouldStartProperly() {
+        VMStaticParams vmStaticParams = new VMStaticParams();
+
+        VM vm = new VM(vmStaticParams, cloudsim);
+        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.startSimulation();
+
+        assertEquals(false, vm.isTerminated());
+    }
+
+    @Test
+    public void testVMShouldTerminateProperly() {
+        VMStaticParams vmStaticParams = new VMStaticParams();
+
+        VM vm = new VM(vmStaticParams, cloudsim);
+        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
+        cloudsim.startSimulation();
+
+        assertEquals(true, vm.isTerminated());
+    }
+
+    @Test
+    public void testVMShouldNotAcceptEventsAfterTermination() {
+        VMStaticParams vmStaticParams = new VMStaticParams();
+
+        VM vm = new VM(vmStaticParams, cloudsim);
+        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
+        cloudsim.send(0, vm.getId(), 0.3, WorkflowEvent.VM_LAUNCH);
+        cloudsim.startSimulation();
+
+        assertEquals(true, vm.isTerminated());
+    }
+
+    @Test
+    public void testVMKillJobsUponTermination() {
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        Job job = new Job(cloudsim);
+        job.setTask(new Task("task_id1", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+
+        VM vm = new VM(vmStaticParams, cloudsim);
+        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.JOB_SUBMIT, job);
+        cloudsim.send(0, vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
+        cloudsim.startSimulation();
+
+        assertEquals(Job.Result.FAILURE, job.getResult());
+    }
+
+    @Test
+    public void testVMShouldNotAcceptNewJobsAfterTermination() {
+        VMStaticParams vmStaticParams = new VMStaticParams();
+        Job job2 = new Job(cloudsim);
+        job2.setTask(new Task("task_id1", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+
+        VM vm = new VM(vmStaticParams, cloudsim);
+        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(0, vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
+        cloudsim.send(0, vm.getId(), 0.3, WorkflowEvent.JOB_SUBMIT, job2);
+        cloudsim.startSimulation();
+
+        assertEquals(Job.Result.NONE, job2.getResult());
     }
 }

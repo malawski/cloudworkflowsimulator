@@ -1,4 +1,4 @@
-package cws.core.experiment;
+package cws.core.provisioner;
 
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 

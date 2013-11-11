@@ -1,5 +1,9 @@
 package cws.core.storage.global;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -60,6 +64,25 @@ public class GlobalStorageParams {
         options.addOption(ctt);
     }
 
+    public void storeProperties(Properties properties) {
+        properties.setProperty("readSpeed", "" + readSpeed);
+        properties.setProperty("writeSpeed", "" + writeSpeed);
+        properties.setProperty("chunkTransferTime", "" + chunkTransferTime);
+        properties.setProperty("latency", "" + latency);
+        properties.setProperty("numReplicas", "" + numReplicas);
+    }
+
+    public static GlobalStorageParams readProperties(Properties properties) {
+        GlobalStorageParams params = new GlobalStorageParams();
+        params.readSpeed = Double.valueOf(properties.getProperty("readSpeed"));
+        params.writeSpeed = Double.valueOf(properties.getProperty("writeSpeed"));
+        params.chunkTransferTime = Double.valueOf(properties.getProperty("chunkTransferTime",
+                DEFAULT_CHUNK_TRANSFER_TIME + ""));
+        params.latency = Double.valueOf(properties.getProperty("latency", DEFAULT_LATENCY + ""));
+        params.numReplicas = Integer.valueOf(properties.getProperty("numReplicas", DEFAULT_NUM_REPLICAS + ""));
+        return params;
+    }
+
     public static GlobalStorageParams readCliOptions(CommandLine args) {
         GlobalStorageParams params = new GlobalStorageParams();
         if (!args.hasOption("storage-manager-read") || !args.hasOption("storage-manager-write")) {
@@ -79,6 +102,30 @@ public class GlobalStorageParams {
         System.out.printf("chunk-transfer-time = %f\n", params.chunkTransferTime);
         System.out.printf("num-replicas = %d\n", params.numReplicas);
         return params;
+    }
+
+    /**
+     * @return Properties file name prefix based on this prams' state.
+     */
+    public String getName() {
+        return "rs_" + readSpeed + "ws_" + writeSpeed + "ctt_" + chunkTransferTime + "l_" + latency + "nr_"
+                + numReplicas;
+    }
+
+    /**
+     * @return All global storage params permutations.
+     */
+    public static List<GlobalStorageParams> getAllGlobalStorageParams() {
+        List<GlobalStorageParams> ret = new ArrayList<GlobalStorageParams>();
+        for (double ws = 10000; ws <= 100000; ws *= 10) {
+            for (double rs = 10000; rs <= 100000; rs *= 10) {
+                GlobalStorageParams gs = new GlobalStorageParams();
+                gs.setReadSpeed(rs);
+                gs.setWriteSpeed(ws);
+                ret.add(gs);
+            }
+        }
+        return ret;
     }
 
     public double getReadSpeed() {

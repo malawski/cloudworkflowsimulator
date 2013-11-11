@@ -19,12 +19,12 @@ import org.apache.commons.io.IOUtils;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.dag.DAGListGenerator;
 import cws.core.dag.DAGParser;
 import cws.core.dag.DAGStats;
 import cws.core.dag.Task;
 import cws.core.exception.IllegalCWSArgumentException;
-import cws.core.experiment.DAGListGenerator;
-import cws.core.experiment.VMFactory;
+import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 
@@ -32,6 +32,7 @@ public class TestRun {
     private static final String DEFAULT_ENSEMBLE_SIZE = "50";
     private static final String DEFAULT_SCALING_FACTOR = "1.0";
     private static final String DEFAULT_STORAGE_CACHE = "void";
+    private static final String DEFAULT_ENABLE_LOGGING = "true";
 
     public static Options buildOptions() {
         Options options = new Options();
@@ -85,6 +86,11 @@ public class TestRun {
         storageManager.setArgName("MRG");
         options.addOption(storageManager);
 
+        Option enableLogging = new Option("el", "enable-logging", true, "Whether to enable logging, defaults to "
+                + DEFAULT_ENABLE_LOGGING);
+        enableLogging.setArgName("BOOL");
+        options.addOption(enableLogging);
+
         GlobalStorageParams.buildCliOptions(options);
         VMFactory.buildCliOptions(options);
         return options;
@@ -132,50 +138,40 @@ public class TestRun {
         Double scalingFactor = Double.parseDouble(args.getOptionValue("scaling-factor", DEFAULT_SCALING_FACTOR));
         Long seed = Long.parseLong(args.getOptionValue("seed", System.currentTimeMillis() + ""));
         String storageCacheType = args.getOptionValue("storage-cache", DEFAULT_STORAGE_CACHE);
+        Boolean enableLogging = Boolean.valueOf(args.getOptionValue("enable-logging", DEFAULT_ENABLE_LOGGING));
 
         VMFactory.readCliOptions(args, seed);
 
-        // TODO(_mequrel_): change to IoC in the future
         CloudSimWrapper cloudsim = new CloudSimWrapper();
         cloudsim.init();
 
         // Disable cloudsim logging
-        cloudsim.disableLogging();
+        if (!enableLogging) {
+            cloudsim.disableLogging();
+        }
 
         // Determine the distribution
         String[] names = null;
         String inputname = inputdir.getAbsolutePath() + "/" + application;
         if ("uniform_unsorted".equals(distribution)) {
-
             names = DAGListGenerator.generateDAGListUniformUnsorted(new Random(seed), inputname, ensembleSize);
-
         } else if ("uniform_sorted".equals(distribution)) {
-
             names = DAGListGenerator.generateDAGListUniform(new Random(seed), inputname, ensembleSize);
-
         } else if ("pareto_unsorted".equals(distribution)) {
-
             names = DAGListGenerator.generateDAGListParetoUnsorted(new Random(seed), inputname, ensembleSize);
-
         } else if ("pareto_sorted".equals(distribution)) {
-
             names = DAGListGenerator.generateDAGListPareto(new Random(seed), inputname, ensembleSize);
-
         } else if ("constant".equals(distribution)) {
-
             names = DAGListGenerator.generateDAGListConstant(new Random(seed), inputname, ensembleSize);
-
         } else if (distribution.startsWith("fixed")) {
-
             int size = Integer.parseInt(distribution.substring(5));
             names = DAGListGenerator.generateDAGListConstant(inputname, size, ensembleSize);
-
         } else {
             System.err.println("Unrecognized distribution: " + distribution);
             System.exit(1);
         }
 
-        AlgorithmSimulationParams simulationParams = new AlgorithmSimulationParams();
+        StorageSimulationParams simulationParams = new StorageSimulationParams();
 
         if (storageCacheType.equals("fifo")) {
             simulationParams.setStorageCacheType(StorageCacheType.FIFO);
@@ -189,8 +185,10 @@ public class TestRun {
             GlobalStorageParams params = GlobalStorageParams.readCliOptions(args);
             simulationParams.setStorageParams(params);
             simulationParams.setStorageType(StorageType.GLOBAL);
-        } else {
+        } else if (storageManagerType.equals("void")) {
             simulationParams.setStorageType(StorageType.VOID);
+        } else {
+            throw new IllegalCWSArgumentException("Wrong storage-manager:" + storageCacheType);
         }
 
         // Echo the simulation parameters
@@ -211,9 +209,15 @@ public class TestRun {
         double maxTime = 0.0;
 
         List<DAG> dags = new ArrayList<DAG>();
+        int workflow_id = 0;
         for (String name : names) {
-            System.out.println(name);
             DAG dag = DAGParser.parseDAG(new File(name));
+            dag.setId(new Integer(workflow_id).toString());
+            System.out.println(String.format(
+                    "Workflow %d, priority = %d, filename = %s",
+                    workflow_id, workflow_id, name
+                    ));
+            workflow_id++;
             dags.add(dag);
 
             if (scalingFactor > 1.0) {
@@ -223,13 +227,13 @@ public class TestRun {
                 }
             }
 
-            DAGStats s = new DAGStats(dag, Algorithm.initializeStorage(simulationParams, cloudsim));
+            DAGStats dagStats = new DAGStats(dag, Algorithm.initializeStorage(simulationParams, cloudsim));
 
-            minTime = Math.min(minTime, s.getCriticalPath());
-            minCost = Math.min(minCost, s.getMinCost());
+            minTime = Math.min(minTime, dagStats.getCriticalPath());
+            minCost = Math.min(minCost, dagStats.getMinCost());
 
-            maxTime += s.getCriticalPath();
-            maxCost += s.getMinCost();
+            maxTime += dagStats.getCriticalPath();
+            maxCost += dagStats.getMinCost();
         }
 
         int nbudgets = 10;
@@ -262,18 +266,8 @@ public class TestRun {
                 System.out.println();
                 for (double deadline = minDeadline; deadline < maxDeadline + (deadlineStep / 2.0); deadline += deadlineStep) {
                     System.out.print(".");
-                    Algorithm algorithm = null;
-                    if ("SPSS".equals(algorithmName)) {
-                        algorithm = new SPSS(budget, deadline, dags, alpha, cloudsim, simulationParams);
-                    } else if ("DPDS".equals(algorithmName)) {
-                        algorithm = new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling,
-                                cloudsim, simulationParams);
-                    } else if ("WADPDS".equals(algorithmName)) {
-                        algorithm = new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling,
-                                cloudsim, simulationParams);
-                    } else {
-                        throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
-                    }
+                    Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, simulationParams,
+                            dags, budget, deadline);
 
                     algorithm.simulate(algorithmName);
 
@@ -305,6 +299,26 @@ public class TestRun {
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(fileOut);
+        }
+    }
+
+    /**
+     * Crates algorithm instance from the given input params.
+     * @return The newly created algorithm instance.
+     */
+    protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
+            CloudSimWrapper cloudsim, StorageSimulationParams simulationParams, List<DAG> dags, double budget,
+            double deadline) {
+        if ("SPSS".equals(algorithmName)) {
+            return new SPSS(budget, deadline, dags, alpha, cloudsim, simulationParams);
+        } else if ("DPDS".equals(algorithmName)) {
+            return new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, cloudsim,
+                    simulationParams);
+        } else if ("WADPDS".equals(algorithmName)) {
+            return new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, cloudsim,
+                    simulationParams);
+        } else {
+            throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }
     }
 }

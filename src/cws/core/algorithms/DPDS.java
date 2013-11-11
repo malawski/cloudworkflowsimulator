@@ -9,7 +9,7 @@ import cws.core.scheduler.EnsembleDynamicScheduler;
 
 public class DPDS extends DynamicAlgorithm {
     public DPDS(double budget, double deadline, List<DAG> dags, double price, double maxScaling,
-            CloudSimWrapper cloudsim, AlgorithmSimulationParams simulationParams) {
+            CloudSimWrapper cloudsim, StorageSimulationParams simulationParams) {
         super(budget, deadline, dags, price, new EnsembleDynamicScheduler(cloudsim),
                 new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim), cloudsim, simulationParams);
     }

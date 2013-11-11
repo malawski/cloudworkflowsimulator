@@ -10,11 +10,11 @@ import cws.core.dag.DAGJobListener;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.experiment.VMFactory;
 import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.log.WorkflowLog;
+import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManager;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener,
@@ -57,7 +57,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     protected long simulationFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
-            AlgorithmSimulationParams simulationParams) {
+            StorageSimulationParams simulationParams) {
         super(budget, deadline, dags, simulationParams, cloudsim);
     }
 
@@ -385,7 +385,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         Task task = vmqueue.peek();
         if (task == null) {
             // No more tasks
-            terminateVM(vm);
+            getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
         } else {
             // If job for task is ready
             if (readyJobs.containsKey(task)) {
@@ -400,10 +400,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         double now = getCloudsim().clock();
         double delay = start - now;
         getCloudsim().send(engine.getId(), cloud.getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
-    }
-
-    private void terminateVM(VM vm) {
-        getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
     }
 
     private void submitJob(VM vm, Job job) {
@@ -446,7 +442,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     public void simulate(String logname) {
         getCloudsim().init();
 
-        storageManager = Algorithm.initializeStorage(simulationParams, cloudsim);
+        storageManager = initializeStorage(simulationParams, cloudsim);
         WorkflowLog log = prepareEnvironment();
 
         planningStartWallTime = System.nanoTime();

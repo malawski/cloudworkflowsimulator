@@ -13,6 +13,11 @@ public class GlobalStorageTransfer {
     private DAGFile file;
     /** Number of bytes transferred so far */
     private double bytesTransferred = 0;
+    /** Unique transfer task identifier */
+    private int id;
+
+    /** Next ID for a transfer task */
+    private static int next_id = 0;
 
     /**
      * Transfer's duration. It should have proper value after transfer finish. In the meantime it can have some
@@ -25,6 +30,8 @@ public class GlobalStorageTransfer {
      * @param file - the transferred file
      */
     public GlobalStorageTransfer(Job job, DAGFile file) {
+        this.id = next_id++;
+
         this.job = job;
         this.file = file;
     }
@@ -72,5 +79,9 @@ public class GlobalStorageTransfer {
 
     public void addDuration(double amount) {
         duration += amount;
+    }
+
+    public int getId() {
+        return id;
     }
 }

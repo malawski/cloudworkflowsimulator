@@ -15,17 +15,17 @@ import cws.core.storage.cache.VoidCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
 
 public abstract class Algorithm {
-    /** Simulation params like storage manager type, needed to initialize simulation properly **/
-    protected AlgorithmSimulationParams simulationParams;
-    protected CloudSimWrapper cloudsim;
+    /** Simulation params like storage manager type, needed to initialize simulation properly. **/
+    protected StorageSimulationParams simulationParams;
 
+    protected CloudSimWrapper cloudsim;
     private double budget;
     private double deadline;
     private List<DAG> dags;
     private boolean generateLog = false;
     protected StorageManager storageManager;
 
-    public Algorithm(double budget, double deadline, List<DAG> dags, AlgorithmSimulationParams simulationParams,
+    public Algorithm(double budget, double deadline, List<DAG> dags, StorageSimulationParams simulationParams,
             CloudSimWrapper cloudsim) {
         this.budget = budget;
         this.deadline = deadline;
@@ -152,7 +152,7 @@ public abstract class Algorithm {
         return b.toString();
     }
 
-    public static StorageManager initializeStorage(AlgorithmSimulationParams simulationParams, CloudSimWrapper cloudsim) {
+    public static StorageManager initializeStorage(StorageSimulationParams simulationParams, CloudSimWrapper cloudsim) {
         VMCacheManager cacheManager;
         if (simulationParams.getStorageCacheType() == StorageCacheType.FIFO) {
             cacheManager = new FIFOCacheManager(cloudsim);

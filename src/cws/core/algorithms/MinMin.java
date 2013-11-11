@@ -16,7 +16,7 @@ import cws.core.dag.algorithms.TopologicalOrder;
 public class MinMin extends StaticAlgorithm {
 
     public MinMin(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
-            AlgorithmSimulationParams simulationParams) {
+            StorageSimulationParams simulationParams) {
         super(budget, deadline, dags, cloudsim, simulationParams);
     }
 

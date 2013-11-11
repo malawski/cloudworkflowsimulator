@@ -6,6 +6,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import cws.core.dag.DAGListGenerator;
+
 public class DAGListGeneratorTest {
 
     @Test

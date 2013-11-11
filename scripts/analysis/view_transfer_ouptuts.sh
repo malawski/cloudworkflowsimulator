@@ -2,7 +2,8 @@
 # This script can be used for lightweight analysis of transfer outputs of a simulation.
 # It runs graphical console tool for displaying CSV files, thus is far more faster than Excel or OpenOffice.
 # Furthermore, it can be run in a console-only environment.
-# TODO(bryk): Add more comments.
+# This script gets columns to display from transfer_outputs_columns.lst file.
+# This script assumes that first 5 columns contain transfer data, hence it will be converted to human readable form.
 
 COLSFILE='transter_outputs_columns.lst';
 

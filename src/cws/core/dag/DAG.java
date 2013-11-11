@@ -14,6 +14,8 @@ public class DAG {
     private HashMap<String, Long> files = new HashMap<String, Long>();
     private HashMap<String, Task> tasks = new HashMap<String, Task>();
 
+    private String id; // for logging purposes
+
     public void addTask(Task t) {
         if (tasks.containsKey(t.getId())) {
             throw new RuntimeException("Task already exists: " + t.getId());
@@ -91,5 +93,13 @@ public class DAG {
 
     public String[] getTasks() {
         return tasks.keySet().toArray(new String[0]);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

@@ -56,6 +56,9 @@ public class Job {
     /** Job result */
     private Result result;
 
+    /** If this job is a retry of the task */
+    private boolean isRetry = false;
+
     public Job(CloudSimWrapper cloudsim) {
         this.id = next_id++;
         this.releaseTime = cloudsim.clock();
@@ -176,5 +179,13 @@ public class Job {
     @Override
     public String toString() {
         return "<Job id=" + Integer.toString(id) + ">";
+    }
+
+    public boolean isRetry() {
+        return isRetry;
+    }
+
+    public void setRetry(boolean retry) {
+        isRetry = retry;
     }
 }
