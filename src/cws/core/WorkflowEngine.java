@@ -1,10 +1,6 @@
 package cws.core;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -244,9 +240,12 @@ public class WorkflowEngine extends CWSSimEntity {
         if (j.getResult() == Job.Result.FAILURE) {
             // Retry the job
             getCloudsim().log(
-                    String.format(" Job %d (task_id = %s, workflow_id = %s) failed on VM %s. Resubmitting...",
-                            j.getID(), j.getTask().getId(), j.getDAGJob().getDAG().getId(), j.getVM().getId()));
+                    String.format(
+                            " Job %d (task_id = %s, workflow_id = %s, retry = %s) failed on VM %s. Resubmitting...", j
+                                    .getID(), j.getTask().getId(), j.getDAGJob().getDAG().getId(), j.isRetry(), j
+                                    .getVM().getId()));
             Job retry = jobFactory.createJob(dj, t, getId(), getCloudsim());
+            retry.setRetry(true);
             VM vm = j.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))
