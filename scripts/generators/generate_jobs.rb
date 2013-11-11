@@ -30,6 +30,8 @@ queue_name = "l_short"
 qsub_params = ""
 local = false
 run = false
+cws_logs = false
+
 
 OptionParser.new do |opts|
   opts.banner = "Usage: #{__FILE__} --dag-dir DIR --out-dir DIR [additional options]"
@@ -99,11 +101,14 @@ OptionParser.new do |opts|
   opts.on("--variation VARIATION", Float, "Optional variation, defaults to \"#{variation}\"") do |val|
     variation = val
   end
-  opts.on("-l", "--[no-]local", "Generate bash_commandands for running simulations locally, defaults to #{local}") do |v|
-    local = v
+  opts.on("--cws-enable-logging", "Whether to enable logging in CWS, defaults to \"#{cws_logs}\"") do |val|
+    cws_logs = val
   end
-  opts.on("-r", "--[no-]run", "Run generated bash_commandands instead of printing them, defaults to #{run}") do |v|
-    run = v
+  opts.on("-l", "--[no-]local", "Generate bash_commandands for running simulations locally, defaults to #{local}") do |val|
+    local = val
+  end
+  opts.on("-r", "--[no-]run", "Run generated bash_commandands instead of printing them, defaults to #{run}") do |val|
+    run = val
   end
   opts.on_tail("-h", "--help", "--usage", "Show this usage message and quit.") do |setting|
     puts opts.help
@@ -155,7 +160,8 @@ for seed in seeds do
                         "--failure-rate #{failure_rate} " +
                         "--runtime-variance #{variation} " +
                         "--delay #{delay} " +
-                        "--storage-manager #{storage_manager} "
+                        "--storage-manager #{storage_manager} " +
+                        "--enable-logging #{cws_logs} "
                     if storage_manager != 'void' then
                       args = args + "--storage-manager-read #{read_speed} " +
                           "--storage-manager-write #{write_speed} " +

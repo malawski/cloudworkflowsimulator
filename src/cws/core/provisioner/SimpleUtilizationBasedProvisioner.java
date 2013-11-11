@@ -191,7 +191,6 @@ public class SimpleUtilizationBasedProvisioner extends AbstractProvisioner imple
      * @param vmSet
      * @return set of VMs that were terminated
      */
-
     private Set<VM> terminateInstances(WorkflowEngine engine, Set<VM> vmSet) {
 
         Set<VM> removed = new HashSet<VM>();
