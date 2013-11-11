@@ -23,3 +23,5 @@ cloudworkflowsimulator.iml
 # vi
 *.swp
 
+# python
+*.pyc
