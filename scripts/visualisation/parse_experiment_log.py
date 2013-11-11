@@ -25,14 +25,18 @@ PATTERNS = [
             type=TaskLog,
             set_values={'started': None, 'result': 'FAILED'}),    
     log_parser.Pattern(
-            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global (read|write) transfer started: (?P<id>(\w|\.)+), size: (\d+)',
+            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global write transfer started: (?P<id>(\w|\.)+), size: (\d+)',
             type=TransferLog,
             set_values={'finished': None, 'vm': 1, 'direction': 'UPLOAD'}),
     log_parser.Pattern(
+            regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global read transfer started: (?P<id>(\w|\.)+), size: (\d+)',
+            type=TransferLog,
+            set_values={'finished': None, 'vm': 1, 'direction': 'DOWNLOAD'}),
+    log_parser.Pattern(
             regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Global (read|write) transfer finished: (?P<id>(\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
             type=TransferLog,
-            set_values={'started': None, 'vm': 1, 'direction': 'UPLOAD'}),
-    # TODO (mequrel): add UPLOAD / DOWNLOAD distinction, add VM
+            set_values={'started': None, 'vm': 1, 'direction': None}),
+    # TODO (mequrel): add VM
     log_parser.Pattern(
             regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) started',
             type=VMLog,
