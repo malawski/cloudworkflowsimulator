@@ -40,6 +40,21 @@ TASK ID001 process 10.0
 
         self.assertListEqual(expected_tasks, dag.tasks)
 
+    def test_should_load_task_definitions_with_weird_names(self):
+        dag_content = '''
+TASK ID000 Genome::filterContams_chr21:1.0 10.0
+TASK ID001 Genome::filterContams_chr21:1.0 10.0
+        '''
+
+        dag = dag_loader.parse_dag(dag_content)
+        expected_tasks = [
+            workflow.Task('ID000', 10.0, 'Genome::filterContams_chr21:1.0'),
+            workflow.Task('ID001', 10.0, 'Genome::filterContams_chr21:1.0')
+        ]
+
+        self.assertListEqual(expected_tasks, dag.tasks)
+
+
     def test_should_load_edges_definition(self):
         dag_content = '''
 TASK ID000 preprocess 10.0

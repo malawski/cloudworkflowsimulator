@@ -2,8 +2,8 @@ from itertools import groupby
 from operator import attrgetter
 import sys
 
-from scripts.log_parser import log_parser
-from scripts.log_parser.execution_log import TaskLog, TransferLog, VMLog, Workflow, ExecutionLog, EventType
+import log_parser
+from execution_log import TaskLog, TransferLog, VMLog, Workflow, ExecutionLog, EventType
 
 
 PATTERNS = [
@@ -48,7 +48,7 @@ PATTERNS = [
         type=VMLog,
         set_values={'started': None}),
     log_parser.Pattern(
-        regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (.*)',
+        regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (?P<filename>.*)',
         type=Workflow,
         set_values={}),
 ]

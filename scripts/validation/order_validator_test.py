@@ -1,11 +1,10 @@
 import unittest
-from scripts.log_parser.execution_log import EventType, ExecutionLog
 
 from scripts.validation import workflow, order_validator
 from scripts.validation.parsed_log_loader import TaskLog
 
 IRRELEVANT_TASK_ATTRIBUTES = {
-    'workflow': 'some_workflow',
+    'workflow': '1',
     'task_id': 'some_task_id',
     'vm': 1,
     'result': 'OK'
@@ -50,32 +49,30 @@ class OrderValidatorTest(unittest.TestCase):
 
     def test_should_pass_when_order_is_correct(self):
         dag = self._prepare_parent_child_dag()
+        dag.id = '1'
 
-        execution_log = ExecutionLog()
-        execution_log.add_event(EventType.TASK,
-                                TaskLog(id='parent', started=0.0, finished=10.0, **IRRELEVANT_TASK_ATTRIBUTES))
-        execution_log.add_event(EventType.TASK,
-                                TaskLog(id='child1', started=11.0, finished=13.0, **IRRELEVANT_TASK_ATTRIBUTES))
-        execution_log.add_event(EventType.TASK,
-                                TaskLog(id='child2', started=12.0, finished=15.0, **IRRELEVANT_TASK_ATTRIBUTES))
+        tasks = {
+            ('1', 'parent'): TaskLog(id='parent', started=0.0, finished=10.0, **IRRELEVANT_TASK_ATTRIBUTES),
+            ('1', 'child1'): TaskLog(id='child1', started=11.0, finished=13.0, **IRRELEVANT_TASK_ATTRIBUTES),
+            ('1', 'child2'): TaskLog(id='child2', started=12.0, finished=15.0, **IRRELEVANT_TASK_ATTRIBUTES),
+        }
 
-        result = order_validator.validate(dag, execution_log)
+        result = order_validator.validate(dag, tasks)
 
         self.assertTrue(result.is_valid)
         self.assertListEqual([], result.errors)
 
     def test_should_fail_if_any_following_task_was_finished_before(self):
         dag = self._prepare_parent_child_dag()
+        dag.id = '1'
 
-        execution_log = ExecutionLog()
-        execution_log.add_event(EventType.TASK,
-                                TaskLog(id='parent', started=0.0, finished=10.0, **IRRELEVANT_TASK_ATTRIBUTES))
-        execution_log.add_event(EventType.TASK,
-                                TaskLog(id='child1', started=11.0, finished=13.0, **IRRELEVANT_TASK_ATTRIBUTES))
-        execution_log.add_event(EventType.TASK,
-                                TaskLog(id='child2', started=5.0, finished=8.0, **IRRELEVANT_TASK_ATTRIBUTES))
+        tasks = {
+            ('1', 'parent'): TaskLog(id='parent', started=0.0, finished=10.0, **IRRELEVANT_TASK_ATTRIBUTES),
+            ('1', 'child1'): TaskLog(id='child1', started=11.0, finished=13.0, **IRRELEVANT_TASK_ATTRIBUTES),
+            ('1', 'child2'): TaskLog(id='child2', started=5.0, finished=8.0, **IRRELEVANT_TASK_ATTRIBUTES),
+        }
 
-        result = order_validator.validate(dag, execution_log)
+        result = order_validator.validate(dag, tasks)
 
         self.assertFalse(result.is_valid)
         self.assertIn('child2', result.errors[0])

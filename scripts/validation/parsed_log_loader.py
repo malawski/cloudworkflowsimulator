@@ -1,9 +1,5 @@
-from collections import namedtuple
-
-TaskLog = namedtuple('TaskLog', 'id workflow task_id vm started finished result')
-TransferLog = namedtuple('TransferLog', 'id vm started finished direction')
-VMLog = namedtuple('VMLog', 'id started finished')
-Workflow = namedtuple('Workflow', 'id priority')
+from ..log_parser.execution_log import VMLog, Workflow, TaskLog, TransferLog
+from scripts.log_parser.execution_log import ExecutionLog, EventType
 
 
 def float_or_none(string_float):
@@ -37,7 +33,7 @@ def read_log(file_content):
 
     for i in xrange(0, workflows_number):
         workflow_info = lines[current_line].split()
-        workflow = Workflow(id=workflow_info[0], priority=int(workflow_info[1]))
+        workflow = Workflow(id=workflow_info[0], priority=int(workflow_info[1]), filename=workflow_info[2])
         workflows[workflow.id] = workflow
         current_line += 1
 
@@ -48,7 +44,7 @@ def read_log(file_content):
 
     for i in xrange(0, tasks_number):
         task_info = lines[current_line].split()
-        task = TaskLog(workflow=task_info[0], id=task_info[1], task_id="not_given", vm=task_info[2],
+        task = TaskLog(workflow=task_info[0], task_id=task_info[1], id="not_given", vm=task_info[2],
                        started=float_or_none(task_info[3]), finished=float_or_none(task_info[4]), result=task_info[5])
         tasks.append(task)
         current_line += 1
@@ -65,9 +61,18 @@ def read_log(file_content):
         transfers.append(transfer)
         current_line += 1
 
-    return {
-        'vms': vms,
-        'workflows': workflows,
-        'tasks': tasks,
-        'transfers': transfers
-    }
+    execution_log = ExecutionLog()
+
+    for task in tasks:
+        execution_log.add_event(EventType.TASK, task)
+
+    for transfer in transfers:
+        execution_log.add_event(EventType.TRANSFER, transfer)
+
+    for vm in vms.values():
+        execution_log.add_event(EventType.VM, vm)
+
+    for workflow in workflows.values():
+        execution_log.add_workflow(workflow)
+
+    return execution_log

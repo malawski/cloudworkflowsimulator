@@ -1,11 +1,11 @@
 import re
-from scripts.validation import workflow
+import workflow
 
 # TODO(mequrel): should fail if dag file is incorrect
 
 
 FILE_PATTERN = r'FILE\s+(\w|.+)\s+(\d+)'
-TASK_PATTERN = r'TASK\s+(\w+)\s+(\w+)\s+(\w+)'
+TASK_PATTERN = r'TASK\s+(\w+)\s+(\S+)\s+(\w+)'
 EDGE_PATTERN = r'EDGE\s+(\w+)\s+(\w+)'
 INPUTS_PATTERN = r'INPUTS\s+(\w+)\s+(.+)'
 OUTPUTS_PATTERN = r'OUTPUTS\s+(w+)\s+(.+)'

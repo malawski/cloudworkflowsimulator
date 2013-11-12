@@ -26,6 +26,7 @@ class Dag(object):
     def __init__(self, tasks, files):
         self.tasks = tasks
         self.files = files
+        self.id = None
 
 
 class DagBuilder(object):

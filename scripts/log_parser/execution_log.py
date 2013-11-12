@@ -4,7 +4,7 @@ import StringIO
 TaskLog = namedtuple('TaskLog', 'id workflow task_id vm started finished result')
 TransferLog = namedtuple('TransferLog', 'id vm started finished direction')
 VMLog = namedtuple('VMLog', 'id started finished')
-Workflow = namedtuple('Workflow', 'id priority')
+Workflow = namedtuple('Workflow', 'id priority filename')
 
 
 class EventType(object):
@@ -24,8 +24,10 @@ class ExecutionLog(object):
         self.workflows.append(workflow)
 
     @property
-    def tasks_by_id(self):
-        return {task.id: task for task in self.events[EventType.TASK]}
+    def tasks_for_dag(self):
+        tasks = self.events[EventType.TASK]
+        completed_tasks = [task for task in tasks if 'OK' in task.result]
+        return {(task.workflow, task.task_id): task for task in completed_tasks}
 
     def dumps(self):
         output = StringIO.StringIO()
@@ -35,7 +37,7 @@ class ExecutionLog(object):
 
         output.write('{}\n'.format(len(self.workflows)))
         for workflow in self.workflows:
-            output.write('{} {}\n'.format(workflow.id, workflow.priority))
+            output.write('{} {} {}\n'.format(workflow.id, workflow.priority, workflow.filename))
 
         output.write('{}\n'.format(len(self.events[EventType.TASK])))
         for task_event in self.events[EventType.TASK]:
