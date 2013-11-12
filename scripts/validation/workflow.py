@@ -1,10 +1,10 @@
-
 class ComparableByAttributes(object):
     def __str__(self):
         return str(self.__dict__)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
+
 
 class Task(ComparableByAttributes):
     def __init__(self, id, makespan, type=''):
@@ -15,10 +15,12 @@ class Task(ComparableByAttributes):
         self.after = []
         self.before = []
 
+
 class File(ComparableByAttributes):
     def __init__(self, filename, size):
         self.filename = filename
         self.size = size
+
 
 class Dag(object):
     def __init__(self, tasks, files):

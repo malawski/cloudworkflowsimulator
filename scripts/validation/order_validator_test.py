@@ -1,20 +1,18 @@
 import unittest
+from scripts.log_parser.execution_log import EventType, ExecutionLog
 
-import order_validator
-import workflow
+from scripts.validation import workflow, order_validator
+from scripts.validation.parsed_log_loader import TaskLog
+
+IRRELEVANT_TASK_ATTRIBUTES = {
+    'workflow': 'some_workflow',
+    'task_id': 'some_task_id',
+    'vm': 1,
+    'result': 'OK'
+}
 
 
 class OrderValidatorTest(unittest.TestCase):
-
-    def setUp(self):
-        super(OrderValidatorTest, self).setUp()
-        pass
-
-    def tearDown(self):
-        super(OrderValidatorTest, self).tearDown()
-        pass
-
-
     #         /-> child1
     # parent |
     #         \-> child2
@@ -33,35 +31,33 @@ class OrderValidatorTest(unittest.TestCase):
 
         return dag_builder.build()
 
-    # before --> (transfered.txt) --> after
+    # before --> (transferred.txt) --> after
     def _prepare_file_transfer_dag(self):
         before_task = workflow.Task('before', 10.0)
         after_task = workflow.Task('after', 10.0)
-        transfered_file = workflow.File('transfered.txt', 1000)
+        transferred_file = workflow.File('transferred.txt', 1000)
 
         dag_builder = workflow.DagBuilder()
         dag_builder.add_task(before_task)
         dag_builder.add_task(after_task)
-        dag_builder.add_file(transfered_file)
+        dag_builder.add_file(transferred_file)
 
         dag_builder.add_edge('before', 'after')
-        dag_builder.add_output_file('before', 'transfered.txt')
-        dag_builder.add_input_file('after', 'transfered.txt')
+        dag_builder.add_output_file('before', 'transferred.txt')
+        dag_builder.add_input_file('after', 'transferred.txt')
 
         return dag_builder.build()
 
     def test_should_pass_when_order_is_correct(self):
         dag = self._prepare_parent_child_dag()
 
-        execution_log = order_validator.ExecutionLog()
-        execution_log.add_event(order_validator.TASK_STARTED, 'parent', 0.0)
-        execution_log.add_event(order_validator.TASK_FINISHED, 'parent', 10.0)
-
-        execution_log.add_event(order_validator.TASK_STARTED, 'child1', 11.0)
-        execution_log.add_event(order_validator.TASK_FINISHED, 'child1', 13.0)
-
-        execution_log.add_event(order_validator.TASK_STARTED, 'child2', 12.0)
-        execution_log.add_event(order_validator.TASK_FINISHED, 'child2', 15.0)
+        execution_log = ExecutionLog()
+        execution_log.add_event(EventType.TASK,
+                                TaskLog(id='parent', started=0.0, finished=10.0, **IRRELEVANT_TASK_ATTRIBUTES))
+        execution_log.add_event(EventType.TASK,
+                                TaskLog(id='child1', started=11.0, finished=13.0, **IRRELEVANT_TASK_ATTRIBUTES))
+        execution_log.add_event(EventType.TASK,
+                                TaskLog(id='child2', started=12.0, finished=15.0, **IRRELEVANT_TASK_ATTRIBUTES))
 
         result = order_validator.validate(dag, execution_log)
 
@@ -71,15 +67,13 @@ class OrderValidatorTest(unittest.TestCase):
     def test_should_fail_if_any_following_task_was_finished_before(self):
         dag = self._prepare_parent_child_dag()
 
-        execution_log = order_validator.ExecutionLog()
-        execution_log.add_event(order_validator.TASK_STARTED, 'parent', 0.0)
-        execution_log.add_event(order_validator.TASK_FINISHED, 'parent', 10.0)
-
-        execution_log.add_event(order_validator.TASK_STARTED, 'child1', 11.0)
-        execution_log.add_event(order_validator.TASK_FINISHED, 'child1', 13.0)
-
-        execution_log.add_event(order_validator.TASK_STARTED, 'child2', 5.0)
-        execution_log.add_event(order_validator.TASK_FINISHED, 'child2', 8.0)
+        execution_log = ExecutionLog()
+        execution_log.add_event(EventType.TASK,
+                                TaskLog(id='parent', started=0.0, finished=10.0, **IRRELEVANT_TASK_ATTRIBUTES))
+        execution_log.add_event(EventType.TASK,
+                                TaskLog(id='child1', started=11.0, finished=13.0, **IRRELEVANT_TASK_ATTRIBUTES))
+        execution_log.add_event(EventType.TASK,
+                                TaskLog(id='child2', started=5.0, finished=8.0, **IRRELEVANT_TASK_ATTRIBUTES))
 
         result = order_validator.validate(dag, execution_log)
 

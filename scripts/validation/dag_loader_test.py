@@ -1,10 +1,9 @@
 import unittest
 
-import dag_loader
-import workflow
+from scripts.validation import workflow, dag_loader
+
 
 class DagLoaderTest(unittest.TestCase):
-
     def setUp(self):
         super(DagLoaderTest, self).setUp()
         pass
@@ -61,7 +60,6 @@ EDGE ID001 ID002
 
         self.assertIn(task_id002, task_id001.after)
         self.assertIn(task_id001, task_id002.before)
-
 
 
 if __name__ == '__main__':

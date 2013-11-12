@@ -1,6 +1,5 @@
 import re
-
-import workflow
+from scripts.validation import workflow
 
 # TODO(mequrel): should fail if dag file is incorrect
 
@@ -11,6 +10,7 @@ EDGE_PATTERN = r'EDGE\s+(\w+)\s+(\w+)'
 INPUTS_PATTERN = r'INPUTS\s+(\w+)\s+(.+)'
 OUTPUTS_PATTERN = r'OUTPUTS\s+(w+)\s+(.+)'
 
+
 def parse_file_line(line):
     match = re.match(FILE_PATTERN, line)
     if not match:
@@ -19,6 +19,7 @@ def parse_file_line(line):
     filename = match.group(1)
     size = int(match.group(2))
     return workflow.File(filename, size)
+
 
 def parse_task_line(line):
     match = re.match(TASK_PATTERN, line)
@@ -30,6 +31,7 @@ def parse_task_line(line):
     makespan = float(match.group(3))
     return workflow.Task(id, makespan, type)
 
+
 def parse_edge_line(line):
     match = re.match(EDGE_PATTERN, line)
     if not match:
@@ -38,6 +40,7 @@ def parse_edge_line(line):
     before_id = match.group(1)
     after_id = match.group(2)
     return before_id, after_id
+
 
 def parse_dag(dag_file_content):
     dag_builder = workflow.DagBuilder()
