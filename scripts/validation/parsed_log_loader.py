@@ -1,5 +1,5 @@
-from ..log_parser.execution_log import VMLog, Workflow, TaskLog, TransferLog
-from scripts.log_parser.execution_log import ExecutionLog, EventType
+from log_parser.execution_log import VMLog, Workflow, TaskLog, TransferLog
+from log_parser.execution_log import ExecutionLog, EventType
 
 
 def float_or_none(string_float):

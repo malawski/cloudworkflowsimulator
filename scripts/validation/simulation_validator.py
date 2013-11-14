@@ -1,3 +1,5 @@
+from validation.order_validator import ValidationResult
+
 ENDS, STARTS = range(2)
 
 
@@ -32,4 +34,7 @@ def get_intersecting_jobs(jobs):
 def validate(jobs):
     intersecting_jobs = get_intersecting_jobs(jobs)
 
-    return not bool(intersecting_jobs)
+    errors = ['Job {} was executed in the same time as job {} on the same VM'.format(job1.id, job2.id)
+              for (job1, job2) in intersecting_jobs]
+
+    return ValidationResult(errors)

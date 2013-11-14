@@ -13,18 +13,24 @@ class SimulationValidatorTest(unittest.TestCase):
             create_job(started=0.0, finished=10.0, vm=1),
             create_job(started=11.0, finished=13.0, vm=1)]
 
-        self.assertTrue(simulation_validator.validate(jobs))
+        result = simulation_validator.validate(jobs)
 
-    # def test_should_pass_if_intersecting_jobs_are_on_different_vms
+        self.assertTrue(result.is_valid)
+        self.assertEqual([], result.errors)
 
     def test_should_fail_if_jobs_intersects(self):
         jobs = [
             create_job(started=0.0, finished=12.0, vm=1),
             create_job(started=11.0, finished=13.0, vm=1)]
 
-        self.assertFalse(simulation_validator.validate(jobs))
+        result = simulation_validator.validate(jobs)
 
-        # errors
+        self.assertFalse(result.is_valid)
+        self.assertEqual(1, len(result.errors))
+
+     # def test_should_pass_if_intersecting_jobs_are_on_different_vms
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -3,9 +3,9 @@ import sys
 
 import parsed_log_loader
 import dag_loader
-from scripts.log_parser.execution_log import EventType
+from log_parser.execution_log import EventType
 
-
+# TODO(mequrel): extract this
 class ValidationResult(object):
     def __init__(self, errors):
         self.errors = errors
