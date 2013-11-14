@@ -1,6 +1,7 @@
 import unittest
 
-from scripts.validation import workflow, dag_loader
+import dag_loader
+import workflow
 
 
 class DagLoaderTest(unittest.TestCase):

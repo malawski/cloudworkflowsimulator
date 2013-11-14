@@ -7,6 +7,7 @@ VMLog = namedtuple('VMLog', 'id started finished')
 Workflow = namedtuple('Workflow', 'id priority filename')
 
 
+# TODO(mequrel): that is bad, will fix
 class EventType(object):
     TASK, TRANSFER, VM = range(3)
 
