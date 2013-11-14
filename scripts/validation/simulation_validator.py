@@ -1,5 +1,8 @@
 from itertools import groupby
 from operator import attrgetter
+import sys
+from log_parser.execution_log import EventType
+from validation import parsed_log_loader
 from validation.order_validator import ValidationResult
 
 ENDS, STARTS = range(2)
@@ -76,3 +79,29 @@ def validate(jobs, transfers):
             errors.extend(vm_errors)
 
     return ValidationResult(errors)
+
+
+# TODO(mequrel): unify this script with other validators and minimize code duplication
+
+def main():
+    if len(sys.argv) != 2:
+        print('Invalid number of params. 1 param expected (filename).')
+        return
+
+    filename = sys.argv[1]
+    infile = open(filename, 'r')
+    execution_log = parsed_log_loader.read_log(infile.read())
+    infile.close()
+
+    jobs = execution_log.events[EventType.TASK]
+    transfers = execution_log.events[EventType.TRANSFER]
+
+    result = validate(jobs, transfers)
+
+    for error in result.errors:
+        print(error)
+
+
+if __name__ == '__main__':
+    main()
+
