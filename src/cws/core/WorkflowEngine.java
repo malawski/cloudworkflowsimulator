@@ -124,23 +124,22 @@ public class WorkflowEngine extends CWSSimEntity {
         }
     }
 
-    @Override
-    public void shutdownEntity() {
-        // Do nothing
-    }
-
     /**
-     * XXX Why does the workflow engine do this?
      * @return total cost consumed by all VMs.
      */
     public double getCost() {
-
-        double cost = 0;
-
+        double ret = cost;
         for (VM vm : vms) {
-            cost += vm.getCost();
+            ret += vm.getCost();
         }
-        return cost;
+        return ret;
+    }
+
+    private double cost = 0;
+
+    @Override
+    public void shutdownEntity() {
+        getCloudsim().log("Total cost:" + getCost() + ", time: " + getCloudsim().clock());
     }
 
     private void vmLaunched(VM vm) {
@@ -149,15 +148,14 @@ public class WorkflowEngine extends CWSSimEntity {
         scheduler.scheduleJobs(this);
     }
 
-    /**
-     * @param vm - not used since this method does nothing
-     */
     private void vmTerminated(VM vm) {
-        /* Do nothing */
+        cost += vm.getCost();
+        vms.remove(vm);
+        freeVMs.remove(vm);
+        busyVMs.remove(vm);
     }
 
     private void dagSubmit(DAGJob dj) {
-
         dags.add(dj);
         allDAGJobs.add(dj);
 
@@ -168,17 +166,17 @@ public class WorkflowEngine extends CWSSimEntity {
         queueReadyJobs(dj);
     }
 
-    private void queueReadyJobs(DAGJob dj) {
+    private void queueReadyJobs(DAGJob dagJob) {
         // Get the ready tasks and convert them into jobs
         while (true) {
-            Task t = dj.nextReadyTask();
-            if (t == null)
+            Task task = dagJob.nextReadyTask();
+            if (task == null)
                 break;
-            Job j = jobFactory.createJob(dj, t, getId(), getCloudsim());
-            j.setDAGJob(dj);
-            j.setTask(t);
-            j.setOwner(getId());
-            jobReleased(j);
+            Job job = jobFactory.createJob(dagJob, task, getId(), getCloudsim());
+            job.setDAGJob(dagJob);
+            job.setTask(task);
+            job.setOwner(getId());
+            jobReleased(job);
         }
     }
 
@@ -201,56 +199,60 @@ public class WorkflowEngine extends CWSSimEntity {
             busyVMs.add(vm);
     }
 
-    private void jobFinished(Job j) {
+    private void jobFinished(Job job) {
         // Notify the listeners
         // IT IS IMPORTANT THAT THIS HAPPENS FIRST
         for (JobListener jl : jobListeners) {
-            jl.jobFinished(j);
+            jl.jobFinished(job);
         }
 
-        DAGJob dj = j.getDAGJob();
-        Task t = j.getTask();
+        DAGJob dagJob = job.getDAGJob();
+        Task t = job.getTask();
 
         // If the job succeeded
-        if (j.getResult() == Job.Result.SUCCESS && getCloudsim().clock() <= deadline) {
+        if (job.getResult() == Job.Result.SUCCESS && getCloudsim().clock() <= deadline) {
 
             // FIXME: temporary hack - when data transfer job
-            if (dj != null) {
+            if (dagJob != null) {
                 // Mark the task as complete in the DAG
-                dj.completeTask(t);
+                dagJob.completeTask(t);
 
                 // Queue any jobs that are now ready
-                queueReadyJobs(dj);
+                queueReadyJobs(dagJob);
 
                 // If the workflow is complete, send it back
-                if (dj.isFinished()) {
-                    dags.remove(dj);
-                    sendNow(dj.getOwner(), WorkflowEvent.DAG_FINISHED, dj);
+                if (dagJob.isFinished()) {
+                    dags.remove(dagJob);
+                    sendNow(dagJob.getOwner(), WorkflowEvent.DAG_FINISHED, dagJob);
                 }
             }
 
-            getCloudsim().log(" Job " + j.getTask().getId() + " finished on VM " + j.getVM().getId());
-            VM vm = j.getVM();
+            getCloudsim().log("Job " + job.getTask().getId() + " finished on VM " + job.getVM().getId());
+            VM vm = job.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))
                 freeVMs.add(vm);
-        }
-
-        // If the job failed
-        if (j.getResult() == Job.Result.FAILURE) {
+        } else if (job.getResult() == Job.Result.FAILURE) { // If the job failed
             // Retry the job
             getCloudsim().log(
                     String.format(
-                            " Job %d (task_id = %s, workflow_id = %s, retry = %s) failed on VM %s. Resubmitting...", j
-                                    .getID(), j.getTask().getId(), j.getDAGJob().getDAG().getId(), j.isRetry(), j
-                                    .getVM().getId()));
-            Job retry = jobFactory.createJob(dj, t, getId(), getCloudsim());
+                            "Job %d (task_id = %s, workflow_id = %s, retry = %s) failed on VM %s. Resubmitting...", job
+                                    .getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(),
+                            job.getVM().getId()));
+            Job retry = jobFactory.createJob(dagJob, t, getId(), getCloudsim());
             retry.setRetry(true);
-            VM vm = j.getVM();
+            VM vm = job.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))
                 freeVMs.add(vm);
             jobReleased(retry);
+        } else {
+            getCloudsim().log(
+                    String.format("Job %d (task_id = %s, workflow_id = %s, retry = %s) exceeded deadline.",
+                            job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry()));
+            VM vm = job.getVM();
+            if (busyVMs.remove(vm))
+                freeVMs.add(vm);
         }
 
         scheduler.scheduleJobs(this);

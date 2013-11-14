@@ -91,6 +91,14 @@ public class TestRun {
         enableLogging.setArgName("BOOL");
         options.addOption(enableLogging);
 
+        Option deadline = new Option("d", "deadline", true, "Optional deadline, which overrides max and min deadlines");
+        enableLogging.setArgName("DEADLINE");
+        options.addOption(deadline);
+
+        Option budget = new Option("b", "budget", true, "Optional budget, which overrides max and min budgets");
+        enableLogging.setArgName("DEADLINE");
+        options.addOption(budget);
+
         GlobalStorageParams.buildCliOptions(options);
         VMFactory.buildCliOptions(options);
         return options;
@@ -213,10 +221,8 @@ public class TestRun {
         for (String name : names) {
             DAG dag = DAGParser.parseDAG(new File(name));
             dag.setId(new Integer(workflow_id).toString());
-            System.out.println(String.format(
-                    "Workflow %d, priority = %d, filename = %s",
-                    workflow_id, workflow_id, name
-                    ));
+            System.out.println(String.format("Workflow %d, priority = %d, filename = %s", workflow_id, workflow_id,
+                    name));
             workflow_id++;
             dags.add(dag);
 
@@ -239,13 +245,35 @@ public class TestRun {
         int nbudgets = 10;
         int ndeadlines = 10;
 
-        double minBudget = Math.ceil(minCost);
-        double maxBudget = Math.ceil(maxCost);
-        double budgetStep = (maxBudget - minBudget) / (nbudgets - 1);
+        double minBudget;
+        double maxBudget;
+        double budgetStep = 0;
+        if (args.getOptionValue("budget") == null) {
+            minBudget = Math.ceil(minCost);
+            maxBudget = Math.ceil(maxCost);
+            budgetStep = (maxBudget - minBudget) / (nbudgets - 1);
+        } else {
+            minBudget = Double.valueOf(args.getOptionValue("budget"));
+            maxBudget = minBudget;
+        }
+        if (budgetStep == 0) {
+            budgetStep = 1;
+        }
 
-        double minDeadline = Math.ceil(minTime);
-        double maxDeadline = Math.ceil(maxTime);
-        double deadlineStep = (maxDeadline - minDeadline) / (ndeadlines - 1);
+        double minDeadline;
+        double maxDeadline;
+        double deadlineStep = 0;
+        if (args.getOptionValue("deadline") == null) {
+            minDeadline = Math.ceil(minTime);
+            maxDeadline = Math.ceil(maxTime);
+            deadlineStep = (maxDeadline - minDeadline) / (ndeadlines - 1);
+        } else {
+            minDeadline = Double.valueOf(args.getOptionValue("deadline"));
+            maxDeadline = minDeadline;
+        }
+        if (deadlineStep == 0) {
+            deadlineStep = 1;
+        }
 
         System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
         System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
@@ -262,9 +290,9 @@ public class TestRun {
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
                     + "actualFilesRead,actualFilesTransferred");
 
-            for (double budget = minBudget; budget < maxBudget + (budgetStep / 2.0); budget += budgetStep) {
+            for (double budget = minBudget; budget <= maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
-                for (double deadline = minDeadline; deadline < maxDeadline + (deadlineStep / 2.0); deadline += deadlineStep) {
+                for (double deadline = minDeadline; deadline <= maxDeadline + (deadlineStep / 2.0); deadline += deadlineStep) {
                     System.out.print(".");
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, simulationParams,
                             dags, budget, deadline);
@@ -276,14 +304,14 @@ public class TestRun {
 
                     fileOut.printf("%s,%s,%d,%d,", application, distribution, seed, ensembleSize);
                     fileOut.printf("%f,%f,%f,%s,", scalingFactor, budget, deadline, algorithm.getName());
-                    fileOut.printf("%d,%.20f,%.20f,%f,", algorithm.numCompletedDAGs(), algorithm.getExponentialScore(),
+                    fileOut.printf("%d,%.10f,%.10f,%f,", algorithm.numCompletedDAGs(), algorithm.getExponentialScore(),
                             algorithm.getLinearScore(), planningTime);
                     fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, algorithm.getScoreBitString(),
                             algorithm.getActualCost(), algorithm.getActualJobFinishTime(),
                             algorithm.getActualDagFinishTime());
                     fileOut.printf("%f,%f,%f,%f,%f,%f,%f,%f,", algorithm.getActualVMFinishTime(),
-                            VMFactory.getRuntimeVariance(), VMFactory.getDelay(), VMFactory.getFailureRate(),
-                            minBudget, maxBudget, minDeadline, maxDeadline);
+                            VMFactory.getRuntimeVariance(), VMFactory.getProvisioningDelay(),
+                            VMFactory.getFailureRate(), minBudget, maxBudget, minDeadline, maxDeadline);
 
                     StorageManagerStatistics stats = algorithm.getStorageManager().getStorageManagerStatistics();
                     fileOut.printf("%s,%d,%d,%d,%d,%d,", storageManagerType, stats.getTotalBytesToRead(),
@@ -295,6 +323,7 @@ public class TestRun {
                             stats.getActualFilesRead() + stats.getTotalFilesToWrite());
                 }
             }
+            System.out.println();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } finally {

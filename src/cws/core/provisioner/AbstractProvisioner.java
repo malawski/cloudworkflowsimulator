@@ -6,7 +6,6 @@ import cws.core.cloudsim.CloudSimWrapper;
 
 public abstract class AbstractProvisioner implements Provisioner {
     public static final double DEFAULT_AUTOSCALING_FACTOR = 2.0;
-    // TODO(bryk): Parametrize this.
     protected static final double PROVISIONER_INTERVAL = 90.0;
 
     private CloudSimWrapper cloudsim;

@@ -13,9 +13,7 @@ import cws.core.jobs.Job;
  * Job is submitted to VM only if VM is idle (no queueing in VMs)
  * and if there are no higher priority jobs in the queue.
  * @author malawski
- * 
  */
-
 public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
 
     public EnsembleDynamicScheduler(CloudSimWrapper cloudsim) {

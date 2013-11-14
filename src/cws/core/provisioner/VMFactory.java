@@ -32,7 +32,7 @@ public class VMFactory {
     private static RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
     private static FailureModel failureModel = new FailureModel(0, 0.0);
     private static double runtimeVariance;
-    private static double delay;
+    private static double provisioningDelay;
     private static double failureRate;
     private static long cacheSize;
 
@@ -105,12 +105,12 @@ public class VMFactory {
 
     public static void readCliOptions(CommandLine args, long seed) {
         runtimeVariance = Double.parseDouble(args.getOptionValue("runtime-variance", DEFAULT_RUNTIME_VARIANCE + ""));
-        delay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_PROVISIONING_DELAY + ""));
+        provisioningDelay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_PROVISIONING_DELAY + ""));
         failureRate = Double.parseDouble(args.getOptionValue("failure-rate", DEFAULT_FAILURE_RATE + ""));
         cacheSize = Long.parseLong(args.getOptionValue("cache-size", DEFAULT_CACHE_SIZE + ""));
 
         System.out.printf("runtimeVariance = %f\n", runtimeVariance);
-        System.out.printf("delay = %f\n", delay);
+        System.out.printf("delay = %f\n", provisioningDelay);
         System.out.printf("failureRate = %f\n", failureRate);
         System.out.printf("cacheSize = %d\n", cacheSize);
 
@@ -118,8 +118,8 @@ public class VMFactory {
             VMFactory.setRuntimeDistribution(new UniformRuntimeDistribution(seed, runtimeVariance));
         }
 
-        if (delay > 0.0) {
-            VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(delay));
+        if (provisioningDelay > 0.0) {
+            VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(provisioningDelay));
         }
 
         if (failureRate > 0.0) {
@@ -131,8 +131,8 @@ public class VMFactory {
         return runtimeVariance;
     }
 
-    public static double getDelay() {
-        return delay;
+    public static double getProvisioningDelay() {
+        return provisioningDelay;
     }
 
     public static double getFailureRate() {

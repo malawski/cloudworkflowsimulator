@@ -34,11 +34,6 @@ public class Cloud extends CWSSimEntity {
     }
 
     @Override
-    public void startEntity() {
-        // DO NOTHING
-    }
-
-    @Override
     public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
         case WorkflowEvent.VM_LAUNCH:
@@ -56,11 +51,6 @@ public class Cloud extends CWSSimEntity {
         default:
             throw new UnknownWorkflowEventException("Unknown event: " + ev);
         }
-    }
-
-    @Override
-    public void shutdownEntity() {
-        // DO NOTHING
     }
 
     private void launchVM(int owner, VM vm) {

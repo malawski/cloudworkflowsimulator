@@ -14,7 +14,6 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
 
     @Override
     public void provisionResources(WorkflowEngine engine) {
-
         // use the queued (released) jobs from the workflow engine
         int queueLength = engine.getQueueLength();
 
@@ -36,7 +35,7 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
             VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
             VM vm = VMFactory.createVM(vmStaticParams, getCloudSim());
 
-            getCloudSim().log(" Starting VM: " + vm.getId());
+            getCloudSim().log("Starting VM: " + vm.getId());
             getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         } else { // terminate free VMs
             Set<VM> freeVMs = engine.getFreeVMs();
@@ -44,7 +43,7 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
             while (vmIt.hasNext()) {
                 VM vm = vmIt.next();
                 vmIt.remove();
-                getCloudSim().log(" Terminating VM: " + vm.getId());
+                getCloudSim().log("Terminating VM: " + vm.getId());
                 getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
             }
         }

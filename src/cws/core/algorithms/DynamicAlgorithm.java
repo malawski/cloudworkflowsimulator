@@ -81,12 +81,12 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         cloudsim.startSimulation();
 
         simulationFinishWallTime = System.nanoTime();
+        
+        setResults(simulationEnvironment.getEngine());
 
         printLogs(logname, simulationEnvironment);
 
-        setResults(simulationEnvironment.getEngine());
-
-        conductSanityChecks(simulationEnvironment.getNumVMs());
+        conductSanityChecks(simulationEnvironment.getEstimatedNumVMs());
     }
 
     private SimulationEnvironment prepareEnvironment() {
@@ -108,13 +108,13 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
 
         WorkflowLog log = initializeLogger(cloud, engine, em);
 
-        int numVMs = determineVMsNumber();
+        int estimatedNumVMs = estimateVMsNumber();
 
-        printEstimations(numVMs);
+        printEstimations(estimatedNumVMs);
 
-        launchVMs(cloud, engine, numVMs);
+        launchVMs(cloud, engine, estimatedNumVMs);
 
-        return new SimulationEnvironment(numVMs, log, engine);
+        return new SimulationEnvironment(estimatedNumVMs, log, engine);
     }
 
     private WorkflowLog initializeLogger(Cloud cloud, WorkflowEngine engine, EnsembleManager em) {
@@ -128,20 +128,21 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
         return log;
     }
 
-    private int determineVMsNumber() {
+    private int estimateVMsNumber() {
         // Calculate estimated number of VMs to consume budget evenly before deadline
         // ceiling is used to start more vms so that the budget is consumed just before deadline
-        int numVMs = (int) Math.ceil(Math.floor(getBudget()) / Math.ceil((getDeadline() / (60 * 60))) / price);
+        // TODO(bryk): Check this.
+        int numEstimatedVMs = (int) Math.ceil(Math.floor(getBudget()) / Math.ceil((getDeadline() / (60 * 60))) / price);
 
         // Check if we can afford at least one VM
         if (getBudget() < price)
-            numVMs = 0;
-        return numVMs;
+            numEstimatedVMs = 0;
+        return numEstimatedVMs;
     }
 
-    private void launchVMs(Cloud cloud, WorkflowEngine engine, int numVMs) {
+    private void launchVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
         HashSet<VM> vms = new HashSet<VM>();
-        for (int i = 0; i < numVMs; i++) {
+        for (int i = 0; i < numEstimatedVMs; i++) {
             VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
             vmStaticParams.setPrice(price);
 
@@ -152,23 +153,21 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     }
 
     private void printEstimations(int numVMs) {
-        cloudsim.log(" Estimated num of VMs " + numVMs);
-        cloudsim.log(" Total budget " + getBudget());
+        cloudsim.log("Estimated num of VMs " + numVMs);
+        cloudsim.log("Total budget " + getBudget());
     }
 
     private void printLogs(String logname, SimulationEnvironment environment) {
-        WorkflowEngine engine = environment.getEngine();
         WorkflowLog log = environment.getLog();
-        int numVMs = environment.getNumVMs();
 
         if (shouldGenerateLog()) {
             log.printJobs(logname);
             log.printVmList(logname);
             log.printDAGJobs();
         }
-
-        printEstimations(numVMs);
-        cloudsim.log(" Total cost " + engine.getCost());
+        cloudsim.log("Actual cost: " + getActualCost());
+        cloudsim.log("Last DAG finished at: " + actualDagFinishTime);
+        cloudsim.log("Last time VM terminated at: " + actualVMFinishTime);
     }
 
     private void setResults(WorkflowEngine engine) {
@@ -246,10 +245,10 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
     private class SimulationEnvironment {
         private WorkflowEngine engine;
         private WorkflowLog log;
-        private int numVMs;
+        private int estimatedNumVMs;
 
         public SimulationEnvironment(int numVMs, WorkflowLog log, WorkflowEngine engine) {
-            this.numVMs = numVMs;
+            this.estimatedNumVMs = numVMs;
             this.log = log;
             this.engine = engine;
         }
@@ -262,9 +261,8 @@ public class DynamicAlgorithm extends Algorithm implements DAGJobListener, VMLis
             return log;
         }
 
-        public int getNumVMs() {
-            return numVMs;
+        public int getEstimatedNumVMs() {
+            return estimatedNumVMs;
         }
-
     }
 }
