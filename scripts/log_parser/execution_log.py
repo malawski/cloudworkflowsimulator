@@ -24,10 +24,9 @@ class ExecutionLog(object):
         self.workflows.append(workflow)
 
     @property
-    def tasks_for_dag(self):
+    def completed_jobs(self):
         tasks = self.events[EventType.TASK]
-        completed_tasks = [task for task in tasks if 'OK' in task.result]
-        return {(task.workflow, task.task_id): task for task in completed_tasks}
+        return [task for task in tasks if 'OK' in task.result]
 
     def dumps(self):
         output = StringIO.StringIO()
@@ -42,14 +41,14 @@ class ExecutionLog(object):
         output.write('{}\n'.format(len(self.events[EventType.TASK])))
         for task_event in self.events[EventType.TASK]:
             output.write(
-                '{} {} {} {} {} {}\n'.format(task_event.workflow, task_event.task_id, task_event.vm, task_event.started,
-                                             task_event.finished, task_event.result))
+                '{} {} {} {} {} {} {}\n'.format(task_event.id, task_event.workflow, task_event.task_id, task_event.vm,
+                    task_event.started, task_event.finished, task_event.result))
 
         output.write('{}\n'.format(len(self.events[EventType.TRANSFER])))
         for transfer_event in self.events[EventType.TRANSFER]:
             output.write('{} {} {} {} {} {} {}\n'.format(transfer_event.id, transfer_event.vm, transfer_event.started,
-                                                         transfer_event.finished, transfer_event.direction,
-                                                         transfer_event.job_id, transfer_event.file_id))
+                transfer_event.finished, transfer_event.direction,
+                transfer_event.job_id, transfer_event.file_id))
 
         contents = output.getvalue()
         output.close()

@@ -42,6 +42,26 @@ def parse_edge_line(line):
     return before_id, after_id
 
 
+def parse_inputs_line(line):
+    match = re.match(INPUTS_PATTERN, line)
+    if not match:
+        return None
+
+    task_id = match.group(1)
+    filenames = match.group(2)
+    return task_id, filenames.split()
+
+
+def parse_outputs_line(line):
+    match = re.match(OUTPUTS_PATTERN, line)
+    if not match:
+        return None
+
+    task_id = match.group(1)
+    filenames = match.group(2)
+    return task_id, filenames.split()
+
+
 def parse_dag(dag_file_content):
     dag_builder = workflow.DagBuilder()
 
@@ -63,5 +83,20 @@ def parse_dag(dag_file_content):
         if dag_edge:
             before_id, after_id = dag_edge
             dag_builder.add_edge(before_id, after_id)
+            continue
+
+        dag_inputs = parse_inputs_line(line)
+
+        if dag_inputs:
+            task_id, filenames = dag_inputs
+            for filename in filenames:
+                dag_builder.add_input_file(task_id, filename)
+
+        dag_outputs = parse_outputs_line(line)
+
+        if dag_outputs:
+            task_id, filenames = dag_outputs
+            for filename in filenames:
+                dag_builder.add_output_file(task_id, filename)
 
     return dag_builder.build()

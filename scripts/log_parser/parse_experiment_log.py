@@ -28,13 +28,13 @@ PATTERNS = [
         type=TaskLog,
         set_values={'started': None, 'result': 'RETRY_FAILED'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global write transfer (?P<id>\d+) started: ((\w|\.)+), size: (\d+), vm: (?P<vm>\d+)',
+        regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global write transfer (?P<id>\d+) started: (?P<file_id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+), job_id: (?P<job_id>\d+)',
         type=TransferLog,
-        set_values={'finished': None, 'direction': 'UPLOAD', 'job_id': 'None'}),
+        set_values={'finished': None, 'direction': 'UPLOAD'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global read transfer (?P<id>\d+) started: ((\w|\.)+), size: (\d+), vm: (?P<vm>\d+)',
+        regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global read transfer (?P<id>\d+) started: (?P<file_id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+), job_id: (?P<job_id>\d+)',
         type=TransferLog,
-        set_values={'finished': None, 'direction': 'DOWNLOAD', 'job_id': 'None', 'file_id': 'None'}),
+        set_values={'finished': None, 'direction': 'DOWNLOAD'}),
     log_parser.Pattern(
         regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Global (read|write) transfer (?P<id>\d+) finished: ((\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
         type=TransferLog,
