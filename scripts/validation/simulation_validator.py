@@ -5,46 +5,46 @@ from log_parser.execution_log import EventType
 from validation import parsed_log_loader
 from validation.order_validator import ValidationResult
 
-ENDS, STARTS = range(2)
+JOB_ENDS, TRANSFER_ENDS, JOB_STARTS, TRANSFER_STARTS = range(4)
 
-#TODO(mequrel): optimize collision detection
 
-def generate_job_events_sequentially(jobs):
+def generate_events_sequentially(jobs, transfers):
     events = []
 
     for job in jobs:
-        events.append((job.started, STARTS, job))
-        events.append((job.finished, ENDS, job))
+        events.append((job.started, JOB_STARTS, job))
+        events.append((job.finished, JOB_ENDS, job))
+
+    for transfer in transfers:
+        events.append((transfer.started, TRANSFER_STARTS, transfer))
+        events.append((transfer.finished, TRANSFER_ENDS, transfer))
 
     return sorted(events)
 
 
-def get_intersections(started_jobs, current_job):
-    return [(current_job, started_job) for started_job in started_jobs]
+def get_intersections(started_jobs, current_event):
+    return [(current_event, started_job) for started_job in started_jobs]
 
 
-def get_intersecting_jobs(jobs):
+def get_intersecting_events(jobs, transfers):
     intersecting_jobs = []
+    intersecting_transfers = []
 
     started_jobs = set()
-    for (_, event_type, job) in generate_job_events_sequentially(jobs):
-        if event_type == STARTS:
-            intersections = get_intersections(started_jobs, job)
+    for (_, event_type, event) in generate_events_sequentially(jobs, transfers):
+        if event_type == JOB_STARTS:
+            intersections = get_intersections(started_jobs, event)
             intersecting_jobs.extend(intersections)
-            started_jobs.add(job)
+            started_jobs.add(event)
+        elif event_type == JOB_ENDS:
+            started_jobs.remove(event)
+        elif event_type == TRANSFER_STARTS:
+            intersections = get_intersections(started_jobs, event)
+            intersecting_transfers.extend(intersections)
         else:
-            started_jobs.remove(job)
+            pass
 
-    return intersecting_jobs
-
-
-def are_events_intersected(event1, event2):
-    return not (event1.finished < event2.started
-                or event2.finished < event1.started)
-
-
-def get_intersecting_with(transfer, jobs):
-    return [job for job in jobs if are_events_intersected(transfer, job)]
+    return intersecting_jobs, intersecting_transfers
 
 
 def group_by_dict(list_to_group, getter):
@@ -106,20 +106,17 @@ def validate(jobs, transfers, vms):
                       for transfer in out_of_lifecycle_transfers]
         errors.extend(job_errors)
 
-        intersecting_jobs = get_intersecting_jobs(vm_jobs)
+        intersecting_jobs, intersecting_transfers = get_intersecting_events(vm_jobs, vm_transfers)
 
         vm_errors = ['Job {} was executed in the same time as job {} on the same VM'.format(job1.id, job2.id)
                      for (job1, job2) in intersecting_jobs]
 
         errors.extend(vm_errors)
 
-        for transfer in vm_transfers:
-            intersecting_jobs = get_intersecting_with(transfer, vm_jobs)
+        vm_errors = ['Transfer {} was executed in the same time as job {} on the same VM'.format(
+            transfer.id, job.id) for (transfer, job) in intersecting_transfers]
 
-            vm_errors = ['Transfer {} was executed in the same time as job {} on the same VM'.format(
-                transfer.id, job.id) for job in intersecting_jobs]
-
-            errors.extend(vm_errors)
+        errors.extend(vm_errors)
 
     return ValidationResult(errors)
 
