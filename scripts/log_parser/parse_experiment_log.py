@@ -86,6 +86,10 @@ def glue_fissured_events(events):
 
 
 def main():
+    if len(sys.argv) != 2:
+        print('Invalid number of params. 1 param expected (filename).')
+        return
+
     filename = sys.argv[1]
     parser = log_parser.LogParser()
 
