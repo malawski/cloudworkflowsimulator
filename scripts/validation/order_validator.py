@@ -4,15 +4,7 @@ import sys
 import parsed_log_loader
 import dag_loader
 from log_parser.execution_log import EventType
-
-# TODO(mequrel): extract this
-class ValidationResult(object):
-    def __init__(self, errors):
-        self.errors = errors
-
-    @property
-    def is_valid(self):
-        return len(self.errors) == 0
+from validation.common import ValidationResult
 
 
 def _is_done_before(task1_log, task2_log):

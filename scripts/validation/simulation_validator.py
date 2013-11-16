@@ -3,7 +3,7 @@ from operator import attrgetter
 import sys
 from log_parser.execution_log import EventType
 from validation import parsed_log_loader
-from validation.order_validator import ValidationResult
+from validation.common import ValidationResult
 
 JOB_ENDS, TRANSFER_ENDS, JOB_STARTS, TRANSFER_STARTS = range(4)
 

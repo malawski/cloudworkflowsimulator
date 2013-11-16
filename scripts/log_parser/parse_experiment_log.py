@@ -4,6 +4,7 @@ import sys
 
 import log_parser
 from execution_log import TaskLog, TransferLog, VMLog, Workflow, ExecutionLog, EventType
+from validation.common import ExperimentSettingsWithId, ExperimentSettings
 
 
 PATTERNS = [
@@ -51,6 +52,14 @@ PATTERNS = [
         regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (?P<filename>.*)',
         type=Workflow,
         set_values={}),
+    log_parser.Pattern(
+        regex=r'budget = (?P<budget>.*)',
+        type=ExperimentSettingsWithId,
+        set_values={'id': 0, 'deadline': None, 'vm_cost_per_hour': 1}),
+    log_parser.Pattern(
+        regex=r'deadline = (?P<deadline>.*)',
+        type=ExperimentSettingsWithId,
+        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None}),
 ]
 
 # TODO(mequrel): change to something more readable (comprehension list)
@@ -99,6 +108,14 @@ def main():
     events = parser.parse(filename)
 
     log = ExecutionLog()
+
+    settings_logs = [event for event in events if isinstance(event, ExperimentSettingsWithId)]
+    settings_logs = glue_fissured_events(settings_logs)
+    settings = settings_logs[0]
+    settings = ExperimentSettings(budget=settings.budget, deadline=settings.deadline,
+                                  vm_cost_per_hour=settings.vm_cost_per_hour)
+
+    log.settings = settings
 
     workflows = [event for event in events if isinstance(event, Workflow)]
 

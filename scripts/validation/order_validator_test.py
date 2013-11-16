@@ -1,8 +1,8 @@
 import unittest
-from scripts.log_parser.execution_log import TransferLog
+from log_parser.execution_log import TransferLog
 
-from scripts.validation import workflow, order_validator
-from scripts.validation.parsed_log_loader import TaskLog
+from validation import workflow, order_validator
+from validation.parsed_log_loader import TaskLog
 
 
 class OrderValidatorTest(unittest.TestCase):
