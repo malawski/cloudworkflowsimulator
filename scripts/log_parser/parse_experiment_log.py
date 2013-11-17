@@ -1,3 +1,12 @@
+"""
+Parses raw log output from CWS to intermediate format 
+that is used by validating and visualising scripts.
+
+Example of usage:
+$ python -m log_parser.parse_experiment_log raw.log preprocessed.log
+
+"""
+
 import argparse
 from itertools import groupby
 from operator import attrgetter

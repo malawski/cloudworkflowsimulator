@@ -4,6 +4,13 @@ A script that defines common validator interface and enables validators to be ru
 Can run any validator that is enclosed in VALIDATORS dict and have a method:
   validate_experiment(execution_log)
 That gets an ExecutionLog object and return ValidationResult.
+
+Example of usage:
+  $ python -m validation.experiment_validator preprocessed.log
+  $ python -m validation.experiment_validator preprocessed.log --validator all
+  $ python -m validation.experiment_validator preprocessed.log --validator order
+
+First two commands are equivalent. They fire all accessible validators.
 """
 
 import argparse
