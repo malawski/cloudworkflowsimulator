@@ -28,15 +28,10 @@ class StorageState
 end
 
 def plot_number_schedule(logs, filename)
-  max_number = 2
-  ymax = max_number * 1.05
-  ymin = max_number - ymax
-
   Gnuplot.open do |gp|
     Gnuplot::Plot.new( gp ) do |plot|
       plot.xlabel "Time"
       plot.ylabel "Read/Write number"
-      plot.yrange "[#{ymin}:#{ymax}]"
       plot.set "key right outside"
       plot.terminal "png size 1024,768"
       plot.output filename + ".png"
@@ -58,20 +53,21 @@ def plot_number_schedule(logs, filename)
       end
 
       plot.data = [readers_series, writers_series]
+      
+      max_number = (readers_numbers + writers_numbers).max
+
+      ymax = max_number * 1.05
+      ymin = max_number - ymax
+      plot.yrange "[#{ymin}:#{ymax}]"
     end
   end
 end
 
 def plot_bandwidth_schedule(logs, filename)
-  max_speed = 300000
-  ymax = max_speed * 1.05
-  ymin = max_speed - ymax
-
   Gnuplot.open do |gp|
     Gnuplot::Plot.new( gp ) do |plot|
       plot.xlabel "Time"
       plot.ylabel "Bandwidth"
-      plot.yrange "[#{ymin}:#{ymax}]"
       plot.set "key right outside"
       plot.terminal "png size 1024,768"
       plot.output filename + ".png"
@@ -93,6 +89,11 @@ def plot_bandwidth_schedule(logs, filename)
       end
 
       plot.data = [read_series, write_series]
+
+      max_speed = (read_bandwidths + write_bandwidths).max
+      ymax = max_speed * 1.05
+      ymin = max_speed - ymax
+      plot.yrange "[#{ymin}:#{ymax}]"
     end
   end
 end
