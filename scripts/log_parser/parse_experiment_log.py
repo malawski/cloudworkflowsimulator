@@ -1,6 +1,6 @@
+import argparse
 from itertools import groupby
 from operator import attrgetter
-import sys
 
 import log_parser
 from execution_log import TaskLog, TransferLog, VMLog, Workflow, ExecutionLog, EventType
@@ -69,6 +69,15 @@ PATTERNS = [
 
 ]
 
+
+def main():
+    args = parse_arguments()
+    events = parse_raw_log(args.raw_log)
+
+    log = create_execution_log_from_events(events)
+    write_execution_log(log, args.output_log)
+
+
 # TODO(mequrel): change to something more readable (comprehension list)
 def merge_tuples_regarding_nones(tuple1, tuple2):
     tuple_type = type(tuple1)
@@ -101,60 +110,55 @@ def glue_fissured_events(events):
     return result
 
 
-def main():
-    if len(sys.argv) != 2:
-        print('Invalid number of params. 1 param expected (filename).')
-        return
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('raw_log', help='Path to file with raw experiment log (directly outputted from CWS).')
+    parser.add_argument('output_log', help='Path to output file.')
+    args = parser.parse_args()
+    return args
 
-    filename = sys.argv[1]
+
+def parse_raw_log(raw_log_file):
     parser = log_parser.LogParser()
-
     for pattern in PATTERNS:
         parser.add_pattern(pattern)
+    return parser.parse(raw_log_file)
 
-    events = parser.parse(filename)
 
+def create_execution_log_from_events(events):
     log = ExecutionLog()
-
     settings_logs = [event for event in events if isinstance(event, ExperimentSettingsWithId)]
     settings_logs = glue_fissured_events(settings_logs)
     settings = settings_logs[0]
     settings = ExperimentSettings(budget=settings.budget, deadline=settings.deadline,
-        vm_cost_per_hour=settings.vm_cost_per_hour)
-
+                                  vm_cost_per_hour=settings.vm_cost_per_hour)
     log.settings = settings
-
     workflows = [event for event in events if isinstance(event, Workflow)]
-
     for workflow in workflows:
         log.add_workflow(workflow)
-
     task_events = [event for event in events if isinstance(event, TaskLog)]
     task_events = glue_fissured_events(task_events)
-
     for task_log in task_events:
         if task_log.finished is not None:
             log.add_event(EventType.TASK, task_log)
-
     transfer_events = [event for event in events if isinstance(event, TransferLog)]
     transfer_events = glue_fissured_events(transfer_events)
-
     for transfer_log in transfer_events:
         if transfer_log.finished is not None:
             log.add_event(EventType.TRANSFER, transfer_log)
-
     vm_events = [event for event in events if isinstance(event, VMLog)]
     vm_events = glue_fissured_events(vm_events)
-
     for vm_log in vm_events:
         log.add_event(EventType.VM, vm_log)
-
     storage_state_events = [event for event in events if isinstance(event, StorageState)]
-
     for storage_state in storage_state_events:
         log.add_event(EventType.STORAGE_STATE, storage_state)
+    return log
 
-    print log.dumps()
+
+def write_execution_log(log, output_log_file):
+    with open(output_log_file, "w") as out_file:
+        out_file.write(log.dumps())
 
 
 if __name__ == "__main__":
