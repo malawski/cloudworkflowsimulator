@@ -14,6 +14,7 @@ require 'scanf.rb'
 require 'rubygems'
 require 'gnuplot'
 require 'set'
+require 'main'
 
 require 'parsed_log_loader.rb'
 
@@ -195,17 +196,40 @@ def plot_storage_schedule(logs, filename)
   plotter.plot(filename)
 end
 
-log_filename = ARGV[0]
-type = ARGV[1]
-output_filename = "test"
+Main {
+  argument('log_filename') {
+    required
+    description "Path to log file in intermediate format (preprocessed)."
+  }
 
-logs = read_log_from_file(log_filename)
+  argument('output_filename') {
+    required
+    description "Result image filename. .png extension will be added to this filename."
+  }
 
-case type
-when "results"
-  plot_result_schedule(logs, output_filename)
-when "workflows"
-  plot_workflow_schedule(logs, output_filename)
-when "storage"
-  plot_storage_schedule(logs, output_filename)
-end
+  mode 'results' do
+    def run() 
+      logs = read_log_from_file(params['log_filename'].value)
+      plot_result_schedule(logs, params['output_filename'].value)
+    end
+  end
+
+  mode 'workflows' do
+    def run() 
+      logs = read_log_from_file(params['log_filename'].value)
+      plot_workflow_schedule(logs, params['output_filename'].value)
+    end
+  end
+
+  mode 'storage' do 
+    def run()
+      logs = read_log_from_file(params['log_filename'].value)
+      plot_storage_schedule(logs, params['output_filename'].value)
+    end
+  end
+
+  def run()
+    print "No mode given!\n\n"
+    help!
+  end
+}
