@@ -15,6 +15,9 @@ class Task(ComparableByAttributes):
         self.after = []
         self.before = []
 
+        self.files_needed = []
+        self.files_produced = []
+
 
 class File(ComparableByAttributes):
     def __init__(self, filename, size):
@@ -46,6 +49,12 @@ class DagBuilder(object):
 
     def add_file(self, file):
         self.files.append(file)
+
+    def add_input_file(self, task_id, file_id):
+        self.tasks[task_id].files_needed.append(file_id)
+
+    def add_output_file(self, task_id, file_id):
+        self.tasks[task_id].files_produced.append(file_id)
 
     def build(self):
         return Dag(self.tasks.values(), self.files)

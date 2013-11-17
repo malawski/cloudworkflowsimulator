@@ -4,6 +4,7 @@ import sys
 
 import log_parser
 from execution_log import TaskLog, TransferLog, VMLog, Workflow, ExecutionLog, EventType
+from validation.common import ExperimentSettingsWithId, ExperimentSettings
 
 
 PATTERNS = [
@@ -28,17 +29,17 @@ PATTERNS = [
         type=TaskLog,
         set_values={'started': None, 'result': 'RETRY_FAILED'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global write transfer (?P<id>\d+) started: ((\w|\.)+), size: (\d+), vm: (?P<vm>\d+)',
+        regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global write transfer (?P<id>\d+) started: (?P<file_id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+), job_id: (?P<job_id>\d+)',
         type=TransferLog,
         set_values={'finished': None, 'direction': 'UPLOAD'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global read transfer (?P<id>\d+) started: ((\w|\.)+), size: (\d+), vm: (?P<vm>\d+)',
+        regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+Global read transfer (?P<id>\d+) started: (?P<file_id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+), job_id: (?P<job_id>\d+)',
         type=TransferLog,
         set_values={'finished': None, 'direction': 'DOWNLOAD'}),
     log_parser.Pattern(
         regex=r'\d+.\d+ \((?P<finished>\d+.\d+)\)\s+Global (read|write) transfer (?P<id>\d+) finished: ((\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
         type=TransferLog,
-        set_values={'started': None, 'vm': None, 'direction': None}),
+        set_values={'started': None, 'vm': None, 'direction': None, 'job_id': None, 'file_id': None}),
     log_parser.Pattern(
         regex=r'\d+.\d+ \((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) started',
         type=VMLog,
@@ -51,6 +52,14 @@ PATTERNS = [
         regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (?P<filename>.*)',
         type=Workflow,
         set_values={}),
+    log_parser.Pattern(
+        regex=r'budget = (?P<budget>.*)',
+        type=ExperimentSettingsWithId,
+        set_values={'id': 0, 'deadline': None, 'vm_cost_per_hour': 1}),
+    log_parser.Pattern(
+        regex=r'deadline = (?P<deadline>.*)',
+        type=ExperimentSettingsWithId,
+        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None}),
 ]
 
 # TODO(mequrel): change to something more readable (comprehension list)
@@ -86,6 +95,10 @@ def glue_fissured_events(events):
 
 
 def main():
+    if len(sys.argv) != 2:
+        print('Invalid number of params. 1 param expected (filename).')
+        return
+
     filename = sys.argv[1]
     parser = log_parser.LogParser()
 
@@ -95,6 +108,14 @@ def main():
     events = parser.parse(filename)
 
     log = ExecutionLog()
+
+    settings_logs = [event for event in events if isinstance(event, ExperimentSettingsWithId)]
+    settings_logs = glue_fissured_events(settings_logs)
+    settings = settings_logs[0]
+    settings = ExperimentSettings(budget=settings.budget, deadline=settings.deadline,
+                                  vm_cost_per_hour=settings.vm_cost_per_hour)
+
+    log.settings = settings
 
     workflows = [event for event in events if isinstance(event, Workflow)]
 

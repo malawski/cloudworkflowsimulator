@@ -1,6 +1,6 @@
 import unittest
 
-from scripts.log_parser import parse_experiment_log
+import parse_experiment_log
 
 
 class MakespannedEventsGluer(unittest.TestCase):
