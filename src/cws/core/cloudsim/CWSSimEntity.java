@@ -12,7 +12,7 @@ public abstract class CWSSimEntity extends SimEntity {
         this.cloudsim = cloudsim;
     }
 
-    protected CloudSimWrapper getCloudsim() {
+    public CloudSimWrapper getCloudsim() {
         return cloudsim;
     }
 

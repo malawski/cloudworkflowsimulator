@@ -124,9 +124,6 @@ public class WorkflowEngine extends CWSSimEntity {
         }
     }
 
-    /**
-     * @return total cost consumed by all VMs.
-     */
     public double getCost() {
         double ret = cost;
         for (VM vm : vms) {
@@ -139,7 +136,7 @@ public class WorkflowEngine extends CWSSimEntity {
 
     @Override
     public void shutdownEntity() {
-        getCloudsim().log("Total cost:" + getCost() + ", time: " + getCloudsim().clock());
+        getCloudsim().log("Total cost: " + getCost() + ", time: " + getCloudsim().clock());
     }
 
     private void vmLaunched(VM vm) {

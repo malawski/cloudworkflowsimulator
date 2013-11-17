@@ -1,12 +1,26 @@
 package cws.core.algorithms;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeMap;
 
-import cws.core.*;
+import cws.core.AlgorithmStatistics;
+import cws.core.Cloud;
+import cws.core.EnsembleManager;
+import cws.core.Provisioner;
+import cws.core.Scheduler;
+import cws.core.VM;
+import cws.core.VMListener;
+import cws.core.VMStaticParams;
+import cws.core.WorkflowEngine;
+import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
-import cws.core.dag.DAGJobListener;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
@@ -17,8 +31,7 @@ import cws.core.log.WorkflowLog;
 import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManager;
 
-public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener,
-        DAGJobListener {
+public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener {
 
     /** Engine that executes workflows */
     private WorkflowEngine engine;
@@ -47,18 +60,20 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     /** Set of idle VMs */
     private HashSet<VM> idle = new HashSet<VM>();
 
-    private int dagsFinished = 0;
+    private long planningStartWallTime;
+    private long planningFinishWallTime;
 
-    protected double actualDagFinishTime = 0.0;
-    protected double actualJobFinishTime = 0.0;
+    public StaticAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
+            StorageSimulationParams simulationParams, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, simulationParams, ensembleStatistics, cloudsim);
+    }
 
-    protected long planningStartWallTime;
-    protected long simulationStartWallTime;
-    protected long simulationFinishWallTime;
+    public double getEstimatedProvisioningDelay() {
+        return 0.0;
+    }
 
-    public StaticAlgorithm(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
-            StorageSimulationParams simulationParams) {
-        super(budget, deadline, dags, simulationParams, cloudsim);
+    public double getEstimatedDeprovisioningDelay() {
+        return 0.0;
     }
 
     @Override
@@ -67,6 +82,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             cloud.removeVMListener(this);
         cloud = c;
         cloud.addVMListener(this);
+        cloud.addVMListener(algorithmStatistics);
     }
 
     @Override
@@ -75,13 +91,12 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             engine.removeJobListener(this);
         engine = e;
         engine.addJobListener(this);
+        engine.addJobListener(algorithmStatistics);
     }
 
     public void setEnsembleManager(EnsembleManager m) {
-        if (manager != null)
-            manager.removeDAGJobListener(this);
         manager = m;
-        manager.addDAGJobListener(this);
+        manager.addDAGJobListener(algorithmStatistics);
     }
 
     @Override
@@ -98,50 +113,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     }
 
     @Override
-    public double getActualCost() {
-        return engine.getCost();
-    }
-
-    @Override
-    public List<DAG> getCompletedDAGs() {
-        return this.admittedDAGs;
-    }
-
-    @Override
-    public double getActualVMFinishTime() {
-        double finish = 0.0;
-        for (VM vm : vmQueues.keySet()) {
-            finish = Math.max(finish, vm.getTerminateTime());
-        }
-        return finish;
-    }
-
-    @Override
-    public double getActualDagFinishTime() {
-        return actualDagFinishTime;
-    }
-
-    @Override
-    public double getActualJobFinishTime() {
-        return actualJobFinishTime;
-    }
-
-    public double getEstimatedProvisioningDelay() {
-        return 0.0;
-    }
-
-    public double getEstimatedDeprovisioningDelay() {
-        return 0.0;
-    }
-
-    @Override
-    public long getSimulationWallTime() {
-        return simulationFinishWallTime - simulationStartWallTime;
-    }
-
-    @Override
     public long getPlanningnWallTime() {
-        return simulationStartWallTime - planningStartWallTime;
+        return planningFinishWallTime - planningStartWallTime;
     }
 
     /**
@@ -149,7 +122,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
      */
     public void plan() {
         // We assume the dags are in priority order
-        for (DAG dag : getDAGs()) {
+        for (DAG dag : getAllDags()) {
             try {
                 Plan newPlan = planDAG(dag, plan);
                 // Plan was feasible
@@ -265,7 +238,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
-        spare = spare - (getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay());
+        spare = spare - (getEstimatedDeprovisioningDelay() + getEstimatedProvisioningDelay());
         for (int i = 0; i < numlevels; i++) {
 
             double taskPart = alpha * (totalTasksByLevel[i] / totalTasks);
@@ -296,7 +269,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     }
 
     private void submitDAG(DAG dag) {
-        List<DAG> dags = getDAGs();
+        List<DAG> dags = getAllDags();
         int priority = dags.indexOf(dag);
         DAGJob dagJob = new DAGJob(dag, manager.getId());
         dagJob.setPriority(priority);
@@ -353,11 +326,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         DAG dag = job.getDAGJob().getDAG();
         if (!admittedDAGs.contains(dag)) {
             throw new RuntimeException("Running DAG that wasn't accepted");
-        }
-
-        // Update the finish time
-        if (job.getResult() == Result.SUCCESS) {
-            actualJobFinishTime = Math.max(actualJobFinishTime, job.getFinishTime());
         }
 
         // If the task failed, retry it on the same VM
@@ -425,23 +393,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     }
 
     @Override
-    public void dagStarted(DAGJob dagJob) {
-        /* Do nothing */
-    }
-
-    @Override
-    public void dagFinished(DAGJob dagJob) {
-        if (!dagJob.isFinished()) {
-            throw new RuntimeException("DAG not finished");
-        }
-        dagsFinished += 1;
-        actualDagFinishTime = Math.max(getCloudsim().clock(), actualDagFinishTime);
-    }
-
-    @Override
     public void simulate(String logname) {
-        getCloudsim().init();
-
         storageManager = initializeStorage(simulationParams, cloudsim);
         WorkflowLog log = prepareEnvironment();
 
@@ -449,11 +401,9 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
         plan();
 
-        simulationStartWallTime = System.nanoTime();
+        planningFinishWallTime = System.nanoTime();
 
         getCloudsim().startSimulation();
-
-        simulationFinishWallTime = System.nanoTime();
 
         conductSanityChecks();
 
@@ -469,17 +419,14 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     }
 
     private void conductSanityChecks() {
-        // Sanity checks
-        if (dagsFinished < numCompletedDAGs()) {
-            throw new RuntimeException("Not all DAGs completed");
+        if (algorithmStatistics.getActualDagFinishTime() > getDeadline()) {
+            System.err.println("WARNING: Exceeded deadline: " + algorithmStatistics.getActualDagFinishTime() + ">"
+                    + getDeadline());
         }
 
-        if (actualDagFinishTime > getDeadline()) {
-            System.err.println("WARNING: Exceeded deadline: " + actualDagFinishTime + ">" + getDeadline());
-        }
-
-        if (getActualCost() > getBudget()) {
-            System.err.println("WARNING: Cost exceeded budget: " + getActualCost() + ">" + getBudget());
+        if (algorithmStatistics.getActualCost() > getBudget()) {
+            System.err.println("WARNING: Cost exceeded budget: " + algorithmStatistics.getActualCost() + ">"
+                    + getBudget());
         }
     }
 

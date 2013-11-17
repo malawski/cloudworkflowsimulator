@@ -17,6 +17,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 
+import cws.core.AlgorithmStatistics;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGListGenerator;
@@ -294,22 +295,26 @@ public class TestRun {
                 System.out.println();
                 for (double deadline = minDeadline; deadline <= maxDeadline + (deadlineStep / 2.0); deadline += deadlineStep) {
                     System.out.print(".");
+                    cloudsim = new CloudSimWrapper();
+                    cloudsim.init();
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, simulationParams,
                             dags, budget, deadline);
 
                     algorithm.simulate(algorithmName);
 
+                    AlgorithmStatistics algorithmStatistics = algorithm.getAlgorithmStatistics();
                     double planningTime = algorithm.getPlanningnWallTime() / 1.0e9;
-                    double simulationTime = algorithm.getSimulationWallTime() / 1.0e9;
+                    double simulationTime = cloudsim.getSimulationWallTime() / 1.0e9;
 
                     fileOut.printf("%s,%s,%d,%d,", application, distribution, seed, ensembleSize);
                     fileOut.printf("%f,%f,%f,%s,", scalingFactor, budget, deadline, algorithm.getName());
-                    fileOut.printf("%d,%.10f,%.10f,%f,", algorithm.numCompletedDAGs(), algorithm.getExponentialScore(),
-                            algorithm.getLinearScore(), planningTime);
-                    fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, algorithm.getScoreBitString(),
-                            algorithm.getActualCost(), algorithm.getActualJobFinishTime(),
-                            algorithm.getActualDagFinishTime());
-                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,%f,", algorithm.getActualVMFinishTime(),
+                    fileOut.printf("%d,%.10f,%.10f,%f,", algorithmStatistics.getFinishedDags().size(),
+                            algorithmStatistics.getExponentialScore(), algorithmStatistics.getLinearScore(),
+                            planningTime);
+                    fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, algorithmStatistics.getScoreBitString(),
+                            algorithmStatistics.getActualCost(), algorithmStatistics.getActualJobFinishTime(),
+                            algorithmStatistics.getActualDagFinishTime());
+                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getActualVMFinishTime(),
                             VMFactory.getRuntimeVariance(), VMFactory.getProvisioningDelay(),
                             VMFactory.getFailureRate(), minBudget, maxBudget, minDeadline, maxDeadline);
 
@@ -338,14 +343,15 @@ public class TestRun {
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
             CloudSimWrapper cloudsim, StorageSimulationParams simulationParams, List<DAG> dags, double budget,
             double deadline) {
+        AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, cloudsim);
         if ("SPSS".equals(algorithmName)) {
-            return new SPSS(budget, deadline, dags, alpha, cloudsim, simulationParams);
+            return new SPSS(budget, deadline, dags, alpha, simulationParams, ensembleStatistics, cloudsim);
         } else if ("DPDS".equals(algorithmName)) {
-            return new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, cloudsim,
-                    simulationParams);
+            return new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, simulationParams,
+                    ensembleStatistics, cloudsim);
         } else if ("WADPDS".equals(algorithmName)) {
-            return new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, cloudsim,
-                    simulationParams);
+            return new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, simulationParams,
+                    ensembleStatistics, cloudsim);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }

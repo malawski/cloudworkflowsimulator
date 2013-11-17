@@ -32,6 +32,7 @@ public class VMFactory {
     private static RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
     private static FailureModel failureModel = new FailureModel(0, 0.0);
     private static double runtimeVariance;
+    private static double deprovisioningDelay = DEFAULT_DEPROVISIONING_DELAY;
     private static double provisioningDelay;
     private static double failureRate;
     private static long cacheSize;
@@ -137,5 +138,9 @@ public class VMFactory {
 
     public static double getFailureRate() {
         return failureRate;
+    }
+
+    public static double getDeprovisioningDelay() {
+        return VMFactory.deprovisioningDelay;
     }
 }

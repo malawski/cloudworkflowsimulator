@@ -3,6 +3,7 @@ package cws.core.algorithms;
 import java.util.HashMap;
 import java.util.List;
 
+import cws.core.AlgorithmStatistics;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
@@ -13,9 +14,9 @@ import cws.core.dag.algorithms.TopologicalOrder;
  */
 public class Backtrack extends StaticAlgorithm {
 
-    public Backtrack(double budget, double deadline, List<DAG> dags, CloudSimWrapper cloudsim,
-            StorageSimulationParams simulationParams) {
-        super(budget, deadline, dags, cloudsim, simulationParams);
+    public Backtrack(double budget, double deadline, List<DAG> dags, StorageSimulationParams simulationParams,
+            AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, simulationParams, cloudsim);
     }
 
     /**

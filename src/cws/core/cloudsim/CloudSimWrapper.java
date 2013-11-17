@@ -8,6 +8,8 @@ import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 
 public class CloudSimWrapper {
+    private long simulationStartWallTime;
+    private long simulationFinishWallTime;
 
     public void addEntity(SimEntity entity) {
         CloudSim.addEntity(entity);
@@ -39,7 +41,9 @@ public class CloudSimWrapper {
      * @see CloudSim#startSimulation()
      */
     public void startSimulation() {
+        simulationStartWallTime = System.nanoTime();
         CloudSim.startSimulation();
+        simulationFinishWallTime = System.nanoTime();
     }
 
     /**
@@ -97,5 +101,9 @@ public class CloudSimWrapper {
 
     public void print(String string) {
         Log.print(string);
+    }
+
+    public double getSimulationWallTime() {
+        return simulationFinishWallTime - simulationStartWallTime;
     }
 }
