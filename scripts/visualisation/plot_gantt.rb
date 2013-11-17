@@ -263,7 +263,6 @@ Main {
   end
 
   def run()
-    print "No mode given!\n\n"
-    help!
+    print "No mode given (results|workflows|storage)!\n"
   end
 }
