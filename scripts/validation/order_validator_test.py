@@ -1,14 +1,8 @@
 import unittest
+from log_parser.execution_log import TransferLog
 
-from scripts.validation import workflow, order_validator
-from scripts.validation.parsed_log_loader import TaskLog
-
-IRRELEVANT_TASK_ATTRIBUTES = {
-    'workflow': '1',
-    'task_id': 'some_task_id',
-    'vm': 1,
-    'result': 'OK'
-}
+from validation import workflow, order_validator
+from validation.parsed_log_loader import TaskLog
 
 
 class OrderValidatorTest(unittest.TestCase):
@@ -51,11 +45,13 @@ class OrderValidatorTest(unittest.TestCase):
         dag = self._prepare_parent_child_dag()
         dag.id = '1'
 
-        tasks = {
-            ('1', 'parent'): TaskLog(id='parent', started=0.0, finished=10.0, **IRRELEVANT_TASK_ATTRIBUTES),
-            ('1', 'child1'): TaskLog(id='child1', started=11.0, finished=13.0, **IRRELEVANT_TASK_ATTRIBUTES),
-            ('1', 'child2'): TaskLog(id='child2', started=12.0, finished=15.0, **IRRELEVANT_TASK_ATTRIBUTES),
-        }
+        tasks = [
+            TaskLog(id='parent_1', workflow='1', task_id='parent', started=0.0, finished=10.0,
+                    vm=1, result='OK'),
+            TaskLog(id='child1_1', workflow='1', task_id='child1', started=11.0, finished=13.0,
+                    vm=1, result='OK'),
+            TaskLog(id='child2_1', workflow='1', task_id='child2', started=12.0, finished=15.0,
+                    vm=2, result='OK')]
 
         result = order_validator.validate(dag, tasks)
 
@@ -66,33 +62,150 @@ class OrderValidatorTest(unittest.TestCase):
         dag = self._prepare_parent_child_dag()
         dag.id = '1'
 
-        tasks = {
-            ('1', 'parent'): TaskLog(id='parent', started=0.0, finished=10.0, **IRRELEVANT_TASK_ATTRIBUTES),
-            ('1', 'child1'): TaskLog(id='child1', started=11.0, finished=13.0, **IRRELEVANT_TASK_ATTRIBUTES),
-            ('1', 'child2'): TaskLog(id='child2', started=5.0, finished=8.0, **IRRELEVANT_TASK_ATTRIBUTES),
-        }
+        tasks = [
+            TaskLog(id='parent_1', workflow='1', task_id='parent', started=0.0, finished=10.0,
+                    vm=1, result='OK'),
+            TaskLog(id='child1_1', workflow='1', task_id='child1', started=11.0, finished=13.0,
+                    vm=1, result='OK'),
+            TaskLog(id='child2_1', workflow='1', task_id='child2', started=5.0, finished=8.0,
+                    vm=2, result='OK')]
 
         result = order_validator.validate(dag, tasks)
 
         self.assertFalse(result.is_valid)
         self.assertIn('child2', result.errors[0])
 
-#    def test_should_fail_if_input_file_was_not_delivered_before_task(self):
-#        dag = self._prepare_file_transfer_dag()
-#
-#        execution_log = order_validator.ExecutionLog()
-#        execution_log.add_event(order_validator.TASK_STARTED, 'before', 0.0)
-#        execution_log.add_event(order_validator.TASK_FINISHED, 'before', 10.0)
-#
-#        execution_log.add_event(order_validator.TASK_STARTED, 'after', 20.0)
-#        execution_log.add_event(order_validator.TASK_FINISHED, 'after', 30.0)
-#
-#        result = order_validator.validate(dag, execution_log)
+    def test_should_pass_if_transfers_are_ok(self):
+        dag = self._prepare_file_transfer_dag()
+        dag.id = '1'
 
+        tasks = [
+            TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
+                    vm=1, result='OK'),
+            TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
+                    vm=1, result='OK')]
 
+        transfers = [
+            TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
+                        direction='UPLOAD', file_id='transferred.txt'),
+            TransferLog(id='234', job_id='after_1', vm=1, started=12.0, finished=13.0,
+                        direction='DOWNLOAD', file_id='transferred.txt')]
 
+        result = order_validator.validate_transfers(dag, tasks, transfers)
+        self.assertTrue(result.is_valid)
+        self.assertListEqual([], result.errors)
 
+    def test_should_fail_if_file_was_not_downloaded_at_all(self):
+        dag = self._prepare_file_transfer_dag()
+        dag.id = '1'
 
+        tasks = [
+            TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
+                    vm=1, result='OK'),
+            TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
+                    vm=1, result='OK')]
+
+        transfers = [
+            TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
+                        direction='UPLOAD', file_id='transferred.txt'),
+        ]
+
+        result = order_validator.validate_transfers(dag, tasks, transfers)
+        self.assertFalse(result.is_valid)
+
+    def test_should_fail_if_file_was_not_uploaded_at_all(self):
+        dag = self._prepare_file_transfer_dag()
+        dag.id = '1'
+
+        tasks = [
+            TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
+                    vm=1, result='OK'),
+            TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
+                    vm=1, result='OK')]
+
+        transfers = [
+            TransferLog(
+                id='234', job_id='after_1', vm=1, started=12.0,
+                finished=13.0, direction='DOWNLOAD', file_id='transferred.txt')]
+
+        result = order_validator.validate_transfers(dag, tasks, transfers)
+        self.assertFalse(result.is_valid)
+
+    def test_should_fail_if_downloaded_to_bad_vm(self):
+        dag = self._prepare_file_transfer_dag()
+        dag.id = '1'
+
+        tasks = [
+            TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
+                    vm=1, result='OK'),
+            TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
+                    vm=1, result='OK')]
+
+        transfers = [
+            TransferLog(id='123', job_id='before_1', vm=2, started=10.0, finished=12.0,
+                        direction='UPLOAD', file_id='transferred.txt'),
+            TransferLog(id='234', job_id='after_1', vm=1, started=12.0, finished=13.0,
+                        direction='DOWNLOAD', file_id='transferred.txt')]
+
+        result = order_validator.validate_transfers(dag, tasks, transfers)
+        self.assertFalse(result.is_valid)
+
+    def test_should_fail_if_uploaded_from_bad_vm(self):
+        dag = self._prepare_file_transfer_dag()
+        dag.id = '1'
+
+        tasks = [
+            TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
+                    vm=1, result='OK'),
+            TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
+                    vm=1, result='OK')]
+
+        transfers = [
+            TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
+                        direction='UPLOAD', file_id='transferred.txt'),
+            TransferLog(id='234', job_id='after_1', vm=2, started=12.0, finished=13.0,
+                        direction='DOWNLOAD', file_id='transferred.txt')]
+
+        result = order_validator.validate_transfers(dag, tasks, transfers)
+        self.assertFalse(result.is_valid)
+
+    def test_should_fail_if_upload_instead_of_download(self):
+        dag = self._prepare_file_transfer_dag()
+        dag.id = '1'
+
+        tasks = [
+            TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
+                    vm=1, result='OK'),
+            TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
+                    vm=1, result='OK')]
+
+        transfers = [
+            TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
+                        direction='UPLOAD', file_id='transferred.txt'),
+            TransferLog(id='234', job_id='after_1', vm=1, started=12.0, finished=13.0,
+                        direction='UPLOAD', file_id='transferred.txt')]
+
+        result = order_validator.validate_transfers(dag, tasks, transfers)
+        self.assertFalse(result.is_valid)
+
+    def test_should_fail_if_download_instead_of_upload(self):
+        dag = self._prepare_file_transfer_dag()
+        dag.id = '1'
+
+        tasks = [
+            TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
+                    vm=1, result='OK'),
+            TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
+                    vm=1, result='OK')]
+
+        transfers = [
+            TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
+                        direction='DOWNLOAD', file_id='transferred.txt'),
+            TransferLog(id='234', job_id='after_1', vm=1, started=12.0, finished=13.0,
+                        direction='DOWNLOAD', file_id='transferred.txt')]
+
+        result = order_validator.validate_transfers(dag, tasks, transfers)
+        self.assertFalse(result.is_valid)
 
 
 if __name__ == '__main__':
