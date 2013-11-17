@@ -11,7 +11,7 @@ ALL_VALIDATORS = 'all'
 VALIDATORS = {
     'single_task': single_task_validator.validate_transfer,
     'order': order_validator.validate,
-    'simulation': simulation_validator.validate,
+    'simulation': simulation_validator.validate_experiment,
     'constraints': constraints_validator.validate_experiment,
 }
 
