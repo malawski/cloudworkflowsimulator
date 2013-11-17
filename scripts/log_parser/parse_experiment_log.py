@@ -4,6 +4,7 @@ import sys
 
 import log_parser
 from execution_log import TaskLog, TransferLog, VMLog, Workflow, ExecutionLog, EventType
+from execution_log import StorageState
 from validation.common import ExperimentSettingsWithId, ExperimentSettings
 
 
@@ -60,6 +61,12 @@ PATTERNS = [
         regex=r'deadline = (?P<deadline>.*)',
         type=ExperimentSettingsWithId,
         set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None}),
+    log_parser.Pattern(
+        regex=r'\d+.\d+ \((?P<time>\d+.\d+)\)\s+GS state has changed: readers = (?P<readers_number>\d+), writers = (?P<writers_number>\d+), read_speed = (?P<read_speed>\d+.\d+), write_speed = (?P<write_speed>\d+.\d+)',
+        type=StorageState,
+        set_values={}),
+
+
 ]
 
 # TODO(mequrel): change to something more readable (comprehension list)
@@ -113,7 +120,7 @@ def main():
     settings_logs = glue_fissured_events(settings_logs)
     settings = settings_logs[0]
     settings = ExperimentSettings(budget=settings.budget, deadline=settings.deadline,
-                                  vm_cost_per_hour=settings.vm_cost_per_hour)
+        vm_cost_per_hour=settings.vm_cost_per_hour)
 
     log.settings = settings
 
@@ -141,6 +148,11 @@ def main():
 
     for vm_log in vm_events:
         log.add_event(EventType.VM, vm_log)
+
+    storage_state_events = [event for event in events if isinstance(event, StorageState)]
+
+    for storage_state in storage_state_events:
+        log.add_event(EventType.STORAGE_STATE, storage_state)
 
     print log.dumps()
 

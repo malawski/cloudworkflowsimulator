@@ -2,30 +2,7 @@ require 'rubygems'
 require 'gnuplot'
 require 'set'
 
-def read_log(file_content)
-  lines = file_content.split(/\n/)
-
-  lines.each do |line| 
-    # match = 
-  end
-end
-
-def read_log_from_file(filename)
-  file_content = `cat #{filename}`
-  return read_log(file_content)
-end
-
-class StorageState
-  def initialize(time, readers_number, writers_number, read_speed, write_speed)
-    @time = time
-    @readers_number = readers_number
-    @writers_number = writers_number
-    @read_speed = read_speed
-    @write_speed = write_speed
-  end
-
-  attr_reader :time, :readers_number, :writers_number, :read_speed, :write_speed
-end
+require 'parsed_log_loader.rb'
 
 def plot_number_schedule(logs, filename)
   Gnuplot.open do |gp|
@@ -33,7 +10,7 @@ def plot_number_schedule(logs, filename)
       plot.xlabel "Time"
       plot.ylabel "Read/Write number"
       plot.set "key right outside"
-      plot.terminal "png size 1024,768"
+      plot.terminal "png size 3024,768"
       plot.output filename + ".png"
 
       times = logs.collect { |log| log.time }
@@ -69,7 +46,7 @@ def plot_bandwidth_schedule(logs, filename)
       plot.xlabel "Time"
       plot.ylabel "Bandwidth"
       plot.set "key right outside"
-      plot.terminal "png size 1024,768"
+      plot.terminal "png size 3024,768"
       plot.output filename + ".png"
 
       times = logs.collect { |log| log.time }
@@ -103,31 +80,26 @@ log_filename = ARGV[0]
 type = ARGV[1]
 output_filename = "storage"
 
-# logs = read_log_from_file(log_filename)
-logs = [
-    StorageState.new(10.0, 0, 0, 300000, 100000),
-    StorageState.new(20.0, 1, 0, 300000, 100000),
-    StorageState.new(30.0, 1, 1, 300000, 100000),
-    StorageState.new(50.0, 2, 1, 150000, 100000),
-    StorageState.new(69.0, 2, 0, 150000, 100000),
-    StorageState.new(89.0, 1, 0, 300000, 100000),
-    StorageState.new(99.0, 0, 0, 300000, 100000)]
+logs = read_log_from_file(log_filename)
+storage_logs = logs[:storage_states]
 
-refined_logs = []
-
-for i in 0...logs.length-1
-  refined_logs.push(logs[i])
-  refined_logs.push(StorageState.new(logs[i+1].time, logs[i].readers_number, logs[i].writers_number,
-                                     logs[i].read_speed, logs[i].write_speed))
+refined_storage_logs = []
+for i in 0...storage_logs.length-1
+  refined_storage_logs.push(storage_logs[i])
+  refined_storage_logs.push(StorageState.new(storage_logs[i+1].time, 
+                                     storage_logs[i].readers_number,
+                                     storage_logs[i].writers_number,
+                                     storage_logs[i].read_speed,
+                                     storage_logs[i].write_speed))
 end
 
-refined_logs.push(logs[-1])
+refined_storage_logs.push(storage_logs[-1])
 
 case type
 when "number"
-  plot_number_schedule(refined_logs, output_filename)
+  plot_number_schedule(refined_storage_logs, output_filename)
 when "speed"
-  plot_bandwidth_schedule(refined_logs, output_filename)
+  plot_bandwidth_schedule(refined_storage_logs, output_filename)
 end
 
 

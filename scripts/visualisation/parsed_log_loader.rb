@@ -45,6 +45,18 @@ class Workflow
   attr_reader :id, :priority
 end
 
+class StorageState
+  def initialize(time, readers_number, writers_number, read_speed, write_speed)
+    @time = time
+    @readers_number = readers_number
+    @writers_number = writers_number
+    @read_speed = read_speed
+    @write_speed = write_speed
+  end
+
+  attr_reader :time, :readers_number, :writers_number, :read_speed, :write_speed
+end
+
 def read_log(file_content)
   lines = file_content.split(/\n/)
 
@@ -101,11 +113,23 @@ def read_log(file_content)
     current_line += 1
   end
 
+  storage_states_number = lines[current_line].to_i
+  current_line += 1
+
+  storage_states = []
+  for i in 0...storage_states_number
+    storage_state_info = lines[current_line].split
+    storage_state = StorageState.new(storage_state_info[0].to_f, storage_state_info[1].to_i, storage_state_info[2].to_i, storage_state_info[3].to_f, storage_state_info[4].to_f)
+    storage_states.push(storage_state)
+    current_line += 1
+  end
+
   return {
     :vms => vms,
     :workflows => workflows,
     :tasks => tasks,
-    :transfers => transfers
+    :transfers => transfers,
+    :storage_states => storage_states,
   }
 end
 
