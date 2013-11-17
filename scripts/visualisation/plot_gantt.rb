@@ -16,28 +16,31 @@ require 'gnuplot'
 require 'set'
 
 class TaskLog
-  def initialize(workflow, id, vm, started, finished, result)
+  def initialize(id, workflow, task_id, vm, started, finished, result)
     @workflow = workflow
     @id = id
+    @task_id = task_id
     @vm = vm
     @started = started
     @finished = finished
     @result = result
   end
 
-  attr_reader :workflow, :id, :vm, :started, :finished, :result
+  attr_reader :id, :workflow, :task_id, :vm, :started, :finished, :result
 end
 
 class TransferLog
-  def initialize(id, vm, started, finished, direction)
+  def initialize(id, vm, started, finished, direction, job_id, file_id)
     @id = id
     @vm = vm
     @started = started
     @finished = finished
     @direction = direction
+    @job_id = job_id
+    @file_id = file_id
   end
 
-  attr_reader :id, :vm, :started, :finished, :direction
+  attr_reader :id, :vm, :started, :finished, :direction, :job_id, :file_id
 end
 
 class VMLog
@@ -61,7 +64,9 @@ end
 
 def read_log(file_content)
   lines = file_content.split(/\n/)
-  current_line = 0
+
+  # skip experiment settings
+  current_line = 1
 
   vm_number = lines[current_line].to_i
   current_line += 1
@@ -96,7 +101,7 @@ def read_log(file_content)
 
   for i in 0...tasks_number
     task_info = lines[current_line].split
-    task = TaskLog.new(task_info[0], task_info[1], task_info[2], task_info[3].to_f, task_info[4].to_f, task_info[5])
+    task = TaskLog.new(task_info[0], task_info[1], task_info[2], task_info[3], task_info[4].to_f, task_info[5].to_f, task_info[6])
     tasks.push(task)
     current_line += 1
   end
@@ -108,7 +113,7 @@ def read_log(file_content)
 
   for i in 0...transfers_number
     transfer_info = lines[current_line].split
-    transfer = TransferLog.new(transfer_info[0], transfer_info[1], transfer_info[2].to_f, transfer_info[3].to_f, transfer_info[4])
+    transfer = TransferLog.new(transfer_info[0], transfer_info[1], transfer_info[2].to_f, transfer_info[3].to_f, transfer_info[4], transfer_info[5], transfer_info[6])
     transfers.push(transfer)
     current_line += 1
   end
@@ -206,7 +211,7 @@ class GanttPlotter
         #plot.noytics
         #plot.noxtics
         #plot.set "grid"
-        plot.terminal "png size 10240,7680"
+        plot.terminal "png size 10240,768"
         plot.output filename + ".png"
 
         plot.data = @data
