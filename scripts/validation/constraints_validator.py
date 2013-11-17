@@ -1,7 +1,5 @@
 import math
-import sys
 from log_parser.execution_log import EventType
-from validation import parsed_log_loader
 from validation.common import ValidationResult
 
 SECS_IN_HOUR = 3600.0
@@ -25,24 +23,8 @@ def validate(vms, settings):
     return ValidationResult(deadline_errors + budget_errors)
 
 
-def main():
-    if len(sys.argv) != 2:
-        print('Invalid number of params. 1 param expected (filename).')
-        return
-
-    filename = sys.argv[1]
-    infile = open(filename, 'r')
-    execution_log = parsed_log_loader.read_log(infile.read())
-    infile.close()
-
+def validate_experiment(execution_log):
     vms = execution_log.events[EventType.VM]
     settings = execution_log.settings
 
-    result = validate(vms, settings)
-
-    for error in result.errors:
-        print(error)
-
-
-if __name__ == '__main__':
-    main()
+    return validate(vms, settings)
