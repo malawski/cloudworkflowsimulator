@@ -64,8 +64,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     private long planningFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-            StorageSimulationParams simulationParams, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, simulationParams, ensembleStatistics, cloudsim);
+            StorageManager storageManager, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, storageManager, ensembleStatistics, cloudsim);
     }
 
     public double getEstimatedProvisioningDelay() {
@@ -394,7 +394,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     @Override
     public void simulate(String logname) {
-        storageManager = initializeStorage(simulationParams, cloudsim);
         WorkflowLog log = prepareEnvironment();
 
         planningStartWallTime = System.nanoTime();

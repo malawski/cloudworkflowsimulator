@@ -17,6 +17,7 @@ import cws.core.dag.DAG;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
 import cws.core.provisioner.VMFactory;
+import cws.core.storage.StorageManager;
 
 public class DynamicAlgorithm extends Algorithm {
     private double price;
@@ -24,9 +25,9 @@ public class DynamicAlgorithm extends Algorithm {
     private Provisioner provisioner;
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, double price, Scheduler scheduler,
-            Provisioner provisioner, StorageSimulationParams simulationParams, AlgorithmStatistics ensembleStatistics,
+            Provisioner provisioner, StorageManager storageManager, AlgorithmStatistics ensembleStatistics,
             CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, simulationParams, ensembleStatistics, cloudsim);
+        super(budget, deadline, dags, storageManager, ensembleStatistics, cloudsim);
         this.price = price;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
@@ -34,8 +35,6 @@ public class DynamicAlgorithm extends Algorithm {
 
     @Override
     public void simulate(String logname) {
-        storageManager = initializeStorage(simulationParams, cloudsim);
-
         SimulationEnvironment simulationEnvironment = prepareEnvironment();
 
         cloudsim.startSimulation();

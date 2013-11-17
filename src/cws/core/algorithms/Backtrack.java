@@ -8,15 +8,16 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.storage.StorageManager;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
  */
 public class Backtrack extends StaticAlgorithm {
 
-    public Backtrack(double budget, double deadline, List<DAG> dags, StorageSimulationParams simulationParams,
+    public Backtrack(double budget, double deadline, List<DAG> dags, StorageManager storageManager,
             AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, simulationParams, cloudsim);
+        super(budget, deadline, dags, ensembleStatistics, storageManager, cloudsim);
     }
 
     /**

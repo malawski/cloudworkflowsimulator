@@ -26,6 +26,8 @@ import cws.core.dag.DAGStats;
 import cws.core.dag.Task;
 import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.provisioner.VMFactory;
+import cws.core.storage.StorageManager;
+import cws.core.storage.StorageManagerFactory;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 
@@ -234,7 +236,7 @@ public class TestRun {
                 }
             }
 
-            DAGStats dagStats = new DAGStats(dag, Algorithm.initializeStorage(simulationParams, cloudsim));
+            DAGStats dagStats = new DAGStats(dag, StorageManagerFactory.createStorage(simulationParams, cloudsim));
 
             minTime = Math.min(minTime, dagStats.getCriticalPath());
             minCost = Math.min(minCost, dagStats.getMinCost());
@@ -344,13 +346,14 @@ public class TestRun {
             CloudSimWrapper cloudsim, StorageSimulationParams simulationParams, List<DAG> dags, double budget,
             double deadline) {
         AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, cloudsim);
+        StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
         if ("SPSS".equals(algorithmName)) {
-            return new SPSS(budget, deadline, dags, alpha, simulationParams, ensembleStatistics, cloudsim);
+            return new SPSS(budget, deadline, dags, alpha, storageManager, ensembleStatistics, cloudsim);
         } else if ("DPDS".equals(algorithmName)) {
-            return new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, simulationParams,
+            return new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, storageManager,
                     ensembleStatistics, cloudsim);
         } else if ("WADPDS".equals(algorithmName)) {
-            return new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, simulationParams,
+            return new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, storageManager,
                     ensembleStatistics, cloudsim);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);

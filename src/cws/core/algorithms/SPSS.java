@@ -11,6 +11,7 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.storage.StorageManager;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -20,9 +21,9 @@ public class SPSS extends StaticAlgorithm {
     /** Tuning parameter for deadline distribution (low alpha = runtime, high alpha = tasks) */
     private double alpha;
 
-    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, StorageSimulationParams simulationParams,
+    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, StorageManager storageManager,
             AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, simulationParams, cloudsim);
+        super(budget, deadline, dags, ensembleStatistics, storageManager, cloudsim);
         this.alpha = alpha;
     }
 
