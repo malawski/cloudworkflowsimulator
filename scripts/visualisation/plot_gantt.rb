@@ -8,7 +8,7 @@
 # Examples of usage:
 #   $ ruby plot_gantt.rb results tests/test1.log output_graph
 #   $ ruby plot_gantt.rb workflow tests/test1.log output_graph --resolution=10000,600
-#   $ ruby plot_gantt.rb storage tests/test2.log output_graph
+#   $ ruby plot_gantt.rb storage tests/test2.log output_graph --crop-from=2.5 --crop-to=4
 
 require 'scanf.rb'
 require 'rubygems'
@@ -35,6 +35,9 @@ class GanttPlotter
     }
     @styles = {}
     @style_next_id = 1
+
+    @vm_min = 1000000000
+    @vm_max = -1
   end
 
   def create_gantt_series (startsList, finishesList, rows, line_style, title)
@@ -57,6 +60,9 @@ class GanttPlotter
     if vm_row.empty?
       return
     end
+
+    @vm_max = ([@vm_max] + [vm_row.max]).max
+    @vm_min = ([@vm_min] + [vm_row.min]).min
 
     add_style_line_if_not_exist color, type
     line_style = get_line_style color, type
@@ -93,6 +99,22 @@ class GanttPlotter
         plot.set "key right outside"
         plot.terminal "png size #{resolution}"
         plot.output filename + ".png"
+
+        if params['crop-from'].given? and params['crop-to'].given?
+          x_min = params['crop-from'].value
+          x_max = params['crop-to'].value
+          plot.xrange "[#{x_min}:#{x_max}]"
+        elsif params['crop-from'].given?
+          x_min = params['crop-from'].value
+          plot.xrange "[#{x_min}:]"
+        elsif params['crop-to'].given?
+          x_max = params['crop-to'].value
+          plot.xrange "[:#{x_max}]"
+        end
+
+        y_min = @vm_min - 0.5
+        y_max = @vm_max + 0.5
+        plot.yrange "[#{y_min}:#{y_max}]"
 
         plot.data = @data
       end
@@ -205,6 +227,18 @@ Main {
     description "Resolution of created graph."
     default "1024,768"
     validate { |comma_separated_resolution| /\d+,\d+/ =~ comma_separated_resolution }
+  }
+
+  option('crop-from') {
+    argument :required
+    description "Show only events after given point of time"
+    cast :float
+  }
+
+  option('crop-to') {
+    argument :required
+    description "Show only events before given point of time"
+    cast :float
   }
 
   mode 'results' do
