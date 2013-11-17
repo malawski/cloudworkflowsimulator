@@ -32,16 +32,6 @@ import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManager;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener {
-
-    /** Engine that executes workflows */
-    private WorkflowEngine engine;
-
-    /** Ensemble manager that submits DAGs */
-    private EnsembleManager manager;
-
-    /** Cloud to provision VMs from */
-    private Cloud cloud;
-
     /** Plan */
     private Plan plan = new Plan();
 
@@ -74,29 +64,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     public double getEstimatedDeprovisioningDelay() {
         return 0.0;
-    }
-
-    @Override
-    public void setCloud(Cloud c) {
-        if (cloud != null)
-            cloud.removeVMListener(this);
-        cloud = c;
-        cloud.addVMListener(this);
-        cloud.addVMListener(algorithmStatistics);
-    }
-
-    @Override
-    public void setWorkflowEngine(WorkflowEngine e) {
-        if (engine != null)
-            engine.removeJobListener(this);
-        engine = e;
-        engine.addJobListener(this);
-        engine.addJobListener(algorithmStatistics);
-    }
-
-    public void setEnsembleManager(EnsembleManager m) {
-        manager = m;
-        manager.addDAGJobListener(algorithmStatistics);
     }
 
     @Override
@@ -271,9 +238,10 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     private void submitDAG(DAG dag) {
         List<DAG> dags = getAllDags();
         int priority = dags.indexOf(dag);
-        DAGJob dagJob = new DAGJob(dag, manager.getId());
+        DAGJob dagJob = new DAGJob(dag, getEnsembleManager().getId());
         dagJob.setPriority(priority);
-        getCloudsim().send(manager.getId(), engine.getId(), 0.0, WorkflowEvent.DAG_SUBMIT, dagJob);
+        getCloudsim().send(getEnsembleManager().getId(), getWorkflowEngine().getId(), 0.0, WorkflowEvent.DAG_SUBMIT,
+                dagJob);
     }
 
     @Override
@@ -353,7 +321,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         Task task = vmqueue.peek();
         if (task == null) {
             // No more tasks
-            getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
+            getCloudsim().send(getWorkflowEngine().getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
         } else {
             // If job for task is ready
             if (readyJobs.containsKey(task)) {
@@ -367,7 +335,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     private void launchVM(VM vm, double start) {
         double now = getCloudsim().clock();
         double delay = start - now;
-        getCloudsim().send(engine.getId(), cloud.getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
+        getCloudsim().send(getWorkflowEngine().getId(), getCloud().getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
     }
 
     private void submitJob(VM vm, Job job) {
@@ -389,11 +357,11 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         // Submit the job to the VM
         idle.remove(vm);
         job.setVM(vm);
-        getCloudsim().send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
+        getCloudsim().send(getWorkflowEngine().getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
     }
 
     @Override
-    public void simulate(String logname) {
+    public void simulateInternal(String logname) {
         WorkflowLog log = prepareEnvironment();
 
         planningStartWallTime = System.nanoTime();
@@ -437,6 +405,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         setCloud(cloud);
         setEnsembleManager(manager);
         setWorkflowEngine(engine);
+        cloud.addVMListener(this);
+        engine.addJobListener(this);
 
         WorkflowLog log = null;
         if (shouldGenerateLog()) {

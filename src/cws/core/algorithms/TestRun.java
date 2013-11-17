@@ -302,7 +302,7 @@ public class TestRun {
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, simulationParams,
                             dags, budget, deadline);
 
-                    algorithm.simulate(algorithmName);
+                    algorithm.simulateInternal(algorithmName);
 
                     AlgorithmStatistics algorithmStatistics = algorithm.getAlgorithmStatistics();
                     double planningTime = algorithm.getPlanningnWallTime() / 1.0e9;

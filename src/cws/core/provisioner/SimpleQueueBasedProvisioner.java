@@ -6,7 +6,7 @@ import java.util.Set;
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 
-public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements Provisioner {
+public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
     public SimpleQueueBasedProvisioner(CloudSimWrapper cloudsim) {
         super(cloudsim);
@@ -17,12 +17,12 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
         // use the queued (released) jobs from the workflow engine
         int queueLength = engine.getQueueLength();
 
-        getCloudSim().log(" Provisioner: queue length: " + queueLength);
+        getCloudsim().log(" Provisioner: queue length: " + queueLength);
 
         // check the deadline and budget constraints
         double budget = engine.getBudget();
         double deadline = engine.getDeadline();
-        double time = getCloudSim().clock();
+        double time = getCloudsim().clock();
         double cost = engine.getCost();
 
         // if we are close to the budget by one VM*hour
@@ -33,21 +33,21 @@ public class SimpleQueueBasedProvisioner extends AbstractProvisioner implements 
         // add one VM if queue not empty
         if (queueLength > 0) {
             VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
-            VM vm = VMFactory.createVM(vmStaticParams, getCloudSim());
+            VM vm = VMFactory.createVM(vmStaticParams, getCloudsim());
 
-            getCloudSim().log("Starting VM: " + vm.getId());
-            getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+            getCloudsim().log("Starting VM: " + vm.getId());
+            getCloudsim().send(engine.getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         } else { // terminate free VMs
             Set<VM> freeVMs = engine.getFreeVMs();
             Iterator<VM> vmIt = freeVMs.iterator();
             while (vmIt.hasNext()) {
                 VM vm = vmIt.next();
                 vmIt.remove();
-                getCloudSim().log("Terminating VM: " + vm.getId());
-                getCloudSim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
+                getCloudsim().log("Terminating VM: " + vm.getId());
+                getCloudsim().send(engine.getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
             }
         }
-        getCloudSim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL, WorkflowEvent.PROVISIONING_REQUEST,
+        getCloudsim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL, WorkflowEvent.PROVISIONING_REQUEST,
                 null);
     }
 }

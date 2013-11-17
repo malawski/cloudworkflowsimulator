@@ -2,25 +2,25 @@ package cws.core.provisioner;
 
 import cws.core.Cloud;
 import cws.core.Provisioner;
+import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 
-public abstract class AbstractProvisioner implements Provisioner {
+public abstract class CloudAwareProvisioner extends CWSSimEntity implements Provisioner {
     public static final double DEFAULT_AUTOSCALING_FACTOR = 2.0;
     protected static final double PROVISIONER_INTERVAL = 90.0;
 
-    private CloudSimWrapper cloudsim;
-    protected Cloud cloud;
+    private Cloud cloud;
 
     // maximum autoscaling factor over initial number of provisioned VMs
     protected double maxScaling;
 
-    public AbstractProvisioner(CloudSimWrapper cloudsim) {
+    public CloudAwareProvisioner(CloudSimWrapper cloudsim) {
         this(DEFAULT_AUTOSCALING_FACTOR, cloudsim);
     }
 
-    public AbstractProvisioner(double maxScaling, CloudSimWrapper cloudsim) {
+    public CloudAwareProvisioner(double maxScaling, CloudSimWrapper cloudsim) {
+        super("CloudAwareProvisioner", cloudsim);
         this.maxScaling = maxScaling;
-        this.cloudsim = cloudsim;
     }
 
     public void setMaxScaling(double maxScaling) {
@@ -31,16 +31,11 @@ public abstract class AbstractProvisioner implements Provisioner {
         return maxScaling;
     }
 
-    @Override
     public void setCloud(Cloud cloud) {
         this.cloud = cloud;
     }
 
     public Cloud getCloud() {
         return cloud;
-    }
-
-    protected CloudSimWrapper getCloudSim() {
-        return cloudsim;
     }
 }

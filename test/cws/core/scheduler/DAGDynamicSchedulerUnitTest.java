@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -37,11 +38,11 @@ public class DAGDynamicSchedulerUnitTest {
 
     @Before
     public void setUp() throws Exception {
+        CloudSim.init(0, null, false);
         cloudsim = mock(CloudSimWrapper.class);
 
         scheduler = new DAGDynamicScheduler(cloudsim);
         engine = mock(WorkflowEngine.class);
-        scheduler.setWorkflowEngine(engine);
 
         jobs = new LinkedList<Job>();
         freeVMs = new HashSet<VM>();

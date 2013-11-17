@@ -51,11 +51,6 @@ public class DAGSchedulerFCFS implements Scheduler {
     }
 
     @Override
-    public void setWorkflowEngine(WorkflowEngine engine) {
-        // do nothing
-    }
-
-    @Override
     public void setStorageManager(StorageManager storageManager) {
         // do nothing, we don't need storage manager here
     }

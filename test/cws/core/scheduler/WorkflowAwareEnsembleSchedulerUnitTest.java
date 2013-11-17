@@ -46,8 +46,6 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         when(engine.getDeadline()).thenReturn(10.0);
         when(engine.getBudget()).thenReturn(10.0);
 
-        scheduler.setWorkflowEngine(engine);
-
         jobs = new LinkedList<Job>();
         freeVMs = new HashSet<VM>();
 

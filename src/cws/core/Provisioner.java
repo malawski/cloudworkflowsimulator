@@ -7,6 +7,4 @@ package cws.core;
  */
 public interface Provisioner {
     public void provisionResources(WorkflowEngine engine);
-
-    public void setCloud(Cloud cloud);
 }

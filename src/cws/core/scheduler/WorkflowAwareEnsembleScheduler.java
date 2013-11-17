@@ -34,7 +34,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         // check the deadline constraints (provisioner takes care about budget)
 
         double deadline = engine.getDeadline();
-        double time = getCloudSim().clock();
+        double time = getCloudsim().clock();
 
         // stop scheduling any new jobs if we are over deadline
         if (isDeadlineExceeded(deadline, time)) {
@@ -120,7 +120,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
         double costEstimate = estimateCost(dj, engine);
         double budgetRemaining = estimateBudgetRemaining(engine);
-        getCloudSim().log(" Cost estimate: " + costEstimate + " Budget remaining: " + budgetRemaining);
+        getCloudsim().log(" Cost estimate: " + costEstimate + " Budget remaining: " + budgetRemaining);
         return costEstimate < budgetRemaining;
     }
 
@@ -171,7 +171,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         // we add this for safety in order not to underestimate our budget
         double safetyMargin = 0.1;
 
-        getCloudSim().log(
+        getCloudsim().log(
                 " Budget for new VMs: " + rn + " Budget on running VMs: " + rc
                         + " Remaining budget of admitted workflows: " + ra);
 

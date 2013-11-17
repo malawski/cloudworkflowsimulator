@@ -39,7 +39,7 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
 
         // check the deadline constraints (provisioner takes care about budget)
         double deadline = engine.getDeadline();
-        double time = getCloudSim().clock();
+        double time = getCloudsim().clock();
 
         // stop scheduling any new jobs if we are over deadline
         if (isDeadlineExceeded(deadline, time)) {

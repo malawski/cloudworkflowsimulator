@@ -10,7 +10,5 @@ import cws.core.storage.StorageManager;
 public interface Scheduler {
     public void scheduleJobs(WorkflowEngine engine);
 
-    public void setWorkflowEngine(WorkflowEngine engine);
-
     void setStorageManager(StorageManager storageManager);
 }

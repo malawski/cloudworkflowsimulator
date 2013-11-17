@@ -8,6 +8,7 @@ import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
+import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
@@ -17,18 +18,11 @@ import cws.core.storage.StorageManager;
  * Job is submitted to VM only if VM is idle (no queuing in VMs).
  * @author malawski
  */
-public class DAGDynamicScheduler implements Scheduler {
-
-    private CloudSimWrapper cloudsim;
+public class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
     protected StorageManager storageManager;
 
     public DAGDynamicScheduler(CloudSimWrapper cloudsim) {
-        this.cloudsim = cloudsim;
-    }
-
-    @Override
-    public void setWorkflowEngine(WorkflowEngine engine) {
-        // do nothing
+        super("DAGDynamicScheduler", cloudsim);
     }
 
     @Override
@@ -42,10 +36,6 @@ public class DAGDynamicScheduler implements Scheduler {
         Queue<Job> jobs = engine.getQueuedJobs();
 
         scheduleQueue(jobs, engine);
-    }
-
-    protected CloudSimWrapper getCloudSim() {
-        return cloudsim;
     }
 
     /**
@@ -77,8 +67,8 @@ public class DAGDynamicScheduler implements Scheduler {
     }
 
     private void sendJobToVM(WorkflowEngine engine, VM vm, Job job) {
-        cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
-        cloudsim.log("Submitting job " + job.getTask().getId() + " to VM " + job.getVM().getId());
+        getCloudsim().send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
+        getCloudsim().log("Submitting job " + job.getTask().getId() + " to VM " + job.getVM().getId());
     }
 
     private boolean canBeScheduled(Queue<Job> jobs, Set<VM> freeVMs) {
