@@ -28,11 +28,15 @@ class StorageState
 end
 
 def plot_number_schedule(logs, filename)
+  max_number = 2
+  ymax = max_number * 1.05
+  ymin = max_number - ymax
+
   Gnuplot.open do |gp|
     Gnuplot::Plot.new( gp ) do |plot|
       plot.xlabel "Time"
       plot.ylabel "Read/Write number"
-      plot.ytics 1
+      plot.yrange "[#{ymin}:#{ymax}]"
       plot.set "key right outside"
       plot.terminal "png size 1024,768"
       plot.output filename + ".png"
@@ -58,6 +62,41 @@ def plot_number_schedule(logs, filename)
   end
 end
 
+def plot_bandwidth_schedule(logs, filename)
+  max_speed = 300000
+  ymax = max_speed * 1.05
+  ymin = max_speed - ymax
+
+  Gnuplot.open do |gp|
+    Gnuplot::Plot.new( gp ) do |plot|
+      plot.xlabel "Time"
+      plot.ylabel "Bandwidth"
+      plot.yrange "[#{ymin}:#{ymax}]"
+      plot.set "key right outside"
+      plot.terminal "png size 1024,768"
+      plot.output filename + ".png"
+
+      times = logs.collect { |log| log.time }
+      read_bandwidths = logs.collect { |log| log.read_speed }
+      write_bandwidths = logs.collect { |log| log.write_speed }
+
+      read_series = Gnuplot::DataSet.new( [times, read_bandwidths] ) do |ds|
+        ds.using = "1:2"
+        ds.with = "lines"
+        ds.title = "read"
+      end
+
+      write_series = Gnuplot::DataSet.new( [times, write_bandwidths] ) do |ds|
+        ds.using = "1:2"
+        ds.with = "lines"
+        ds.title = "write"
+      end
+
+      plot.data = [read_series, write_series]
+    end
+  end
+end
+
 
 log_filename = ARGV[0]
 type = ARGV[1]
@@ -68,8 +107,8 @@ logs = [
     StorageState.new(10.0, 0, 0, 300000, 100000),
     StorageState.new(20.0, 1, 0, 300000, 100000),
     StorageState.new(30.0, 1, 1, 300000, 100000),
-    StorageState.new(50.0, 2, 1, 300000, 100000),
-    StorageState.new(69.0, 2, 0, 300000, 100000),
+    StorageState.new(50.0, 2, 1, 150000, 100000),
+    StorageState.new(69.0, 2, 0, 150000, 100000),
     StorageState.new(89.0, 1, 0, 300000, 100000),
     StorageState.new(99.0, 0, 0, 300000, 100000)]
 
@@ -86,6 +125,9 @@ refined_logs.push(logs[-1])
 case type
 when "number"
   plot_number_schedule(refined_logs, output_filename)
+when "speed"
+  plot_bandwidth_schedule(refined_logs, output_filename)
 end
+
 
 
