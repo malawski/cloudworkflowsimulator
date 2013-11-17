@@ -182,7 +182,7 @@ def plot_workflow_schedule(logs, params)
 
   # TODO(mequrel): sort by priorities
 
-  workflows = logs[:workflows].values
+  workflows = logs[:workflows].values.sort_by { |workflow| workflow.priority }
 
   colors = [:red, :green, :orange, :dark_grey, :brown]
 
