@@ -172,6 +172,14 @@ def plot_workflow_schedule(logs, params)
   tasks = logs[:tasks]
   tasks_by_workflow = tasks.group_by { |task| task.workflow }
 
+  tasks_by_id = Hash[tasks.map { |task| [task.id, task] }]
+
+  transfers = logs[:transfers]
+  transfers_by_workflow = transfers.group_by { 
+      |transfer| if tasks_by_id.key? transfer.job_id
+                   tasks_by_id[transfer.job_id].workflow
+                 else "None" end }
+
   # TODO(mequrel): sort by priorities
 
   workflows = logs[:workflows].values
@@ -180,8 +188,8 @@ def plot_workflow_schedule(logs, params)
 
   workflows.reverse.each_with_index do |workflow, i|
     color = colors[i % colors.length]
-    workflow_tasks = tasks_by_workflow[workflow.id]
-    plotter.add_series get_task_series(workflow_tasks), "#{workflow.id} (#{workflow.priority})" , color
+    workflow_tasks = tasks_by_workflow[workflow.id] + transfers_by_workflow[workflow.id]
+    plotter.add_series get_task_series(workflow_tasks), "#{workflow.id} (#{workflow.priority})" , color    
   end
 
   plotter.plot(params)
