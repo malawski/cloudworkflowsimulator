@@ -1,3 +1,11 @@
+"""
+Validates if simulator was behaving properly during the experiment. Raises error if:
+  * two jobs execution makespan intersects each other on the same VM
+  * a transfer was done at the same time and same VM when a job was executed
+  * a job/transfer was executed on non-existing VM
+  * a job/transfer was executed out of VM lifecycle
+"""
+
 from itertools import groupby
 from operator import attrgetter
 from log_parser.execution_log import EventType

@@ -1,3 +1,11 @@
+"""
+A script that defines common validator interface and enables validators to be run on experiment logs.
+
+Can run any validator that is enclosed in VALIDATORS dict and have a method:
+  validate_experiment(execution_log)
+That gets an ExecutionLog object and return ValidationResult.
+"""
+
 import argparse
 
 from validation import constraints_validator

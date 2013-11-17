@@ -1,3 +1,9 @@
+"""
+Validates if experiment constraints were met. Raises error if
+  * Total VMs cost exceeded constrained budget.
+  * Lifecycle of any VM exceeded constrained deadline.
+"""
+
 import math
 from log_parser.execution_log import EventType
 from validation.common import ValidationResult

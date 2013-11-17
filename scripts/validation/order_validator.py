@@ -1,3 +1,7 @@
+"""
+Validates if tasks and transfers execution order defined in workflow was preserved.
+"""
+
 import itertools
 
 import dag_loader
