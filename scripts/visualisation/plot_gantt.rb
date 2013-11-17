@@ -6,9 +6,9 @@
 #   - Storage mode. Useful to distinguish upload, download and computational part of task.
 # 
 # Examples of usage:
-#   $ ruby plot_gantt.rb tests/test1.log results
-#   $ ruby plot_gantt.rb tests/test1.log workflow
-#   $ ruby plot_gantt.rb tests/test2.log storage
+#   $ ruby plot_gantt.rb results tests/test1.log output_graph
+#   $ ruby plot_gantt.rb workflow tests/test1.log output_graph --resolution=10000,600
+#   $ ruby plot_gantt.rb storage tests/test2.log output_graph
 
 require 'scanf.rb'
 require 'rubygems'
@@ -73,7 +73,10 @@ class GanttPlotter
     end
   end
 
-  def plot(filename)
+  def plot(params)
+    filename = params['output_filename'].value
+    resolution = params['resolution'].value
+
     Gnuplot.open do |gp|
       Gnuplot::Plot.new( gp ) do |plot|
         @styles.each do |key, style_id|
@@ -82,23 +85,13 @@ class GanttPlotter
           gp_color = @colors[color]
           plot.set "style line #{style_id} lc rgb '#{gp_color}' lt #{gp_type} lw 1"
         end
-        # plot.set "style fill border lc rgb 'black'"
-        plot.set "style fill"
 
-        #plot.title  "Schedule " + File.basename(filename)
+        plot.set "style fill"
         plot.xlabel "Time"
         plot.ylabel "VM"
-        #plot.xtics 3600
         plot.ytics 1
-        #plot.yrange "[-0.8:#{ymax}]"
-        #plot.terminal 'pdfcairo size 5,1.5 font "arial,8" linewidth 1'
-        #plot.terminal 'pdf size 11,8.5 font "arial,6" linewidth 1'
         plot.set "key right outside"
-        # plot.set "key off"
-        #plot.noytics
-        #plot.noxtics
-        #plot.set "grid"
-        plot.terminal "png size 10240,768"
+        plot.terminal "png size #{resolution}"
         plot.output filename + ".png"
 
         plot.data = @data
@@ -115,7 +108,7 @@ def get_task_series(tasks)
   }
 end
 
-def plot_result_schedule (logs, filename)
+def plot_result_schedule (logs, params)
   plotter = GanttPlotter.new
 
   vms = logs[:vms].values
@@ -140,10 +133,10 @@ def plot_result_schedule (logs, filename)
   retried_failed_tasks = tasks.select { |task| task.result.include? "FAILED" and task.result.include? "RETRY" }
   plotter.add_series get_task_series(retried_failed_tasks), "Retry failed", :red, :dotted
 
-  plotter.plot(filename)
+  plotter.plot(params)
 end
 
-def plot_workflow_schedule(logs, filename)
+def plot_workflow_schedule(logs, params)
   plotter = GanttPlotter.new
 
   vms = logs[:vms].values
@@ -169,10 +162,10 @@ def plot_workflow_schedule(logs, filename)
     plotter.add_series get_task_series(workflow_tasks), "#{workflow.id} (#{workflow.priority})" , color
   end
 
-  plotter.plot(filename)
+  plotter.plot(params)
 end
 
-def plot_storage_schedule(logs, filename)
+def plot_storage_schedule(logs, params)
   plotter = GanttPlotter.new
 
   vms = logs[:vms].values
@@ -193,7 +186,7 @@ def plot_storage_schedule(logs, filename)
   output_transfers = transfers.select { |transfer| transfer.direction == "DOWNLOAD" }
   plotter.add_series get_task_series(output_transfers), "Download", :green
 
-  plotter.plot(filename)
+  plotter.plot(params)
 end
 
 Main {
@@ -207,24 +200,31 @@ Main {
     description "Result image filename. .png extension will be added to this filename."
   }
 
+  option('resolution') {
+    argument :required
+    description "Resolution of created graph."
+    default "1024,768"
+    validate { |comma_separated_resolution| /\d+,\d+/ =~ comma_separated_resolution }
+  }
+
   mode 'results' do
     def run() 
       logs = read_log_from_file(params['log_filename'].value)
-      plot_result_schedule(logs, params['output_filename'].value)
+      plot_result_schedule(logs, params)
     end
   end
 
   mode 'workflows' do
     def run() 
       logs = read_log_from_file(params['log_filename'].value)
-      plot_workflow_schedule(logs, params['output_filename'].value)
+      plot_workflow_schedule(logs, params)
     end
   end
 
   mode 'storage' do 
     def run()
       logs = read_log_from_file(params['log_filename'].value)
-      plot_storage_schedule(logs, params['output_filename'].value)
+      plot_storage_schedule(logs, params)
     end
   end
 
