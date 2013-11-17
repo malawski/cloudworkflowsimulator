@@ -1,7 +1,5 @@
 import itertools
-import sys
 
-import parsed_log_loader
 import dag_loader
 from log_parser.execution_log import EventType
 from validation.common import ValidationResult
@@ -105,25 +103,21 @@ def validate_transfers(dag, jobs, transfers):
     return ValidationResult(errors)
 
 
-def main():
-    if len(sys.argv) != 2:
-        print('Invalid number of params. 1 param expected (filename).')
-        return
+def load_dag(workflow):
+    dag_file = open(workflow.filename, 'r')
+    dag = dag_loader.parse_dag(dag_file.read())
+    dag.id = workflow.id
+    dag_file.close()
+    return dag
 
-    filename = sys.argv[1]
-    infile = open(filename, 'r')
-    execution_log = parsed_log_loader.read_log(infile.read())
-    infile.close()
 
+def validate_experiment(execution_log):
     jobs = execution_log.completed_jobs
     transfers = execution_log.events[EventType.TRANSFER]
 
     errors = []
     for workflow in execution_log.workflows:
-        dag_file = open(workflow.filename, 'r')
-        dag = dag_loader.parse_dag(dag_file.read())
-        dag.id = workflow.id
-        dag_file.close()
+        dag = load_dag(workflow)
 
         result = validate(dag, jobs)
         if not result.is_valid:
@@ -134,11 +128,7 @@ def main():
             errors.append(result.errors)
 
     errors = flatten_list(errors)
-
-    for error in errors:
-        print(error)
+    return ValidationResult(errors)
 
 
-if __name__ == '__main__':
-    main()
 
