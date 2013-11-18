@@ -11,7 +11,6 @@ import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
-import cws.core.provisioner.VMFactory;
 import cws.core.storage.cache.VMCacheManager;
 
 /**
@@ -39,7 +38,7 @@ import cws.core.storage.cache.VMCacheManager;
  */
 public class VM extends CWSSimEntity {
 
-    private static int next_id = 0;
+    private static int nextId = 0;
 
     /** How many seconds there are in one hour */
     public static final double SECONDS_PER_HOUR = 60 * 60;
@@ -57,7 +56,7 @@ public class VM extends CWSSimEntity {
      * The number of bytes on internal disk that can be used as a cache
      * @see {@link VMCacheManager}
      */
-    private long cacheSize = VMFactory.DEFAULT_CACHE_SIZE;
+    private long cacheSize;
 
     /** Current idle cores */
     private int idleCores;
@@ -81,10 +80,10 @@ public class VM extends CWSSimEntity {
     private double cpuSecondsConsumed;
 
     /** Delay from when the VM is launched until it is ready */
-    private double provisioningDelay = VMFactory.DEFAULT_PROVISIONING_DELAY;
+    private double provisioningDelay;
 
     /** Delay from when the VM is terminated until it is no longer charged */
-    private double deprovisioningDelay = VMFactory.DEFAULT_DEPROVISIONING_DELAY;
+    private double deprovisioningDelay;
 
     /** Varies the actual runtime of tasks according to the specified distribution */
     private RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
@@ -93,7 +92,7 @@ public class VM extends CWSSimEntity {
     private FailureModel failureModel = new FailureModel(0, 0.0);
 
     public VM(VMStaticParams vmStaticParams, CloudSimWrapper cloudsim) {
-        super("VM" + (next_id++), cloudsim);
+        super("VM" + (nextId++), cloudsim);
         this.vmStaticParams = vmStaticParams;
         this.jobs = new LinkedList<Job>();
         this.runningJobs = new HashSet<Job>();

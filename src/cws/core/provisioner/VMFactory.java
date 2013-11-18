@@ -20,20 +20,16 @@ public class VMFactory {
     private static final double DEFAULT_FAILURE_RATE = 0.0;
     public static final long DEFAULT_CACHE_SIZE = 100000000;
 
-    public static class ZeroDistribution implements ContinuousDistribution {
-        @Override
-        public double sample() {
-            return 0.0d;
-        }
-    }
-
-    private static ContinuousDistribution provisioningDelayDistribution = new ZeroDistribution();
-    private static ContinuousDistribution deprovisioningDelayDistribution = new ZeroDistribution();
+    private static ContinuousDistribution provisioningDelayDistribution = new ConstantDistribution(
+            DEFAULT_PROVISIONING_DELAY);
+    private static ContinuousDistribution deprovisioningDelayDistribution = new ConstantDistribution(
+            DEFAULT_DEPROVISIONING_DELAY);
     private static RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
     private static FailureModel failureModel = new FailureModel(0, 0.0);
     private static double runtimeVariance;
-    private static double deprovisioningDelay = DEFAULT_DEPROVISIONING_DELAY;
-    private static double provisioningDelay;
+    private static double deprovisioningDelay = DEFAULT_DEPROVISIONING_DELAY; // TODO(bryk: There is no CLI param for
+                                                                              // this.
+    private static double provisioningDelay = DEFAULT_PROVISIONING_DELAY;
     private static double failureRate;
     private static long cacheSize;
 
@@ -74,7 +70,6 @@ public class VMFactory {
      *            storage manager here.
      */
     public static VM createVM(VMStaticParams vmStaticParams, CloudSimWrapper cloudSimWrapper) {
-        // TODO(_mequrel_): change to IoC in the future
         VM vm = new VM(vmStaticParams, cloudSimWrapper);
         vm.setCacheSize(cacheSize);
         vm.setProvisioningDelay(provisioningDelayDistribution.sample());
@@ -136,11 +131,11 @@ public class VMFactory {
         return provisioningDelay;
     }
 
-    public static double getFailureRate() {
-        return failureRate;
+    public static double getDeprovistioningDelay() {
+        return deprovisioningDelay;
     }
 
-    public static double getDeprovisioningDelay() {
-        return VMFactory.deprovisioningDelay;
+    public static double getFailureRate() {
+        return failureRate;
     }
 }

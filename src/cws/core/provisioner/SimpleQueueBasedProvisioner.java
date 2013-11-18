@@ -17,7 +17,7 @@ public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implement
         // use the queued (released) jobs from the workflow engine
         int queueLength = engine.getQueueLength();
 
-        getCloudsim().log(" Provisioner: queue length: " + queueLength);
+        getCloudsim().log("Provisioner: queue length: " + queueLength);
 
         // check the deadline and budget constraints
         double budget = engine.getBudget();

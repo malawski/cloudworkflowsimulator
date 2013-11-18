@@ -57,13 +57,11 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     }
 
     public double getEstimatedProvisioningDelay() {
-        // TODO(bryk): What is this?
-        return 0.0;
+        return VMFactory.getProvisioningDelay();
     }
 
     public double getEstimatedDeprovisioningDelay() {
-        // TODO(bryk): What is this?
-        return 0.0;
+        return VMFactory.getDeprovistioningDelay();
     }
 
     @Override
@@ -201,7 +199,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
-        spare = spare - (getEstimatedDeprovisioningDelay() + getEstimatedProvisioningDelay());
+        spare = spare - (VMFactory.getProvisioningDelay() + VMFactory.getDeprovistioningDelay());
         for (int i = 0; i < numlevels; i++) {
 
             double taskPart = alpha * (totalTasksByLevel[i] / totalTasks);
@@ -457,7 +455,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             }
             double last = schedule.lastKey();
             Slot lastSlot = schedule.get(last);
-            return last + lastSlot.duration + getEstimatedDeprovisioningDelay(); // add estimate of deprovisioning time
+            return last + lastSlot.duration + getEstimatedDeprovisioningDelay();
         }
 
         public int getHours() {

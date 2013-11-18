@@ -16,7 +16,6 @@ public class VMFactoryTest {
 
     @Before
     public void setUp() {
-        // TODO(_mequrel_): change to IoC in the future or to mock
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
     }
