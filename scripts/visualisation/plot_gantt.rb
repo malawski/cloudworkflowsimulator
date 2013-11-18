@@ -23,11 +23,16 @@ class GanttPlotter
     @data = []
     @colors = {
       :red => 'red',
-      :blue => 'grey90',
+      :light_grey => 'grey90',
       :green => 'green',
       :orange => 'orange',
       :brown => 'brown', 
-      :dark_grey => 'grey10'
+      :dark_grey => 'grey10',
+      :blue => 'blue',
+      :cyan => 'cyan',
+      :olivedrab => 'olivedrab',
+      :bisque => 'bisque',
+      :pink => 'magenta',
     }
     @types = {
       :dotted => 0,
@@ -139,7 +144,7 @@ def plot_result_schedule (logs, params)
     :started => vms.collect { |vm| vm.started },
     :finished => vms.collect { |vm| vm.finished }
   }
-  plotter.add_series provisioning_series, "VM idle", :blue
+  plotter.add_series provisioning_series, "VM idle", :light_grey
  
   tasks = logs[:tasks]
 
@@ -167,7 +172,7 @@ def plot_workflow_schedule(logs, params)
     :started => vms.collect { |vm| vm.started },
     :finished => vms.collect { |vm| vm.finished }
   }
-  plotter.add_series provisioning_series, "VM idle", :blue
+  plotter.add_series provisioning_series, "VM idle", :light_grey
  
   tasks = logs[:tasks]
   tasks_by_workflow = tasks.group_by { |task| task.workflow }
@@ -180,16 +185,20 @@ def plot_workflow_schedule(logs, params)
                    tasks_by_id[transfer.job_id].workflow
                  else "None" end }
 
-  # TODO(mequrel): sort by priorities
-
   workflows = logs[:workflows].values.sort_by { |workflow| workflow.priority }
 
-  colors = [:red, :green, :orange, :dark_grey, :brown]
+  colors = [:red, :green, :orange, :dark_grey, :brown, :blue, :cyan, :olivedrab, :bisque, :pink]
 
   workflows.reverse.each_with_index do |workflow, i|
     color = colors[i % colors.length]
-    workflow_tasks = tasks_by_workflow[workflow.id] + transfers_by_workflow[workflow.id]
-    plotter.add_series get_task_series(workflow_tasks), "#{workflow.id} (#{workflow.priority})" , color    
+
+    workflow_tasks = if tasks_by_workflow.key?(workflow.id) 
+                        tasks_by_workflow[workflow.id] else [] end
+    workflow_transfers = if transfers_by_workflow.key?(workflow.id) 
+                            transfers_by_workflow[workflow.id] else [] end
+
+    workflow_events = workflow_tasks + workflow_transfers
+    plotter.add_series get_task_series(workflow_events), "#{workflow.id} (#{workflow.priority})" , color    
   end
 
   plotter.plot(params)
@@ -204,7 +213,7 @@ def plot_storage_schedule(logs, params)
     :started => vms.collect { |vm| vm.started },
     :finished => vms.collect { |vm| vm.finished }
   }
-  plotter.add_series provisioning_series, "VM idle", :blue
+  plotter.add_series provisioning_series, "VM idle", :light_grey
  
   tasks = logs[:tasks]
   plotter.add_series get_task_series(tasks), "Computation", :dark_grey
