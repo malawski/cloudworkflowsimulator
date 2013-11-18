@@ -2,7 +2,6 @@ package cws.core.algorithms;
 
 import java.util.List;
 
-import cws.core.AlgorithmStatistics;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.storage.StorageManager;

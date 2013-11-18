@@ -2,18 +2,22 @@ package cws.core.algorithms;
 
 import java.util.List;
 
-import cws.core.AlgorithmStatistics;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.WorkflowEngine;
+import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.log.WorkflowLog;
 import cws.core.storage.StorageManager;
 
-public abstract class Algorithm {
-    protected CloudSimWrapper cloudsim;
+public abstract class Algorithm extends CWSSimEntity {
+    /** Storage manager used by this algorithm */
     protected StorageManager storageManager;
+
+    /** Provides statistics about this algorithm's run */
     protected AlgorithmStatistics algorithmStatistics;
+
     /** Engine that executes workflows */
     private WorkflowEngine engine;
 
@@ -23,39 +27,69 @@ public abstract class Algorithm {
     /** Cloud to provision VMs from */
     private Cloud cloud;
 
+    /** WorkflowLog instance. Logs some interesting data to a file. */
+    WorkflowLog workflowLog = new WorkflowLog(getCloudsim());
+
+    /** Should we dump WorkflowLog's logs */
+    private boolean shouldGenerateLog = true; // TODO(bryk): Parametrize this.
+
+    /** Simulation's budget */
     private double budget;
+
+    /** Simulation's deadline */
     private double deadline;
+
+    /** All simulation's DAGs */
     private List<DAG> dags;
-    private boolean generateLog = false;
 
     public Algorithm(double budget, double deadline, List<DAG> dags, StorageManager storageManager,
             AlgorithmStatistics algorithmStatistics, CloudSimWrapper cloudsim) {
+        super("Algorithm", cloudsim);
         this.budget = budget;
         this.deadline = deadline;
         this.dags = dags;
-        this.cloudsim = cloudsim;
         this.algorithmStatistics = algorithmStatistics;
         this.storageManager = storageManager;
     }
 
+    /** Should run actual simulation */
+    abstract protected void simulateInternal();
+
+    /** Should return the number of wall time nanos spent for planning */
+    abstract public long getPlanningnWallTime();
+
     public void simulate(String logname) {
-        simulateInternal(logname);
+        simulateInternal();
+        if (shouldGenerateLog()) {
+            printWorkflowLogs(logname);
+        }
         conductSanityChecks();
+    }
+
+    private void printWorkflowLogs(String logname) {
+        workflowLog.printJobs(logname);
+        workflowLog.printVmList(logname);
+        workflowLog.printDAGJobs();
     }
 
     public void setCloud(Cloud cloud) {
         this.cloud = cloud;
         this.cloud.addVMListener(algorithmStatistics);
+        this.cloud.addVMListener(workflowLog);
     }
 
     public void setWorkflowEngine(WorkflowEngine workflowEngine) {
         this.engine = workflowEngine;
         this.engine.addJobListener(algorithmStatistics);
+        this.engine.addJobListener(workflowLog);
+
     }
 
     public void setEnsembleManager(EnsembleManager ensembleManager) {
         this.manager = ensembleManager;
         this.manager.addDAGJobListener(algorithmStatistics);
+        this.manager.addDAGJobListener(workflowLog);
+
     }
 
     private void conductSanityChecks() {
@@ -69,10 +103,6 @@ public abstract class Algorithm {
                     + getBudget() + " deadline: " + getDeadline());
         }
     }
-
-    abstract protected void simulateInternal(String logname);
-
-    abstract public long getPlanningnWallTime();
 
     public EnsembleManager getEnsembleManager() {
         return manager;
@@ -102,20 +132,17 @@ public abstract class Algorithm {
         return deadline;
     }
 
+    @Override
     public String getName() {
         return this.getClass().getSimpleName();
     }
 
     public boolean shouldGenerateLog() {
-        return this.generateLog;
+        return this.shouldGenerateLog;
     }
 
     public void setGenerateLog(boolean generateLog) {
-        this.generateLog = generateLog;
-    }
-
-    protected CloudSimWrapper getCloudsim() {
-        return cloudsim;
+        this.shouldGenerateLog = generateLog;
     }
 
     public StorageManager getStorageManager() {

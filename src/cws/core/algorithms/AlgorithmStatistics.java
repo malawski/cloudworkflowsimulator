@@ -1,4 +1,4 @@
-package cws.core;
+package cws.core.algorithms;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import cws.core.VM;
+import cws.core.VMListener;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
@@ -28,6 +30,14 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
     private double actualDagFinishTime = 0.0;
     private List<DAG> finishedDags = new ArrayList<DAG>();
     private double cost = 0.0;
+
+    @Override
+    public void shutdownEntity() {
+        getCloudsim().log("Actual cost: " + this.getActualCost());
+        getCloudsim().log("Last DAG finished at: " + this.getActualDagFinishTime());
+        getCloudsim().log("Last time VM terminated at: " + this.getActualVMFinishTime());
+        getCloudsim().log("Last time Job terminated at: " + this.getActualJobFinishTime());
+    }
 
     public List<Integer> getFinishedDAGPriorities() {
         List<Integer> priorities = new LinkedList<Integer>();
@@ -114,18 +124,6 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
     };
 
     @Override
-    public void jobReleased(Job job) {
-    }
-
-    @Override
-    public void jobSubmitted(Job job) {
-    }
-
-    @Override
-    public void jobStarted(Job job) {
-    }
-
-    @Override
     public void jobFinished(Job job) {
         if (job.getResult() == Result.SUCCESS) {
             actualJobFinishTime = Math.max(actualJobFinishTime, job.getFinishTime());
@@ -150,5 +148,17 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
     public void dagFinished(DAGJob dagJob) {
         actualDagFinishTime = Math.max(actualDagFinishTime, getCloudsim().clock());
         finishedDags.add(dagJob.getDAG());
+    }
+
+    @Override
+    public void jobReleased(Job job) {
+    }
+
+    @Override
+    public void jobSubmitted(Job job) {
+    }
+
+    @Override
+    public void jobStarted(Job job) {
     }
 }

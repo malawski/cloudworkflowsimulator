@@ -17,7 +17,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 
-import cws.core.AlgorithmStatistics;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGListGenerator;
@@ -302,7 +301,7 @@ public class TestRun {
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, simulationParams,
                             dags, budget, deadline);
 
-                    algorithm.simulateInternal(algorithmName);
+                    algorithm.simulate(algorithmName);
 
                     AlgorithmStatistics algorithmStatistics = algorithm.getAlgorithmStatistics();
                     double planningTime = algorithm.getPlanningnWallTime() / 1.0e9;

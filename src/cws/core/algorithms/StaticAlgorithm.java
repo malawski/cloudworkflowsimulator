@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import cws.core.AlgorithmStatistics;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
@@ -27,7 +26,6 @@ import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
-import cws.core.log.WorkflowLog;
 import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManager;
 
@@ -48,7 +46,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     private HashMap<VM, LinkedList<Task>> vmQueues = new HashMap<VM, LinkedList<Task>>();
 
     /** Set of idle VMs */
-    private HashSet<VM> idle = new HashSet<VM>();
+    private HashSet<VM> idleVms = new HashSet<VM>();
 
     private long planningStartWallTime;
     private long planningFinishWallTime;
@@ -59,10 +57,12 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     }
 
     public double getEstimatedProvisioningDelay() {
+        // TODO(bryk): What is this?
         return 0.0;
     }
 
     public double getEstimatedDeprovisioningDelay() {
+        // TODO(bryk): What is this?
         return 0.0;
     }
 
@@ -73,10 +73,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     public Plan getPlan() {
         return plan;
-    }
-
-    public double getPlanCost() {
-        return plan.getCost();
     }
 
     @Override
@@ -257,13 +253,13 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     @Override
     public void vmLaunched(VM vm) {
-        idle.add(vm);
+        idleVms.add(vm);
         submitNextTaskFor(vm);
     }
 
     @Override
     public void vmTerminated(VM vm) {
-        idle.remove(vm);
+        idleVms.remove(vm);
     }
 
     @Override
@@ -306,13 +302,13 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             queue.addFirst(job.getTask());
         }
 
-        idle.add(vm);
+        idleVms.add(vm);
         submitNextTaskFor(vm);
     }
 
     private void submitNextTaskFor(VM vm) {
         // If the VM is busy, do nothing
-        if (!idle.contains(vm))
+        if (!idleVms.contains(vm))
             return;
 
         LinkedList<Task> vmqueue = vmQueues.get(vm);
@@ -355,14 +351,14 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         readyJobs.remove(task);
 
         // Submit the job to the VM
-        idle.remove(vm);
+        idleVms.remove(vm);
         job.setVM(vm);
         getCloudsim().send(getWorkflowEngine().getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
     }
 
     @Override
-    public void simulateInternal(String logname) {
-        WorkflowLog log = prepareEnvironment();
+    public void simulateInternal() {
+        prepareEnvironment();
 
         planningStartWallTime = System.nanoTime();
 
@@ -371,33 +367,9 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         planningFinishWallTime = System.nanoTime();
 
         getCloudsim().startSimulation();
-
-        conductSanityChecks();
-
-        printLogs(logname, log);
     }
 
-    private void printLogs(String logname, WorkflowLog log) {
-        if (shouldGenerateLog()) {
-            log.printJobs(logname);
-            log.printVmList(logname);
-            log.printDAGJobs();
-        }
-    }
-
-    private void conductSanityChecks() {
-        if (algorithmStatistics.getActualDagFinishTime() > getDeadline()) {
-            System.err.println("WARNING: Exceeded deadline: " + algorithmStatistics.getActualDagFinishTime() + ">"
-                    + getDeadline());
-        }
-
-        if (algorithmStatistics.getActualCost() > getBudget()) {
-            System.err.println("WARNING: Cost exceeded budget: " + algorithmStatistics.getActualCost() + ">"
-                    + getBudget());
-        }
-    }
-
-    private WorkflowLog prepareEnvironment() {
+    private void prepareEnvironment() {
         Cloud cloud = new Cloud(getCloudsim());
         WorkflowEngine engine = new WorkflowEngine(this, this, getCloudsim());
         EnsembleManager manager = new EnsembleManager(engine, getCloudsim());
@@ -407,15 +379,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         setWorkflowEngine(engine);
         cloud.addVMListener(this);
         engine.addJobListener(this);
-
-        WorkflowLog log = null;
-        if (shouldGenerateLog()) {
-            log = new WorkflowLog(getCloudsim());
-            engine.addJobListener(log);
-            cloud.addVMListener(log);
-            manager.addDAGJobListener(log);
-        }
-        return log;
     }
 
     /**
@@ -458,7 +421,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         }
     }
 
-    static int nextresourceid = 0;
+    private static int nextresourceid = 0;
 
     class Resource {
         int id = nextresourceid++;
