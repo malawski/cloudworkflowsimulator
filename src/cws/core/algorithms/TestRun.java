@@ -8,21 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.DAG;
-import cws.core.dag.DAGListGenerator;
-import cws.core.dag.DAGParser;
-import cws.core.dag.DAGStats;
-import cws.core.dag.Task;
+import cws.core.dag.*;
 import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManager;
@@ -223,8 +213,8 @@ public class TestRun {
         for (String name : names) {
             DAG dag = DAGParser.parseDAG(new File(name));
             dag.setId(new Integer(workflow_id).toString());
-            System.out.println(String.format("Workflow %d, priority = %d, filename = %s", workflow_id, workflow_id,
-                    name));
+            System.out.println(String.format("Workflow %d, priority = %d, filename = %s", workflow_id, names.length
+                    - workflow_id, name));
             workflow_id++;
             dags.add(dag);
 

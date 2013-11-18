@@ -179,6 +179,28 @@ public class GlobalStorageManager extends StorageManager {
             super.onUnknownSimEvent(ev);
             break;
         }
+
+        logStorageState();
+    }
+
+    private int lastNumReads = -1;
+    private int lastNumWrites = -1;
+
+    private void logStorageState() {
+        if (hasStorageStateNotChanged()) {
+            return;
+        }
+        getCloudsim().log(
+                String.format("GS state has changed: readers = %d, writers = %d, read_speed = %f, write_speed = %f",
+                        congestedParams.getNumReads(), congestedParams.getNumWrites(), congestedParams.getReadSpeed(),
+                        congestedParams.getWriteSpeed()));
+
+        lastNumReads = congestedParams.getNumReads();
+        lastNumWrites = congestedParams.getNumWrites();
+    }
+
+    private boolean hasStorageStateNotChanged() {
+        return lastNumReads == congestedParams.getNumReads() && lastNumWrites == congestedParams.getNumWrites();
     }
 
     /** Called on GLOBAL_STORAGE_WRITE_PROGRESS event. */

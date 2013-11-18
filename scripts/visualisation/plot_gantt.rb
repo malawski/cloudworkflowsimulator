@@ -6,136 +6,33 @@
 #   - Storage mode. Useful to distinguish upload, download and computational part of task.
 # 
 # Examples of usage:
-#   $ ruby plot_gantt.rb tests/test1.log results
-#   $ ruby plot_gantt.rb tests/test1.log workflow
-#   $ ruby plot_gantt.rb tests/test2.log storage
+#   $ ruby plot_gantt.rb results tests/test1.log output_graph
+#   $ ruby plot_gantt.rb workflow tests/test1.log output_graph --resolution=10000,600
+#   $ ruby plot_gantt.rb storage tests/test2.log output_graph --crop-from=2.5 --crop-to=4
 
 require 'scanf.rb'
 require 'rubygems'
 require 'gnuplot'
 require 'set'
+require 'main'
 
-class TaskLog
-  def initialize(workflow, id, vm, started, finished, result)
-    @workflow = workflow
-    @id = id
-    @vm = vm
-    @started = started
-    @finished = finished
-    @result = result
-  end
-
-  attr_reader :workflow, :id, :vm, :started, :finished, :result
-end
-
-class TransferLog
-  def initialize(id, vm, started, finished, direction)
-    @id = id
-    @vm = vm
-    @started = started
-    @finished = finished
-    @direction = direction
-  end
-
-  attr_reader :id, :vm, :started, :finished, :direction
-end
-
-class VMLog
-  def initialize(id, started, finished)
-    @id = id
-    @started = started
-    @finished = finished
-  end
-
-  attr_reader :id, :started, :finished
-end
-
-class Workflow
-  def initialize(id, priority)
-    @id = id
-    @priority = priority
-  end
-
-  attr_reader :id, :priority
-end
-
-def read_log(file_content)
-  lines = file_content.split(/\n/)
-  current_line = 0
-
-  vm_number = lines[current_line].to_i
-  current_line += 1
-
-  vms = Hash.new
-
-  for i in 0...vm_number
-    vm_info = lines[current_line].split
-
-    vm = VMLog.new(vm_info[0], vm_info[1].to_f, vm_info[2].to_f)
-    vms[vm.id] = vm
-
-    current_line += 1
-  end
-
-  workflows_number = lines[current_line].to_i
-  current_line += 1
-
-  workflows = Hash.new
-
-  for i in 0...workflows_number
-    workflow_info = lines[current_line].split
-    workflow = Workflow.new(workflow_info[0], workflow_info[1].to_i)
-    workflows[workflow.id] = workflow
-    current_line += 1
-  end
-
-  tasks_number = lines[current_line].to_i
-  current_line += 1
-
-  tasks = []
-
-  for i in 0...tasks_number
-    task_info = lines[current_line].split
-    task = TaskLog.new(task_info[0], task_info[1], task_info[2], task_info[3].to_f, task_info[4].to_f, task_info[5])
-    tasks.push(task)
-    current_line += 1
-  end
-
-  transfers_number = lines[current_line].to_i
-  current_line += 1
-
-  transfers = []
-
-  for i in 0...transfers_number
-    transfer_info = lines[current_line].split
-    transfer = TransferLog.new(transfer_info[0], transfer_info[1], transfer_info[2].to_f, transfer_info[3].to_f, transfer_info[4])
-    transfers.push(transfer)
-    current_line += 1
-  end
-
-  return {
-    :vms => vms,
-    :workflows => workflows,
-    :tasks => tasks,
-    :transfers => transfers
-  }
-end
-
-def read_log_from_file(filename)
-  file_content = `cat #{filename}`
-  return read_log(file_content)
-end
+require 'parsed_log_loader.rb'
 
 class GanttPlotter
   def initialize()
     @data = []
     @colors = {
       :red => 'red',
-      :blue => 'grey90',
+      :light_grey => 'grey90',
       :green => 'green',
       :orange => 'orange',
       :brown => 'brown', 
-      :dark_grey => 'grey10'
+      :dark_grey => 'grey10',
+      :blue => 'blue',
+      :cyan => 'cyan',
+      :olivedrab => 'olivedrab',
+      :bisque => 'bisque',
+      :pink => 'magenta',
     }
     @types = {
       :dotted => 0,
@@ -143,6 +40,9 @@ class GanttPlotter
     }
     @styles = {}
     @style_next_id = 1
+
+    @vm_min = 1000000000
+    @vm_max = -1
   end
 
   def create_gantt_series (startsList, finishesList, rows, line_style, title)
@@ -166,6 +66,9 @@ class GanttPlotter
       return
     end
 
+    @vm_max = ([@vm_max] + [vm_row.max]).max
+    @vm_min = ([@vm_min] + [vm_row.min]).min
+
     add_style_line_if_not_exist color, type
     line_style = get_line_style color, type
 
@@ -181,7 +84,10 @@ class GanttPlotter
     end
   end
 
-  def plot(filename)
+  def plot(params)
+    filename = params['output_filename'].value
+    resolution = params['resolution'].value
+
     Gnuplot.open do |gp|
       Gnuplot::Plot.new( gp ) do |plot|
         @styles.each do |key, style_id|
@@ -190,24 +96,30 @@ class GanttPlotter
           gp_color = @colors[color]
           plot.set "style line #{style_id} lc rgb '#{gp_color}' lt #{gp_type} lw 1"
         end
-        # plot.set "style fill border lc rgb 'black'"
-        plot.set "style fill"
 
-        #plot.title  "Schedule " + File.basename(filename)
+        plot.set "style fill"
         plot.xlabel "Time"
         plot.ylabel "VM"
-        #plot.xtics 3600
         plot.ytics 1
-        #plot.yrange "[-0.8:#{ymax}]"
-        #plot.terminal 'pdfcairo size 5,1.5 font "arial,8" linewidth 1'
-        #plot.terminal 'pdf size 11,8.5 font "arial,6" linewidth 1'
         plot.set "key right outside"
-        # plot.set "key off"
-        #plot.noytics
-        #plot.noxtics
-        #plot.set "grid"
-        plot.terminal "png size 10240,7680"
+        plot.terminal "png size #{resolution}"
         plot.output filename + ".png"
+
+        if params['crop-from'].given? and params['crop-to'].given?
+          x_min = params['crop-from'].value
+          x_max = params['crop-to'].value
+          plot.xrange "[#{x_min}:#{x_max}]"
+        elsif params['crop-from'].given?
+          x_min = params['crop-from'].value
+          plot.xrange "[#{x_min}:]"
+        elsif params['crop-to'].given?
+          x_max = params['crop-to'].value
+          plot.xrange "[:#{x_max}]"
+        end
+
+        y_min = @vm_min - 0.5
+        y_max = @vm_max + 0.5
+        plot.yrange "[#{y_min}:#{y_max}]"
 
         plot.data = @data
       end
@@ -223,7 +135,7 @@ def get_task_series(tasks)
   }
 end
 
-def plot_result_schedule (logs, filename)
+def plot_result_schedule (logs, params)
   plotter = GanttPlotter.new
 
   vms = logs[:vms].values
@@ -232,7 +144,7 @@ def plot_result_schedule (logs, filename)
     :started => vms.collect { |vm| vm.started },
     :finished => vms.collect { |vm| vm.finished }
   }
-  plotter.add_series provisioning_series, "VM idle", :blue
+  plotter.add_series provisioning_series, "VM idle", :light_grey
  
   tasks = logs[:tasks]
 
@@ -248,10 +160,10 @@ def plot_result_schedule (logs, filename)
   retried_failed_tasks = tasks.select { |task| task.result.include? "FAILED" and task.result.include? "RETRY" }
   plotter.add_series get_task_series(retried_failed_tasks), "Retry failed", :red, :dotted
 
-  plotter.plot(filename)
+  plotter.plot(params)
 end
 
-def plot_workflow_schedule(logs, filename)
+def plot_workflow_schedule(logs, params)
   plotter = GanttPlotter.new
 
   vms = logs[:vms].values
@@ -260,27 +172,39 @@ def plot_workflow_schedule(logs, filename)
     :started => vms.collect { |vm| vm.started },
     :finished => vms.collect { |vm| vm.finished }
   }
-  plotter.add_series provisioning_series, "VM idle", :blue
+  plotter.add_series provisioning_series, "VM idle", :light_grey
  
   tasks = logs[:tasks]
   tasks_by_workflow = tasks.group_by { |task| task.workflow }
 
-  # TODO(mequrel): sort by priorities
+  tasks_by_id = Hash[tasks.map { |task| [task.id, task] }]
 
-  workflows = logs[:workflows].values
+  transfers = logs[:transfers]
+  transfers_by_workflow = transfers.group_by { 
+      |transfer| if tasks_by_id.key? transfer.job_id
+                   tasks_by_id[transfer.job_id].workflow
+                 else "None" end }
 
-  colors = [:red, :green, :orange, :dark_grey, :brown]
+  workflows = logs[:workflows].values.sort_by { |workflow| workflow.priority }
+
+  colors = [:red, :green, :orange, :dark_grey, :brown, :blue, :cyan, :olivedrab, :bisque, :pink]
 
   workflows.reverse.each_with_index do |workflow, i|
     color = colors[i % colors.length]
-    workflow_tasks = tasks_by_workflow[workflow.id]
-    plotter.add_series get_task_series(workflow_tasks), "#{workflow.id} (#{workflow.priority})" , color
+
+    workflow_tasks = if tasks_by_workflow.key?(workflow.id) 
+                        tasks_by_workflow[workflow.id] else [] end
+    workflow_transfers = if transfers_by_workflow.key?(workflow.id) 
+                            transfers_by_workflow[workflow.id] else [] end
+
+    workflow_events = workflow_tasks + workflow_transfers
+    plotter.add_series get_task_series(workflow_events), "#{workflow.id} (#{workflow.priority})" , color    
   end
 
-  plotter.plot(filename)
+  plotter.plot(params)
 end
 
-def plot_storage_schedule(logs, filename)
+def plot_storage_schedule(logs, params)
   plotter = GanttPlotter.new
 
   vms = logs[:vms].values
@@ -289,7 +213,7 @@ def plot_storage_schedule(logs, filename)
     :started => vms.collect { |vm| vm.started },
     :finished => vms.collect { |vm| vm.finished }
   }
-  plotter.add_series provisioning_series, "VM idle", :blue
+  plotter.add_series provisioning_series, "VM idle", :light_grey
  
   tasks = logs[:tasks]
   plotter.add_series get_task_series(tasks), "Computation", :dark_grey
@@ -301,20 +225,61 @@ def plot_storage_schedule(logs, filename)
   output_transfers = transfers.select { |transfer| transfer.direction == "DOWNLOAD" }
   plotter.add_series get_task_series(output_transfers), "Download", :green
 
-  plotter.plot(filename)
+  plotter.plot(params)
 end
 
-log_filename = ARGV[0]
-type = ARGV[1]
-output_filename = "test"
+Main {
+  argument('log_filename') {
+    required
+    description "Path to log file in intermediate format (preprocessed)."
+  }
 
-logs = read_log_from_file(log_filename)
+  argument('output_filename') {
+    required
+    description "Result image filename. .png extension will be added to this filename."
+  }
 
-case type
-when "results"
-  plot_result_schedule(logs, output_filename)
-when "workflows"
-  plot_workflow_schedule(logs, output_filename)
-when "storage"
-  plot_storage_schedule(logs, output_filename)
-end
+  option('resolution') {
+    argument :required
+    description "Resolution of created graph."
+    default "1024,768"
+    validate { |comma_separated_resolution| /\d+,\d+/ =~ comma_separated_resolution }
+  }
+
+  option('crop-from') {
+    argument :required
+    description "Show only events after given point of time"
+    cast :float
+  }
+
+  option('crop-to') {
+    argument :required
+    description "Show only events before given point of time"
+    cast :float
+  }
+
+  mode 'results' do
+    def run() 
+      logs = read_log_from_file(params['log_filename'].value)
+      plot_result_schedule(logs, params)
+    end
+  end
+
+  mode 'workflows' do
+    def run() 
+      logs = read_log_from_file(params['log_filename'].value)
+      plot_workflow_schedule(logs, params)
+    end
+  end
+
+  mode 'storage' do 
+    def run()
+      logs = read_log_from_file(params['log_filename'].value)
+      plot_storage_schedule(logs, params)
+    end
+  end
+
+  def run()
+    print "No mode given (results|workflows|storage)!\n"
+  end
+}
