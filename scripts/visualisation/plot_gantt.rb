@@ -155,10 +155,10 @@ def plot_result_schedule (logs, params)
   plotter.add_series get_task_series(failed_tasks), "Failed", :red
 
   retried_finished_tasks = tasks.select { |task| task.result.include? "OK" and task.result.include? "RETRY" }
-  plotter.add_series get_task_series(retried_finished_tasks), "Retry", :green, :dotted
+  plotter.add_series get_task_series(retried_finished_tasks), "Retry", :olivedrab, :dotted
 
   retried_failed_tasks = tasks.select { |task| task.result.include? "FAILED" and task.result.include? "RETRY" }
-  plotter.add_series get_task_series(retried_failed_tasks), "Retry failed", :red, :dotted
+  plotter.add_series get_task_series(retried_failed_tasks), "Retry failed", :pink, :dotted
 
   plotter.plot(params)
 end
