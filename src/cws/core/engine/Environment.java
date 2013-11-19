@@ -54,7 +54,7 @@ public class Environment {
     public double getVMCostFor(double runtimeInSeconds) {
         double hours = runtimeInSeconds / TimeUnit.HOURS.toSeconds(1);
         int fullHours = (int) Math.ceil(hours);
-        return Math.max(1, fullHours);
+        return Math.max(1, fullHours) * vmType.getPrice();
     }
 
     public double getSingleVMPrice() {
