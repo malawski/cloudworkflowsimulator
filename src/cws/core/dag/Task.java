@@ -3,8 +3,6 @@ package cws.core.dag;
 import java.util.ArrayList;
 import java.util.List;
 
-import cws.core.algorithms.VMType;
-
 /**
  * @author Gideon Juve <juve@usc.edu>
  */
@@ -30,14 +28,10 @@ public class Task {
     /** Task's output files */
     private List<DAGFile> outputFiles = new ArrayList<DAGFile>();
 
-    /** VMType that this task runs on */
-    private VMType vmType;
-
-    public Task(String id, String transformation, double size, VMType vmType) {
+    public Task(String id, String transformation, double size) {
         this.id = id;
         this.transformation = transformation;
         this.size = size;
-        this.vmType = vmType;
     }
 
     /**
@@ -111,9 +105,5 @@ public class Task {
 
     public void addOutputFiles(List<DAGFile> outputs) {
         this.outputFiles.addAll(outputs);
-    }
-
-    public VMType getVmType() {
-        return vmType;
     }
 }

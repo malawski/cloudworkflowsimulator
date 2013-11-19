@@ -5,7 +5,6 @@ import java.util.*;
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeFactory;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
@@ -83,8 +82,9 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         }
 
         for (Resource r : plan.resources) {
-            // Create VM
-            VMType vmType = VMTypeFactory.fromOldVMType(r.vmtype);
+            // create VM
+            VMType vmType = environment.getVMType();
+            // TODO(mequrel): should have exposed interface for that!
             VM vm = VMFactory.createVM(vmType, getCloudsim());
 
             // Build task<->vm mappings
@@ -361,16 +361,13 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     /**
      * Computes and returns {@link TopologicalOrder} for the given parameters.
      * @param dag DAG with tasks
-     * @param vmTypes hash map of Task -> VMType
      * @param runtimes hash map of Task -> predicted runtime
      * @return TopologicalOrder
      * @throws NoFeasiblePlan when best critical path > deadline
      */
-    protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, cws.core.algorithms.VMType> vmTypes,
-            HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
+    protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
         TopologicalOrder order = new TopologicalOrder(dag);
         for (Task task : order) {
-            vmTypes.put(task, task.getVmType());
             double runtime = environment.getPredictedRuntime(task);
             runtimes.put(task, runtime);
         }
@@ -403,18 +400,18 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     class Resource {
         int id = nextresourceid++;
-        cws.core.algorithms.VMType vmtype;
+        Environment environment;
         TreeMap<Double, Slot> schedule;
 
         public Resource(Resource other) {
-            this(other.vmtype);
+            this(other.environment);
             for (Double s : other.schedule.navigableKeySet()) {
                 schedule.put(s, other.schedule.get(s));
             }
         }
 
-        public Resource(cws.core.algorithms.VMType type) {
-            this.vmtype = type;
+        public Resource(Environment environment) {
+            this.environment = environment;
             this.schedule = new TreeMap<Double, Slot>();
         }
 
@@ -450,11 +447,11 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         }
 
         public double getCostWith(double start, double end) {
-            return getHoursWith(start, end) * vmtype.getPrice();
+            return environment.getVMCostFor(end - start);
         }
 
         public double getCost() {
-            return getHours() * vmtype.getPrice();
+            return getCostWith(getStart(), getEnd());
         }
 
         public double getUtilization() {

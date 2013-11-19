@@ -84,7 +84,7 @@ public class EnsembleDynamicSchedulerTest {
 
         DAG dag = new DAG();
         for (int i = 0; i < 100; i++) {
-            Task task = new Task("TASK" + i, "transformation", (i % 10), cws.core.algorithms.VMType.DEFAULT_VM_TYPE);
+            Task task = new Task("TASK" + i, "transformation", (i % 10));
             dag.addTask(task);
         }
 

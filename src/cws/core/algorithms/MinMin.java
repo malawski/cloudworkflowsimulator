@@ -26,9 +26,8 @@ public class MinMin extends StaticAlgorithm {
      */
     @Override
     Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
-        HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
-        TopologicalOrder order = computeTopologicalOrder(dag, vmTypes, runtimes);
+        TopologicalOrder order = computeTopologicalOrder(dag, runtimes);
         /*
          * FIXME Later we will determine the best VM type for each task
          * assignEachTaskToCheapestResource()
@@ -76,7 +75,6 @@ public class MinMin extends StaticAlgorithm {
             for (Task t : queue) {
                 double deadline = deadlines.get(t);
                 double runtime = runtimes.get(t);
-                VMType vmtype = vmTypes.get(t);
 
                 // Compute earliest start time of task
                 double earliestStart = 0.0;
@@ -92,7 +90,7 @@ public class MinMin extends StaticAlgorithm {
                 // One option is to allocate a new resource
                 Solution best = null;
                 {
-                    Resource r = new Resource(vmtype);
+                    Resource r = new Resource(environment);
                     double cost = r.getCostWith(earliestStart, earliestStart + runtime);
                     Slot sl = new Slot(t, earliestStart, runtime);
                     best = new Solution(r, sl, cost, true);
@@ -100,12 +98,6 @@ public class MinMin extends StaticAlgorithm {
 
                 // Check each resource for a better (cheaper, earlier) solution
                 for (Resource r : plan.resources) {
-
-                    // The resource must match the vm type of the task
-                    if (vmtype != r.vmtype) {
-                        continue;
-                    }
-
                     // Try placing task at the beginning of resource schedule
                     if (earliestStart + runtime < r.getStart()) {
 

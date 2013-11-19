@@ -14,22 +14,24 @@ public class DAGStats {
     public DAGStats(DAG dag, Environment environment) {
         TopologicalOrder order = new TopologicalOrder(dag);
 
-        minCost = 0.0;
-        totalRuntime = 0.0;
+        HashMap<Task, Double> runTimes = computeMinimumCostOfRunningTheWorkflow(environment, order);
 
-        HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
+        // Make sure a plan is feasible given the deadline and available VMs
+        CriticalPath path = new CriticalPath(order, runTimes, environment);
+        criticalPath = path.getCriticalPathLength();
+    }
+
+    private HashMap<Task, Double> computeMinimumCostOfRunningTheWorkflow(Environment environment, TopologicalOrder order) {
+        totalRuntime = 0.0;
+        HashMap<Task, Double> runTimes = new HashMap<Task, Double>();
         for (Task task : order) {
             double runtime = environment.getPredictedRuntime(task);
-            runtimes.put(task, runtime);
-
-            // Compute the minimum cost of running this workflow
-            minCost += (runtime / (60 * 60)) * task.getVmType().getPrice();
+            runTimes.put(task, runtime);
             totalRuntime += runtime;
         }
 
-        // Make sure a plan is feasible given the deadline and available VMs
-        CriticalPath path = new CriticalPath(order, runtimes, environment);
-        criticalPath = path.getCriticalPathLength();
+        minCost = environment.getVMCostFor(totalRuntime);
+        return runTimes;
     }
 
     public double getMinCost() {

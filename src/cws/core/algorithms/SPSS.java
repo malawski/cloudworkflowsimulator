@@ -27,9 +27,8 @@ public class SPSS extends StaticAlgorithm {
      */
     @Override
     Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
-        HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
-        TopologicalOrder order = computeTopologicalOrder(dag, vmTypes, runtimes);
+        TopologicalOrder order = computeTopologicalOrder(dag, runtimes);
 
         /**
          * FIXME Later we will determine the best VM type for each task
@@ -78,7 +77,6 @@ public class SPSS extends StaticAlgorithm {
         for (Task task : sortedTasks) {
             double runtime = runtimes.get(task);
             double deadline = deadlines.get(task);
-            VMType vmtype = vmTypes.get(task);
 
             // Compute earliest start time of task
             double earliestStart = 0.0;
@@ -92,7 +90,7 @@ public class SPSS extends StaticAlgorithm {
             Solution best;
             {
                 // Default is to allocate a new resource
-                Resource r = new Resource(vmtype);
+                Resource r = new Resource(environment);
                 double cost = r.getCostWith(earliestStart, earliestStart + runtime);
                 Slot sl = new Slot(task, earliestStart, runtime);
                 best = newResource = new Solution(r, sl, cost, true);
@@ -100,12 +98,6 @@ public class SPSS extends StaticAlgorithm {
 
             // Check each resource for a better (cheaper, earlier) solution
             for (Resource r : plan.resources) {
-
-                // The resource must match the vm type of the task
-                if (vmtype != r.vmtype) {
-                    continue;
-                }
-
                 // Try placing task at the beginning of resource schedule
                 if (earliestStart + runtime < r.getStart()) {
 

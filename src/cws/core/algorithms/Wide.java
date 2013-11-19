@@ -26,7 +26,7 @@ public class Wide extends Backtrack {
         // Add them to the initial plan
         Plan plan = getPlan();
         for (int i = 0; i < N; i++) {
-            plan.resources.add(new Resource(VMType.DEFAULT_VM_TYPE));
+            plan.resources.add(new Resource(environment));
         }
 
         super.plan();

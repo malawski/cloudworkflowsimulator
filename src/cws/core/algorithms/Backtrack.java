@@ -14,6 +14,8 @@ import cws.core.engine.Environment;
  */
 public class Backtrack extends StaticAlgorithm {
 
+    public static final int SECONDS_IN_HOUR = 60 * 60;
+
     public Backtrack(double budget, double deadline, List<DAG> dags, Environment environment,
             AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
@@ -24,9 +26,8 @@ public class Backtrack extends StaticAlgorithm {
      */
     @Override
     Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
-        HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
-        TopologicalOrder order = computeTopologicalOrder(dag, vmTypes, runtimes);
+        TopologicalOrder order = computeTopologicalOrder(dag, runtimes);
 
         /*
          * FIXME Later we will determine the best VM type for each task
@@ -51,23 +52,21 @@ public class Backtrack extends StaticAlgorithm {
         int N = 0;
         Plan best = new Plan(currentPlan);
         do {
-            if (planDAG(dag, best, runtimes, deadlines, vmTypes)) {
+            if (planDAG(dag, best, runtimes, deadlines)) {
                 break;
             }
 
             best = new Plan(currentPlan);
             N++;
             for (int i = 0; i < N; i++) {
-                best.resources.add(new Resource(VMType.DEFAULT_VM_TYPE));
+                best.resources.add(new Resource(this.environment));
             }
         } while (best.getCost() <= getBudget());
 
         return best;
     }
 
-    boolean planDAG(DAG dag, Plan plan, HashMap<Task, Double> runtimes, HashMap<Task, Double> deadlines,
-            HashMap<Task, VMType> vmTypes) {
-
+    boolean planDAG(DAG dag, Plan plan, HashMap<Task, Double> runtimes, HashMap<Task, Double> deadlines) {
         TopologicalOrder order = new TopologicalOrder(dag);
 
         // Actual finish times of tasks
@@ -77,7 +76,6 @@ public class Backtrack extends StaticAlgorithm {
         for (Task t : order) {
             double deadline = deadlines.get(t);
             double runtime = runtimes.get(t);
-            VMType vmtype = vmTypes.get(t);
 
             // Compute earliest start time of task
             double earliestStart = 0.0;
@@ -105,11 +103,6 @@ public class Backtrack extends StaticAlgorithm {
             // Check each resource for a better (cheaper, earlier) solution
             for (Resource r : plan.resources) {
 
-                // The resource must match the vm type of the task
-                if (vmtype != r.vmtype) {
-                    continue;
-                }
-
                 // Try placing task at the beginning of resource schedule
                 if (earliestStart + runtime < r.getStart()) {
 
@@ -135,9 +128,9 @@ public class Backtrack extends StaticAlgorithm {
 
                     // Option 2: Leave a big gap
                     biggap: {
-                        int runtimeHours = (int) Math.ceil(runtime / (60 * 60));
+                        int runtimeHours = (int) Math.ceil(runtime / SECONDS_IN_HOUR);
 
-                        double ast = r.getStart() - (runtimeHours * 60 * 60);
+                        double ast = r.getStart() - (runtimeHours * SECONDS_IN_HOUR);
                         if (ast < earliestStart) {
                             ast = earliestStart;
                         }
@@ -157,7 +150,7 @@ public class Backtrack extends StaticAlgorithm {
 
                     // Option 3: Use some slack time (medium gap)
                     slack: {
-                        double slack = (r.getHours() * 60 * 60) - (r.getEnd() - r.getStart());
+                        double slack = (r.getHours() * SECONDS_IN_HOUR) - (r.getEnd() - r.getStart());
 
                         double ast = r.getStart() - slack;
                         if (ast < earliestStart) {

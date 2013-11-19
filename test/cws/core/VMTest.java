@@ -88,7 +88,7 @@ public class VMTest {
     @Test
     public void testSingleJob() {
         Job j = new Job(cloudsim);
-        j.setTask(new Task("task_id", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
+        j.setTask(new Task("task_id", "transformation", 1000));
         j.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMType vmType = new VMTypeBuilder().mips(100).cores(1).price(0.40).build();
@@ -109,10 +109,10 @@ public class VMTest {
     @Test
     public void testTwoJobs() {
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
+        j1.setTask(new Task("task_id", "transformation", 1000));
         j1.setDAGJob(new DAGJob(new DAG(), 1));
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
+        j2.setTask(new Task("task_id2", "transformation", 1000));
         j2.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMType vmType = new VMTypeBuilder().mips(100).cores(1).price(0.40).build();
@@ -138,11 +138,11 @@ public class VMTest {
     @Test
     public void testMultiCoreVM() {
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id1", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
+        j1.setTask(new Task("task_id1", "transformation", 1000));
         j1.setDAGJob(new DAGJob(new DAG(), 1));
 
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
+        j2.setTask(new Task("task_id2", "transformation", 1000));
         j2.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMType vmType = new VMTypeBuilder().mips(100).cores(2).price(0.40).build();
@@ -208,7 +208,7 @@ public class VMTest {
     @Test
     public void testVMKillJobsUponTermination() {
         Job job = new Job(cloudsim);
-        job.setTask(new Task("task_id1", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
+        job.setTask(new Task("task_id1", "transformation", 1000));
         job.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMType vmType = VMTypeFactory.fromOldVMType(cws.core.algorithms.VMType.DEFAULT_VM_TYPE);
@@ -228,7 +228,7 @@ public class VMTest {
     @Test
     public void testVMShouldNotAcceptNewJobsAfterTermination() {
         Job job2 = new Job(cloudsim);
-        job2.setTask(new Task("task_id1", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
+        job2.setTask(new Task("task_id1", "transformation", 1000));
         job2.setDAGJob(new DAGJob(new DAG(), 1));
 
         VMType vmType = VMTypeFactory.fromOldVMType(cws.core.algorithms.VMType.DEFAULT_VM_TYPE);

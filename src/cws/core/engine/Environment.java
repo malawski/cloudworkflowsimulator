@@ -1,6 +1,7 @@
 package cws.core.engine;
 
-import cws.core.algorithms.VMType;
+import java.util.concurrent.TimeUnit;
+
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.storage.StorageManager;
@@ -16,21 +17,18 @@ public class Environment {
         this.storageManager = storageManager;
     }
 
+    // FIXME(mequrel): temporary encapsulation breakage for static algorithm
+    public cws.core.core.VMType getVMType() {
+        return vmType;
+    }
+
     /**
-     * Returns task's predicted runtime. It is based on task's vmType and provided storage manager. <br>
+     * Returns task's predicted runtime. It is based on vmType and storage manager. <br>
      * Note that the estimation is trivial and may not be accurate during congestion and it doesn't include runtime
      * variance.
      * 
-     * @param storageManager manager used to estimate transfers
      * @return task's predicted runtime as a double
      */
-    public double getPredictedRuntime(Task task, StorageManager storageManager, VMType vmType) {
-        return task.getSize() / vmType.getMips() + storageManager.getTransferTimeEstimation(task);
-    }
-
-    public double getPredictedRuntime(Task task, StorageManager storageManager, cws.core.core.VMType vmType) {
-        return task.getSize() / vmType.getMips() + storageManager.getTransferTimeEstimation(task);
-    }
 
     public double getPredictedRuntime(Task task) {
         return getComputationTaskEstimation(task) + storageManager.getTransferTimeEstimation(task);
@@ -51,5 +49,11 @@ public class Environment {
 
     public StorageManagerStatistics getStorageManagerStatistics() {
         return storageManager.getStorageManagerStatistics();
+    }
+
+    public double getVMCostFor(double runtimeInSeconds) {
+        double hours = runtimeInSeconds / TimeUnit.HOURS.toSeconds(1);
+        int fullHours = (int) Math.ceil(hours);
+        return Math.max(1, fullHours);
     }
 }

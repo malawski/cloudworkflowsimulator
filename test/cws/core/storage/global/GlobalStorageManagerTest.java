@@ -11,7 +11,6 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import cws.core.WorkflowEvent;
-import cws.core.algorithms.VMType;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
@@ -190,7 +189,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         List<DAGFile> files = new ArrayList<DAGFile>();
         long sz = 22222;
         files.add(new DAGFile("abc.txt", sz));
-        Task t = new Task("xx", "xx", 222, VMType.DEFAULT_VM_TYPE);
+        Task t = new Task("xx", "xx", 222);
         t.addInputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
         Assert.assertEquals(sz / params.getReadSpeed() + params.getLatency(), time, 0.00001);
@@ -201,7 +200,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         List<DAGFile> files = new ArrayList<DAGFile>();
         long sz = 22222;
         files.add(new DAGFile("abc.txt", sz));
-        Task t = new Task("xx", "xx", 222, VMType.DEFAULT_VM_TYPE);
+        Task t = new Task("xx", "xx", 222);
         t.addOutputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
         Assert.assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.00001);
