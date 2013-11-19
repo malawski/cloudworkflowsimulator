@@ -86,8 +86,8 @@ public class SPSS extends StaticAlgorithm {
 
             // Compute earliest start time of task
             double earliestStart = 0.0;
-            for (Task p : t.getParents()) {
-                earliestStart = Math.max(earliestStart, finishTimes.get(p));
+            for (Task parent : t.getParents()) {
+                earliestStart = Math.max(earliestStart, finishTimes.get(parent));
             }
 
             Solution newResource;

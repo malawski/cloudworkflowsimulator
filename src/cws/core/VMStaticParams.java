@@ -5,7 +5,6 @@ public class VMStaticParams implements Cloneable {
      * The processing power of this VM
      */
     public int mips;
-
     /**
      * The number of cores of this VM
      */
