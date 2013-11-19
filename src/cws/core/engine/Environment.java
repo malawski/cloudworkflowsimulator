@@ -17,7 +17,7 @@ public class Environment {
         this.storageManager = storageManager;
     }
 
-    // FIXME(mequrel): temporary encapsulation breakage for static algorithm
+    // FIXME(mequrel): temporary encapsulation breakage for static and dynamic algorithms
     public cws.core.core.VMType getVMType() {
         return vmType;
     }
@@ -55,5 +55,9 @@ public class Environment {
         double hours = runtimeInSeconds / TimeUnit.HOURS.toSeconds(1);
         int fullHours = (int) Math.ceil(hours);
         return Math.max(1, fullHours);
+    }
+
+    public double getSingleVMPrice() {
+        return vmType.getPrice();
     }
 }

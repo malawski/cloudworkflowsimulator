@@ -345,11 +345,9 @@ public class TestRun {
         if ("SPSS".equals(algorithmName)) {
             return new SPSS(budget, deadline, dags, alpha, environment, ensembleStatistics, cloudsim);
         } else if ("DPDS".equals(algorithmName)) {
-            return new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, environment,
-                    ensembleStatistics, cloudsim);
+            return new DPDS(budget, deadline, dags, maxScaling, environment, ensembleStatistics, cloudsim);
         } else if ("WADPDS".equals(algorithmName)) {
-            return new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, environment,
-                    ensembleStatistics, cloudsim);
+            return new WADPDS(budget, deadline, dags, maxScaling, environment, ensembleStatistics, cloudsim);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }

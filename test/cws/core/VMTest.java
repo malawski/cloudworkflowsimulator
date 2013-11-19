@@ -10,7 +10,6 @@ import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.core.VMTypeBuilder;
-import cws.core.core.VMTypeFactory;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
@@ -211,7 +210,7 @@ public class VMTest {
         job.setTask(new Task("task_id1", "transformation", 1000));
         job.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = VMTypeFactory.fromOldVMType(cws.core.algorithms.VMType.DEFAULT_VM_TYPE);
+        VMType vmType = new VMTypeBuilder().mips(1).cores(1).price(1.0).build();
 
         VM vm = new VM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
@@ -231,7 +230,7 @@ public class VMTest {
         job2.setTask(new Task("task_id1", "transformation", 1000));
         job2.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = VMTypeFactory.fromOldVMType(cws.core.algorithms.VMType.DEFAULT_VM_TYPE);
+        VMType vmType = new VMTypeBuilder().mips(1).cores(1).price(1.0).build();
 
         VM vm = new VM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);

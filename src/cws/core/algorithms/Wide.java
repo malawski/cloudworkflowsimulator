@@ -11,6 +11,8 @@ import cws.core.engine.Environment;
  */
 public class Wide extends Backtrack {
 
+    public static final int SECONDS_IN_HOUR = 60 * 60;
+
     public Wide(double budget, double deadline, List<DAG> dags, Environment environment,
             AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, environment, ensembleStatistics, cloudsim);
@@ -19,8 +21,8 @@ public class Wide extends Backtrack {
     @Override
     public void plan() {
         // Estimate number of nodes we can use
-        double hours = getDeadline() / (60 * 60);
-        double nodeHours = getBudget() / VMType.DEFAULT_VM_TYPE.getPrice();
+        double hours = getDeadline() / SECONDS_IN_HOUR;
+        double nodeHours = getBudget() / environment.getSingleVMPrice();
         int N = (int) Math.floor(nodeHours / hours);
 
         // Add them to the initial plan

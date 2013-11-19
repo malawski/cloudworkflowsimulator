@@ -1,7 +1,7 @@
 package cws.core.algorithms;
 
 public enum VMType {
-    DEFAULT_VM_TYPE(1, 1.0);
+    UNUSED_DEFAULT_VM_TYPE(1, 1.0);
     // NOTE(bryk): commented out the rest, since we don't use them
     // , MEDIUM(5, 0.40), LARGE(10, 0.80);
 
