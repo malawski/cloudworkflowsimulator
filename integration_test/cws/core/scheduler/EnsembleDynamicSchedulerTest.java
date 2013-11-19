@@ -44,7 +44,8 @@ public class EnsembleDynamicSchedulerTest {
         environment = new Environment(new VMTypeBuilder().mips(1000).cores(1).price(1.0).build(), storageManager);
 
         provisioner = null;
-        scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
+        scheduler = new EnsembleDynamicScheduler(cloudsim);
+        scheduler.setEnvironment(environment);
         engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
         cloud = new Cloud(cloudsim);
 

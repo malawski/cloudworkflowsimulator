@@ -40,7 +40,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
         environment = mock(Environment.class);
 
-        scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment);
+        scheduler = new WorkflowAwareEnsembleScheduler(cloudsim);
+        scheduler.setEnvironment(environment);
 
         engine = mock(WorkflowEngine.class);
         when(engine.getDeadline()).thenReturn(10.0);

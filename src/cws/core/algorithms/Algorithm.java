@@ -42,14 +42,13 @@ public abstract class Algorithm extends CWSSimEntity {
     /** All simulation's DAGs */
     private List<DAG> dags;
 
-    public Algorithm(double budget, double deadline, List<DAG> dags, Environment environment,
-            AlgorithmStatistics algorithmStatistics, CloudSimWrapper cloudsim) {
+    public Algorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics algorithmStatistics,
+            CloudSimWrapper cloudsim) {
         super("Algorithm", cloudsim);
         this.budget = budget;
         this.deadline = deadline;
         this.dags = dags;
         this.algorithmStatistics = algorithmStatistics;
-        this.environment = environment;
     }
 
     /** Should run actual simulation */
@@ -83,6 +82,10 @@ public abstract class Algorithm extends CWSSimEntity {
         this.engine.addJobListener(algorithmStatistics);
         this.engine.addJobListener(workflowLog);
 
+    }
+
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 
     public void setEnsembleManager(EnsembleManager ensembleManager) {

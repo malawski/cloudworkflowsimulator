@@ -10,7 +10,6 @@ import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.engine.Environment;
 
 public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
@@ -21,8 +20,8 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
     // number of initially provisioned VMs to be used for setting limits for autoscaling
     private int initialNumVMs = 0;
 
-    public SimpleUtilizationBasedProvisioner(double maxScaling, CloudSimWrapper cloudsim, Environment environment) {
-        super(maxScaling, cloudsim, environment);
+    public SimpleUtilizationBasedProvisioner(double maxScaling, CloudSimWrapper cloudsim) {
+        super(maxScaling, cloudsim);
     }
 
     @Override

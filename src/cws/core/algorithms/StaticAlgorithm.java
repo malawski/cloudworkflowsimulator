@@ -39,8 +39,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     private long planningFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-            Environment environment, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, environment, ensembleStatistics, cloudsim);
+            CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, cloudsim);
     }
 
     public double getEstimatedProvisioningDelay() {

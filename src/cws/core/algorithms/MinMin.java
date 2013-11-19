@@ -9,7 +9,6 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.engine.Environment;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -17,8 +16,8 @@ import cws.core.engine.Environment;
 public class MinMin extends StaticAlgorithm {
 
     public MinMin(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-            Environment environment, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
+            CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, cloudsim);
     }
 
     /**

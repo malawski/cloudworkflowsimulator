@@ -11,18 +11,21 @@ public abstract class CloudAwareProvisioner extends CWSSimEntity implements Prov
     protected static final double PROVISIONER_INTERVAL = 90.0;
 
     private Cloud cloud;
-    protected final Environment environment;
+    protected Environment environment;
 
     // maximum autoscaling factor over initial number of provisioned VMs
     protected double maxScaling;
 
-    public CloudAwareProvisioner(CloudSimWrapper cloudsim, Environment environment) {
-        this(DEFAULT_AUTOSCALING_FACTOR, cloudsim, environment);
+    public CloudAwareProvisioner(CloudSimWrapper cloudsim) {
+        this(DEFAULT_AUTOSCALING_FACTOR, cloudsim);
     }
 
-    public CloudAwareProvisioner(double maxScaling, CloudSimWrapper cloudsim, Environment environment) {
+    public CloudAwareProvisioner(double maxScaling, CloudSimWrapper cloudsim) {
         super("CloudAwareProvisioner", cloudsim);
         this.maxScaling = maxScaling;
+    }
+
+    public void setEnvironment(Environment environment) {
         this.environment = environment;
     }
 

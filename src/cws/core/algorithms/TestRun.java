@@ -295,9 +295,10 @@ public class TestRun {
 
                     environment = createEnvironment(cloudsim, simulationParams);
 
-                    Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, environment,
-                            dags, budget, deadline);
+                    Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
+                            deadline);
 
+                    algorithm.setEnvironment(environment);
                     algorithm.simulate(algorithmName);
 
                     AlgorithmStatistics algorithmStatistics = algorithm.getAlgorithmStatistics();
@@ -339,15 +340,15 @@ public class TestRun {
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
-            CloudSimWrapper cloudsim, Environment environment, List<DAG> dags, double budget, double deadline) {
+            CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline) {
         AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, cloudsim);
 
         if ("SPSS".equals(algorithmName)) {
-            return new SPSS(budget, deadline, dags, alpha, environment, ensembleStatistics, cloudsim);
+            return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, cloudsim);
         } else if ("DPDS".equals(algorithmName)) {
-            return new DPDS(budget, deadline, dags, maxScaling, environment, ensembleStatistics, cloudsim);
+            return new DPDS(budget, deadline, dags, maxScaling, ensembleStatistics, cloudsim);
         } else if ("WADPDS".equals(algorithmName)) {
-            return new WADPDS(budget, deadline, dags, maxScaling, environment, ensembleStatistics, cloudsim);
+            return new WADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, cloudsim);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }

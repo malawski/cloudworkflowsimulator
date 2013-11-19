@@ -6,7 +6,6 @@ import java.util.List;
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
-import cws.core.engine.Environment;
 import cws.core.provisioner.CloudAwareProvisioner;
 import cws.core.provisioner.VMFactory;
 
@@ -16,9 +15,8 @@ public class DynamicAlgorithm extends Algorithm {
     private CloudAwareProvisioner provisioner;
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, Scheduler scheduler,
-            CloudAwareProvisioner provisioner, Environment environment, AlgorithmStatistics ensembleStatistics,
-            CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, environment, ensembleStatistics, cloudsim);
+            CloudAwareProvisioner provisioner, AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, cloudsim);
         this.provisioner = provisioner;
         this.scheduler = scheduler;
     }
@@ -30,6 +28,9 @@ public class DynamicAlgorithm extends Algorithm {
     }
 
     private void prepareEnvironment() {
+        provisioner.setEnvironment(environment);
+        scheduler.setEnvironment(environment);
+
         setCloud(new Cloud(getCloudsim()));
         provisioner.setCloud(getCloud());
 

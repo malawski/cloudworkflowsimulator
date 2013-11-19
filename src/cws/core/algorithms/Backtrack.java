@@ -7,7 +7,6 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.engine.Environment;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -16,9 +15,9 @@ public class Backtrack extends StaticAlgorithm {
 
     public static final int SECONDS_IN_HOUR = 60 * 60;
 
-    public Backtrack(double budget, double deadline, List<DAG> dags, Environment environment,
-            AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
+    public Backtrack(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
+            CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, cloudsim);
     }
 
     /**

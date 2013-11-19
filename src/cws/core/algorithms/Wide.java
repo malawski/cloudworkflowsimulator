@@ -4,7 +4,6 @@ import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
-import cws.core.engine.Environment;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -13,9 +12,9 @@ public class Wide extends Backtrack {
 
     public static final int SECONDS_IN_HOUR = 60 * 60;
 
-    public Wide(double budget, double deadline, List<DAG> dags, Environment environment,
-            AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, environment, ensembleStatistics, cloudsim);
+    public Wide(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
+            CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, cloudsim);
     }
 
     @Override

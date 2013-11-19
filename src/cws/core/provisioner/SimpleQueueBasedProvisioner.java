@@ -9,12 +9,11 @@ import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.engine.Environment;
 
 public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
-    public SimpleQueueBasedProvisioner(CloudSimWrapper cloudsim, Environment environment) {
-        super(cloudsim, environment);
+    public SimpleQueueBasedProvisioner(CloudSimWrapper cloudsim) {
+        super(cloudsim);
     }
 
     @Override

@@ -4,12 +4,11 @@ import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
-import cws.core.engine.Environment;
 
 public class MaxMin extends MinMin {
-    public MaxMin(double budget, double deadline, List<DAG> dags, Environment environment,
-            AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
+    public MaxMin(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
+            CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, cloudsim);
     }
 
     /**
