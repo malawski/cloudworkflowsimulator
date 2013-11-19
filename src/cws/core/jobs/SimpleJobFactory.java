@@ -12,6 +12,8 @@ import cws.core.dag.Task;
 public class SimpleJobFactory implements JobFactory {
     double scale;
 
+    // TODO(bryk): Update this class.
+
     public SimpleJobFactory() {
         this.scale = 1;
     }

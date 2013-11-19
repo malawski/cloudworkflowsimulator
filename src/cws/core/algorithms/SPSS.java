@@ -49,7 +49,7 @@ public class SPSS extends StaticAlgorithm {
          */
 
         // Get deadlines for each task (deadline distribution)
-        final HashMap<Task, Double> deadlines = deadlineDistribution(order, runtimes, this.alpha);
+        final HashMap<Task, Double> deadlines = getDeadlineDistribution(order, runtimes, this.alpha);
 
         // Sort tasks by deadline
         LinkedList<Task> sortedTasks = new LinkedList<Task>();
@@ -79,14 +79,14 @@ public class SPSS extends StaticAlgorithm {
         HashMap<Task, Double> finishTimes = new HashMap<Task, Double>();
 
         // Assign resources to each task
-        for (Task t : sortedTasks) {
-            double runtime = runtimes.get(t);
-            double deadline = deadlines.get(t);
-            VMType vmtype = vmTypes.get(t);
+        for (Task task : sortedTasks) {
+            double runtime = runtimes.get(task);
+            double deadline = deadlines.get(task);
+            VMType vmtype = vmTypes.get(task);
 
             // Compute earliest start time of task
             double earliestStart = 0.0;
-            for (Task parent : t.getParents()) {
+            for (Task parent : task.getParents()) {
                 earliestStart = Math.max(earliestStart, finishTimes.get(parent));
             }
 
@@ -98,7 +98,7 @@ public class SPSS extends StaticAlgorithm {
                 // Default is to allocate a new resource
                 Resource r = new Resource(vmtype);
                 double cost = r.getCostWith(earliestStart, earliestStart + runtime);
-                Slot sl = new Slot(t, earliestStart, runtime);
+                Slot sl = new Slot(task, earliestStart, runtime);
                 best = newResource = new Solution(r, sl, cost, true);
             }
 
@@ -126,8 +126,8 @@ public class SPSS extends StaticAlgorithm {
                         }
 
                         double cost = r.getCostWith(ast, r.getEnd()) - r.getCost();
-                        Slot sl = new Slot(t, ast, runtime);
-                        Solution soln = new Solution(r, sl, cost, false);
+                        Slot slot = new Slot(task, ast, runtime);
+                        Solution soln = new Solution(r, slot, cost, false);
                         if (soln.betterThan(best)) {
                             best = soln;
                         }
@@ -148,7 +148,7 @@ public class SPSS extends StaticAlgorithm {
                         }
 
                         double cost = r.getCostWith(ast, r.getEnd()) - r.getCost();
-                        Slot sl = new Slot(t, ast, runtime);
+                        Slot sl = new Slot(task, ast, runtime);
                         Solution soln = new Solution(r, sl, cost, false);
                         if (soln.betterThan(best)) {
                             best = soln;
@@ -174,7 +174,7 @@ public class SPSS extends StaticAlgorithm {
                         if (cost > 1e-6) {
                             throw new RuntimeException("Solution should be free");
                         }
-                        Slot sl = new Slot(t, ast, runtime);
+                        Slot sl = new Slot(task, ast, runtime);
                         Solution soln = new Solution(r, sl, cost, false);
                         if (soln.betterThan(best)) {
                             best = soln;
@@ -214,7 +214,7 @@ public class SPSS extends StaticAlgorithm {
                     double aft = ast + runtime;
                     if (aft <= end && aft <= deadline) {
                         double cost = 0.0; // free as in beer
-                        Slot sl = new Slot(t, ast, runtime);
+                        Slot sl = new Slot(task, ast, runtime);
                         Solution soln = new Solution(r, sl, cost, false);
                         if (soln.betterThan(best)) {
                             best = soln;
@@ -244,7 +244,7 @@ public class SPSS extends StaticAlgorithm {
                     }
 
                     double cost = r.getCostWith(r.getStart(), aft) - r.getCost();
-                    Slot sl = new Slot(t, ast, runtime);
+                    Slot sl = new Slot(task, ast, runtime);
                     Solution soln = new Solution(r, sl, cost, false);
                     if (soln.betterThan(best)) {
                         best = soln;
@@ -253,14 +253,15 @@ public class SPSS extends StaticAlgorithm {
             }
 
             if (newResource.cost < best.cost) {
-                System.out.printf("%s best: %f %s\n", t.getId(), best.cost, newResource.betterThan(best));
+                getCloudsim().log(
+                        String.format("%s best: %f %s\n", task.getId(), best.cost, newResource.betterThan(best)));
             }
 
             // Schedule task on resource of best solution
             best.addToPlan(plan);
 
             // Save actual finish time of task
-            finishTimes.put(t, best.slot.start + runtime);
+            finishTimes.put(task, best.slot.start + runtime);
         }
 
         return plan;

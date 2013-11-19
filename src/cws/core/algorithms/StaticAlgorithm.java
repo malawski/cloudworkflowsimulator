@@ -137,8 +137,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     /**
      * Assign deadlines to each task in the DAG
      */
-    HashMap<Task, Double> deadlineDistribution(TopologicalOrder order, HashMap<Task, Double> runtimes, double alpha) {
-
+    protected HashMap<Task, Double> getDeadlineDistribution(TopologicalOrder order, HashMap<Task, Double> runtimes,
+            double alpha) {
         // Sanity check
         if (alpha < 0 || alpha > 1) {
             throw new RuntimeException("Invalid alpha: " + alpha + ". Valid range is [0,1].");
@@ -170,9 +170,9 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         double totalRuntime = 0;
         double[] totalRuntimesByLevel = new double[numlevels];
 
-        for (Task t : order) {
-            double runtime = runtimes.get(t);
-            int level = levels.get(t);
+        for (Task task : order) {
+            double runtime = runtimes.get(task);
+            int level = levels.get(task);
 
             totalRuntime += runtime;
             totalRuntimesByLevel[level] += runtime;
@@ -199,7 +199,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
-        spare = spare - (VMFactory.getProvisioningDelay() + VMFactory.getDeprovistioningDelay());
+        spare = spare - (getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay());
         for (int i = 0; i < numlevels; i++) {
 
             double taskPart = alpha * (totalTasksByLevel[i] / totalTasks);
@@ -214,16 +214,16 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
          * t.deadline = max[p in t.parents](p.deadline) + t.runtime + shares[t.level]
          */
         HashMap<Task, Double> deadlines = new HashMap<Task, Double>();
-        for (Task t : order) {
-            int level = levels.get(t);
+        for (Task task : order) {
+            int level = levels.get(task);
             double latestDeadline = 0.0;
-            for (Task p : t.getParents()) {
-                double pdeadline = deadlines.get(p);
+            for (Task parent : task.getParents()) {
+                double pdeadline = deadlines.get(parent);
                 latestDeadline = Math.max(latestDeadline, pdeadline);
             }
-            double runtime = runtimes.get(t);
+            double runtime = runtimes.get(task);
             double deadline = latestDeadline + runtime + shares[level];
-            deadlines.put(t, deadline);
+            deadlines.put(task, deadline);
         }
 
         return deadlines;
@@ -390,19 +390,20 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, VMType> vmTypes,
             HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
         TopologicalOrder order = new TopologicalOrder(dag);
-        for (Task t : order) {
-            vmTypes.put(t, t.getVmType());
-            double runtime = t.getPredictedRuntime(storageManager);
-            runtimes.put(t, runtime);
+        for (Task task : order) {
+            vmTypes.put(task, task.getVmType());
+            double runtime = task.getPredictedRuntime(storageManager);
+            runtimes.put(task, runtime);
         }
 
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = new CriticalPath(order, runtimes, storageManager);
-        double criticalPath = path.getCriticalPathLength();
-        if (criticalPath > getDeadline() + getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay()) {
-            throw new NoFeasiblePlan("Best critical path (" + criticalPath + ") " + "> deadline (" + getDeadline()
-                    + ")");
+        double minimalTime = path.getCriticalPathLength() + getEstimatedProvisioningDelay()
+                + getEstimatedDeprovisioningDelay();
+        if (minimalTime > getDeadline()) {
+            throw new NoFeasiblePlan("Best critical path + provisioning estimates (" + minimalTime + ") "
+                    + "> deadline (" + getDeadline() + ")");
         }
         return order;
     }

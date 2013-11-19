@@ -52,7 +52,7 @@ public class MinMin extends StaticAlgorithm {
          */
 
         // Use the fancy deadline distribution
-        HashMap<Task, Double> deadlines = deadlineDistribution(order, runtimes, 0.7);
+        HashMap<Task, Double> deadlines = getDeadlineDistribution(order, runtimes, 0.7);
 
         // Create a new plan
         Plan plan = new Plan(currentPlan);

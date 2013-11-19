@@ -121,7 +121,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         double costEstimate = estimateCost(dj, engine);
         double budgetRemaining = estimateBudgetRemaining(engine);
         getCloudsim().log(" Cost estimate: " + costEstimate + " Budget remaining: " + budgetRemaining);
-        return costEstimate < budgetRemaining;
+        return costEstimate < budgetRemaining; // TODO(bryk): Add critical path here.
     }
 
     /**
