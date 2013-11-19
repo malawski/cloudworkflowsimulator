@@ -4,25 +4,20 @@ public class VMType implements Cloneable {
     /**
      * The processing power of this VM
      */
-    public int mips;
+    private int mips;
 
     /**
      * The number of cores of this VM
      */
-    public int cores;
+    private int cores;
 
     /**
      * Price per hour of usage
      */
-    public double price;
+    private double price;
 
     public int getMips() {
         return mips;
-    }
-
-    public VMType setMips(int mips) {
-        this.mips = mips;
-        return this;
     }
 
     public int getCores() {
@@ -33,14 +28,9 @@ public class VMType implements Cloneable {
         return price;
     }
 
-    public VMType setCores(int cores) {
+    public VMType(int mips, int cores, double price) {
+        this.mips = mips;
         this.cores = cores;
-        return this;
-    }
-
-    public VMType setPrice(double price) {
         this.price = price;
-        return this;
     }
-
 }

@@ -5,6 +5,7 @@ import java.util.*;
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
+import cws.core.core.VMTypeFactory;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
@@ -88,11 +89,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
         for (Resource r : plan.resources) {
             // Create VM
-            cws.core.algorithms.VMType type = r.vmtype;
-            VMType vmType = new VMType();
-            vmType.setMips(type.getMips());
-            vmType.setCores(1);
-            vmType.setPrice(type.getPrice());
+            VMType vmType = VMTypeFactory.fromOldVMType(r.vmtype);
             VM vm = VMFactory.createVM(vmType, getCloudsim());
 
             // Build task<->vm mappings

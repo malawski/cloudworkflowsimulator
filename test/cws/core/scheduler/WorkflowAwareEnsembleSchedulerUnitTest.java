@@ -16,6 +16,7 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
+import cws.core.core.VMTypeFactory;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGFile;
 import cws.core.dag.DAGJob;
@@ -129,7 +130,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
     private VM createVMMock() {
         VM vm = mock(VM.class);
-        when(vm.getVmType()).thenReturn(new VMType());
+        VMType vmType = VMTypeFactory.getDefaults();
+        when(vm.getVmType()).thenReturn(vmType);
         return vm;
     }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeFactory;
+import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.provisioner.CloudAwareProvisioner;
 import cws.core.provisioner.VMFactory;
@@ -66,8 +66,7 @@ public class DynamicAlgorithm extends Algorithm {
     private void launchVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numEstimatedVMs; i++) {
-            VMType vmType = VMTypeFactory.getDefaults();
-            vmType.setPrice(price);
+            VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(price).build();
 
             VM vm = VMFactory.createVM(vmType, getCloudsim());
             vms.add(vm);

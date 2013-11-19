@@ -9,6 +9,8 @@ import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
+import cws.core.core.VMTypeBuilder;
+import cws.core.core.VMTypeFactory;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
@@ -20,6 +22,8 @@ public class VMTest {
     private CloudSimWrapper cloudsim;
     @SuppressWarnings("unused")
     private StorageManager storageManager;
+
+    private VMType testDefaultVMType;
 
     private class VMDriver extends CWSSimEntity {
         private VM vm;
@@ -63,11 +67,22 @@ public class VMTest {
         }
     }
 
+    private class VMDummyDriver extends CWSSimEntity {
+        private VM vm;
+
+        public VMDummyDriver(VM vm, CloudSimWrapper cloudsim) {
+            super("VMDummyDriver", cloudsim);
+            this.vm = vm;
+            getCloudsim().addEntity(this);
+        }
+    }
+
     @Before
     public void setUp() {
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
         storageManager = new VoidStorageManager(cloudsim);
+        testDefaultVMType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
     }
 
     @Test
@@ -76,10 +91,7 @@ public class VMTest {
         j.setTask(new Task("task_id", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
         j.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = new VMType();
-        vmType.setMips(100);
-        vmType.setCores(1);
-        vmType.setPrice(0.40);
+        VMType vmType = new VMTypeBuilder().mips(100).cores(1).price(0.40).build();
 
         VM vm = new VM(vmType, cloudsim);
 
@@ -103,10 +115,7 @@ public class VMTest {
         j2.setTask(new Task("task_id2", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
         j2.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = new VMType();
-        vmType.setMips(100);
-        vmType.setCores(1);
-        vmType.setPrice(0.40);
+        VMType vmType = new VMTypeBuilder().mips(100).cores(1).price(0.40).build();
 
         VM vm = new VM(vmType, cloudsim);
 
@@ -136,10 +145,7 @@ public class VMTest {
         j2.setTask(new Task("task_id2", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
         j2.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = new VMType();
-        vmType.setMips(100);
-        vmType.setCores(2);
-        vmType.setPrice(0.40);
+        VMType vmType = new VMTypeBuilder().mips(100).cores(2).price(0.40).build();
 
         VM vm = new VM(vmType, cloudsim);
 
@@ -161,9 +167,7 @@ public class VMTest {
 
     @Test
     public void testVMShouldNotStartAutomatically() {
-        VMType vmType = new VMType();
-
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = new VM(testDefaultVMType, cloudsim);
         cloudsim.startSimulation();
 
         assertEquals(false, vm.isTerminated());
@@ -171,9 +175,7 @@ public class VMTest {
 
     @Test
     public void testVMShouldStartProperly() {
-        VMType vmType = new VMType();
-
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = new VM(testDefaultVMType, cloudsim);
         cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.startSimulation();
 
@@ -182,9 +184,7 @@ public class VMTest {
 
     @Test
     public void testVMShouldTerminateProperly() {
-        VMType vmType = new VMType();
-
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = new VM(testDefaultVMType, cloudsim);
         cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
         cloudsim.startSimulation();
@@ -194,12 +194,12 @@ public class VMTest {
 
     @Test
     public void testVMShouldNotAcceptEventsAfterTermination() {
-        VMType vmType = new VMType();
+        VM vm = new VM(testDefaultVMType, cloudsim);
+        VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
 
-        VM vm = new VM(vmType, cloudsim);
-        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
-        cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
-        cloudsim.send(0, vm.getId(), 0.3, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
+        cloudsim.send(driver.getId(), vm.getId(), 0.3, WorkflowEvent.VM_LAUNCH);
         cloudsim.startSimulation();
 
         assertEquals(true, vm.isTerminated());
@@ -207,14 +207,19 @@ public class VMTest {
 
     @Test
     public void testVMKillJobsUponTermination() {
-        VMType vmType = new VMType();
         Job job = new Job(cloudsim);
         job.setTask(new Task("task_id1", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
+        job.setDAGJob(new DAGJob(new DAG(), 1));
+
+        VMType vmType = VMTypeFactory.fromOldVMType(cws.core.algorithms.VMType.DEFAULT_VM_TYPE);
 
         VM vm = new VM(vmType, cloudsim);
-        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
-        cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.JOB_SUBMIT, job);
-        cloudsim.send(0, vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
+        VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
+        job.setOwner(driver.getId());
+
+        cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.JOB_SUBMIT, job);
+        cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
         cloudsim.startSimulation();
 
         assertEquals(Job.Result.FAILURE, job.getResult());
@@ -222,14 +227,18 @@ public class VMTest {
 
     @Test
     public void testVMShouldNotAcceptNewJobsAfterTermination() {
-        VMType vmType = new VMType();
         Job job2 = new Job(cloudsim);
         job2.setTask(new Task("task_id1", "transformation", 1000, cws.core.algorithms.VMType.DEFAULT_VM_TYPE));
+        job2.setDAGJob(new DAGJob(new DAG(), 1));
+
+        VMType vmType = VMTypeFactory.fromOldVMType(cws.core.algorithms.VMType.DEFAULT_VM_TYPE);
 
         VM vm = new VM(vmType, cloudsim);
-        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
-        cloudsim.send(0, vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
-        cloudsim.send(0, vm.getId(), 0.3, WorkflowEvent.JOB_SUBMIT, job2);
+        VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
+
+        cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
+        cloudsim.send(driver.getId(), vm.getId(), 0.3, WorkflowEvent.JOB_SUBMIT, job2);
         cloudsim.startSimulation();
 
         assertEquals(Job.Result.NONE, job2.getResult());

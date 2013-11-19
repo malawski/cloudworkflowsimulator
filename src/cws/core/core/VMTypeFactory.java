@@ -7,6 +7,10 @@ public class VMTypeFactory {
      * @return
      */
     public static VMType getDefaults() {
-        return new VMType().setMips(1000).setCores(1).setPrice(1.0);
+        return new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+    }
+
+    public static VMType fromOldVMType(cws.core.algorithms.VMType oldVMType) {
+        return new VMTypeBuilder().mips(oldVMType.getMips()).cores(1).price(oldVMType.getPrice()).build();
     }
 }
