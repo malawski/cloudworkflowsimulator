@@ -10,7 +10,7 @@ import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeFactory;
+import cws.core.engine.Environment;
 
 public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
@@ -21,8 +21,8 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
     // number of initially provisioned VMs to be used for setting limits for autoscaling
     private int initialNumVMs = 0;
 
-    public SimpleUtilizationBasedProvisioner(double maxScaling, CloudSimWrapper cloudsim) {
-        super(maxScaling, cloudsim);
+    public SimpleUtilizationBasedProvisioner(double maxScaling, CloudSimWrapper cloudsim, Environment environment) {
+        super(maxScaling, cloudsim, environment);
     }
 
     @Override
@@ -158,7 +158,8 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         if (!finishing_phase && utilization > UPPER_THRESHOLD
                 && numBusyVMs + numFreeVMS < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 
-            VMType vmType = VMTypeFactory.getDefaults();
+            // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
+            VMType vmType = environment.getVMType();
             VM vm = new VM(vmType, getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());

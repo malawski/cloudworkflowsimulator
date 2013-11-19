@@ -12,7 +12,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.core.VMTypeFactory;
+import cws.core.core.VMTypeBuilder;
 import cws.core.dag.*;
 import cws.core.engine.Environment;
 import cws.core.exception.IllegalCWSArgumentException;
@@ -355,7 +355,7 @@ public class TestRun {
 
     private Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams) {
         StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
-        cws.core.core.VMType vmType = VMTypeFactory.getDefaults();
+        cws.core.core.VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
         return new Environment(vmType, storageManager);
     }
 }

@@ -12,6 +12,7 @@ public class DPDS extends DynamicAlgorithm {
     public DPDS(double budget, double deadline, List<DAG> dags, double maxScaling, Environment environment,
             AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, new EnsembleDynamicScheduler(cloudsim, environment),
-                new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim), environment, ensembleStatistics, cloudsim);
+                new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim, environment), environment,
+                ensembleStatistics, cloudsim);
     }
 }

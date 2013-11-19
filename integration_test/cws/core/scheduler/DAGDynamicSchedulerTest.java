@@ -13,7 +13,7 @@ import org.junit.Test;
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeFactory;
+import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
@@ -41,7 +41,8 @@ public class DAGDynamicSchedulerTest {
         cloudsim.init();
 
         storageManager = new VoidStorageManager(cloudsim);
-        environment = new Environment(VMTypeFactory.getDefaults(), storageManager);
+        VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+        environment = new Environment(vmType, storageManager);
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim, environment);
@@ -56,7 +57,7 @@ public class DAGDynamicSchedulerTest {
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeFactory.getDefaults();
+            VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vm.setProvisioningDelay(0.0);
@@ -75,7 +76,7 @@ public class DAGDynamicSchedulerTest {
     public void testScheduleDag() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeFactory.getDefaults();
+            VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
             VM vm = new VM(vmType, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
@@ -105,7 +106,7 @@ public class DAGDynamicSchedulerTest {
     public void testScheduleDag100() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeFactory.getDefaults();
+            VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vms.add(vm);

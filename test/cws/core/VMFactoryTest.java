@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeFactory;
+import cws.core.core.VMTypeBuilder;
 import cws.core.provisioner.VMFactory;
 
 public class VMFactoryTest {
@@ -38,7 +38,7 @@ public class VMFactoryTest {
         VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
         VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
-        VMType vmType = VMTypeFactory.getDefaults();
+        VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
 
         for (int i = 0; i < 1000; i++) {
             VM vm = VMFactory.createVM(vmType, cloudsim);

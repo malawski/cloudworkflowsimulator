@@ -17,7 +17,7 @@ public class Environment {
         this.storageManager = storageManager;
     }
 
-    // FIXME(mequrel): temporary encapsulation breakage for static and dynamic algorithms
+    // FIXME(mequrel): temporary encapsulation breakage for static algorithm, dynamic algorithm and provisioners
     public cws.core.core.VMType getVMType() {
         return vmType;
     }

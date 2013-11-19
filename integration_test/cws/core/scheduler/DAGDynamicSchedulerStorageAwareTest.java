@@ -10,7 +10,7 @@ import org.junit.Test;
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeFactory;
+import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.engine.Environment;
@@ -47,7 +47,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
         // code.
         VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
         storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
-        environment = new Environment(VMTypeFactory.getDefaults(), storageManager);
+        environment = new Environment(new VMTypeBuilder().mips(1000).cores(1).price(1.0).build(), storageManager);
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim, environment);
@@ -108,7 +108,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
     }
 
     protected void launchVM() {
-        VMType vmType = VMTypeFactory.getDefaults();
+        VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
 
         VM vm = new VM(vmType, cloudsim);
         cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);

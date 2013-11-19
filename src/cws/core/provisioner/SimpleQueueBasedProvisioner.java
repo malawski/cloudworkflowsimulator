@@ -9,12 +9,12 @@ import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeFactory;
+import cws.core.engine.Environment;
 
 public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
-    public SimpleQueueBasedProvisioner(CloudSimWrapper cloudsim) {
-        super(cloudsim);
+    public SimpleQueueBasedProvisioner(CloudSimWrapper cloudsim, Environment environment) {
+        super(cloudsim, environment);
     }
 
     @Override
@@ -37,7 +37,8 @@ public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implement
 
         // add one VM if queue not empty
         if (queueLength > 0) {
-            VMType vmType = VMTypeFactory.getDefaults();
+            // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
+            VMType vmType = environment.getVMType();
             VM vm = VMFactory.createVM(vmType, getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());
