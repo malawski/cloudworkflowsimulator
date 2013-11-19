@@ -8,9 +8,9 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
+import cws.core.engine.Environment;
 import cws.core.provisioner.CloudAwareProvisioner;
 import cws.core.provisioner.VMFactory;
-import cws.core.storage.StorageManager;
 
 public class DynamicAlgorithm extends Algorithm {
     private double price;
@@ -18,9 +18,9 @@ public class DynamicAlgorithm extends Algorithm {
     private CloudAwareProvisioner provisioner;
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, double price, Scheduler scheduler,
-            CloudAwareProvisioner provisioner, StorageManager storageManager, AlgorithmStatistics ensembleStatistics,
+            CloudAwareProvisioner provisioner, Environment environment, AlgorithmStatistics ensembleStatistics,
             CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, storageManager, ensembleStatistics, cloudsim);
+        super(budget, deadline, dags, environment, ensembleStatistics, cloudsim);
         this.price = price;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
@@ -39,8 +39,6 @@ public class DynamicAlgorithm extends Algorithm {
         setWorkflowEngine(new WorkflowEngine(provisioner, scheduler, getCloudsim()));
         getWorkflowEngine().setDeadline(getDeadline());
         getWorkflowEngine().setBudget(getBudget());
-
-        scheduler.setStorageManager(storageManager);
 
         setEnsembleManager(new EnsembleManager(getAllDags(), getWorkflowEngine(), getCloudsim()));
 

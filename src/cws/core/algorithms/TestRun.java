@@ -12,7 +12,9 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMTypeFactory;
 import cws.core.dag.*;
+import cws.core.engine.Environment;
 import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManager;
@@ -208,6 +210,8 @@ public class TestRun {
         double maxCost = 0.0;
         double maxTime = 0.0;
 
+        Environment environment = createEnvironment(cloudsim, simulationParams);
+
         List<DAG> dags = new ArrayList<DAG>();
         int workflow_id = 0;
         for (String name : names) {
@@ -225,7 +229,7 @@ public class TestRun {
                 }
             }
 
-            DAGStats dagStats = new DAGStats(dag, StorageManagerFactory.createStorage(simulationParams, cloudsim));
+            DAGStats dagStats = new DAGStats(dag, environment);
 
             minTime = Math.min(minTime, dagStats.getCriticalPath());
             minCost = Math.min(minCost, dagStats.getMinCost());
@@ -288,7 +292,10 @@ public class TestRun {
                     System.out.print(".");
                     cloudsim = new CloudSimWrapper();
                     cloudsim.init();
-                    Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, simulationParams,
+
+                    environment = createEnvironment(cloudsim, simulationParams);
+
+                    Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, environment,
                             dags, budget, deadline);
 
                     algorithm.simulate(algorithmName);
@@ -309,7 +316,7 @@ public class TestRun {
                             VMFactory.getRuntimeVariance(), VMFactory.getProvisioningDelay(),
                             VMFactory.getFailureRate(), minBudget, maxBudget, minDeadline, maxDeadline);
 
-                    StorageManagerStatistics stats = algorithm.getStorageManager().getStorageManagerStatistics();
+                    StorageManagerStatistics stats = environment.getStorageManagerStatistics();
                     fileOut.printf("%s,%d,%d,%d,%d,%d,", storageManagerType, stats.getTotalBytesToRead(),
                             stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
                             stats.getActualBytesRead(), stats.getActualBytesRead() + stats.getTotalBytesToWrite());
@@ -332,20 +339,25 @@ public class TestRun {
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
-            CloudSimWrapper cloudsim, StorageSimulationParams simulationParams, List<DAG> dags, double budget,
-            double deadline) {
+            CloudSimWrapper cloudsim, Environment environment, List<DAG> dags, double budget, double deadline) {
         AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, cloudsim);
-        StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
+
         if ("SPSS".equals(algorithmName)) {
-            return new SPSS(budget, deadline, dags, alpha, storageManager, ensembleStatistics, cloudsim);
+            return new SPSS(budget, deadline, dags, alpha, environment, ensembleStatistics, cloudsim);
         } else if ("DPDS".equals(algorithmName)) {
-            return new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, storageManager,
+            return new DPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, environment,
                     ensembleStatistics, cloudsim);
         } else if ("WADPDS".equals(algorithmName)) {
-            return new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, storageManager,
+            return new WADPDS(budget, deadline, dags, VMType.DEFAULT_VM_TYPE.getPrice(), maxScaling, environment,
                     ensembleStatistics, cloudsim);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }
+    }
+
+    private Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams) {
+        StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
+        cws.core.core.VMType vmType = VMTypeFactory.getDefaults();
+        return new Environment(vmType, storageManager);
     }
 }

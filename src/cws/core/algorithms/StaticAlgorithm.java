@@ -11,11 +11,11 @@ import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.provisioner.VMFactory;
-import cws.core.storage.StorageManager;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener {
     /** Plan */
@@ -40,8 +40,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     private long planningFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-            StorageManager storageManager, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, storageManager, ensembleStatistics, cloudsim);
+            Environment environment, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, environment, ensembleStatistics, cloudsim);
     }
 
     public double getEstimatedProvisioningDelay() {
@@ -50,11 +50,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     public double getEstimatedDeprovisioningDelay() {
         return VMFactory.getDeprovistioningDelay();
-    }
-
-    @Override
-    public void setStorageManager(StorageManager storageManager) {
-        this.storageManager = storageManager;
     }
 
     public Plan getPlan() {
@@ -179,7 +174,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
          * as the total runtime of those tasks.
          */
         double[] shares = new double[numlevels];
-        CriticalPath path = new CriticalPath(order, runtimes, storageManager);
+        CriticalPath path = new CriticalPath(order, runtimes, environment);
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
@@ -376,13 +371,13 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         TopologicalOrder order = new TopologicalOrder(dag);
         for (Task task : order) {
             vmTypes.put(task, task.getVmType());
-            double runtime = task.getPredictedRuntime(storageManager);
+            double runtime = environment.getPredictedRuntime(task);
             runtimes.put(task, runtime);
         }
 
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
-        CriticalPath path = new CriticalPath(order, runtimes, storageManager);
+        CriticalPath path = new CriticalPath(order, runtimes, environment);
         double minimalTime = path.getCriticalPathLength() + getEstimatedProvisioningDelay()
                 + getEstimatedDeprovisioningDelay();
         if (minimalTime > getDeadline()) {

@@ -10,6 +10,7 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 
 /**
@@ -20,9 +21,8 @@ import cws.core.jobs.Job;
  * @author malawski
  */
 public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
-
-    public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim) {
-        super(cloudsim);
+    public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment) {
+        super(cloudsim, environment);
     }
 
     private Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
@@ -131,7 +131,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
      * @return
      */
     private double estimateCost(DAGJob dj, WorkflowEngine engine) {
-        double sumRuntime = dj.getDAG().getRuntimeSum(storageManager);
+        double sumRuntime = environment.getPredictedRuntime(dj.getDAG());
         double vmPrice = getVmPrice(engine);
         return vmPrice * sumRuntime / 3600.0;
     }
@@ -190,8 +190,9 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         DAG dag = admittedDJ.getDAG();
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
-            if (!admittedDJ.isComplete(task))
-                cost += task.getPredictedRuntime(storageManager) * getVmPrice(engine);
+            if (!admittedDJ.isComplete(task)) {
+                cost += environment.getPredictedRuntime(task) * getVmPrice(engine);
+            }
         }
         return cost / 3600.0;
     }

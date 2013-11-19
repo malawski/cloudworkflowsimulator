@@ -4,16 +4,16 @@ import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
-import cws.core.storage.StorageManager;
+import cws.core.engine.Environment;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
  */
 public class Wide extends Backtrack {
 
-    public Wide(double budget, double deadline, List<DAG> dags, StorageManager storageManager,
+    public Wide(double budget, double deadline, List<DAG> dags, Environment environment,
             AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, storageManager, ensembleStatistics, cloudsim);
+        super(budget, deadline, dags, environment, ensembleStatistics, cloudsim);
     }
 
     @Override

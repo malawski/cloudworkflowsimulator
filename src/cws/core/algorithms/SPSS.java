@@ -1,16 +1,12 @@
 package cws.core.algorithms;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.storage.StorageManager;
+import cws.core.engine.Environment;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -20,9 +16,9 @@ public class SPSS extends StaticAlgorithm {
     /** Tuning parameter for deadline distribution (low alpha = runtime, high alpha = tasks) */
     private double alpha;
 
-    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, StorageManager storageManager,
+    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, Environment environment,
             AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, storageManager, cloudsim);
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
         this.alpha = alpha;
     }
 

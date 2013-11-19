@@ -1,7 +1,5 @@
 package cws.core;
 
-import cws.core.storage.StorageManager;
-
 /**
  * An interface for job schedulers used by the WorkflowEngine.
  * 
@@ -9,6 +7,4 @@ import cws.core.storage.StorageManager;
  */
 public interface Scheduler {
     public void scheduleJobs(WorkflowEngine engine);
-
-    void setStorageManager(StorageManager storageManager);
 }

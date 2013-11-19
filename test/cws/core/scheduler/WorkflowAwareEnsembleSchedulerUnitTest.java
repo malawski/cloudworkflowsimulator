@@ -21,14 +21,14 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGFile;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
-import cws.core.storage.StorageManager;
 
 public class WorkflowAwareEnsembleSchedulerUnitTest {
     WorkflowAwareEnsembleScheduler scheduler;
     WorkflowEngine engine;
     CloudSimWrapper cloudsim;
-    StorageManager storageManager;
+    Environment environment;
 
     Queue<Job> jobs;
     Set<VM> freeVMs;
@@ -38,10 +38,9 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         cloudsim = mock(CloudSimWrapper.class);
         when(cloudsim.clock()).thenReturn(1.0);
 
-        storageManager = mock(StorageManager.class);
+        environment = mock(Environment.class);
 
-        scheduler = new WorkflowAwareEnsembleScheduler(cloudsim);
-        scheduler.setStorageManager(storageManager);
+        scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment);
 
         engine = mock(WorkflowEngine.class);
         when(engine.getDeadline()).thenReturn(10.0);

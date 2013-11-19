@@ -13,6 +13,7 @@ import cws.core.core.VMType;
 import cws.core.core.VMTypeFactory;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
+import cws.core.engine.Environment;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
 import cws.core.storage.StorageManager;
@@ -30,6 +31,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
     private WorkflowLog jobLog;
     @SuppressWarnings("unused")
     private StorageManager storageManager;
+    private Environment environment;
 
     @Before
     public void setUp() {
@@ -45,8 +47,10 @@ public class DAGDynamicSchedulerStorageAwareTest {
         // code.
         VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
         storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
+        environment = new Environment(VMTypeFactory.getDefaults(), storageManager);
+
         provisioner = null;
-        scheduler = new DAGDynamicScheduler(cloudsim);
+        scheduler = new DAGDynamicScheduler(cloudsim, environment);
         engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
         cloud = new Cloud(cloudsim);
 
