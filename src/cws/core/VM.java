@@ -7,6 +7,7 @@ import java.util.Set;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.Job;
@@ -43,8 +44,8 @@ public class VM extends CWSSimEntity {
     /** How many seconds there are in one hour */
     public static final double SECONDS_PER_HOUR = 60 * 60;
 
-    /** VM parameters like cores number, price for hour **/
-    private VMStaticParams vmStaticParams;
+    /** Contains VM parameters like cores number, price for hour **/
+    private VMType vmType;
 
     /** The SimEntity that owns this VM */
     private int owner;
@@ -91,12 +92,12 @@ public class VM extends CWSSimEntity {
     /** Varies the failure rate of tasks according to a specified distribution */
     private FailureModel failureModel = new FailureModel(0, 0.0);
 
-    public VM(VMStaticParams vmStaticParams, CloudSimWrapper cloudsim) {
+    public VM(VMType vmType, CloudSimWrapper cloudsim) {
         super("VM" + (nextId++), cloudsim);
-        this.vmStaticParams = vmStaticParams;
+        this.vmType = vmType;
         this.jobs = new LinkedList<Job>();
         this.runningJobs = new HashSet<Job>();
-        this.idleCores = vmStaticParams.getCores();
+        this.idleCores = vmType.getCores();
         this.launchTime = -1.0;
         this.terminateTime = -1.0;
         this.cpuSecondsConsumed = 0.0;
@@ -127,7 +128,7 @@ public class VM extends CWSSimEntity {
         double hours = getRuntime() / SECONDS_PER_HOUR;
         hours = Math.ceil(hours);
         // Log.printLine(CloudSim.clock() + " VM " + getId() + " cost " + hours * price);
-        return hours * vmStaticParams.getPrice();
+        return hours * vmType.getPrice();
     }
 
     public double getCPUSecondsConsumed() {
@@ -136,7 +137,7 @@ public class VM extends CWSSimEntity {
 
     /** cpu_seconds / (runtime * cores) */
     public double getUtilization() {
-        double totalCPUSeconds = getRuntime() * vmStaticParams.getCores();
+        double totalCPUSeconds = getRuntime() * vmType.getCores();
         return cpuSecondsConsumed / totalCPUSeconds;
     }
 
@@ -171,7 +172,7 @@ public class VM extends CWSSimEntity {
     private void launchVM() {
         // Reset dynamic state
         jobs.clear();
-        idleCores = vmStaticParams.getCores();
+        idleCores = vmType.getCores();
         cpuSecondsConsumed = 0.0;
         getCloudsim().log(String.format("VM %d started", getId()));
     }
@@ -193,7 +194,7 @@ public class VM extends CWSSimEntity {
 
         // Reset dynamic state
         jobs.clear();
-        idleCores = vmStaticParams.getCores();
+        idleCores = vmType.getCores();
         getCloudsim().log(String.format("VM %d terminated", getId()));
     }
 
@@ -212,7 +213,7 @@ public class VM extends CWSSimEntity {
     private void allInputsTrasferred(Job job) {
         // Compute the duration of the job on this VM
         double size = job.getTask().getSize();
-        double predictedRuntime = size / vmStaticParams.getMips();
+        double predictedRuntime = size / vmType.getMips();
 
         // Compute actual runtime
         double actualRuntime = this.runtimeDistribution.getActualRuntime(predictedRuntime);
@@ -353,8 +354,8 @@ public class VM extends CWSSimEntity {
         return terminateTime;
     }
 
-    public VMStaticParams getVmStaticParams() {
-        return vmStaticParams;
+    public VMType getVmType() {
+        return vmType;
     }
 
     public RuntimeDistribution getRuntimeDistribution() {
@@ -381,8 +382,8 @@ public class VM extends CWSSimEntity {
         this.cacheSize = cacheSize;
     }
 
-    public void setVmStaticParams(VMStaticParams vmStaticParams) {
-        this.vmStaticParams = vmStaticParams;
+    public void setVmType(VMType vmType) {
+        this.vmType = vmType;
     }
 
     public boolean isTerminated() {

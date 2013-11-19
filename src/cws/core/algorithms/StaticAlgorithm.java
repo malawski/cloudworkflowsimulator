@@ -1,23 +1,10 @@
 package cws.core.algorithms;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeMap;
+import java.util.*;
 
-import cws.core.Cloud;
-import cws.core.EnsembleManager;
-import cws.core.Provisioner;
-import cws.core.Scheduler;
-import cws.core.VM;
-import cws.core.VMListener;
-import cws.core.VMStaticParams;
-import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
+import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
@@ -101,12 +88,12 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
         for (Resource r : plan.resources) {
             // Create VM
-            VMType type = r.vmtype;
-            VMStaticParams vmStaticParams = new VMStaticParams();
-            vmStaticParams.setMips(type.getMips());
-            vmStaticParams.setCores(1);
-            vmStaticParams.setPrice(type.getPrice());
-            VM vm = VMFactory.createVM(vmStaticParams, getCloudsim());
+            cws.core.algorithms.VMType type = r.vmtype;
+            VMType vmType = new VMType();
+            vmType.setMips(type.getMips());
+            vmType.setCores(1);
+            vmType.setPrice(type.getPrice());
+            VM vm = VMFactory.createVM(vmType, getCloudsim());
 
             // Build task<->vm mappings
             LinkedList<Task> vmQueue = new LinkedList<Task>();
@@ -387,7 +374,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
      * @return TopologicalOrder
      * @throws NoFeasiblePlan when best critical path > deadline
      */
-    protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, VMType> vmTypes,
+    protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, cws.core.algorithms.VMType> vmTypes,
             HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
         TopologicalOrder order = new TopologicalOrder(dag);
         for (Task task : order) {
@@ -424,7 +411,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     class Resource {
         int id = nextresourceid++;
-        VMType vmtype;
+        cws.core.algorithms.VMType vmtype;
         TreeMap<Double, Slot> schedule;
 
         public Resource(Resource other) {
@@ -434,7 +421,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             }
         }
 
-        public Resource(VMType type) {
+        public Resource(cws.core.algorithms.VMType type) {
             this.vmtype = type;
             this.schedule = new TreeMap<Double, Slot>();
         }

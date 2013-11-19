@@ -156,7 +156,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         vms.addAll(engine.getBusyVMs());
 
         for (VM vm : vms) {
-            rc += vm.getCost() - vm.getRuntime() * vm.getVmStaticParams().getPrice() / 3600.0;
+            rc += vm.getCost() - vm.getRuntime() * vm.getVmType().getPrice() / 3600.0;
         }
 
         // compute remaining runtime of admitted workflows
@@ -202,7 +202,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
     private double getVmPrice(WorkflowEngine engine) {
         double vmPrice = 0;
         if (!engine.getAvailableVMs().isEmpty())
-            vmPrice = engine.getAvailableVMs().get(0).getVmStaticParams().getPrice();
+            vmPrice = engine.getAvailableVMs().get(0).getVmType().getPrice();
         return vmPrice;
     }
 }

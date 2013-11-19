@@ -4,8 +4,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import cws.core.*;
+import cws.core.Provisioner;
+import cws.core.VM;
+import cws.core.WorkflowEngine;
+import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeFactory;
 
 public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
@@ -42,7 +47,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         // assuming all VMs are homogeneous
         double vmPrice = 0;
         if (!engine.getAvailableVMs().isEmpty())
-            vmPrice = engine.getAvailableVMs().get(0).getVmStaticParams().getPrice();
+            vmPrice = engine.getAvailableVMs().get(0).getVmType().getPrice();
 
         // running vms are free + busy
         Set<VM> runningVMs = new HashSet<VM>(engine.getFreeVMs());
@@ -153,8 +158,8 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         if (!finishing_phase && utilization > UPPER_THRESHOLD
                 && numBusyVMs + numFreeVMS < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 
-            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
-            VM vm = new VM(vmStaticParams, getCloudsim());
+            VMType vmType = VMTypeFactory.getDefaults();
+            VM vm = new VM(vmType, getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());
             getCloudsim().send(engine.getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);

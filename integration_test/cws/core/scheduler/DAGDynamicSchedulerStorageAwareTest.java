@@ -9,6 +9,8 @@ import org.junit.Test;
 
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeFactory;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.jobs.SimpleJobFactory;
@@ -102,9 +104,9 @@ public class DAGDynamicSchedulerStorageAwareTest {
     }
 
     protected void launchVM() {
-        VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
+        VMType vmType = VMTypeFactory.getDefaults();
 
-        VM vm = new VM(vmStaticParams, cloudsim);
+        VM vm = new VM(vmType, cloudsim);
         cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
     }
 

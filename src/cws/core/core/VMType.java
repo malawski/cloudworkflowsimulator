@@ -1,14 +1,16 @@
-package cws.core;
+package cws.core.core;
 
-public class VMStaticParams implements Cloneable {
+public class VMType implements Cloneable {
     /**
      * The processing power of this VM
      */
     public int mips;
+
     /**
      * The number of cores of this VM
      */
     public int cores;
+
     /**
      * Price per hour of usage
      */
@@ -18,7 +20,7 @@ public class VMStaticParams implements Cloneable {
         return mips;
     }
 
-    public VMStaticParams setMips(int mips) {
+    public VMType setMips(int mips) {
         this.mips = mips;
         return this;
     }
@@ -31,21 +33,14 @@ public class VMStaticParams implements Cloneable {
         return price;
     }
 
-    public VMStaticParams setCores(int cores) {
+    public VMType setCores(int cores) {
         this.cores = cores;
         return this;
     }
 
-    public VMStaticParams setPrice(double price) {
+    public VMType setPrice(double price) {
         this.price = price;
         return this;
     }
 
-    /**
-     * Extracted defaults appearing in many places throughout the project
-     * @return
-     */
-    public static VMStaticParams getDefaults() {
-        return new VMStaticParams().setMips(1000).setCores(1).setPrice(1.0);
-    }
 }

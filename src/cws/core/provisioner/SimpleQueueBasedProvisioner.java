@@ -3,8 +3,13 @@ package cws.core.provisioner;
 import java.util.Iterator;
 import java.util.Set;
 
-import cws.core.*;
+import cws.core.Provisioner;
+import cws.core.VM;
+import cws.core.WorkflowEngine;
+import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeFactory;
 
 public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
@@ -32,8 +37,8 @@ public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implement
 
         // add one VM if queue not empty
         if (queueLength > 0) {
-            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
-            VM vm = VMFactory.createVM(vmStaticParams, getCloudsim());
+            VMType vmType = VMTypeFactory.getDefaults();
+            VM vm = VMFactory.createVM(vmType, getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());
             getCloudsim().send(engine.getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);

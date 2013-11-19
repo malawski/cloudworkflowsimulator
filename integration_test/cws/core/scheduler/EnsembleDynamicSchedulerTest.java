@@ -11,8 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.*;
-import cws.core.algorithms.VMType;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeFactory;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
@@ -51,9 +52,9 @@ public class EnsembleDynamicSchedulerTest {
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
+            VMType vmType = VMTypeFactory.getDefaults();
 
-            VM vm = new VM(vmStaticParams, cloudsim);
+            VM vm = new VM(vmType, cloudsim);
             vm.setProvisioningDelay(0.0);
             vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
@@ -70,16 +71,16 @@ public class EnsembleDynamicSchedulerTest {
     public void testScheduleDag() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
+            VMType vmType = VMTypeFactory.getDefaults();
 
-            VM vm = new VM(vmStaticParams, cloudsim);
+            VM vm = new VM(vmType, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
 
         DAG dag = new DAG();
         for (int i = 0; i < 100; i++) {
-            Task task = new Task("TASK" + i, "transformation", (i % 10), VMType.DEFAULT_VM_TYPE);
+            Task task = new Task("TASK" + i, "transformation", (i % 10), cws.core.algorithms.VMType.DEFAULT_VM_TYPE);
             dag.addTask(task);
         }
 
@@ -101,9 +102,9 @@ public class EnsembleDynamicSchedulerTest {
     public void testScheduleDag100() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
+            VMType vmType = VMTypeFactory.getDefaults();
 
-            VM vm = new VM(vmStaticParams, cloudsim);
+            VM vm = new VM(vmType, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
@@ -128,8 +129,8 @@ public class EnsembleDynamicSchedulerTest {
     public void testScheduleDag100x10() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
-            VM vm = new VM(vmStaticParams, cloudsim);
+            VMType vmType = VMTypeFactory.getDefaults();
+            VM vm = new VM(vmType, cloudsim);
 
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);

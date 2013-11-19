@@ -3,14 +3,10 @@ package cws.core.algorithms;
 import java.util.HashSet;
 import java.util.List;
 
-import cws.core.Cloud;
-import cws.core.EnsembleManager;
-import cws.core.Scheduler;
-import cws.core.VM;
-import cws.core.VMStaticParams;
-import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
+import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeFactory;
 import cws.core.dag.DAG;
 import cws.core.provisioner.CloudAwareProvisioner;
 import cws.core.provisioner.VMFactory;
@@ -70,10 +66,10 @@ public class DynamicAlgorithm extends Algorithm {
     private void launchVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numEstimatedVMs; i++) {
-            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
-            vmStaticParams.setPrice(price);
+            VMType vmType = VMTypeFactory.getDefaults();
+            vmType.setPrice(price);
 
-            VM vm = VMFactory.createVM(vmStaticParams, getCloudsim());
+            VM vm = VMFactory.createVM(vmType, getCloudsim());
             vms.add(vm);
             getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
