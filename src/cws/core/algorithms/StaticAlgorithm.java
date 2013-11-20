@@ -435,14 +435,14 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             return last + lastSlot.duration + getEstimatedDeprovisioningDelay();
         }
 
-        public int getHours() {
-            return getHoursWith(getStart(), getEnd());
+        public int getFullBillingUnits() {
+            return getFullBillingUnitsWith(getStart(), getEnd());
         }
 
-        public int getHoursWith(double start, double end) {
+        public int getFullBillingUnitsWith(double start, double end) {
             double seconds = end - start;
-            double hours = seconds / (60 * 60);
-            int rounded = (int) Math.ceil(hours);
+            double units = seconds / environment.getBillingTimeInSeconds();
+            int rounded = (int) Math.ceil(units);
             return Math.max(1, rounded);
         }
 
@@ -459,7 +459,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             for (Slot sl : schedule.values()) {
                 runtime += sl.duration;
             }
-            return runtime / (getHours() * 60 * 60);
+            return runtime / (getFullBillingUnits() * environment.getBillingTimeInSeconds());
         }
     }
 

@@ -122,9 +122,9 @@ public class MinMin extends StaticAlgorithm {
 
                         // Option 2: Leave a big gap
                         biggap: {
-                            int runtimeHours = (int) Math.ceil(runtime / (60 * 60));
+                            int runtimeHours = (int) Math.ceil(runtime / environment.getBillingTimeInSeconds());
 
-                            double ast = r.getStart() - (runtimeHours * 60 * 60);
+                            double ast = r.getStart() - (runtimeHours * environment.getBillingTimeInSeconds());
                             if (ast < earliestStart) {
                                 ast = earliestStart;
                             }
@@ -144,7 +144,8 @@ public class MinMin extends StaticAlgorithm {
 
                         // Option 3: Use some slack time (medium gap)
                         slack: {
-                            double slack = (r.getHours() * 60 * 60) - (r.getEnd() - r.getStart());
+                            double slack = (r.getFullBillingUnits() * environment.getBillingTimeInSeconds())
+                                    - (r.getEnd() - r.getStart());
 
                             double ast = r.getStart() - slack;
                             if (ast < earliestStart) {

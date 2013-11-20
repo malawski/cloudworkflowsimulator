@@ -12,9 +12,6 @@ import cws.core.dag.algorithms.TopologicalOrder;
  * @author Gideon Juve <juve@usc.edu>
  */
 public class Backtrack extends StaticAlgorithm {
-
-    public static final int SECONDS_IN_HOUR = 60 * 60;
-
     public Backtrack(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
             CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, ensembleStatistics, cloudsim);
@@ -127,9 +124,9 @@ public class Backtrack extends StaticAlgorithm {
 
                     // Option 2: Leave a big gap
                     biggap: {
-                        int runtimeHours = (int) Math.ceil(runtime / SECONDS_IN_HOUR);
+                        int runtimeHours = (int) Math.ceil(runtime / environment.getBillingTimeInSeconds());
 
-                        double ast = r.getStart() - (runtimeHours * SECONDS_IN_HOUR);
+                        double ast = r.getStart() - (runtimeHours * environment.getBillingTimeInSeconds());
                         if (ast < earliestStart) {
                             ast = earliestStart;
                         }
@@ -149,7 +146,8 @@ public class Backtrack extends StaticAlgorithm {
 
                     // Option 3: Use some slack time (medium gap)
                     slack: {
-                        double slack = (r.getHours() * SECONDS_IN_HOUR) - (r.getEnd() - r.getStart());
+                        double slack = (r.getFullBillingUnits() * environment.getBillingTimeInSeconds())
+                                - (r.getEnd() - r.getStart());
 
                         double ast = r.getStart() - slack;
                         if (ast < earliestStart) {

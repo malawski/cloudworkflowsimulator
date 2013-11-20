@@ -10,7 +10,6 @@ import cws.core.provisioner.CloudAwareProvisioner;
 import cws.core.provisioner.VMFactory;
 
 public class DynamicAlgorithm extends Algorithm {
-    public static final int BILLING_TIME_UNIT_IN_SECS = 60 * 60;
     private Scheduler scheduler;
     private CloudAwareProvisioner provisioner;
 
@@ -60,7 +59,7 @@ public class DynamicAlgorithm extends Algorithm {
     }
 
     private double getMaxSpendingSpeedWeCanAfford() {
-        return Math.floor(getBudget()) / Math.ceil((getDeadline() / BILLING_TIME_UNIT_IN_SECS));
+        return Math.floor(getBudget()) / Math.ceil((getDeadline() / environment.getBillingTimeInSeconds()));
     }
 
     private boolean canAffordAtLeastOneVM() {

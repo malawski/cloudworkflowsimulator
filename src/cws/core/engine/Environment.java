@@ -2,6 +2,7 @@ package cws.core.engine;
 
 import java.util.concurrent.TimeUnit;
 
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.storage.StorageManager;
@@ -9,16 +10,16 @@ import cws.core.storage.StorageManagerStatistics;
 
 public class Environment {
 
-    private cws.core.core.VMType vmType;
+    private VMType vmType;
     private StorageManager storageManager;
 
-    public Environment(cws.core.core.VMType vmType, StorageManager storageManager) {
+    public Environment(VMType vmType, StorageManager storageManager) {
         this.vmType = vmType;
         this.storageManager = storageManager;
     }
 
     // FIXME(mequrel): temporary encapsulation breakage for static algorithm, dynamic algorithm and provisioners
-    public cws.core.core.VMType getVMType() {
+    public VMType getVMType() {
         return vmType;
     }
 
@@ -59,5 +60,9 @@ public class Environment {
 
     public double getSingleVMPrice() {
         return vmType.getPrice();
+    }
+
+    public double getBillingTimeInSeconds() {
+        return vmType.getBillingTimeInSeconds();
     }
 }

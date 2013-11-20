@@ -41,9 +41,6 @@ public class VM extends CWSSimEntity {
 
     private static int nextId = 0;
 
-    /** How many seconds there are in one hour */
-    public static final double SECONDS_PER_HOUR = 60 * 60;
-
     /** Contains VM parameters like cores number, price for hour **/
     private VMType vmType;
 
@@ -125,9 +122,8 @@ public class VM extends CWSSimEntity {
      * by the hourly price.
      */
     public double getCost() {
-        double hours = getRuntime() / SECONDS_PER_HOUR;
+        double hours = getRuntime() / vmType.getBillingTimeInSeconds();
         hours = Math.ceil(hours);
-        // Log.printLine(CloudSim.clock() + " VM " + getId() + " cost " + hours * price);
         return hours * vmType.getPrice();
     }
 

@@ -16,6 +16,11 @@ public class VMType implements Cloneable {
      */
     private double price;
 
+    /**
+     * For how long we pay in advance
+     */
+    private double billingTimeInSeconds;
+
     public int getMips() {
         return mips;
     }
@@ -28,9 +33,14 @@ public class VMType implements Cloneable {
         return price;
     }
 
-    public VMType(int mips, int cores, double price) {
+    public double getBillingTimeInSeconds() {
+        return billingTimeInSeconds;
+    }
+
+    public VMType(int mips, int cores, double price, double billingTimeInSeconds) {
         this.mips = mips;
         this.cores = cores;
         this.price = price;
+        this.billingTimeInSeconds = billingTimeInSeconds;
     }
 }

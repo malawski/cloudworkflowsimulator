@@ -61,11 +61,11 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         for (VM vm : runningVMs) {
             double vmRuntime = vm.getRuntime();
 
-            // full hours (rounded up)
-            double vmHours = Math.ceil(vmRuntime / 3600.0);
+            // full billing units (rounded up)
+            double vmBillingUnits = Math.ceil(vmRuntime / environment.getBillingTimeInSeconds());
 
             // seconds till next full hour
-            double secondsRemaining = vmHours * 3600.0 - vmRuntime;
+            double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds() - vmRuntime;
 
             // we add delay estimate to include also the deprovisioning time
             if (secondsRemaining <= vm.getProvisioningDelay() + vm.getDeprovisioningDelay()) {
