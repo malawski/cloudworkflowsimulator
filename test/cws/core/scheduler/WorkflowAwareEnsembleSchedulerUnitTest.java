@@ -130,7 +130,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
     private VM createVMMock() {
         VM vm = mock(VM.class);
-        VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
         when(vm.getVmType()).thenReturn(vmType);
         return vm;
     }

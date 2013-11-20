@@ -29,7 +29,7 @@ public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implement
         double time = getCloudsim().clock();
         double cost = engine.getCost();
 
-        // if we are close to the budget by one VM*hour
+        // if we are close to the budget by one VM*billing unit
         if (budget <= cost || time > deadline) {
             return;
         }

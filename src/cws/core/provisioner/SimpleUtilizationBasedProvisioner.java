@@ -46,7 +46,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         // assuming all VMs are homogeneous
         double vmPrice = 0;
         if (!engine.getAvailableVMs().isEmpty())
-            vmPrice = engine.getAvailableVMs().get(0).getVmType().getPrice();
+            vmPrice = engine.getAvailableVMs().get(0).getVmType().getPriceForBillingUnit();
 
         // running vms are free + busy
         Set<VM> runningVMs = new HashSet<VM>(engine.getFreeVMs());
@@ -54,7 +54,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
 
         int numVMsRunning = runningVMs.size();
 
-        // find VMs that will complete their billing hour
+        // find VMs that will complete their billing unit
         // during the next provisioning cycle
         Set<VM> completingVMs = new HashSet<VM>();
 
@@ -64,7 +64,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
             // full billing units (rounded up)
             double vmBillingUnits = Math.ceil(vmRuntime / environment.getBillingTimeInSeconds());
 
-            // seconds till next full hour
+            // seconds till next full unit
             double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds() - vmRuntime;
 
             // we add delay estimate to include also the deprovisioning time
@@ -124,7 +124,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
             engine.getBusyVMs().removeAll(terminated);
 
             // some instances may be still running so we want to be invoked again to stop them before they reach full
-            // hour
+            // billing unit
             if (engine.getFreeVMs().size() + engine.getBusyVMs().size() > 0)
                 getCloudsim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL,
                         WorkflowEvent.PROVISIONING_REQUEST, null);
@@ -186,7 +186,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
 
     /**
      * This method terminates instances but only the ones
-     * that are close to the full hour of operation.
+     * that are close to the full billing unit of operation.
      * Thus this method has to be invoked several times
      * to effectively terminate all the instances.
      * The method modifies the given vmSet by removing the terminated Vms.

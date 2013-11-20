@@ -153,7 +153,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         vms.addAll(engine.getBusyVMs());
 
         for (VM vm : vms) {
-            rc += vm.getCost() - vm.getRuntime() * vm.getVmType().getPrice() / environment.getBillingTimeInSeconds();
+            rc += vm.getCost() - vm.getRuntime() * vm.getVmType().getPriceForBillingUnit()
+                    / environment.getBillingTimeInSeconds();
         }
 
         // compute remaining runtime of admitted workflows

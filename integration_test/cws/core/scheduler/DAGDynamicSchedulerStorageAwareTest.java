@@ -47,7 +47,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
         // code.
         VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
         storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
-        environment = new Environment(new VMTypeBuilder().mips(1000).cores(1).price(1.0).build(), storageManager);
+        environment = new Environment(VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build(), storageManager);
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim);
@@ -109,7 +109,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
     }
 
     protected void launchVM() {
-        VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
 
         VM vm = new VM(vmType, cloudsim);
         cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);

@@ -12,9 +12,9 @@ public class VMType implements Cloneable {
     private int cores;
 
     /**
-     * Price per hour of usage
+     * Price per billing unit of usage
      */
-    private double price;
+    private double billingUnitPrice;
 
     /**
      * For how long we pay in advance
@@ -29,18 +29,18 @@ public class VMType implements Cloneable {
         return cores;
     }
 
-    public double getPrice() {
-        return price;
+    public double getPriceForBillingUnit() {
+        return billingUnitPrice;
     }
 
     public double getBillingTimeInSeconds() {
         return billingTimeInSeconds;
     }
 
-    public VMType(int mips, int cores, double price, double billingTimeInSeconds) {
+    public VMType(int mips, int cores, double billingUnitPrice, double billingTimeInSeconds) {
         this.mips = mips;
         this.cores = cores;
-        this.price = price;
+        this.billingUnitPrice = billingUnitPrice;
         this.billingTimeInSeconds = billingTimeInSeconds;
     }
 }

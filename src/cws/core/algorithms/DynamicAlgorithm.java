@@ -47,10 +47,6 @@ public class DynamicAlgorithm extends Algorithm {
     }
 
     private int estimateVMsNumber() {
-        // Calculate estimated number of VMs to consume budget evenly before deadline
-        // ceiling is used to start more vms so that the budget is consumed just before deadline
-        // TODO(bryk): Check this, because it doesn't look very right.
-
         if (!canAffordAtLeastOneVM()) {
             return 0;
         }

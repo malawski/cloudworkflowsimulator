@@ -12,7 +12,7 @@ import cws.core.engine.Environment;
 import cws.core.log.WorkflowLog;
 
 public abstract class Algorithm extends CWSSimEntity {
-    /** Environment of experiment (VMs, storage info) */
+    /** Environment of simulation (VMs, storage info) */
     protected Environment environment;
 
     /** Provides statistics about this algorithm's run */

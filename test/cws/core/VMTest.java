@@ -81,7 +81,7 @@ public class VMTest {
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
         storageManager = new VoidStorageManager(cloudsim);
-        testDefaultVMType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+        testDefaultVMType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
     }
 
     @Test
@@ -90,7 +90,7 @@ public class VMTest {
         j.setTask(new Task("task_id", "transformation", 1000));
         j.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = new VMTypeBuilder().mips(100).cores(1).price(0.40).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(1).price(0.40).build();
 
         VM vm = new VM(vmType, cloudsim);
 
@@ -114,7 +114,7 @@ public class VMTest {
         j2.setTask(new Task("task_id2", "transformation", 1000));
         j2.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = new VMTypeBuilder().mips(100).cores(1).price(0.40).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(1).price(0.40).build();
 
         VM vm = new VM(vmType, cloudsim);
 
@@ -144,7 +144,7 @@ public class VMTest {
         j2.setTask(new Task("task_id2", "transformation", 1000));
         j2.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = new VMTypeBuilder().mips(100).cores(2).price(0.40).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(2).price(0.40).build();
 
         VM vm = new VM(vmType, cloudsim);
 
@@ -210,7 +210,7 @@ public class VMTest {
         job.setTask(new Task("task_id1", "transformation", 1000));
         job.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = new VMTypeBuilder().mips(1).cores(1).price(1.0).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
         VM vm = new VM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
@@ -230,7 +230,7 @@ public class VMTest {
         job2.setTask(new Task("task_id1", "transformation", 1000));
         job2.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMType vmType = new VMTypeBuilder().mips(1).cores(1).price(1.0).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
         VM vm = new VM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);

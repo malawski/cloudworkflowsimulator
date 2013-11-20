@@ -22,7 +22,7 @@ public class DAGSchedulerFCFS implements Scheduler {
     private List<VM> vms;
 
     private CloudSimWrapper cloudsim;
-    private Environment environment;
+    protected Environment environment;
 
     public DAGSchedulerFCFS(CloudSimWrapper cloudsim) {
         this.cloudsim = cloudsim;

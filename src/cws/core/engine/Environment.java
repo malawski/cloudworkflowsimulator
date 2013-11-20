@@ -1,7 +1,5 @@
 package cws.core.engine;
 
-import java.util.concurrent.TimeUnit;
-
 import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
@@ -30,7 +28,6 @@ public class Environment {
      * 
      * @return task's predicted runtime as a double
      */
-
     public double getPredictedRuntime(Task task) {
         return getComputationTaskEstimation(task) + storageManager.getTransferTimeEstimation(task);
     }
@@ -53,13 +50,13 @@ public class Environment {
     }
 
     public double getVMCostFor(double runtimeInSeconds) {
-        double hours = runtimeInSeconds / TimeUnit.HOURS.toSeconds(1);
-        int fullHours = (int) Math.ceil(hours);
-        return Math.max(1, fullHours) * vmType.getPrice();
+        double billingUnits = runtimeInSeconds / getVMType().getBillingTimeInSeconds();
+        int fullBillingUnits = (int) Math.ceil(billingUnits);
+        return Math.max(1, fullBillingUnits) * vmType.getPriceForBillingUnit();
     }
 
     public double getSingleVMPrice() {
-        return vmType.getPrice();
+        return vmType.getPriceForBillingUnit();
     }
 
     public double getBillingTimeInSeconds() {

@@ -38,7 +38,7 @@ public class VMFactoryTest {
         VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
         VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
-        VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
 
         for (int i = 0; i < 1000; i++) {
             VM vm = VMFactory.createVM(vmType, cloudsim);

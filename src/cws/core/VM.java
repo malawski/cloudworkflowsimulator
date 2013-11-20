@@ -27,9 +27,9 @@ import cws.core.storage.cache.VMCacheManager;
  * Jobs can be queued and are executed in FIFO order. The scheduling is
  * space shared.
  * 
- * It has a price per hour. The cost of a VM is computed by multiplying the
- * runtime in hours by the hourly price. The runtime is rounded up to the
- * nearest hour for this calculation.
+ * It has a price per billing unit. The cost of a VM is computed by multiplying the
+ * runtime in billing units by the billing unit price. The runtime is rounded up to the
+ * nearest billing unit for this calculation.
  * 
  * Each VM has a provisioning delay between when it is launched and when it
  * is ready, and a deprovisioning delay between when it is terminated and
@@ -41,7 +41,7 @@ public class VM extends CWSSimEntity {
 
     private static int nextId = 0;
 
-    /** Contains VM parameters like cores number, price for hour **/
+    /** Contains VM parameters like cores number, price for billing unit **/
     private VMType vmType;
 
     /** The SimEntity that owns this VM */
@@ -118,13 +118,13 @@ public class VM extends CWSSimEntity {
 
     /**
      * Compute the total cost of this VM. This is computed by taking the
-     * runtime, rounding it up to the nearest whole hour, and multiplying
-     * by the hourly price.
+     * runtime, rounding it up to the nearest whole billing unit, and multiplying
+     * by the billing unit price.
      */
     public double getCost() {
-        double hours = getRuntime() / vmType.getBillingTimeInSeconds();
-        hours = Math.ceil(hours);
-        return hours * vmType.getPrice();
+        double billingUnits = getRuntime() / vmType.getBillingTimeInSeconds();
+        double fullBillingUnits = Math.ceil(billingUnits);
+        return fullBillingUnits * vmType.getPriceForBillingUnit();
     }
 
     public double getCPUSecondsConsumed() {

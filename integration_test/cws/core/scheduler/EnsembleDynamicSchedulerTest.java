@@ -41,7 +41,7 @@ public class EnsembleDynamicSchedulerTest {
         cloudsim.init();
 
         storageManager = new VoidStorageManager(cloudsim);
-        environment = new Environment(new VMTypeBuilder().mips(1000).cores(1).price(1.0).build(), storageManager);
+        environment = new Environment(VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build(), storageManager);
 
         provisioner = null;
         scheduler = new EnsembleDynamicScheduler(cloudsim);
@@ -57,7 +57,7 @@ public class EnsembleDynamicSchedulerTest {
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vm.setProvisioningDelay(0.0);
@@ -76,7 +76,7 @@ public class EnsembleDynamicSchedulerTest {
     public void testScheduleDag() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vms.add(vm);
@@ -107,7 +107,7 @@ public class EnsembleDynamicSchedulerTest {
     public void testScheduleDag100() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vms.add(vm);
@@ -134,7 +134,7 @@ public class EnsembleDynamicSchedulerTest {
     public void testScheduleDag100x10() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = new VMTypeBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
             VM vm = new VM(vmType, cloudsim);
 
             vms.add(vm);

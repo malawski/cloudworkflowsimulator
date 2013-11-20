@@ -157,7 +157,7 @@ public class SPSS extends StaticAlgorithm {
                             break slack;
                         }
 
-                        // This solution should be free because we add no hours
+                        // This solution should be free because we add no billing units
                         double cost = r.getCostWith(ast, r.getEnd()) - r.getCost();
                         if (cost > 1e-6) {
                             throw new RuntimeException("Solution should be free");
