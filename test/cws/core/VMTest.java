@@ -67,11 +67,8 @@ public class VMTest {
     }
 
     private class VMDummyDriver extends CWSSimEntity {
-        private VM vm;
-
-        public VMDummyDriver(VM vm, CloudSimWrapper cloudsim) {
+        public VMDummyDriver(CloudSimWrapper cloudsim) {
             super("VMDummyDriver", cloudsim);
-            this.vm = vm;
             getCloudsim().addEntity(this);
         }
     }
@@ -194,7 +191,7 @@ public class VMTest {
     @Test
     public void testVMShouldNotAcceptEventsAfterTermination() {
         VM vm = new VM(testDefaultVMType, cloudsim);
-        VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
+        VMDummyDriver driver = new VMDummyDriver(cloudsim);
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
@@ -213,7 +210,7 @@ public class VMTest {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
         VM vm = new VM(vmType, cloudsim);
-        VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
+        VMDummyDriver driver = new VMDummyDriver(cloudsim);
         job.setOwner(driver.getId());
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
@@ -233,7 +230,7 @@ public class VMTest {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
         VM vm = new VM(vmType, cloudsim);
-        VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
+        VMDummyDriver driver = new VMDummyDriver(cloudsim);
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);

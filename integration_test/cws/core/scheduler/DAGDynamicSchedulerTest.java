@@ -30,7 +30,6 @@ public class DAGDynamicSchedulerTest {
     private WorkflowEngine engine;
     private Cloud cloud;
     private WorkflowLog jobLog;
-    @SuppressWarnings("unused")
     private StorageManager storageManager;
     private Environment environment;
 
