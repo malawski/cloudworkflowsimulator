@@ -3,7 +3,6 @@ package cws.core.provisioner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.FailureModel;
 import cws.core.VM;
@@ -15,39 +14,14 @@ import cws.core.jobs.UniformRuntimeDistribution;
 
 public class VMFactory {
     private static final double DEFAULT_RUNTIME_VARIANCE = 0.0;
-    private static final double DEFAULT_PROVISIONING_DELAY = 0.0;
-    private static final double DEFAULT_DEPROVISIONING_DELAY = 10.0;
     private static final double DEFAULT_FAILURE_RATE = 0.0;
     private static final long DEFAULT_CACHE_SIZE = 100000000;
 
-    private static ContinuousDistribution provisioningDelayDistribution = new ConstantDistribution(
-            DEFAULT_PROVISIONING_DELAY);
-    private static ContinuousDistribution deprovisioningDelayDistribution = new ConstantDistribution(
-            DEFAULT_DEPROVISIONING_DELAY);
     private static RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
     private static FailureModel failureModel = new FailureModel(0, 0.0);
     private static double runtimeVariance;
-    private static double deprovisioningDelay = DEFAULT_DEPROVISIONING_DELAY; // TODO(bryk: There is no CLI param for
-                                                                              // this.
-    private static double provisioningDelay = DEFAULT_PROVISIONING_DELAY;
     private static double failureRate;
     private static long cacheSize;
-
-    public static ContinuousDistribution getProvisioningDelayDistribution() {
-        return VMFactory.provisioningDelayDistribution;
-    }
-
-    public static void setProvisioningDelayDistribution(ContinuousDistribution distribution) {
-        VMFactory.provisioningDelayDistribution = distribution;
-    }
-
-    public static ContinuousDistribution getDeprovisioningDelayDistribution() {
-        return VMFactory.deprovisioningDelayDistribution;
-    }
-
-    public static void setDeprovisioningDelayDistribution(ContinuousDistribution deprovisioningDelayDistribution) {
-        VMFactory.deprovisioningDelayDistribution = deprovisioningDelayDistribution;
-    }
 
     public static void setRuntimeDistribution(RuntimeDistribution runtimeDistribution) {
         VMFactory.runtimeDistribution = runtimeDistribution;
@@ -72,8 +46,6 @@ public class VMFactory {
     public static VM createVM(VMType vmType, CloudSimWrapper cloudSimWrapper) {
         VM vm = new VM(vmType, cloudSimWrapper);
         vm.setCacheSize(cacheSize);
-        vm.setProvisioningDelay(provisioningDelayDistribution.sample());
-        vm.setDeprovisioningDelay(deprovisioningDelayDistribution.sample());
         vm.setRuntimeDistribution(runtimeDistribution);
         vm.setFailureModel(failureModel);
         return vm;
@@ -85,9 +57,10 @@ public class VMFactory {
         runtimeVariance.setArgName("VAR");
         options.addOption(runtimeVariance);
 
-        Option delay = new Option("dl", "delay", true, "Delay, defaluts to " + DEFAULT_PROVISIONING_DELAY);
-        delay.setArgName("DELAY");
-        options.addOption(delay);
+        // TODO(mequrel): should be moved to TestRun somewhere
+        // Option delay = new Option("dl", "delay", true, "Delay, defaluts to " + DEFAULT_PROVISIONING_DELAY);
+        // delay.setArgName("DELAY");
+        // options.addOption(delay);
 
         Option cacheSize = new Option("cs", "cache-size", true, "VM cache size, defaluts to " + DEFAULT_CACHE_SIZE
                 + " bytes");
@@ -101,12 +74,12 @@ public class VMFactory {
 
     public static void readCliOptions(CommandLine args, long seed) {
         runtimeVariance = Double.parseDouble(args.getOptionValue("runtime-variance", DEFAULT_RUNTIME_VARIANCE + ""));
-        provisioningDelay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_PROVISIONING_DELAY + ""));
+        // provisioningDelay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_PROVISIONING_DELAY + ""));
         failureRate = Double.parseDouble(args.getOptionValue("failure-rate", DEFAULT_FAILURE_RATE + ""));
         cacheSize = Long.parseLong(args.getOptionValue("cache-size", DEFAULT_CACHE_SIZE + ""));
 
         System.out.printf("runtimeVariance = %f\n", runtimeVariance);
-        System.out.printf("delay = %f\n", provisioningDelay);
+        // System.out.printf("delay = %f\n", provisioningDelay);
         System.out.printf("failureRate = %f\n", failureRate);
         System.out.printf("cacheSize = %d\n", cacheSize);
 
@@ -114,9 +87,9 @@ public class VMFactory {
             VMFactory.setRuntimeDistribution(new UniformRuntimeDistribution(seed, runtimeVariance));
         }
 
-        if (provisioningDelay > 0.0) {
-            VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(provisioningDelay));
-        }
+        // if (provisioningDelay > 0.0) {
+        // VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(provisioningDelay));
+        // }
 
         if (failureRate > 0.0) {
             VMFactory.setFailureModel(new FailureModel(seed, failureRate));
@@ -125,14 +98,6 @@ public class VMFactory {
 
     public static double getRuntimeVariance() {
         return runtimeVariance;
-    }
-
-    public static double getProvisioningDelay() {
-        return provisioningDelay;
-    }
-
-    public static double getDeprovistioningDelay() {
-        return deprovisioningDelay;
     }
 
     public static double getFailureRate() {

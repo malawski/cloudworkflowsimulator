@@ -80,12 +80,6 @@ public class VM extends CWSSimEntity {
     /** Number of CPU seconds consumed by jobs on this VM */
     private double cpuSecondsConsumed;
 
-    /** Delay from when the VM is launched until it is ready */
-    private double provisioningDelay;
-
-    /** Delay from when the VM is terminated until it is no longer charged */
-    private double deprovisioningDelay;
-
     /** Varies the actual runtime of tasks according to the specified distribution */
     private RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
 
@@ -321,22 +315,6 @@ public class VM extends CWSSimEntity {
             // Start the next job in the queue
             jobStart(jobs.poll());
         }
-    }
-
-    public void setDeprovisioningDelay(double deprovisioningDelay) {
-        this.deprovisioningDelay = deprovisioningDelay;
-    }
-
-    public double getDeprovisioningDelay() {
-        return deprovisioningDelay;
-    }
-
-    public void setProvisioningDelay(double provisioningDelay) {
-        this.provisioningDelay = provisioningDelay;
-    }
-
-    public double getProvisioningDelay() {
-        return provisioningDelay;
     }
 
     public int getOwner() {

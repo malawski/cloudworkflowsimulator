@@ -396,7 +396,7 @@ public class Simulation {
                             algorithmStatistics.getActualCost(), algorithmStatistics.getActualJobFinishTime(),
                             algorithmStatistics.getActualDagFinishTime());
                     fileOut.printf("%f,%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getActualVMFinishTime(),
-                            VMFactory.getRuntimeVariance(), VMFactory.getProvisioningDelay(),
+                            VMFactory.getRuntimeVariance(), environment.getVMType().getProvisioningDelay(),
                             VMFactory.getFailureRate(), minBudget, maxBudget, minDeadline, maxDeadline);
 
                     StorageManagerStatistics stats = environment.getStorageManagerStatistics();

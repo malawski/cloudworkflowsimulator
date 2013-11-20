@@ -61,11 +61,10 @@ public class DAGDynamicSchedulerTest {
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).provisioningTime(0.0)
+                    .deprovisioningTime(0.0).build();
 
             VM vm = new VM(vmType, cloudsim);
-            vm.setProvisioningDelay(0.0);
-            vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.1, WorkflowEvent.VM_LAUNCH, vm);
         }

@@ -56,14 +56,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         super(budget, deadline, dags, ensembleStatistics, cloudsim);
     }
 
-    public double getEstimatedProvisioningDelay() {
-        return VMFactory.getProvisioningDelay();
-    }
-
-    public double getEstimatedDeprovisioningDelay() {
-        return VMFactory.getDeprovistioningDelay();
-    }
-
     public Plan getPlan() {
         return plan;
     }
@@ -191,7 +183,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
-        spare = spare - (getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay());
+        spare = spare - environment.getProvisioningDelays();
         for (int i = 0; i < numlevels; i++) {
 
             double taskPart = alpha * (totalTasksByLevel[i] / totalTasks);
@@ -388,8 +380,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = new CriticalPath(order, runtimes, environment);
-        double minimalTime = path.getCriticalPathLength() + getEstimatedProvisioningDelay()
-                + getEstimatedDeprovisioningDelay();
+        double minimalTime = path.getCriticalPathLength() + environment.getProvisioningDelays();
         if (minimalTime > getDeadline()) {
             throw new NoFeasiblePlan("Best critical path + provisioning estimates (" + minimalTime + ") "
                     + "> deadline (" + getDeadline() + ")");
@@ -445,7 +436,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             }
             double last = schedule.lastKey();
             Slot lastSlot = schedule.get(last);
-            return last + lastSlot.duration + getEstimatedDeprovisioningDelay();
+            return last + lastSlot.duration + environment.getOnlyDeprovisioningDelay();
         }
 
         public int getFullBillingUnits() {

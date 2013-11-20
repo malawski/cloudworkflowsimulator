@@ -5,7 +5,7 @@ import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 /**
  * @see ContinuousDistribution
  */
-class ConstantDistribution implements ContinuousDistribution {
+public class ConstantDistribution implements ContinuousDistribution {
     private double delay;
 
     public ConstantDistribution(double delay) {

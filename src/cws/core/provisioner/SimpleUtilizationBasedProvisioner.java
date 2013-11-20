@@ -43,11 +43,8 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         double time = getCloudsim().clock();
         double cost = engine.getCost();
 
-        // NOTE(bryk): Watch for out this code.
         // assuming all VMs are homogeneous
-        double vmPrice = 0;
-        if (!engine.getAvailableVMs().isEmpty())
-            vmPrice = engine.getAvailableVMs().get(0).getVmType().getPriceForBillingUnit();
+        double vmPrice = environment.getSingleVMPrice();
 
         // running vms are free + busy
         Set<VM> runningVMs = new HashSet<VM>(engine.getFreeVMs());
@@ -69,7 +66,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
             double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds() - vmRuntime;
 
             // we add delay estimate to include also the deprovisioning time
-            if (secondsRemaining <= PROVISIONER_INTERVAL + vm.getDeprovisioningDelay()) {
+            if (secondsRemaining <= environment.getProvisioningDelays()) {
                 completingVMs.add(vm);
             }
         }

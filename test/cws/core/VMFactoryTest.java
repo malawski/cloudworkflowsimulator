@@ -8,9 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.core.VMType;
-import cws.core.core.VMTypeBuilder;
-import cws.core.provisioner.VMFactory;
 
 public class VMFactoryTest {
 
@@ -35,20 +32,9 @@ public class VMFactoryTest {
         ContinuousDistribution deprovisioningDelayDistribution = new LognormalDistr(new java.util.Random(0), 2.96542,
                 0.09975135);
 
-        VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
-        VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
-
-        VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
-
-        for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(vmType, cloudsim);
-            assertTrue(vm.getProvisioningDelay() > 0.0);
-            System.out.println(vm.getProvisioningDelay());
-        }
-        for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(vmType, cloudsim);
-            assertTrue(vm.getDeprovisioningDelay() > 0.0);
-            System.out.println(vm.getDeprovisioningDelay());
-        }
+        assertTrue(provisioningDelayDistribution.sample() > 0.0);
+        assertTrue(deprovisioningDelayDistribution.sample() > 0.0);
+        // TODO(mequrel): the test was really testing only this but 1000 times with cloudsim unnecessary invocation.
+        // Should be rewritten.
     }
 }

@@ -38,7 +38,7 @@ public class Backtrack extends StaticAlgorithm {
         HashMap<Task, Double> deadlines = new HashMap<Task, Double>();
         for (Task t : order.reverse()) {
             double deadline = getDeadline();
-            deadline = deadline - (getEstimatedProvisioningDelay() + getEstimatedDeprovisioningDelay());
+            deadline = deadline - environment.getProvisioningDelays();
             for (Task c : t.getChildren()) {
                 deadline = Math.min(deadline, deadlines.get(c) - runtimes.get(c));
             }

@@ -21,6 +21,16 @@ public class VMType implements Cloneable {
      */
     private double billingTimeInSeconds;
 
+    /**
+     * Delay from when the VM is launched until it is ready
+     */
+    private double provisioningDelay;
+
+    /**
+     * Delay from when the VM is terminated until it is no longer charged
+     */
+    private double deprovisioningDelay; // TODO(bryk): There is no CLI param for this.
+
     public int getMips() {
         return mips;
     }
@@ -37,10 +47,21 @@ public class VMType implements Cloneable {
         return billingTimeInSeconds;
     }
 
-    public VMType(int mips, int cores, double billingUnitPrice, double billingTimeInSeconds) {
+    public double getProvisioningDelay() {
+        return provisioningDelay;
+    }
+
+    public double getDeprovisioningDelay() {
+        return deprovisioningDelay;
+    }
+
+    public VMType(int mips, int cores, double billingUnitPrice, double billingTimeInSeconds, double provisioningTime,
+            double deprovisioningTime) {
         this.mips = mips;
         this.cores = cores;
         this.billingUnitPrice = billingUnitPrice;
         this.billingTimeInSeconds = billingTimeInSeconds;
+        this.provisioningDelay = provisioningTime;
+        this.deprovisioningDelay = deprovisioningTime;
     }
 }
