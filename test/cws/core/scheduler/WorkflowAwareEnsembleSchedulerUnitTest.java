@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.*;
 
+import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -35,10 +36,14 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
     @Before
     public void setUp() throws Exception {
+        CloudSim.init(0, null, false);
         cloudsim = mock(CloudSimWrapper.class);
         when(cloudsim.clock()).thenReturn(1.0);
 
         environment = mock(Environment.class);
+
+        when(environment.getSingleVMPrice()).thenReturn(1.0);
+        when(environment.getBillingTimeInSeconds()).thenReturn(3600.0);
 
         scheduler = new WorkflowAwareEnsembleScheduler(cloudsim);
         scheduler.setEnvironment(environment);
@@ -72,6 +77,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         freeVMs.add(createVMMock());
 
         Queue<Job> expected = new LinkedList<Job>();
+
+        when(environment.getPredictedRuntime(job.getDAGJob().getDAG())).thenReturn(10.0);
 
         scheduler.scheduleJobs(engine);
 
@@ -130,7 +137,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
     private VM createVMMock() {
         VM vm = mock(VM.class);
-        VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         when(vm.getVmType()).thenReturn(vmType);
         return vm;
     }
