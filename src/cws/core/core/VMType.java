@@ -31,6 +31,12 @@ public class VMType implements Cloneable {
      */
     private double deprovisioningDelay; // TODO(bryk): There is no CLI param for this.
 
+    /**
+     * The number of bytes on internal disk that can be used as a cache
+     * @see {@link cws.core.storage.cache.VMCacheManager}
+     */
+    private long cacheSize;
+
     public int getMips() {
         return mips;
     }
@@ -55,13 +61,18 @@ public class VMType implements Cloneable {
         return deprovisioningDelay;
     }
 
+    public long getCacheSize() {
+        return cacheSize;
+    }
+
     public VMType(int mips, int cores, double billingUnitPrice, double billingTimeInSeconds, double provisioningTime,
-            double deprovisioningTime) {
+            double deprovisioningTime, long cacheSize) {
         this.mips = mips;
         this.cores = cores;
         this.billingUnitPrice = billingUnitPrice;
         this.billingTimeInSeconds = billingTimeInSeconds;
         this.provisioningDelay = provisioningTime;
         this.deprovisioningDelay = deprovisioningTime;
+        this.cacheSize = cacheSize;
     }
 }

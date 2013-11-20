@@ -1,10 +1,6 @@
 package cws.core.storage.cache;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -32,7 +28,7 @@ public class FIFOCacheManager extends VMCacheManager {
         private Set<DAGFile> filesSet = new HashSet<DAGFile>();
 
         public VMCache(VM vm) {
-            this.size = vm.getCacheSize();
+            this.size = vm.getVmType().getCacheSize();
             this.remainingSize = this.size;
         }
 

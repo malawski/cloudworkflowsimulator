@@ -13,6 +13,7 @@ public class VMTypeBuilder {
     private static final double DEFAULT_BILLING_TIME = 3600;
     private static final double DEFAULT_PROVISIONING_DELAY = 0.0;
     private static final double DEFAULT_DEPROVISIONING_DELAY = 10.0;
+    private static final long DEFAULT_CACHE_SIZE = 100000000;
 
     private static ContinuousDistribution provisioningDelayDistribution = new ConstantDistribution(
             DEFAULT_PROVISIONING_DELAY);
@@ -42,6 +43,8 @@ public class VMTypeBuilder {
 
         OptionalsStep deprovisioningTime(double deprovisioningTime);
 
+        OptionalsStep cacheSize(long cacheSize);
+
         VMType build();
     }
 
@@ -49,9 +52,11 @@ public class VMTypeBuilder {
         private int mips;
         private int cores;
         private double price;
+
         private double billingTimeInSeconds = DEFAULT_BILLING_TIME;
         private double provisioningTime;
         private double deprovisioningTime;
+        private long cacheSize = DEFAULT_CACHE_SIZE;
 
         public Steps() {
             this.provisioningTime = provisioningDelayDistribution.sample();
@@ -95,8 +100,14 @@ public class VMTypeBuilder {
         }
 
         @Override
+        public OptionalsStep cacheSize(long cacheSize) {
+            this.cacheSize = cacheSize;
+            return this;
+        }
+
+        @Override
         public VMType build() {
-            return new VMType(mips, cores, price, billingTimeInSeconds, provisioningTime, deprovisioningTime);
+            return new VMType(mips, cores, price, billingTimeInSeconds, provisioningTime, deprovisioningTime, cacheSize);
         }
     }
 }

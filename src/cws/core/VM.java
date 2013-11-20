@@ -12,7 +12,6 @@ import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
-import cws.core.storage.cache.VMCacheManager;
 
 /**
  * A VM is a virtual machine that executes Jobs.
@@ -49,12 +48,6 @@ public class VM extends CWSSimEntity {
 
     /** The Cloud that runs this VM */
     private int cloud;
-
-    /**
-     * The number of bytes on internal disk that can be used as a cache
-     * @see {@link VMCacheManager}
-     */
-    private long cacheSize;
 
     /** Current idle cores */
     private int idleCores;
@@ -379,14 +372,6 @@ public class VM extends CWSSimEntity {
 
     public void setFailureModel(FailureModel failureModel) {
         this.failureModel = failureModel;
-    }
-
-    public long getCacheSize() {
-        return cacheSize;
-    }
-
-    public void setCacheSize(long cacheSize) {
-        this.cacheSize = cacheSize;
     }
 
     public void setVmType(VMType vmType) {

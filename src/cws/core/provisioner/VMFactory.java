@@ -15,13 +15,11 @@ import cws.core.jobs.UniformRuntimeDistribution;
 public class VMFactory {
     private static final double DEFAULT_RUNTIME_VARIANCE = 0.0;
     private static final double DEFAULT_FAILURE_RATE = 0.0;
-    private static final long DEFAULT_CACHE_SIZE = 100000000;
 
     private static RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
     private static FailureModel failureModel = new FailureModel(0, 0.0);
     private static double runtimeVariance;
     private static double failureRate;
-    private static long cacheSize;
 
     public static void setRuntimeDistribution(RuntimeDistribution runtimeDistribution) {
         VMFactory.runtimeDistribution = runtimeDistribution;
@@ -45,7 +43,6 @@ public class VMFactory {
      */
     public static VM createVM(VMType vmType, CloudSimWrapper cloudSimWrapper) {
         VM vm = new VM(vmType, cloudSimWrapper);
-        vm.setCacheSize(cacheSize);
         vm.setRuntimeDistribution(runtimeDistribution);
         vm.setFailureModel(failureModel);
         return vm;
@@ -62,10 +59,11 @@ public class VMFactory {
         // delay.setArgName("DELAY");
         // options.addOption(delay);
 
-        Option cacheSize = new Option("cs", "cache-size", true, "VM cache size, defaluts to " + DEFAULT_CACHE_SIZE
-                + " bytes");
-        cacheSize.setArgName("SIZE");
-        options.addOption(cacheSize);
+        // TODO(mequrel): similar as above
+        // Option cacheSize = new Option("cs", "cache-size", true, "VM cache size, defaluts to " + DEFAULT_CACHE_SIZE
+        // + " bytes");
+        // cacheSize.setArgName("SIZE");
+        // options.addOption(cacheSize);
 
         Option failureRate = new Option("fr", "failure-rate", true, "Faliure rate, defaults to " + DEFAULT_FAILURE_RATE);
         failureRate.setArgName("RATE");
@@ -76,12 +74,12 @@ public class VMFactory {
         runtimeVariance = Double.parseDouble(args.getOptionValue("runtime-variance", DEFAULT_RUNTIME_VARIANCE + ""));
         // provisioningDelay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_PROVISIONING_DELAY + ""));
         failureRate = Double.parseDouble(args.getOptionValue("failure-rate", DEFAULT_FAILURE_RATE + ""));
-        cacheSize = Long.parseLong(args.getOptionValue("cache-size", DEFAULT_CACHE_SIZE + ""));
+        // cacheSize = Long.parseLong(args.getOptionValue("cache-size", DEFAULT_CACHE_SIZE + ""));
 
         System.out.printf("runtimeVariance = %f\n", runtimeVariance);
         // System.out.printf("delay = %f\n", provisioningDelay);
         System.out.printf("failureRate = %f\n", failureRate);
-        System.out.printf("cacheSize = %d\n", cacheSize);
+        // System.out.printf("cacheSize = %d\n", cacheSize);
 
         if (runtimeVariance > 0.0) {
             VMFactory.setRuntimeDistribution(new UniformRuntimeDistribution(seed, runtimeVariance));
