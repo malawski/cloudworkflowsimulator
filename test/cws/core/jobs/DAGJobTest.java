@@ -1,12 +1,9 @@
 package cws.core.jobs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import cws.core.algorithms.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
@@ -15,10 +12,10 @@ public class DAGJobTest {
 
     public DAG diamondDAG() {
         DAG diamond = new DAG();
-        Task a = new Task("a", "test::a", 10, VMType.DEFAULT_VM_TYPE);
-        Task b = new Task("b", "test::b", 5, VMType.DEFAULT_VM_TYPE);
-        Task c = new Task("c", "test::c", 5, VMType.DEFAULT_VM_TYPE);
-        Task d = new Task("d", "test::d", 10, VMType.DEFAULT_VM_TYPE);
+        Task a = new Task("a", "test::a", 10);
+        Task b = new Task("b", "test::b", 5);
+        Task c = new Task("c", "test::c", 5);
+        Task d = new Task("d", "test::d", 10);
         diamond.addTask(a);
         diamond.addTask(b);
         diamond.addTask(c);

@@ -20,7 +20,6 @@ import cws.core.jobs.Job;
  * @author malawski
  */
 public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
-
     public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim) {
         super(cloudsim);
     }
@@ -117,8 +116,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
     // decide what to do with the job from a new dag
     private boolean isJobAdmittable(DAGJob dj, WorkflowEngine engine) {
-
-        double costEstimate = estimateCost(dj, engine);
+        double costEstimate = estimateCost(dj);
         double budgetRemaining = estimateBudgetRemaining(engine);
         getCloudsim().log(" Cost estimate: " + costEstimate + " Budget remaining: " + budgetRemaining);
         return costEstimate < budgetRemaining; // TODO(bryk): Add critical path here.
@@ -127,13 +125,12 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
     /**
      * Estimate cost of this workflow
      * @param dj
-     * @param engine
      * @return
      */
-    private double estimateCost(DAGJob dj, WorkflowEngine engine) {
-        double sumRuntime = dj.getDAG().getRuntimeSum(storageManager);
-        double vmPrice = getVmPrice(engine);
-        return vmPrice * sumRuntime / 3600.0;
+    private double estimateCost(DAGJob dj) {
+        double sumRuntime = environment.getPredictedRuntime(dj.getDAG());
+        double vmPrice = environment.getSingleVMPrice();
+        return vmPrice * sumRuntime / environment.getBillingTimeInSeconds();
     }
 
     /**
@@ -156,7 +153,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         vms.addAll(engine.getBusyVMs());
 
         for (VM vm : vms) {
-            rc += vm.getCost() - vm.getRuntime() * vm.getVmStaticParams().getPrice() / 3600.0;
+            rc += vm.getCost() - vm.getRuntime() * vm.getVmType().getPriceForBillingUnit()
+                    / environment.getBillingTimeInSeconds();
         }
 
         // compute remaining runtime of admitted workflows
@@ -190,19 +188,10 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         DAG dag = admittedDJ.getDAG();
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
-            if (!admittedDJ.isComplete(task))
-                cost += task.getPredictedRuntime(storageManager) * getVmPrice(engine);
+            if (!admittedDJ.isComplete(task)) {
+                cost += environment.getPredictedRuntime(task) * environment.getSingleVMPrice();
+            }
         }
-        return cost / 3600.0;
-    }
-
-    /**
-     * @return the price of VM hour, assuming that all the vms are homogeneous
-     */
-    private double getVmPrice(WorkflowEngine engine) {
-        double vmPrice = 0;
-        if (!engine.getAvailableVMs().isEmpty())
-            vmPrice = engine.getAvailableVMs().get(0).getVmStaticParams().getPrice();
-        return vmPrice;
+        return cost / environment.getBillingTimeInSeconds();
     }
 }

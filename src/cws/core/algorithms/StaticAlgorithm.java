@@ -1,33 +1,20 @@
 package cws.core.algorithms;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeMap;
+import java.util.*;
 
-import cws.core.Cloud;
-import cws.core.EnsembleManager;
-import cws.core.Provisioner;
-import cws.core.Scheduler;
-import cws.core.VM;
-import cws.core.VMListener;
-import cws.core.VMStaticParams;
-import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
+import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.provisioner.VMFactory;
-import cws.core.storage.StorageManager;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener {
     /** Plan */
@@ -52,8 +39,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     private long planningFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-            StorageManager storageManager, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, storageManager, ensembleStatistics, cloudsim);
+            CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, cloudsim);
     }
 
     public double getEstimatedProvisioningDelay() {
@@ -62,11 +49,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     public double getEstimatedDeprovisioningDelay() {
         return VMFactory.getDeprovistioningDelay();
-    }
-
-    @Override
-    public void setStorageManager(StorageManager storageManager) {
-        this.storageManager = storageManager;
     }
 
     public Plan getPlan() {
@@ -100,13 +82,10 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         }
 
         for (Resource r : plan.resources) {
-            // Create VM
-            VMType type = r.vmtype;
-            VMStaticParams vmStaticParams = new VMStaticParams();
-            vmStaticParams.setMips(type.getMips());
-            vmStaticParams.setCores(1);
-            vmStaticParams.setPrice(type.getPrice());
-            VM vm = VMFactory.createVM(vmStaticParams, getCloudsim());
+            // create VM
+            VMType vmType = environment.getVMType();
+            // TODO(mequrel): should have exposed interface for that!
+            VM vm = VMFactory.createVM(vmType, getCloudsim());
 
             // Build task<->vm mappings
             LinkedList<Task> vmQueue = new LinkedList<Task>();
@@ -195,7 +174,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
          * as the total runtime of those tasks.
          */
         double[] shares = new double[numlevels];
-        CriticalPath path = new CriticalPath(order, runtimes, storageManager);
+        CriticalPath path = new CriticalPath(order, runtimes, environment);
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
@@ -382,23 +361,20 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     /**
      * Computes and returns {@link TopologicalOrder} for the given parameters.
      * @param dag DAG with tasks
-     * @param vmTypes hash map of Task -> VMType
      * @param runtimes hash map of Task -> predicted runtime
      * @return TopologicalOrder
      * @throws NoFeasiblePlan when best critical path > deadline
      */
-    protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, VMType> vmTypes,
-            HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
+    protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
         TopologicalOrder order = new TopologicalOrder(dag);
         for (Task task : order) {
-            vmTypes.put(task, task.getVmType());
-            double runtime = task.getPredictedRuntime(storageManager);
+            double runtime = environment.getPredictedRuntime(task);
             runtimes.put(task, runtime);
         }
 
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
-        CriticalPath path = new CriticalPath(order, runtimes, storageManager);
+        CriticalPath path = new CriticalPath(order, runtimes, environment);
         double minimalTime = path.getCriticalPathLength() + getEstimatedProvisioningDelay()
                 + getEstimatedDeprovisioningDelay();
         if (minimalTime > getDeadline()) {
@@ -424,18 +400,18 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     class Resource {
         int id = nextresourceid++;
-        VMType vmtype;
+        Environment environment;
         TreeMap<Double, Slot> schedule;
 
         public Resource(Resource other) {
-            this(other.vmtype);
+            this(other.environment);
             for (Double s : other.schedule.navigableKeySet()) {
                 schedule.put(s, other.schedule.get(s));
             }
         }
 
-        public Resource(VMType type) {
-            this.vmtype = type;
+        public Resource(Environment environment) {
+            this.environment = environment;
             this.schedule = new TreeMap<Double, Slot>();
         }
 
@@ -459,23 +435,23 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             return last + lastSlot.duration + getEstimatedDeprovisioningDelay();
         }
 
-        public int getHours() {
-            return getHoursWith(getStart(), getEnd());
+        public int getFullBillingUnits() {
+            return getFullBillingUnitsWith(getStart(), getEnd());
         }
 
-        public int getHoursWith(double start, double end) {
+        public int getFullBillingUnitsWith(double start, double end) {
             double seconds = end - start;
-            double hours = seconds / (60 * 60);
-            int rounded = (int) Math.ceil(hours);
+            double units = seconds / environment.getBillingTimeInSeconds();
+            int rounded = (int) Math.ceil(units);
             return Math.max(1, rounded);
         }
 
         public double getCostWith(double start, double end) {
-            return getHoursWith(start, end) * vmtype.getPrice();
+            return environment.getVMCostFor(end - start);
         }
 
         public double getCost() {
-            return getHours() * vmtype.getPrice();
+            return getCostWith(getStart(), getEnd());
         }
 
         public double getUtilization() {
@@ -483,7 +459,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             for (Slot sl : schedule.values()) {
                 runtime += sl.duration;
             }
-            return runtime / (getHours() * 60 * 60);
+            return runtime / (getFullBillingUnits() * environment.getBillingTimeInSeconds());
         }
     }
 

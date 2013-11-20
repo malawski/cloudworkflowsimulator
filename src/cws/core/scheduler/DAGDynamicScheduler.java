@@ -10,8 +10,8 @@ import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
-import cws.core.storage.StorageManager;
 
 /**
  * This scheduler submits jobs to VMs on FCFS basis.
@@ -19,15 +19,14 @@ import cws.core.storage.StorageManager;
  * @author malawski
  */
 public class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
-    protected StorageManager storageManager;
+    protected Environment environment;
 
     public DAGDynamicScheduler(CloudSimWrapper cloudsim) {
         super("DAGDynamicScheduler", cloudsim);
     }
 
-    @Override
-    public void setStorageManager(StorageManager storageManager) {
-        this.storageManager = storageManager;
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 
     @Override

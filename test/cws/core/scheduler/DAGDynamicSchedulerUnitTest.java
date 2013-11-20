@@ -4,17 +4,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
@@ -26,22 +18,25 @@ import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 
 public class DAGDynamicSchedulerUnitTest {
     DAGDynamicScheduler scheduler;
     WorkflowEngine engine;
     CloudSimWrapper cloudsim;
-
     Queue<Job> jobs;
     Set<VM> freeVMs;
+    private Environment environment;
 
     @Before
     public void setUp() throws Exception {
         CloudSim.init(0, null, false);
         cloudsim = mock(CloudSimWrapper.class);
+        environment = mock(Environment.class);
 
         scheduler = new DAGDynamicScheduler(cloudsim);
+        scheduler.setEnvironment(environment);
         engine = mock(WorkflowEngine.class);
 
         jobs = new LinkedList<Job>();

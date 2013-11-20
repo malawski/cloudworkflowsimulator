@@ -1,16 +1,11 @@
 package cws.core.algorithms;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.storage.StorageManager;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -20,9 +15,9 @@ public class SPSS extends StaticAlgorithm {
     /** Tuning parameter for deadline distribution (low alpha = runtime, high alpha = tasks) */
     private double alpha;
 
-    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, StorageManager storageManager,
-            AlgorithmStatistics ensembleStatistics, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, storageManager, cloudsim);
+    public SPSS(double budget, double deadline, List<DAG> dags, double alpha, AlgorithmStatistics ensembleStatistics,
+            CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, cloudsim);
         this.alpha = alpha;
     }
 
@@ -31,9 +26,8 @@ public class SPSS extends StaticAlgorithm {
      */
     @Override
     Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
-        HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
-        TopologicalOrder order = computeTopologicalOrder(dag, vmTypes, runtimes);
+        TopologicalOrder order = computeTopologicalOrder(dag, runtimes);
 
         /**
          * FIXME Later we will determine the best VM type for each task
@@ -82,7 +76,6 @@ public class SPSS extends StaticAlgorithm {
         for (Task task : sortedTasks) {
             double runtime = runtimes.get(task);
             double deadline = deadlines.get(task);
-            VMType vmtype = vmTypes.get(task);
 
             // Compute earliest start time of task
             double earliestStart = 0.0;
@@ -96,7 +89,7 @@ public class SPSS extends StaticAlgorithm {
             Solution best;
             {
                 // Default is to allocate a new resource
-                Resource r = new Resource(vmtype);
+                Resource r = new Resource(environment);
                 double cost = r.getCostWith(earliestStart, earliestStart + runtime);
                 Slot sl = new Slot(task, earliestStart, runtime);
                 best = newResource = new Solution(r, sl, cost, true);
@@ -104,12 +97,6 @@ public class SPSS extends StaticAlgorithm {
 
             // Check each resource for a better (cheaper, earlier) solution
             for (Resource r : plan.resources) {
-
-                // The resource must match the vm type of the task
-                if (vmtype != r.vmtype) {
-                    continue;
-                }
-
                 // Try placing task at the beginning of resource schedule
                 if (earliestStart + runtime < r.getStart()) {
 
@@ -135,9 +122,9 @@ public class SPSS extends StaticAlgorithm {
 
                     // Option 2: Leave a big gap
                     biggap: {
-                        int runtimeHours = (int) Math.ceil(runtime / (60 * 60));
+                        int runtimeUnits = (int) Math.ceil(runtime / environment.getBillingTimeInSeconds());
 
-                        double ast = r.getStart() - (runtimeHours * 60 * 60);
+                        double ast = r.getStart() - (runtimeUnits * environment.getBillingTimeInSeconds());
                         if (ast < earliestStart) {
                             ast = earliestStart;
                         }
@@ -157,7 +144,8 @@ public class SPSS extends StaticAlgorithm {
 
                     // Option 3: Use some slack time (medium gap)
                     slack: {
-                        double slack = (r.getHours() * 60 * 60) - (r.getEnd() - r.getStart());
+                        double slack = (r.getFullBillingUnits() * environment.getBillingTimeInSeconds())
+                                - (r.getEnd() - r.getStart());
 
                         double ast = r.getStart() - slack;
                         if (ast < earliestStart) {
@@ -169,7 +157,7 @@ public class SPSS extends StaticAlgorithm {
                             break slack;
                         }
 
-                        // This solution should be free because we add no hours
+                        // This solution should be free because we add no billing units
                         double cost = r.getCostWith(ast, r.getEnd()) - r.getCost();
                         if (cost > 1e-6) {
                             throw new RuntimeException("Solution should be free");

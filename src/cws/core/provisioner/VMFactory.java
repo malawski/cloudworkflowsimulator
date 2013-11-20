@@ -7,8 +7,8 @@ import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
 import cws.core.FailureModel;
 import cws.core.VM;
-import cws.core.VMStaticParams;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.RuntimeDistribution;
 import cws.core.jobs.UniformRuntimeDistribution;
@@ -69,8 +69,8 @@ public class VMFactory {
      * @param cloudSimWrapper - initialized CloudSimWrapper instance. It needs to be inited, because we're creting
      *            storage manager here.
      */
-    public static VM createVM(VMStaticParams vmStaticParams, CloudSimWrapper cloudSimWrapper) {
-        VM vm = new VM(vmStaticParams, cloudSimWrapper);
+    public static VM createVM(VMType vmType, CloudSimWrapper cloudSimWrapper) {
+        VM vm = new VM(vmType, cloudSimWrapper);
         vm.setCacheSize(cacheSize);
         vm.setProvisioningDelay(provisioningDelayDistribution.sample());
         vm.setDeprovisioningDelay(deprovisioningDelayDistribution.sample());

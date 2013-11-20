@@ -2,15 +2,16 @@ package cws.core;
 
 import static org.junit.Assert.assertEquals;
 
-import cws.core.dag.DAG;
-import cws.core.dag.DAGJob;
 import org.junit.Before;
 import org.junit.Test;
 
-import cws.core.algorithms.VMType;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeBuilder;
+import cws.core.dag.DAG;
+import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
@@ -20,6 +21,8 @@ public class VMTest {
     private CloudSimWrapper cloudsim;
     @SuppressWarnings("unused")
     private StorageManager storageManager;
+
+    private VMType testDefaultVMType;
 
     private class VMDriver extends CWSSimEntity {
         private VM vm;
@@ -63,25 +66,33 @@ public class VMTest {
         }
     }
 
+    private class VMDummyDriver extends CWSSimEntity {
+        private VM vm;
+
+        public VMDummyDriver(VM vm, CloudSimWrapper cloudsim) {
+            super("VMDummyDriver", cloudsim);
+            this.vm = vm;
+            getCloudsim().addEntity(this);
+        }
+    }
+
     @Before
     public void setUp() {
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
         storageManager = new VoidStorageManager(cloudsim);
+        testDefaultVMType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
     }
 
     @Test
     public void testSingleJob() {
         Job j = new Job(cloudsim);
-        j.setTask(new Task("task_id", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j.setTask(new Task("task_id", "transformation", 1000));
         j.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMStaticParams vmStaticParams = new VMStaticParams();
-        vmStaticParams.setMips(100);
-        vmStaticParams.setCores(1);
-        vmStaticParams.setPrice(0.40);
+        VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(1).price(0.40).build();
 
-        VM vm = new VM(vmStaticParams, cloudsim);
+        VM vm = new VM(vmType, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j });
@@ -97,18 +108,15 @@ public class VMTest {
     @Test
     public void testTwoJobs() {
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j1.setTask(new Task("task_id", "transformation", 1000));
         j1.setDAGJob(new DAGJob(new DAG(), 1));
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j2.setTask(new Task("task_id2", "transformation", 1000));
         j2.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMStaticParams vmStaticParams = new VMStaticParams();
-        vmStaticParams.setMips(100);
-        vmStaticParams.setCores(1);
-        vmStaticParams.setPrice(0.40);
+        VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(1).price(0.40).build();
 
-        VM vm = new VM(vmStaticParams, cloudsim);
+        VM vm = new VM(vmType, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });
@@ -129,19 +137,16 @@ public class VMTest {
     @Test
     public void testMultiCoreVM() {
         Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id1", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j1.setTask(new Task("task_id1", "transformation", 1000));
         j1.setDAGJob(new DAGJob(new DAG(), 1));
 
         Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        j2.setTask(new Task("task_id2", "transformation", 1000));
         j2.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VMStaticParams vmStaticParams = new VMStaticParams();
-        vmStaticParams.setMips(100);
-        vmStaticParams.setCores(2);
-        vmStaticParams.setPrice(0.40);
+        VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(2).price(0.40).build();
 
-        VM vm = new VM(vmStaticParams, cloudsim);
+        VM vm = new VM(vmType, cloudsim);
 
         VMDriver driver = new VMDriver(vm, cloudsim);
         driver.setJobs(new Job[] { j1, j2 });
@@ -161,9 +166,7 @@ public class VMTest {
 
     @Test
     public void testVMShouldNotStartAutomatically() {
-        VMStaticParams vmStaticParams = new VMStaticParams();
-
-        VM vm = new VM(vmStaticParams, cloudsim);
+        VM vm = new VM(testDefaultVMType, cloudsim);
         cloudsim.startSimulation();
 
         assertEquals(false, vm.isTerminated());
@@ -171,9 +174,7 @@ public class VMTest {
 
     @Test
     public void testVMShouldStartProperly() {
-        VMStaticParams vmStaticParams = new VMStaticParams();
-
-        VM vm = new VM(vmStaticParams, cloudsim);
+        VM vm = new VM(testDefaultVMType, cloudsim);
         cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.startSimulation();
 
@@ -182,9 +183,7 @@ public class VMTest {
 
     @Test
     public void testVMShouldTerminateProperly() {
-        VMStaticParams vmStaticParams = new VMStaticParams();
-
-        VM vm = new VM(vmStaticParams, cloudsim);
+        VM vm = new VM(testDefaultVMType, cloudsim);
         cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
         cloudsim.startSimulation();
@@ -194,12 +193,12 @@ public class VMTest {
 
     @Test
     public void testVMShouldNotAcceptEventsAfterTermination() {
-        VMStaticParams vmStaticParams = new VMStaticParams();
+        VM vm = new VM(testDefaultVMType, cloudsim);
+        VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
 
-        VM vm = new VM(vmStaticParams, cloudsim);
-        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
-        cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
-        cloudsim.send(0, vm.getId(), 0.3, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
+        cloudsim.send(driver.getId(), vm.getId(), 0.3, WorkflowEvent.VM_LAUNCH);
         cloudsim.startSimulation();
 
         assertEquals(true, vm.isTerminated());
@@ -207,14 +206,19 @@ public class VMTest {
 
     @Test
     public void testVMKillJobsUponTermination() {
-        VMStaticParams vmStaticParams = new VMStaticParams();
         Job job = new Job(cloudsim);
-        job.setTask(new Task("task_id1", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        job.setTask(new Task("task_id1", "transformation", 1000));
+        job.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VM vm = new VM(vmStaticParams, cloudsim);
-        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
-        cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.JOB_SUBMIT, job);
-        cloudsim.send(0, vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+
+        VM vm = new VM(vmType, cloudsim);
+        VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
+        job.setOwner(driver.getId());
+
+        cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.JOB_SUBMIT, job);
+        cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
         cloudsim.startSimulation();
 
         assertEquals(Job.Result.FAILURE, job.getResult());
@@ -222,14 +226,18 @@ public class VMTest {
 
     @Test
     public void testVMShouldNotAcceptNewJobsAfterTermination() {
-        VMStaticParams vmStaticParams = new VMStaticParams();
         Job job2 = new Job(cloudsim);
-        job2.setTask(new Task("task_id1", "transformation", 1000, VMType.DEFAULT_VM_TYPE));
+        job2.setTask(new Task("task_id1", "transformation", 1000));
+        job2.setDAGJob(new DAGJob(new DAG(), 1));
 
-        VM vm = new VM(vmStaticParams, cloudsim);
-        cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
-        cloudsim.send(0, vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
-        cloudsim.send(0, vm.getId(), 0.3, WorkflowEvent.JOB_SUBMIT, job2);
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+
+        VM vm = new VM(vmType, cloudsim);
+        VMDummyDriver driver = new VMDummyDriver(vm, cloudsim);
+
+        cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
+        cloudsim.send(driver.getId(), vm.getId(), 0.3, WorkflowEvent.JOB_SUBMIT, job2);
         cloudsim.startSimulation();
 
         assertEquals(Job.Result.NONE, job2.getResult());

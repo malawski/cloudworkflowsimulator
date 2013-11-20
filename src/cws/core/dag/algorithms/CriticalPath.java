@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cws.core.dag.Task;
-import cws.core.storage.StorageManager;
+import cws.core.engine.Environment;
 
 /**
  * Compute longest path using topological order,
@@ -15,17 +15,17 @@ public class CriticalPath {
     private Map<Task, Double> eft;
     private Double length = null;
 
-    public CriticalPath(TopologicalOrder order, StorageManager storageManager) {
-        this(order, null, storageManager);
+    public CriticalPath(TopologicalOrder order, Environment environment) {
+        this(order, null, environment);
     }
 
-    public CriticalPath(TopologicalOrder order, Map<Task, Double> runtimes, StorageManager storageManager) {
+    public CriticalPath(TopologicalOrder order, Map<Task, Double> runtimes, Environment environment) {
         this.eft = new HashMap<Task, Double>();
 
         if (runtimes == null) {
             runtimes = new HashMap<Task, Double>();
             for (Task task : order) {
-                runtimes.put(task, task.getPredictedRuntime(storageManager));
+                runtimes.put(task, environment.getPredictedRuntime(task));
             }
         }
 

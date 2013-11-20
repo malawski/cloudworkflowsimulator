@@ -4,8 +4,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import cws.core.*;
+import cws.core.Provisioner;
+import cws.core.VM;
+import cws.core.WorkflowEngine;
+import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 
 public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
@@ -42,7 +46,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         // assuming all VMs are homogeneous
         double vmPrice = 0;
         if (!engine.getAvailableVMs().isEmpty())
-            vmPrice = engine.getAvailableVMs().get(0).getVmStaticParams().getPrice();
+            vmPrice = engine.getAvailableVMs().get(0).getVmType().getPriceForBillingUnit();
 
         // running vms are free + busy
         Set<VM> runningVMs = new HashSet<VM>(engine.getFreeVMs());
@@ -50,18 +54,18 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
 
         int numVMsRunning = runningVMs.size();
 
-        // find VMs that will complete their billing hour
+        // find VMs that will complete their billing unit
         // during the next provisioning cycle
         Set<VM> completingVMs = new HashSet<VM>();
 
         for (VM vm : runningVMs) {
             double vmRuntime = vm.getRuntime();
 
-            // full hours (rounded up)
-            double vmHours = Math.ceil(vmRuntime / 3600.0);
+            // full billing units (rounded up)
+            double vmBillingUnits = Math.ceil(vmRuntime / environment.getBillingTimeInSeconds());
 
-            // seconds till next full hour
-            double secondsRemaining = vmHours * 3600.0 - vmRuntime;
+            // seconds till next full unit
+            double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds() - vmRuntime;
 
             // we add delay estimate to include also the deprovisioning time
             if (secondsRemaining <= vm.getProvisioningDelay() + vm.getDeprovisioningDelay()) {
@@ -120,7 +124,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
             engine.getBusyVMs().removeAll(terminated);
 
             // some instances may be still running so we want to be invoked again to stop them before they reach full
-            // hour
+            // billing unit
             if (engine.getFreeVMs().size() + engine.getBusyVMs().size() > 0)
                 getCloudsim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL,
                         WorkflowEvent.PROVISIONING_REQUEST, null);
@@ -153,8 +157,9 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         if (!finishing_phase && utilization > UPPER_THRESHOLD
                 && numBusyVMs + numFreeVMS < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 
-            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
-            VM vm = new VM(vmStaticParams, getCloudsim());
+            // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
+            VMType vmType = environment.getVMType();
+            VM vm = new VM(vmType, getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());
             getCloudsim().send(engine.getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
@@ -181,7 +186,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
 
     /**
      * This method terminates instances but only the ones
-     * that are close to the full hour of operation.
+     * that are close to the full billing unit of operation.
      * Thus this method has to be invoked several times
      * to effectively terminate all the instances.
      * The method modifies the given vmSet by removing the terminated Vms.

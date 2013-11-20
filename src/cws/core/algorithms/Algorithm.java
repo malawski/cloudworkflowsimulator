@@ -8,12 +8,12 @@ import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.engine.Environment;
 import cws.core.log.WorkflowLog;
-import cws.core.storage.StorageManager;
 
 public abstract class Algorithm extends CWSSimEntity {
-    /** Storage manager used by this algorithm */
-    protected StorageManager storageManager;
+    /** Environment of simulation (VMs, storage info) */
+    protected Environment environment;
 
     /** Provides statistics about this algorithm's run */
     protected AlgorithmStatistics algorithmStatistics;
@@ -42,14 +42,13 @@ public abstract class Algorithm extends CWSSimEntity {
     /** All simulation's DAGs */
     private List<DAG> dags;
 
-    public Algorithm(double budget, double deadline, List<DAG> dags, StorageManager storageManager,
-            AlgorithmStatistics algorithmStatistics, CloudSimWrapper cloudsim) {
+    public Algorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics algorithmStatistics,
+            CloudSimWrapper cloudsim) {
         super("Algorithm", cloudsim);
         this.budget = budget;
         this.deadline = deadline;
         this.dags = dags;
         this.algorithmStatistics = algorithmStatistics;
-        this.storageManager = storageManager;
     }
 
     /** Should run actual simulation */
@@ -83,6 +82,10 @@ public abstract class Algorithm extends CWSSimEntity {
         this.engine.addJobListener(algorithmStatistics);
         this.engine.addJobListener(workflowLog);
 
+    }
+
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 
     public void setEnsembleManager(EnsembleManager ensembleManager) {
@@ -143,9 +146,5 @@ public abstract class Algorithm extends CWSSimEntity {
 
     public void setGenerateLog(boolean generateLog) {
         this.shouldGenerateLog = generateLog;
-    }
-
-    public StorageManager getStorageManager() {
-        return storageManager;
     }
 }

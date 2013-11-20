@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeBuilder;
 import cws.core.provisioner.VMFactory;
 
 public class VMFactoryTest {
@@ -36,15 +38,15 @@ public class VMFactoryTest {
         VMFactory.setProvisioningDelayDistribution(provisioningDelayDistribution);
         VMFactory.setDeprovisioningDelayDistribution(deprovisioningDelayDistribution);
 
-        VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
 
         for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(vmStaticParams, cloudsim);
+            VM vm = VMFactory.createVM(vmType, cloudsim);
             assertTrue(vm.getProvisioningDelay() > 0.0);
             System.out.println(vm.getProvisioningDelay());
         }
         for (int i = 0; i < 1000; i++) {
-            VM vm = VMFactory.createVM(vmStaticParams, cloudsim);
+            VM vm = VMFactory.createVM(vmType, cloudsim);
             assertTrue(vm.getDeprovisioningDelay() > 0.0);
             System.out.println(vm.getDeprovisioningDelay());
         }

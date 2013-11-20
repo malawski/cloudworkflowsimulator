@@ -3,9 +3,6 @@ package cws.core.dag;
 import java.util.ArrayList;
 import java.util.List;
 
-import cws.core.algorithms.VMType;
-import cws.core.storage.StorageManager;
-
 /**
  * @author Gideon Juve <juve@usc.edu>
  */
@@ -31,14 +28,10 @@ public class Task {
     /** Task's output files */
     private List<DAGFile> outputFiles = new ArrayList<DAGFile>();
 
-    /** VMType that this task runs on */
-    private VMType vmType;
-
-    public Task(String id, String transformation, double size, VMType vmType) {
+    public Task(String id, String transformation, double size) {
         this.id = id;
         this.transformation = transformation;
         this.size = size;
-        this.vmType = vmType;
     }
 
     /**
@@ -68,17 +61,6 @@ public class Task {
     @Override
     public String toString() {
         return "<task id=" + getId() + ">";
-    }
-
-    /**
-     * Returns task's predicted runtime. It is based on task's vmType and provided storage manager. <br>
-     * Note that the estimation is trivial and may not be accurate during congestion and it doesn't include runtime
-     * variance.
-     * @param storageManager manager used to estimate transfers
-     * @return task's predicted runtime as a double
-     */
-    public double getPredictedRuntime(StorageManager storageManager) {
-        return getSize() / vmType.getMips() + storageManager.getTransferTimeEstimation(this);
     }
 
     public void scaleSize(double scalingFactor) {
@@ -123,9 +105,5 @@ public class Task {
 
     public void addOutputFiles(List<DAGFile> outputs) {
         this.outputFiles.addAll(outputs);
-    }
-
-    public VMType getVmType() {
-        return vmType;
     }
 }

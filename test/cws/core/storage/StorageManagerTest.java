@@ -14,7 +14,6 @@ import org.mockito.Mockito;
 
 import cws.core.VM;
 import cws.core.WorkflowEvent;
-import cws.core.algorithms.VMType;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
@@ -110,7 +109,7 @@ public abstract class StorageManagerTest {
 
     @Test
     public void testTimeEstimationForEmptyTask() {
-        Task t = new Task("xx", "xx", 222, VMType.DEFAULT_VM_TYPE);
+        Task t = new Task("xx", "xx", 222);
         Assert.assertEquals(0.0, storageManager.getTransferTimeEstimation(t), 0.0);
     }
 
@@ -119,7 +118,7 @@ public abstract class StorageManagerTest {
         List<DAGFile> files = new ArrayList<DAGFile>();
         files.add(new DAGFile("abc.txt", 2442));
         files.add(new DAGFile("def.txt", 327879));
-        Task t = new Task("xx", "xx", 222, VMType.DEFAULT_VM_TYPE);
+        Task t = new Task("xx", "xx", 222);
         t.addInputFiles(files);
         t.addOutputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);

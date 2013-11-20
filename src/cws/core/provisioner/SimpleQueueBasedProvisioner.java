@@ -3,8 +3,12 @@ package cws.core.provisioner;
 import java.util.Iterator;
 import java.util.Set;
 
-import cws.core.*;
+import cws.core.Provisioner;
+import cws.core.VM;
+import cws.core.WorkflowEngine;
+import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 
 public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
@@ -25,15 +29,16 @@ public class SimpleQueueBasedProvisioner extends CloudAwareProvisioner implement
         double time = getCloudsim().clock();
         double cost = engine.getCost();
 
-        // if we are close to the budget by one VM*hour
+        // if we are close to the budget by one VM*billing unit
         if (budget <= cost || time > deadline) {
             return;
         }
 
         // add one VM if queue not empty
         if (queueLength > 0) {
-            VMStaticParams vmStaticParams = VMStaticParams.getDefaults();
-            VM vm = VMFactory.createVM(vmStaticParams, getCloudsim());
+            // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
+            VMType vmType = environment.getVMType();
+            VM vm = VMFactory.createVM(vmType, getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());
             getCloudsim().send(engine.getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);

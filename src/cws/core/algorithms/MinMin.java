@@ -9,7 +9,6 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.storage.StorageManager;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -17,8 +16,8 @@ import cws.core.storage.StorageManager;
 public class MinMin extends StaticAlgorithm {
 
     public MinMin(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-            StorageManager storageManager, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, storageManager, cloudsim);
+            CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, cloudsim);
     }
 
     /**
@@ -26,9 +25,8 @@ public class MinMin extends StaticAlgorithm {
      */
     @Override
     Plan planDAG(DAG dag, Plan currentPlan) throws NoFeasiblePlan {
-        HashMap<Task, VMType> vmTypes = new HashMap<Task, VMType>();
         HashMap<Task, Double> runtimes = new HashMap<Task, Double>();
-        TopologicalOrder order = computeTopologicalOrder(dag, vmTypes, runtimes);
+        TopologicalOrder order = computeTopologicalOrder(dag, runtimes);
         /*
          * FIXME Later we will determine the best VM type for each task
          * assignEachTaskToCheapestResource()
@@ -76,7 +74,6 @@ public class MinMin extends StaticAlgorithm {
             for (Task t : queue) {
                 double deadline = deadlines.get(t);
                 double runtime = runtimes.get(t);
-                VMType vmtype = vmTypes.get(t);
 
                 // Compute earliest start time of task
                 double earliestStart = 0.0;
@@ -92,7 +89,7 @@ public class MinMin extends StaticAlgorithm {
                 // One option is to allocate a new resource
                 Solution best = null;
                 {
-                    Resource r = new Resource(vmtype);
+                    Resource r = new Resource(environment);
                     double cost = r.getCostWith(earliestStart, earliestStart + runtime);
                     Slot sl = new Slot(t, earliestStart, runtime);
                     best = new Solution(r, sl, cost, true);
@@ -100,12 +97,6 @@ public class MinMin extends StaticAlgorithm {
 
                 // Check each resource for a better (cheaper, earlier) solution
                 for (Resource r : plan.resources) {
-
-                    // The resource must match the vm type of the task
-                    if (vmtype != r.vmtype) {
-                        continue;
-                    }
-
                     // Try placing task at the beginning of resource schedule
                     if (earliestStart + runtime < r.getStart()) {
 
@@ -131,9 +122,9 @@ public class MinMin extends StaticAlgorithm {
 
                         // Option 2: Leave a big gap
                         biggap: {
-                            int runtimeHours = (int) Math.ceil(runtime / (60 * 60));
+                            int runtimeBillingUnits = (int) Math.ceil(runtime / environment.getBillingTimeInSeconds());
 
-                            double ast = r.getStart() - (runtimeHours * 60 * 60);
+                            double ast = r.getStart() - (runtimeBillingUnits * environment.getBillingTimeInSeconds());
                             if (ast < earliestStart) {
                                 ast = earliestStart;
                             }
@@ -153,7 +144,8 @@ public class MinMin extends StaticAlgorithm {
 
                         // Option 3: Use some slack time (medium gap)
                         slack: {
-                            double slack = (r.getHours() * 60 * 60) - (r.getEnd() - r.getStart());
+                            double slack = (r.getFullBillingUnits() * environment.getBillingTimeInSeconds())
+                                    - (r.getEnd() - r.getStart());
 
                             double ast = r.getStart() - slack;
                             if (ast < earliestStart) {
@@ -165,7 +157,7 @@ public class MinMin extends StaticAlgorithm {
                                 break slack;
                             }
 
-                            // This solution should be free because we add no hours
+                            // This solution should be free because we add no billing units
                             double cost = r.getCostWith(ast, r.getEnd()) - r.getCost();
                             if (cost > 1e-6) {
                                 throw new RuntimeException("Solution should be free");

@@ -13,21 +13,22 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import cws.core.VM;
-import cws.core.VMStaticParams;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGFile;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
-import cws.core.storage.StorageManager;
 
 public class WorkflowAwareEnsembleSchedulerUnitTest {
     WorkflowAwareEnsembleScheduler scheduler;
     WorkflowEngine engine;
     CloudSimWrapper cloudsim;
-    StorageManager storageManager;
+    Environment environment;
 
     Queue<Job> jobs;
     Set<VM> freeVMs;
@@ -37,10 +38,10 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         cloudsim = mock(CloudSimWrapper.class);
         when(cloudsim.clock()).thenReturn(1.0);
 
-        storageManager = mock(StorageManager.class);
+        environment = mock(Environment.class);
 
         scheduler = new WorkflowAwareEnsembleScheduler(cloudsim);
-        scheduler.setStorageManager(storageManager);
+        scheduler.setEnvironment(environment);
 
         engine = mock(WorkflowEngine.class);
         when(engine.getDeadline()).thenReturn(10.0);
@@ -129,7 +130,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
     private VM createVMMock() {
         VM vm = mock(VM.class);
-        when(vm.getVmStaticParams()).thenReturn(new VMStaticParams());
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+        when(vm.getVmType()).thenReturn(vmType);
         return vm;
     }
 }

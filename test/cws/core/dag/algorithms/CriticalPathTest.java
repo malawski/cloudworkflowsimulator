@@ -8,29 +8,34 @@ import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
-import cws.core.storage.StorageManager;
+import cws.core.engine.Environment;
 import cws.core.storage.VoidStorageManager;
 
 public class CriticalPathTest {
 
-    private StorageManager storageManager;
+    private Environment environment;
     private CloudSimWrapper cloudsim;
 
     @Before
     public void setUp() {
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
-        storageManager = new VoidStorageManager(cloudsim);
+
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+        VoidStorageManager storageManager = new VoidStorageManager(cloudsim);
+        environment = new Environment(vmType, storageManager);
     }
 
     @Test
     public void cptest() {
         DAG dag = DAGParser.parseDAG(new File("dags/cptest.dag"));
         TopologicalOrder order = new TopologicalOrder(dag);
-        CriticalPath cp = new CriticalPath(order, storageManager);
+        CriticalPath cp = new CriticalPath(order, environment);
 
         Task A = dag.getTaskById("A");
         Task B = dag.getTaskById("B");
@@ -55,7 +60,7 @@ public class CriticalPathTest {
     public void test() {
         DAG dag = DAGParser.parseDAG(new File("dags/test.dag"));
         TopologicalOrder order = new TopologicalOrder(dag);
-        CriticalPath cp = new CriticalPath(order, storageManager);
+        CriticalPath cp = new CriticalPath(order, environment);
         assertEquals(21, cp.getCriticalPathLength(), 0.00001);
     }
 
@@ -63,7 +68,7 @@ public class CriticalPathTest {
     public void cybershake30() {
         DAG dag = DAGParser.parseDAG(new File("dags/CyberShake_30.dag"));
         TopologicalOrder order = new TopologicalOrder(dag);
-        CriticalPath cp = new CriticalPath(order, storageManager);
+        CriticalPath cp = new CriticalPath(order, environment);
         assertEquals(221.84, cp.getCriticalPathLength(), 0.00001);
     }
 }
