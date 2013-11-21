@@ -59,7 +59,7 @@ public class DynamicAlgorithm extends Algorithm {
     }
 
     private boolean canAffordAtLeastOneVM() {
-        return environment.getSingleVMPrice() < getBudget();
+        return environment.getSingleVMPrice() <= getBudget();
     }
 
     private void launchVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
