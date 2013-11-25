@@ -32,6 +32,8 @@ import cws.core.engine.Environment;
 import cws.core.engine.EnvironmentFactory;
 import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.provisioner.VMFactory;
+import cws.core.storage.StorageManager;
+import cws.core.storage.StorageManagerFactory;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 
@@ -144,7 +146,7 @@ public class Simulation {
         options.addOption(deadline);
 
         Option budget = new Option("b", "budget", true, "Optional budget, which overrides max and min budgets");
-        budget.setArgName("DEADLINE");
+        budget.setArgName("BUDGET");
         options.addOption(budget);
 
         Option nBudgets = new Option("nb", "n-budgets", true, "Optional number of generated budgets, defaults to "
