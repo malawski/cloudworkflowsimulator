@@ -12,10 +12,17 @@ import org.apache.commons.cli.Options;
 import org.yaml.snakeyaml.Yaml;
 
 public class VMTypeLoader {
-    private static final String DEFAULT_VM_FILENAME = "default.vm.yaml";
     private static final String VMS_DIRECTORY = "vms/";
+
     private static final String VM_TYPE_OPTION_NAME = "vm";
     private static final String VM_TYPE_SHORT_OPTION_NAME = "vm";
+    private static final String DEFAULT_VM_FILENAME = "default.vm.yaml";
+
+    private static final String VM_CACHE_SIZE_OPTION_NAME = "vm-cache-size";
+    private static final String VM_CACHE_SIZE_SHORT_OPTION_NAME = "vcs";
+
+    // explanatory constant
+    private static final boolean HAS_ARG = true;
 
     public VMType loadVM(Map<String, Object> config) throws MissingParameterException {
         if (!config.containsKey("mips") || !config.containsKey("cores") || !config.containsKey("cacheSize")) {
@@ -35,16 +42,17 @@ public class VMTypeLoader {
     }
 
     public static void buildCliOptions(Options options) {
-        Option vm = new Option(VM_TYPE_SHORT_OPTION_NAME, VM_TYPE_OPTION_NAME, true, String.format(
+        Option vm = new Option(VM_TYPE_SHORT_OPTION_NAME, VM_TYPE_OPTION_NAME, HAS_ARG, String.format(
                 "VM config filename, relative to %s, defaults to %s", VMS_DIRECTORY, DEFAULT_VM_FILENAME));
         vm.setArgName("FILENAME");
         options.addOption(vm);
 
-        Option delay = new Option("vpd", "vm-provisioning-delay", true, "VM provisioning delay time in seconds");
+        Option delay = new Option("vpd", "vm-provisioning-delay", HAS_ARG, "VM provisioning delay time in seconds");
         delay.setArgName("DELAY IN SECONDS");
         options.addOption(delay);
 
-        Option cacheSize = new Option("vcs", "vm-cache-size", true, "VM cache size");
+        Option cacheSize = new Option(VM_CACHE_SIZE_SHORT_OPTION_NAME, VM_CACHE_SIZE_OPTION_NAME, HAS_ARG,
+                "VM cache size");
         cacheSize.setArgName("SIZE");
         options.addOption(cacheSize);
     }
@@ -68,6 +76,11 @@ public class VMTypeLoader {
         // if(args.hasOption("vm-provisioning-delay")) {
         // vmConfig.put("vm-provisioning-delay", args.getOptionValue("vm-provisioning-delay"));
         // }
+
+        if (args.hasOption(VM_CACHE_SIZE_OPTION_NAME)) {
+            Long cacheSize = Long.parseLong(args.getOptionValue(VM_CACHE_SIZE_OPTION_NAME));
+            vmConfig.put("cacheSize", cacheSize);
+        }
     }
 
     private Map<String, Object> loadVMFromConfigFile(CommandLine args) throws FileNotFoundException {
