@@ -16,7 +16,7 @@ require 'gnuplot'
 require 'set'
 require 'main'
 
-require 'parsed_log_loader.rb'
+require './parsed_log_loader.rb'
 
 class GanttPlotter
   def initialize()

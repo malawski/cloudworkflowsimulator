@@ -15,7 +15,7 @@ require 'gnuplot'
 require 'set'
 require 'main'
 
-require 'parsed_log_loader.rb'
+require './parsed_log_loader.rb'
 
 def plot_number_schedule(logs, params)
   filename = params['output_filename'].value
