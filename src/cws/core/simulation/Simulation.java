@@ -19,6 +19,7 @@ import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.InvalidDistributionException;
 import cws.core.core.MissingParameterException;
 import cws.core.core.VMType;
 import cws.core.core.VMTypeLoader;
@@ -234,6 +235,9 @@ public class Simulation {
             e.printStackTrace();
             return;
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return;
+        } catch (InvalidDistributionException e) {
             e.printStackTrace();
             return;
         }
@@ -456,6 +460,8 @@ public class Simulation {
         System.out.printf("VM price = %f\n", vmType.getPriceForBillingUnit());
         System.out.printf("VM unit = %f\n", vmType.getBillingTimeInSeconds());
         System.out.printf("VM cache = %d\n", vmType.getCacheSize());
+        System.out.printf("VM provisioningDelay = %s\n", vmType.getProvisioningDelay());
+        System.out.printf("VM deprovisioningDelay = %s\n", vmType.getDeprovisioningDelay());
     }
 
     /**

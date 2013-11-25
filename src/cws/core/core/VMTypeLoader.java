@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 import org.yaml.snakeyaml.Yaml;
 
 public class VMTypeLoader {
@@ -41,7 +42,7 @@ public class VMTypeLoader {
     private static final String VM_BILLING_UNIT_SHORT_OPTION_NAME = "vbu";
     private static final String VM_BILLING_UNIT_OPTION_NAME = "vm-billing-unit";
 
-    public VMType loadVM(Map<String, Object> config) throws MissingParameterException {
+    public VMType loadVM(Map<String, Object> config) throws MissingParameterException, InvalidDistributionException {
         if (!config.containsKey(VM_MIPS_CONFIG_ENTRY) || !config.containsKey(VM_CORES_CONFIG_ENTRY)
                 || !config.containsKey(VM_CACHE_SIZE_CONFIG_ENTRY)) {
             throw new MissingParameterException();
@@ -55,8 +56,17 @@ public class VMTypeLoader {
         int cores = (int) config.get(VM_CORES_CONFIG_ENTRY);
         long cacheSize = ((Number) config.get(VM_CACHE_SIZE_CONFIG_ENTRY)).longValue();
 
+        DistributionFactory factory = new DistributionFactory();
+
+        Map<String, Object> provisioningConfig = (Map<String, Object>) config.get("provisioningDelay");
+        ContinuousDistribution provisioningDelay = factory.createDistribution(provisioningConfig);
+
+        Map<String, Object> deprovisioningConfig = (Map<String, Object>) config.get("deprovisioningDelay");
+        ContinuousDistribution deprovisioningDelay = factory.createDistribution(deprovisioningConfig);
+
         return VMTypeBuilder.newBuilder().mips(mips).cores(cores).price(unitPrice).cacheSize(cacheSize)
-                .billingTimeInSeconds(unitTime).build();
+                .billingTimeInSeconds(unitTime).provisioningTime(provisioningDelay)
+                .deprovisioningTime(deprovisioningDelay).build();
     }
 
     public static void buildCliOptions(Options options) {
@@ -96,7 +106,8 @@ public class VMTypeLoader {
         options.addOption(billingUnit);
     }
 
-    public VMType determineVMType(CommandLine args) throws MissingParameterException, FileNotFoundException {
+    public VMType determineVMType(CommandLine args) throws MissingParameterException, FileNotFoundException,
+            InvalidDistributionException {
         // provisioningDelay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_PROVISIONING_DELAY + ""));
         // cacheSize = Long.parseLong(args.getOptionValue("cache-size", DEFAULT_CACHE_SIZE + ""));
         // System.out.printf("delay = %f\n", provisioningDelay);

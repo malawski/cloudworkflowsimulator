@@ -16,4 +16,8 @@ public class ConstantDistribution implements ContinuousDistribution {
     public double sample() {
         return this.delay;
     }
+
+    public String toString() {
+        return "constant distribution, value = " + delay;
+    }
 }
