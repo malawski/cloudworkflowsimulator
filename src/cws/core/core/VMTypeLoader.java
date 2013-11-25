@@ -12,6 +12,11 @@ import org.apache.commons.cli.Options;
 import org.yaml.snakeyaml.Yaml;
 
 public class VMTypeLoader {
+    private static final String DEFAULT_VM_FILENAME = "default.vm.yaml";
+    private static final String VMS_DIRECTORY = "vms/";
+    private static final String VM_TYPE_OPTION_NAME = "vm";
+    private static final String VM_TYPE_SHORT_OPTION_NAME = "vm";
+
     public VMType loadVM(Map<String, Object> config) throws MissingParameterException {
         if (!config.containsKey("mips") || !config.containsKey("cores") || !config.containsKey("cacheSize")) {
             throw new MissingParameterException();
@@ -30,6 +35,11 @@ public class VMTypeLoader {
     }
 
     public static void buildCliOptions(Options options) {
+        Option vm = new Option(VM_TYPE_SHORT_OPTION_NAME, VM_TYPE_OPTION_NAME, true, String.format(
+                "VM config filename, relative to %s, defaults to %s", VMS_DIRECTORY, DEFAULT_VM_FILENAME));
+        vm.setArgName("FILENAME");
+        options.addOption(vm);
+
         Option delay = new Option("vpd", "vm-provisioning-delay", true, "VM provisioning delay time in seconds");
         delay.setArgName("DELAY IN SECONDS");
         options.addOption(delay);
@@ -61,7 +71,9 @@ public class VMTypeLoader {
     }
 
     private Map<String, Object> loadVMFromConfigFile(CommandLine args) throws FileNotFoundException {
-        InputStream input = new FileInputStream(new File("vms/default.vm.yaml"));
+        String vmConfigFilename = args.getOptionValue(VM_TYPE_OPTION_NAME, DEFAULT_VM_FILENAME);
+
+        InputStream input = new FileInputStream(new File(VMS_DIRECTORY + vmConfigFilename));
         Yaml yaml = new Yaml();
         return (Map<String, Object>) yaml.load(input);
     }
