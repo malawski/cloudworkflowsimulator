@@ -42,6 +42,21 @@ public class VMTypeLoader {
     private static final String VM_BILLING_UNIT_SHORT_OPTION_NAME = "vbu";
     private static final String VM_BILLING_UNIT_OPTION_NAME = "vm-billing-unit";
 
+    private static final String VM_PROVISIONING_DELAY_DISTRIBUTION_SHORT_OPTION_NAME = "vpd";
+    private static final String VM_PROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME = "vm-provisioning-distribution";
+
+    private static final String VM_DEPROVISIONING_DELAY_DISTRIBUTION_SHORT_OPTION_NAME = "vdd";
+    private static final String VM_DEPROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME = "vm-deprovisioning-distribution";
+
+    private static final String VM_PROVISIONING_DELAY_VALUE_SHORT_OPTION_NAME = "vpv";
+    private static final String VM_PROVISIONING_DELAY_VALUE_OPTION_NAME = "vm-provisioning-value";
+
+    private static final String VM_DEPROVISIONING_DELAY_VALUE_SHORT_OPTION_NAME = "vdv";
+    private static final String VM_DEPROVISIONING_DELAY_VALUE_OPTION_NAME = "vm-deprovisioning-value";
+
+    private static final String DISTRIBUTION_TYPE_CONFIG_ENTRY = "distribution";
+    private static final String DISTRIBUTION_VALUE_CONFIG_ENTRY = "value";
+
     public VMType loadVM(Map<String, Object> config) throws MissingParameterException, InvalidDistributionException {
         if (!config.containsKey(VM_MIPS_CONFIG_ENTRY) || !config.containsKey(VM_CORES_CONFIG_ENTRY)
                 || !config.containsKey(VM_CACHE_SIZE_CONFIG_ENTRY)) {
@@ -58,10 +73,10 @@ public class VMTypeLoader {
 
         DistributionFactory factory = new DistributionFactory();
 
-        Map<String, Object> provisioningConfig = (Map<String, Object>) config.get("provisioningDelay");
+        Map<String, Object> provisioningConfig = getProvisioningSection(config);
         ContinuousDistribution provisioningDelay = factory.createDistribution(provisioningConfig);
 
-        Map<String, Object> deprovisioningConfig = (Map<String, Object>) config.get("deprovisioningDelay");
+        Map<String, Object> deprovisioningConfig = getDeprovisioningSection(config);
         ContinuousDistribution deprovisioningDelay = factory.createDistribution(deprovisioningConfig);
 
         return VMTypeBuilder.newBuilder().mips(mips).cores(cores).price(unitPrice).cacheSize(cacheSize)
@@ -74,11 +89,6 @@ public class VMTypeLoader {
                 "VM config filename, relative to %s, defaults to %s", VMS_DIRECTORY, DEFAULT_VM_FILENAME));
         vm.setArgName("FILENAME");
         options.addOption(vm);
-
-        Option delay = new Option("vpd", "vm-provisioning-delay", HAS_ARG,
-                "Overrides VM provisioning delay time in seconds");
-        delay.setArgName("DELAY IN SECONDS");
-        options.addOption(delay);
 
         Option cacheSize = new Option(VM_CACHE_SIZE_SHORT_OPTION_NAME, VM_CACHE_SIZE_OPTION_NAME, HAS_ARG,
                 "Overrides VM cache size");
@@ -104,18 +114,34 @@ public class VMTypeLoader {
                 "Overrides VM billing unit in seconds");
         billingUnit.setArgName("SECONDS");
         options.addOption(billingUnit);
+
+        Option provisioningDelayDistribution = new Option(VM_PROVISIONING_DELAY_DISTRIBUTION_SHORT_OPTION_NAME,
+                VM_PROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME, HAS_ARG,
+                "Overrides VM provisioning distribution type (constant|uniform)");
+        provisioningDelayDistribution.setArgName("TYPE");
+        options.addOption(provisioningDelayDistribution);
+
+        Option provisioningDelayValue = new Option(VM_PROVISIONING_DELAY_VALUE_SHORT_OPTION_NAME,
+                VM_PROVISIONING_DELAY_VALUE_OPTION_NAME, HAS_ARG,
+                "Overrides VM provisioning constant distribution value in seconds");
+        provisioningDelayValue.setArgName("SECONDS");
+        options.addOption(provisioningDelayValue);
+
+        Option deprovisioningDelayDistribution = new Option(VM_DEPROVISIONING_DELAY_DISTRIBUTION_SHORT_OPTION_NAME,
+                VM_DEPROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME, HAS_ARG,
+                "Overrides VM deprovisioning distribution type (constant|uniform)");
+        deprovisioningDelayDistribution.setArgName("TYPE");
+        options.addOption(deprovisioningDelayDistribution);
+
+        Option deprovisioningDelayValue = new Option(VM_DEPROVISIONING_DELAY_VALUE_SHORT_OPTION_NAME,
+                VM_DEPROVISIONING_DELAY_VALUE_OPTION_NAME, HAS_ARG,
+                "Overrides VM deprovisioning constant distribution value in seconds");
+        deprovisioningDelayValue.setArgName("SECONDS");
+        options.addOption(deprovisioningDelayValue);
     }
 
     public VMType determineVMType(CommandLine args) throws MissingParameterException, FileNotFoundException,
             InvalidDistributionException {
-        // provisioningDelay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_PROVISIONING_DELAY + ""));
-        // cacheSize = Long.parseLong(args.getOptionValue("cache-size", DEFAULT_CACHE_SIZE + ""));
-        // System.out.printf("delay = %f\n", provisioningDelay);
-        // System.out.printf("cacheSize = %d\n", cacheSize);
-        // if (provisioningDelay > 0.0) {
-        // VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(provisioningDelay));
-        // }
-
         Map<String, Object> vmConfig = loadVMFromConfigFile(args);
         overrideConfigFromFileWithCliArgs(vmConfig, args);
 
@@ -123,10 +149,6 @@ public class VMTypeLoader {
     }
 
     private void overrideConfigFromFileWithCliArgs(Map<String, Object> vmConfig, CommandLine args) {
-        // if(args.hasOption("vm-provisioning-delay")) {
-        // vmConfig.put("vm-provisioning-delay", args.getOptionValue("vm-provisioning-delay"));
-        // }
-
         if (args.hasOption(VM_MIPS_OPTION_NAME)) {
             Integer mips = Integer.parseInt(args.getOptionValue(VM_MIPS_OPTION_NAME));
             vmConfig.put(VM_MIPS_CONFIG_ENTRY, mips);
@@ -154,6 +176,39 @@ public class VMTypeLoader {
             billingConfig.put(VM_BILLING_TIME_CONFIG_ENTRY, billingUnit);
         }
 
+        if (args.hasOption(VM_PROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME)) {
+            String distributionType = args.getOptionValue(VM_PROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME);
+            Map<String, Object> provisioningConfig = getProvisioningSection(vmConfig);
+            provisioningConfig.put(DISTRIBUTION_TYPE_CONFIG_ENTRY, distributionType);
+        }
+
+        if (args.hasOption(VM_PROVISIONING_DELAY_VALUE_OPTION_NAME)) {
+            Double distributionValue = Double.parseDouble(args.getOptionValue(VM_PROVISIONING_DELAY_VALUE_OPTION_NAME));
+            Map<String, Object> provisioningConfig = getProvisioningSection(vmConfig);
+            provisioningConfig.put(DISTRIBUTION_VALUE_CONFIG_ENTRY, distributionValue);
+        }
+
+        if (args.hasOption(VM_DEPROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME)) {
+            String distributionType = args.getOptionValue(VM_DEPROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME);
+            Map<String, Object> deprovisioningConfig = getDeprovisioningSection(vmConfig);
+            deprovisioningConfig.put(DISTRIBUTION_TYPE_CONFIG_ENTRY, distributionType);
+        }
+
+        if (args.hasOption(VM_DEPROVISIONING_DELAY_VALUE_OPTION_NAME)) {
+            Double distributionValue = Double.parseDouble(args
+                    .getOptionValue(VM_DEPROVISIONING_DELAY_VALUE_OPTION_NAME));
+            Map<String, Object> deprovisioningConfig = getDeprovisioningSection(vmConfig);
+            deprovisioningConfig.put(DISTRIBUTION_VALUE_CONFIG_ENTRY, distributionValue);
+        }
+
+    }
+
+    private Map<String, Object> getProvisioningSection(Map<String, Object> vmConfig) {
+        return (Map<String, Object>) vmConfig.get("provisioningDelay");
+    }
+
+    private Map<String, Object> getDeprovisioningSection(Map<String, Object> config) {
+        return (Map<String, Object>) config.get("deprovisioningDelay");
     }
 
     private Map<String, Object> getBillingSection(Map<String, Object> vmConfig) {

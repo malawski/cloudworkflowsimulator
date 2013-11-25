@@ -95,6 +95,7 @@ public class VMTypeBuilder {
 
         @Override
         public OptionalsStep deprovisioningTime(ContinuousDistribution deprovisioningTime) {
+            // TODO(mequrel): add checks for >= 0.0 somewhere
             this.deprovisioningTime = deprovisioningTime;
             return this;
         }
