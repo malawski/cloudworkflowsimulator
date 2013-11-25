@@ -1,0 +1,16 @@
+mips: 1000
+cores: 1
+cacheSize: 100000000
+
+billing:
+    unitTime: 3600.0
+    unitPrice: 1.0
+
+provisioningDelay:
+    distribution: constant
+    value: 0.0
+
+deprovisioningDelay:
+    distribution: constant
+    value: 10.0
+

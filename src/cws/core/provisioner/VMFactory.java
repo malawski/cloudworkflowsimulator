@@ -54,17 +54,6 @@ public class VMFactory {
         runtimeVariance.setArgName("VAR");
         options.addOption(runtimeVariance);
 
-        // TODO(mequrel): should be moved to TestRun somewhere
-        // Option delay = new Option("dl", "delay", true, "Delay, defaluts to " + DEFAULT_PROVISIONING_DELAY);
-        // delay.setArgName("DELAY");
-        // options.addOption(delay);
-
-        // TODO(mequrel): similar as above
-        // Option cacheSize = new Option("cs", "cache-size", true, "VM cache size, defaluts to " + DEFAULT_CACHE_SIZE
-        // + " bytes");
-        // cacheSize.setArgName("SIZE");
-        // options.addOption(cacheSize);
-
         Option failureRate = new Option("fr", "failure-rate", true, "Faliure rate, defaults to " + DEFAULT_FAILURE_RATE);
         failureRate.setArgName("RATE");
         options.addOption(failureRate);
@@ -72,22 +61,14 @@ public class VMFactory {
 
     public static void readCliOptions(CommandLine args, long seed) {
         runtimeVariance = Double.parseDouble(args.getOptionValue("runtime-variance", DEFAULT_RUNTIME_VARIANCE + ""));
-        // provisioningDelay = Double.parseDouble(args.getOptionValue("delay", DEFAULT_PROVISIONING_DELAY + ""));
         failureRate = Double.parseDouble(args.getOptionValue("failure-rate", DEFAULT_FAILURE_RATE + ""));
-        // cacheSize = Long.parseLong(args.getOptionValue("cache-size", DEFAULT_CACHE_SIZE + ""));
 
         System.out.printf("runtimeVariance = %f\n", runtimeVariance);
-        // System.out.printf("delay = %f\n", provisioningDelay);
         System.out.printf("failureRate = %f\n", failureRate);
-        // System.out.printf("cacheSize = %d\n", cacheSize);
 
         if (runtimeVariance > 0.0) {
             VMFactory.setRuntimeDistribution(new UniformRuntimeDistribution(seed, runtimeVariance));
         }
-
-        // if (provisioningDelay > 0.0) {
-        // VMFactory.setProvisioningDelayDistribution(new ConstantDistribution(provisioningDelay));
-        // }
 
         if (failureRate > 0.0) {
             VMFactory.setFailureModel(new FailureModel(seed, failureRate));

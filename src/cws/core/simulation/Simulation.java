@@ -1,6 +1,9 @@
 package cws.core.simulation;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,8 +18,10 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
-import cws.core.algorithms.*;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.MissingParameterException;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeLoader;
 import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGListGenerator;
@@ -168,6 +173,9 @@ public class Simulation {
 
         GlobalStorageParams.buildCliOptions(options);
         VMFactory.buildCliOptions(options);
+
+        VMTypeLoader.buildCliOptions(options);
+
         return options;
     }
 
@@ -215,6 +223,20 @@ public class Simulation {
         double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
         double alpha = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_ALPHA));
         boolean isStorageAware = Boolean.valueOf(args.getOptionValue("storage-aware", DEFAULT_IS_STORAGE_AWARE));
+
+        VMType vmType = null;
+        VMTypeLoader loader = new VMTypeLoader();
+        try {
+            vmType = loader.determineVMType(args);
+        } catch (MissingParameterException e) {
+            e.printStackTrace();
+            return;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        logVMType(vmType);
 
         VMFactory.readCliOptions(args, seed);
 
@@ -424,6 +446,14 @@ public class Simulation {
                     dags.size() - i, names[i]);
             cloudsim.log(workflowDescription);
         }
+	}
+
+    private void logVMType(VMType vmType) {
+        System.out.printf("VM mips = %d\n", vmType.getMips());
+        System.out.printf("VM cores = %d\n", vmType.getCores());
+        System.out.printf("VM price = %f\n", vmType.getPriceForBillingUnit());
+        System.out.printf("VM unit = %f\n", vmType.getBillingTimeInSeconds());
+        System.out.printf("VM cache = %d\n", vmType.getCacheSize());
     }
 
     /**
