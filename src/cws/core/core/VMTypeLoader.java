@@ -21,33 +21,39 @@ public class VMTypeLoader {
     private static final String VM_TYPE_SHORT_OPTION_NAME = "vm";
     private static final String DEFAULT_VM_FILENAME = "default.vm.yaml";
 
+    private static final String VM_CACHE_SIZE_CONFIG_ENTRY = "cacheSize";
     private static final String VM_CACHE_SIZE_SHORT_OPTION_NAME = "vcs";
     private static final String VM_CACHE_SIZE_OPTION_NAME = "vm-cache-size";
 
+    private static final String VM_MIPS_CONFIG_ENTRY = "mips";
     private static final String VM_MIPS_SHORT_OPTION_NAME = "vmi";
     private static final String VM_MIPS_OPTION_NAME = "vm-mips";
 
+    private static final String VM_CORES_CONFIG_ENTRY = "cores";
     private static final String VM_CORES_SHORT_OPTION_NAME = "vco";
     private static final String VM_CORES_OPTION_NAME = "vm-cores";
 
+    private static final String VM_BILLING_PRICE_CONFIG_ENTRY = "unitPrice";
     private static final String VM_BILLING_PRICE_SHORT_OPTION_NAME = "vbp";
     private static final String VM_BILLING_PRICE_OPTION_NAME = "vm-billing-price";
 
+    private static final String VM_BILLING_TIME_CONFIG_ENTRY = "unitTime";
     private static final String VM_BILLING_UNIT_SHORT_OPTION_NAME = "vbu";
     private static final String VM_BILLING_UNIT_OPTION_NAME = "vm-billing-unit";
 
     public VMType loadVM(Map<String, Object> config) throws MissingParameterException {
-        if (!config.containsKey("mips") || !config.containsKey("cores") || !config.containsKey("cacheSize")) {
+        if (!config.containsKey(VM_MIPS_CONFIG_ENTRY) || !config.containsKey(VM_CORES_CONFIG_ENTRY)
+                || !config.containsKey(VM_CACHE_SIZE_CONFIG_ENTRY)) {
             throw new MissingParameterException();
         }
 
-        Map<String, Object> billingConfig = (Map<String, Object>) config.get("billing");
-        double unitPrice = ((Number) billingConfig.get("unitPrice")).doubleValue();
-        double unitTime = ((Number) billingConfig.get("unitTime")).doubleValue();
+        Map<String, Object> billingConfig = getBillingSection(config);
+        double unitPrice = ((Number) billingConfig.get(VM_BILLING_PRICE_CONFIG_ENTRY)).doubleValue();
+        double unitTime = ((Number) billingConfig.get(VM_BILLING_TIME_CONFIG_ENTRY)).doubleValue();
 
-        int mips = (int) config.get("mips");
-        int cores = (int) config.get("cores");
-        long cacheSize = ((Number) config.get("cacheSize")).longValue();
+        int mips = (int) config.get(VM_MIPS_CONFIG_ENTRY);
+        int cores = (int) config.get(VM_CORES_CONFIG_ENTRY);
+        long cacheSize = ((Number) config.get(VM_CACHE_SIZE_CONFIG_ENTRY)).longValue();
 
         return VMTypeBuilder.newBuilder().mips(mips).cores(cores).price(unitPrice).cacheSize(cacheSize)
                 .billingTimeInSeconds(unitTime).build();
@@ -112,31 +118,35 @@ public class VMTypeLoader {
 
         if (args.hasOption(VM_MIPS_OPTION_NAME)) {
             Integer mips = Integer.parseInt(args.getOptionValue(VM_MIPS_OPTION_NAME));
-            vmConfig.put("mips", mips);
+            vmConfig.put(VM_MIPS_CONFIG_ENTRY, mips);
         }
 
         if (args.hasOption(VM_CORES_OPTION_NAME)) {
             Integer cores = Integer.parseInt(args.getOptionValue(VM_CORES_OPTION_NAME));
-            vmConfig.put("cores", cores);
+            vmConfig.put(VM_CORES_CONFIG_ENTRY, cores);
         }
 
         if (args.hasOption(VM_CACHE_SIZE_OPTION_NAME)) {
             Long cacheSize = Long.parseLong(args.getOptionValue(VM_CACHE_SIZE_OPTION_NAME));
-            vmConfig.put("cacheSize", cacheSize);
+            vmConfig.put(VM_CACHE_SIZE_CONFIG_ENTRY, cacheSize);
         }
 
         if (args.hasOption(VM_BILLING_PRICE_OPTION_NAME)) {
             Double billingPrice = Double.parseDouble(args.getOptionValue(VM_BILLING_PRICE_OPTION_NAME));
-            Map<String, Object> billingConfig = (Map<String, Object>) vmConfig.get("billing");
-            billingConfig.put("unitPrice", billingPrice);
+            Map<String, Object> billingConfig = getBillingSection(vmConfig);
+            billingConfig.put(VM_BILLING_PRICE_CONFIG_ENTRY, billingPrice);
         }
 
         if (args.hasOption(VM_BILLING_UNIT_OPTION_NAME)) {
             Double billingUnit = Double.parseDouble(args.getOptionValue(VM_BILLING_UNIT_OPTION_NAME));
-            Map<String, Object> billingConfig = (Map<String, Object>) vmConfig.get("billing");
-            billingConfig.put("unitTime", billingUnit);
+            Map<String, Object> billingConfig = getBillingSection(vmConfig);
+            billingConfig.put(VM_BILLING_TIME_CONFIG_ENTRY, billingUnit);
         }
 
+    }
+
+    private Map<String, Object> getBillingSection(Map<String, Object> vmConfig) {
+        return (Map<String, Object>) vmConfig.get("billing");
     }
 
     private Map<String, Object> loadVMFromConfigFile(CommandLine args) throws FileNotFoundException {
