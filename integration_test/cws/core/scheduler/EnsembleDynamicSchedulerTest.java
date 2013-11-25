@@ -25,6 +25,7 @@ import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.engine.StorageAwarePredictionStrategy;
 import cws.core.log.WorkflowLog;
+import cws.core.provisioner.ConstantDistribution;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 
@@ -61,8 +62,9 @@ public class EnsembleDynamicSchedulerTest {
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).provisioningTime(0.0)
-                    .deprovisioningTime(0.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0)
+                    .provisioningTime(new ConstantDistribution(0.0)).deprovisioningTime(new ConstantDistribution(0.0))
+                    .build();
 
             VM vm = new VM(vmType, cloudsim);
             vms.add(vm);

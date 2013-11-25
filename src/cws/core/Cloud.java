@@ -62,7 +62,7 @@ public class Cloud extends CWSSimEntity {
         getCloudsim().sendNow(this.getId(), vm.getId(), WorkflowEvent.VM_LAUNCH, null);
 
         // But it isn't ready until after the delay
-        getCloudsim().send(getId(), getId(), vm.getVmType().getProvisioningDelay(), WorkflowEvent.VM_LAUNCHED, vm);
+        getCloudsim().send(getId(), getId(), vm.getProvisioningDelay(), WorkflowEvent.VM_LAUNCHED, vm);
     }
 
     private void vmLaunched(VM vm) {
@@ -90,7 +90,7 @@ public class Cloud extends CWSSimEntity {
         getCloudsim().sendNow(this.getId(), vm.getId(), WorkflowEvent.VM_TERMINATE, null);
 
         // But it isn't gone until after the delay
-        getCloudsim().send(getId(), getId(), vm.getVmType().getDeprovisioningDelay(), WorkflowEvent.VM_TERMINATED, vm);
+        getCloudsim().send(getId(), getId(), vm.getDeprovisioningDelay(), WorkflowEvent.VM_TERMINATED, vm);
     }
 
     private void vmTerminated(VM vm) {

@@ -377,7 +377,7 @@ public class Simulation {
             fileOut.println("application,distribution,seed,dags,scale,budget,"
                     + "deadline,algorithm,completed,exponential,linear,"
                     + "planning,simulation,scorebits,cost,jobfinish,dagfinish,"
-                    + "vmfinish,runtimeVariance,delay,failureRate,minBudget," + "maxBudget,minDeadline,maxDeadline,"
+                    + "vmfinish,runtimeVariance,failureRate,minBudget," + "maxBudget,minDeadline,maxDeadline,"
                     + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
                     + "actualBytesRead,actualBytesTransferred,"
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
@@ -419,9 +419,9 @@ public class Simulation {
                     fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, algorithmStatistics.getScoreBitString(),
                             algorithmStatistics.getActualCost(), algorithmStatistics.getActualJobFinishTime(),
                             algorithmStatistics.getActualDagFinishTime());
-                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getActualVMFinishTime(),
-                            VMFactory.getRuntimeVariance(), environment.getVMType().getProvisioningDelay(),
-                            VMFactory.getFailureRate(), minBudget, maxBudget, minDeadline, maxDeadline);
+                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getActualVMFinishTime(),
+                            VMFactory.getRuntimeVariance(), VMFactory.getFailureRate(), minBudget, maxBudget,
+                            minDeadline, maxDeadline);
 
                     StorageManagerStatistics stats = environment.getStorageManagerStatistics();
                     fileOut.printf("%s,%d,%d,%d,%d,%d,", storageManagerType, stats.getTotalBytesToRead(),

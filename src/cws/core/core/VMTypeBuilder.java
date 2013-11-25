@@ -39,9 +39,9 @@ public class VMTypeBuilder {
     public interface OptionalsStep {
         OptionalsStep billingTimeInSeconds(double billingTimeInSeconds);
 
-        OptionalsStep provisioningTime(double provisioningTime);
+        OptionalsStep provisioningTime(ContinuousDistribution provisioningTime);
 
-        OptionalsStep deprovisioningTime(double deprovisioningTime);
+        OptionalsStep deprovisioningTime(ContinuousDistribution deprovisioningTime);
 
         OptionalsStep cacheSize(long cacheSize);
 
@@ -54,13 +54,13 @@ public class VMTypeBuilder {
         private double price;
 
         private double billingTimeInSeconds = DEFAULT_BILLING_TIME;
-        private double provisioningTime;
-        private double deprovisioningTime;
+        private ContinuousDistribution provisioningTime;
+        private ContinuousDistribution deprovisioningTime;
         private long cacheSize = DEFAULT_CACHE_SIZE;
 
         public Steps() {
-            this.provisioningTime = provisioningDelayDistribution.sample();
-            this.deprovisioningTime = deprovisioningDelayDistribution.sample();
+            this.provisioningTime = provisioningDelayDistribution;
+            this.deprovisioningTime = deprovisioningDelayDistribution;
         }
 
         @Override
@@ -88,13 +88,13 @@ public class VMTypeBuilder {
         }
 
         @Override
-        public OptionalsStep provisioningTime(double provisioningTime) {
+        public OptionalsStep provisioningTime(ContinuousDistribution provisioningTime) {
             this.provisioningTime = provisioningTime;
             return this;
         }
 
         @Override
-        public OptionalsStep deprovisioningTime(double deprovisioningTime) {
+        public OptionalsStep deprovisioningTime(ContinuousDistribution deprovisioningTime) {
             this.deprovisioningTime = deprovisioningTime;
             return this;
         }
