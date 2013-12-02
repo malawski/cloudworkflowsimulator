@@ -191,7 +191,6 @@ public class VM extends CWSSimEntity {
         // Reset dynamic state
         jobs.clear();
         idleCores = vmType.getCores();
-        getCloudsim().log(String.format("VM %d terminated", getId()));
     }
 
     private void jobSubmit(Job job) {
