@@ -52,7 +52,7 @@ public class DAGSchedulerFCFSTest {
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vm.setProvisioningDelay(0.0);
@@ -71,7 +71,7 @@ public class DAGSchedulerFCFSTest {
     public void testScheduleDag() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vms.add(vm);
@@ -102,7 +102,7 @@ public class DAGSchedulerFCFSTest {
     public void testScheduleDag100() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vms.add(vm);

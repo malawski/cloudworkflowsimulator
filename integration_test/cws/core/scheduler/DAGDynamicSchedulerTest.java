@@ -40,7 +40,7 @@ public class DAGDynamicSchedulerTest {
         cloudsim.init();
 
         storageManager = new VoidStorageManager(cloudsim);
-        VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         environment = new Environment(vmType, storageManager);
 
         provisioner = null;
@@ -57,7 +57,7 @@ public class DAGDynamicSchedulerTest {
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vm.setProvisioningDelay(0.0);
@@ -76,7 +76,7 @@ public class DAGDynamicSchedulerTest {
     public void testScheduleDag() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
             VM vm = new VM(vmType, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
@@ -106,7 +106,7 @@ public class DAGDynamicSchedulerTest {
     public void testScheduleDag100() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
             VM vm = new VM(vmType, cloudsim);
             vms.add(vm);

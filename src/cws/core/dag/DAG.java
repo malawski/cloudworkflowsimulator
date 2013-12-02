@@ -6,7 +6,6 @@ import java.util.List;
 import cws.core.dag.exception.DAGFileNotFoundException;
 
 /**
- * 
  * @author Gideon Juve <juve@usc.edu>
  */
 public class DAG {

@@ -71,10 +71,6 @@ public class Task {
         return size;
     }
 
-    public void setSize(double size) {
-        this.size = size;
-    }
-
     public String getTransformation() {
         return transformation;
     }

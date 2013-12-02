@@ -222,6 +222,7 @@ public class VM extends CWSSimEntity {
         } else {
             job.setResult(Job.Result.SUCCESS);
         }
+        System.out.println("Predicted:" + predictedRuntime + ", actual:" + actualRuntime + " sz:" + size);
 
         getCloudsim().log(
                 String.format("Starting computational part of job %s (task_id = %s, workflow = %s) on VM %s",

@@ -356,7 +356,7 @@ public class TestRun {
 
     private Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams) {
         StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
-        cws.core.core.VMType vmType = VMTypeBuilder.newBuilder().mips(1000).cores(1).price(1.0).build();
+        cws.core.core.VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         return new Environment(vmType, storageManager);
     }
 }
