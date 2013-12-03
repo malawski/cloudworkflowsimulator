@@ -99,7 +99,7 @@ public class Cloud extends CWSSimEntity {
         if (!vms.contains(vm)) {
             throw new RuntimeException("Unknown VM");
         }
-        getCloudsim().log(String.format("VM %d terminated", getId()));
+        getCloudsim().log(String.format("VM %d terminated", vm.getId()));
 
         vm.setTerminateTime(getCloudsim().clock());
         vms.remove(vm);
