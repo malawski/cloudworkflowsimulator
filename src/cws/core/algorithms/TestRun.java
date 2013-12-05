@@ -299,16 +299,6 @@ public class TestRun {
                     cloudsim.setLogsEnabled(enableLogging);
                     cloudsim.log("budget = " + budget);
                     cloudsim.log("deadline = " + deadline);
-                    cloudsim.log("application = " + application);
-                    cloudsim.log("inputdir = " + inputdir);
-                    cloudsim.log("outputfile = " + outputfile);
-                    cloudsim.log("distribution = " + distribution);
-                    cloudsim.log("ensembleSize = " + ensembleSize);
-                    cloudsim.log("scalingFactor = " + scalingFactor);
-                    cloudsim.log("algorithm = " + algorithmName);
-                    cloudsim.log("seed = " + seed);
-                    cloudsim.log("storageManagerType = " + storageManagerType);
-                    cloudsim.log("storageCache = " + storageCacheType);
 
                     environment = createEnvironment(cloudsim, simulationParams);
 
@@ -352,11 +342,6 @@ public class TestRun {
         }
     }
 
-    private OutputStream getLogOutputStream(double budget, double deadline, File outputfile)
-            throws FileNotFoundException {
-        return new FileOutputStream(new File(outputfile.getAbsolutePath() + ".b-" + budget + "d-" + deadline + ".log"));
-    }
-
     /**
      * Crates algorithm instance from the given input params.
      * @return The newly created algorithm instance.
@@ -374,6 +359,19 @@ public class TestRun {
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }
+    }
+
+    /**
+     * Returns output stream for logs for current simulation.
+     * @param budget The simulation's budget.
+     * @param deadline The simulation's deadline.
+     * @param outputfile The simulation's main output file.
+     * @return Output stream for logs for current simulation.
+     */
+    private OutputStream getLogOutputStream(double budget, double deadline, File outputfile)
+            throws FileNotFoundException {
+        String name = String.format("%s.b-%.2f-d-%.2f.log", outputfile.getAbsolutePath(), budget, deadline);
+        return new FileOutputStream(new File(name));
     }
 
     private Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams) {

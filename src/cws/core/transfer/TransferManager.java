@@ -55,7 +55,6 @@ public class TransferManager extends CWSSimEntity {
 
     public TransferManager(CloudSimWrapper cloudsim) {
         super("TransferManager", cloudsim);
-        cloudsim.addEntity(this);
         activeTransfers = new HashSet<Transfer>();
         listeners = new HashSet<TransferListener>();
     }

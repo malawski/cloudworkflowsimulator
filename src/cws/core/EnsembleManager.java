@@ -32,7 +32,6 @@ public class EnsembleManager extends CWSSimEntity {
         this.dags = new LinkedList<DAGJob>();
         this.listeners = new LinkedList<DAGJobListener>();
         prioritizeDAGs(dags);
-        cloudsim.addEntity(this);
     }
 
     public EnsembleManager(WorkflowEngine engine, CloudSimWrapper cloudsim) {

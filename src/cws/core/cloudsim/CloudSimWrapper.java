@@ -5,35 +5,41 @@ import java.io.PrintStream;
 import java.util.Calendar;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 
+/**
+ * Wrapper for CloudSim class. Why did we need this class? Because CloudSim has only static methods and we wanted to
+ * make code more testable, hence we have created this class.
+ */
 public class CloudSimWrapper {
+    /** Simulation wall start time in nanos */
     private long simulationStartWallTime;
+
+    /** Simulation wall finish time in nanos */
     private long simulationFinishWallTime;
-    // TODO(bryk):
+
+    /** The input stream to write logs to */
     private PrintStream logPrintStream;
+
+    /** Whether logging is enabled. Defaults to true. */
     private boolean logsEnabled = true;
 
+    /** The last time a log has been prited. */
     private double lastTime = 0.0;
 
     /**
-     * TODO(bryk):
+     * Creates CloudSimWrapper which prints logs to stdout.
      */
     public CloudSimWrapper() {
         logPrintStream = System.out;
     }
 
     /**
-     * TODO(bryk):
-     * @param logOutputStream
+     * Creates CloudSimWrapper which prints logs to the provided stream.
+     * @param logOutputStream The stream to print logs to.
      */
     public CloudSimWrapper(OutputStream logOutputStream) {
         this.logPrintStream = new PrintStream(logOutputStream);
-    }
-
-    public void addEntity(SimEntity entity) {
-        CloudSim.addEntity(entity);
     }
 
     /**
@@ -109,6 +115,10 @@ public class CloudSimWrapper {
         send(myslef.getId(), myslef.getId(), delay, tag, data);
     }
 
+    /**
+     * Logs the given message to previously set output stream.
+     * @param msg The message to logs.
+     */
     public void log(String msg) {
         if (logsEnabled) {
             if (CloudSim.running()) {
@@ -120,10 +130,16 @@ public class CloudSimWrapper {
         }
     }
 
+    /**
+     * @param logsEnabled Whether logging should be enabled.
+     */
     public void setLogsEnabled(boolean logsEnabled) {
         this.logsEnabled = logsEnabled;
     }
 
+    /**
+     * @return Simulation wall time in nanos.
+     */
     public double getSimulationWallTime() {
         return simulationFinishWallTime - simulationStartWallTime;
     }

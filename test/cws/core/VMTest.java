@@ -3,7 +3,6 @@ package cws.core;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import cws.core.cloudsim.CWSSimEntity;
@@ -32,7 +31,6 @@ public class VMTest {
         public VMDriver(VM vm, CloudSimWrapper cloudsim) {
             super("VMDriver", cloudsim);
             this.vm = vm;
-            getCloudsim().addEntity(this);
         }
 
         public void setJobs(Job[] jobs) {
@@ -70,7 +68,6 @@ public class VMTest {
     private class VMDummyDriver extends CWSSimEntity {
         public VMDummyDriver(CloudSimWrapper cloudsim) {
             super("VMDummyDriver", cloudsim);
-            getCloudsim().addEntity(this);
         }
     }
 
