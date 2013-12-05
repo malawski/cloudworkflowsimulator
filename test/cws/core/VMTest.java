@@ -3,7 +3,9 @@ package cws.core;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Categories.ExcludeCategory;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -131,7 +133,11 @@ public class VMTest {
         assertEquals(20.0, j2.getFinishTime(), 0.0);
     }
 
+    /**
+     * We cancel support of multicore VMs. Once it is reintrucuded, then we should unignore this.
+     */
     @Test
+    @Ignore
     public void testMultiCoreVM() {
         Job j1 = new Job(cloudsim);
         j1.setTask(new Task("task_id1", "transformation", 1000));
@@ -188,7 +194,7 @@ public class VMTest {
         assertEquals(true, vm.isTerminated());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testVMShouldNotAcceptEventsAfterTermination() {
         VM vm = new VM(testDefaultVMType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(cloudsim);
@@ -197,8 +203,6 @@ public class VMTest {
         cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
         cloudsim.send(driver.getId(), vm.getId(), 0.3, WorkflowEvent.VM_LAUNCH);
         cloudsim.startSimulation();
-
-        assertEquals(true, vm.isTerminated());
     }
 
     @Test
@@ -221,7 +225,7 @@ public class VMTest {
         assertEquals(Job.Result.FAILURE, job.getResult());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testVMShouldNotAcceptNewJobsAfterTermination() {
         Job job2 = new Job(cloudsim);
         job2.setTask(new Task("task_id1", "transformation", 1000));
@@ -236,7 +240,5 @@ public class VMTest {
         cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
         cloudsim.send(driver.getId(), vm.getId(), 0.3, WorkflowEvent.JOB_SUBMIT, job2);
         cloudsim.startSimulation();
-
-        assertEquals(Job.Result.NONE, job2.getResult());
     }
 }
