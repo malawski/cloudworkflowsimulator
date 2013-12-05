@@ -3,6 +3,7 @@ package cws.core;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import cws.core.cloudsim.CWSSimEntity;

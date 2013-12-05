@@ -95,7 +95,7 @@ public class DAGSchedulerFCFSTest {
         assertEquals(vms.size(), engine.getAvailableVMs().size());
         assertEquals(0, engine.getQueuedJobs().size());
 
-        jobLog.printJobs("testScheduleDag");
+        jobLog.printJobs();
     }
 
     @Test
@@ -122,7 +122,7 @@ public class DAGSchedulerFCFSTest {
         assertEquals(vms.size(), engine.getAvailableVMs().size());
         assertEquals(0, engine.getQueuedJobs().size());
 
-        jobLog.printJobs("testScheduleDag_CyberShake_100");
+        jobLog.printJobs();
     }
 
 }

@@ -99,7 +99,7 @@ public class EnsembleDynamicSchedulerTest {
         assertEquals(vms.size(), engine.getAvailableVMs().size());
         assertEquals(0, engine.getQueuedJobs().size());
 
-        jobLog.printJobs("testEnsembleDynamicSchedulerDag");
+        jobLog.printJobs();
     }
 
     @Test
@@ -126,7 +126,7 @@ public class EnsembleDynamicSchedulerTest {
         assertEquals(vms.size(), engine.getAvailableVMs().size());
         assertEquals(0, engine.getQueuedJobs().size());
 
-        jobLog.printJobs("testEnsembleDynamicSchedulerDag_CyberShake_100");
+        jobLog.printJobs();
     }
 
     @Test
@@ -155,6 +155,6 @@ public class EnsembleDynamicSchedulerTest {
         assertEquals(vms.size(), engine.getAvailableVMs().size());
         assertEquals(0, engine.getQueuedJobs().size());
 
-        jobLog.printJobs("testEnsembleDynamicSchedulerDag_CyberShake_100x10");
+        jobLog.printJobs();
     }
 }

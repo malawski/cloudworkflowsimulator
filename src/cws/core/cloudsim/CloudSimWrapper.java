@@ -1,8 +1,9 @@
 package cws.core.cloudsim;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Calendar;
 
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
@@ -10,6 +11,26 @@ import org.cloudbus.cloudsim.core.predicates.Predicate;
 public class CloudSimWrapper {
     private long simulationStartWallTime;
     private long simulationFinishWallTime;
+    // TODO(bryk):
+    private PrintStream logPrintStream;
+    private boolean logsEnabled = true;
+
+    private double lastTime = 0.0;
+
+    /**
+     * TODO(bryk):
+     */
+    public CloudSimWrapper() {
+        logPrintStream = System.out;
+    }
+
+    /**
+     * TODO(bryk):
+     * @param logOutputStream
+     */
+    public CloudSimWrapper(OutputStream logOutputStream) {
+        this.logPrintStream = new PrintStream(logOutputStream);
+    }
 
     public void addEntity(SimEntity entity) {
         CloudSim.addEntity(entity);
@@ -88,19 +109,19 @@ public class CloudSimWrapper {
         send(myslef.getId(), myslef.getId(), delay, tag, data);
     }
 
-    private double lastTime = 0.0;
-
     public void log(String msg) {
-        Log.printLine((clock() - lastTime) + " (" + clock() + ") " + msg);
-        lastTime = clock();
+        if (logsEnabled) {
+            if (CloudSim.running()) {
+                logPrintStream.println((clock() - lastTime) + " (" + clock() + ") " + msg);
+                lastTime = clock();
+            } else {
+                logPrintStream.println(msg);
+            }
+        }
     }
 
-    public void disableLogging() {
-        Log.disable();
-    }
-
-    public void print(String string) {
-        Log.print(string);
+    public void setLogsEnabled(boolean logsEnabled) {
+        this.logsEnabled = logsEnabled;
     }
 
     public double getSimulationWallTime() {

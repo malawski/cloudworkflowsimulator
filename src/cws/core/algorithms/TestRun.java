@@ -3,6 +3,7 @@ package cws.core.algorithms;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Random;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
+import org.cloudbus.cloudsim.Log;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMTypeBuilder;
@@ -86,11 +88,11 @@ public class TestRun {
         options.addOption(enableLogging);
 
         Option deadline = new Option("d", "deadline", true, "Optional deadline, which overrides max and min deadlines");
-        enableLogging.setArgName("DEADLINE");
+        deadline.setArgName("DEADLINE");
         options.addOption(deadline);
 
         Option budget = new Option("b", "budget", true, "Optional budget, which overrides max and min budgets");
-        enableLogging.setArgName("DEADLINE");
+        deadline.setArgName("DEADLINE");
         options.addOption(budget);
 
         GlobalStorageParams.buildCliOptions(options);
@@ -146,11 +148,8 @@ public class TestRun {
 
         CloudSimWrapper cloudsim = new CloudSimWrapper();
         cloudsim.init();
-
-        // Disable cloudsim logging
-        if (!enableLogging) {
-            cloudsim.disableLogging();
-        }
+        cloudsim.setLogsEnabled(enableLogging);
+        Log.disable();
 
         // Determine the distribution
         String[] names = null;
@@ -204,6 +203,7 @@ public class TestRun {
         System.out.printf("seed = %d\n", seed);
         System.out.printf("storageManagerType = %s\n", storageManagerType);
         System.out.printf("storageCache = %s\n", storageCacheType);
+        System.out.printf("enableLogging = %b\n", enableLogging);
 
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
@@ -271,8 +271,8 @@ public class TestRun {
             deadlineStep = 1;
         }
 
-        System.out.printf("budget = %f %f %f\n", minBudget, maxBudget, budgetStep);
-        System.out.printf("deadline = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
+        System.out.printf("budgets (min, max, step) = %f %f %f\n", minBudget, maxBudget, budgetStep);
+        System.out.printf("deadlines (min, max, step) = %f %f %f\n", minDeadline, maxDeadline, deadlineStep);
 
         PrintStream fileOut = null;
         try {
@@ -290,8 +290,25 @@ public class TestRun {
                 System.out.println();
                 for (double deadline = minDeadline; deadline <= maxDeadline + (deadlineStep / 2.0); deadline += deadlineStep) {
                     System.out.print(".");
-                    cloudsim = new CloudSimWrapper();
+                    if (enableLogging) {
+                        cloudsim = new CloudSimWrapper(getLogOutputStream(budget, deadline, outputfile));
+                    } else {
+                        cloudsim = new CloudSimWrapper();
+                    }
                     cloudsim.init();
+                    cloudsim.setLogsEnabled(enableLogging);
+                    cloudsim.log("budget = " + budget);
+                    cloudsim.log("deadline = " + deadline);
+                    cloudsim.log("application = " + application);
+                    cloudsim.log("inputdir = " + inputdir);
+                    cloudsim.log("outputfile = " + outputfile);
+                    cloudsim.log("distribution = " + distribution);
+                    cloudsim.log("ensembleSize = " + ensembleSize);
+                    cloudsim.log("scalingFactor = " + scalingFactor);
+                    cloudsim.log("algorithm = " + algorithmName);
+                    cloudsim.log("seed = " + seed);
+                    cloudsim.log("storageManagerType = " + storageManagerType);
+                    cloudsim.log("storageCache = " + storageCacheType);
 
                     environment = createEnvironment(cloudsim, simulationParams);
 
@@ -299,7 +316,7 @@ public class TestRun {
                             deadline);
 
                     algorithm.setEnvironment(environment);
-                    algorithm.simulate(algorithmName);
+                    algorithm.simulate();
 
                     AlgorithmStatistics algorithmStatistics = algorithm.getAlgorithmStatistics();
                     double planningTime = algorithm.getPlanningnWallTime() / 1.0e9;
@@ -333,6 +350,11 @@ public class TestRun {
         } finally {
             IOUtils.closeQuietly(fileOut);
         }
+    }
+
+    private OutputStream getLogOutputStream(double budget, double deadline, File outputfile)
+            throws FileNotFoundException {
+        return new FileOutputStream(new File(outputfile.getAbsolutePath() + ".b-" + budget + "d-" + deadline + ".log"));
     }
 
     /**
