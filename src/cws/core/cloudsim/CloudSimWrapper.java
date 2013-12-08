@@ -24,9 +24,6 @@ public class CloudSimWrapper {
     /** Whether logging is enabled. Defaults to true. */
     private boolean logsEnabled = true;
 
-    /** The last time a log has been prited. */
-    private double lastTime = 0.0;
-
     /**
      * Creates CloudSimWrapper which prints logs to stdout.
      */
@@ -122,8 +119,7 @@ public class CloudSimWrapper {
     public void log(String msg) {
         if (logsEnabled) {
             if (CloudSim.running()) {
-                logPrintStream.println((clock() - lastTime) + " (" + clock() + ") " + msg);
-                lastTime = clock();
+                logPrintStream.println("(" + clock() + ") " + msg);
             } else {
                 logPrintStream.println(msg);
             }

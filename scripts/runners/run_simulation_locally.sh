@@ -17,7 +17,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 (set -x && java -cp "${DIR}/../../lib/*:${DIR}/../../bin/*:${DIR}/../../bin/" cws.core.algorithms.TestRun $ARGS)
 
 if [ $LOG_PREFIX ] ; then
-  for LOG in `ls ${LOG_PREFIX}.*`; do
+  for LOG in `ls ${LOG_PREFIX}.*.log`; do
     LOG=`readlink -f "$LOG"`
     echo "Processing ${LOG}"
     (
