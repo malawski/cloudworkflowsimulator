@@ -25,10 +25,46 @@ import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 
 public class TestRun {
-    private static final String DEFAULT_ENSEMBLE_SIZE = "50";
+    /**
+     * The number of workflows an ensemble is comprised of.
+     */
+    private static final String DEFAULT_ENSEMBLE_SIZE = "20";
+
+    /**
+     * The scaling factor for jobs' runtimes.
+     */
     private static final String DEFAULT_SCALING_FACTOR = "1.0";
+
+    /**
+     * Storage cache type. Allowed values: void, global.
+     */
     private static final String DEFAULT_STORAGE_CACHE = "void";
+
+    /**
+     * Whether to enable simulation logging. It is needed for validation and gantt graphs generation, but can decrease
+     * performance especially if logs are dumped to stdout.
+     */
     private static final String DEFAULT_ENABLE_LOGGING = "true";
+
+    /**
+     * Number of budgets generated. It is ignored when budget is explicitly set.
+     */
+    private static final String DEFAULT_N_BUDGETS = "10";
+
+    /**
+     * Number of deadlines generated. It is ignored when deadline is explicitly set.
+     */
+    private static final String DEFAULT_N_DEADLINES = "10";
+
+    /**
+     * How many times more can the number of VMs be increased? 1.0 means 0%, 2.0 means 100%, etc..
+     */
+    private static final String DEFAULT_MAX_SCALING = "1.0";
+
+    /**
+     * The algorithm alpha parameter.
+     */
+    private static final String DEFAULT_ALPHA = "0.7";
 
     public static Options buildOptions() {
         Options options = new Options();
@@ -92,8 +128,27 @@ public class TestRun {
         options.addOption(deadline);
 
         Option budget = new Option("b", "budget", true, "Optional budget, which overrides max and min budgets");
-        deadline.setArgName("DEADLINE");
+        budget.setArgName("DEADLINE");
         options.addOption(budget);
+
+        Option nBudgets = new Option("nb", "n-budgets", true, "Optional number of generated budgets, defaults to "
+                + DEFAULT_N_BUDGETS);
+        nBudgets.setArgName("N");
+        options.addOption(nBudgets);
+
+        Option nDeadlines = new Option("nd", "n-deadlines", true,
+                "Optional number of generated deadlines, defaults to " + DEFAULT_N_DEADLINES);
+        nDeadlines.setArgName("N");
+        options.addOption(nDeadlines);
+
+        Option maxScaling = new Option("ms", "max-scaling", true,
+                "Optional maximum VM number scaling factor, defaults to " + DEFAULT_MAX_SCALING);
+        maxScaling.setArgName("FLOAT");
+        options.addOption(maxScaling);
+
+        Option alpha = new Option("alp", "alpha", true, "Optional alpha factor, defaults to " + DEFAULT_ALPHA);
+        alpha.setArgName("FLOAT");
+        options.addOption(alpha);
 
         GlobalStorageParams.buildCliOptions(options);
         VMFactory.buildCliOptions(options);
@@ -125,31 +180,31 @@ public class TestRun {
     }
 
     public void runTest(CommandLine args) {
-        // These parameters are consistent with previous experiments
-        double alpha = 0.7;
-        double maxScaling = 1.0;
-
         // Arguments with no defaults
-        String algorithmName = args.getOptionValue("algorithm"); // "SPSS";
-        String application = args.getOptionValue("application"); // "SIPHT";
+        String algorithmName = args.getOptionValue("algorithm");
+        String application = args.getOptionValue("application");
         File inputdir = new File(args.getOptionValue("input-dir"));
-        File outputfile = new File(args.getOptionValue("output-file")); // new File("TestRun.dat");
-        String distribution = args.getOptionValue("distribution"); // "uniform_unsorted";
+        File outputfile = new File(args.getOptionValue("output-file"));
+        String distribution = args.getOptionValue("distribution");
         String storageManagerType = args.getOptionValue("storage-manager");
 
         // Arguments with defaults
-        Integer ensembleSize = Integer.parseInt(args.getOptionValue("ensemble-size", DEFAULT_ENSEMBLE_SIZE));
-        Double scalingFactor = Double.parseDouble(args.getOptionValue("scaling-factor", DEFAULT_SCALING_FACTOR));
-        Long seed = Long.parseLong(args.getOptionValue("seed", System.currentTimeMillis() + ""));
+        int ensembleSize = Integer.parseInt(args.getOptionValue("ensemble-size", DEFAULT_ENSEMBLE_SIZE));
+        double scalingFactor = Double.parseDouble(args.getOptionValue("scaling-factor", DEFAULT_SCALING_FACTOR));
+        long seed = Long.parseLong(args.getOptionValue("seed", System.currentTimeMillis() + ""));
         String storageCacheType = args.getOptionValue("storage-cache", DEFAULT_STORAGE_CACHE);
-        Boolean enableLogging = Boolean.valueOf(args.getOptionValue("enable-logging", DEFAULT_ENABLE_LOGGING));
+        boolean enableLogging = Boolean.valueOf(args.getOptionValue("enable-logging", DEFAULT_ENABLE_LOGGING));
+        int nbudgets = Integer.parseInt(args.getOptionValue("n-budgets", DEFAULT_N_BUDGETS));
+        int ndeadlines = Integer.parseInt(args.getOptionValue("n-deadlines", DEFAULT_N_DEADLINES));
+        double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
+        double alpha = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_ALPHA));
 
         VMFactory.readCliOptions(args, seed);
 
         CloudSimWrapper cloudsim = new CloudSimWrapper();
         cloudsim.init();
         cloudsim.setLogsEnabled(enableLogging);
-        Log.disable();
+        Log.disable(); // We do not need Cloudsim's logs. We have our own.
 
         // Determine the distribution
         String[] names = null;
@@ -204,6 +259,10 @@ public class TestRun {
         System.out.printf("storageManagerType = %s\n", storageManagerType);
         System.out.printf("storageCache = %s\n", storageCacheType);
         System.out.printf("enableLogging = %b\n", enableLogging);
+        System.out.printf("nbudgets = %d\n", nbudgets);
+        System.out.printf("ndeadlines = %d\n", ndeadlines);
+        System.out.printf("alpha = %f\n", alpha);
+        System.out.printf("maxScaling = %f\n", maxScaling);
 
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
@@ -237,9 +296,6 @@ public class TestRun {
             maxTime += dagStats.getCriticalPath();
             maxCost += dagStats.getMinCost();
         }
-
-        int nbudgets = 10;
-        int ndeadlines = 10;
 
         double minBudget;
         double maxBudget;
