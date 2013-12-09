@@ -15,10 +15,10 @@ import cws.core.jobs.UniformRuntimeDistribution;
 
 public class VMFactory {
     private static final double DEFAULT_RUNTIME_VARIANCE = 0.0;
-    public static final double DEFAULT_PROVISIONING_DELAY = 0.0;
-    public static final double DEFAULT_DEPROVISIONING_DELAY = 10.0;
+    private static final double DEFAULT_PROVISIONING_DELAY = 0.0;
+    private static final double DEFAULT_DEPROVISIONING_DELAY = 10.0;
     private static final double DEFAULT_FAILURE_RATE = 0.0;
-    public static final long DEFAULT_CACHE_SIZE = 100000000;
+    private static final long DEFAULT_CACHE_SIZE = 100000000;
 
     private static ContinuousDistribution provisioningDelayDistribution = new ConstantDistribution(
             DEFAULT_PROVISIONING_DELAY);
