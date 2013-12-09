@@ -85,7 +85,6 @@ public class WorkflowEngine extends CWSSimEntity {
         this.jobFactory = jobFactory;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
-        getCloudsim().addEntity(this);
     }
 
     public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, CloudSimWrapper cloudsim) {

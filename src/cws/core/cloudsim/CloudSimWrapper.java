@@ -1,18 +1,45 @@
 package cws.core.cloudsim;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Calendar;
 
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.predicates.Predicate;
 
+/**
+ * Wrapper for CloudSim class. Why did we need this class? Because CloudSim has only static methods and we wanted to
+ * make code more testable, hence we have created this class.
+ */
 public class CloudSimWrapper {
+    /** Simulation wall start time in nanos */
     private long simulationStartWallTime;
+
+    /** Simulation wall finish time in nanos */
     private long simulationFinishWallTime;
 
-    public void addEntity(SimEntity entity) {
-        CloudSim.addEntity(entity);
+    /** The input stream to write logs to */
+    private PrintStream logPrintStream;
+
+    /** Whether logging is enabled. Defaults to true. */
+    private boolean logsEnabled = true;
+
+    /** The last time a log has been prited. */
+    private double lastTime = 0.0;
+
+    /**
+     * Creates CloudSimWrapper which prints logs to stdout.
+     */
+    public CloudSimWrapper() {
+        logPrintStream = System.out;
+    }
+
+    /**
+     * Creates CloudSimWrapper which prints logs to the provided stream.
+     * @param logOutputStream The stream to print logs to.
+     */
+    public CloudSimWrapper(OutputStream logOutputStream) {
+        this.logPrintStream = new PrintStream(logOutputStream);
     }
 
     /**
@@ -88,21 +115,31 @@ public class CloudSimWrapper {
         send(myslef.getId(), myslef.getId(), delay, tag, data);
     }
 
-    private double lastTime = 0.0;
-
+    /**
+     * Logs the given message to previously set output stream.
+     * @param msg The message to logs.
+     */
     public void log(String msg) {
-        Log.printLine((clock() - lastTime) + " (" + clock() + ") " + msg);
-        lastTime = clock();
+        if (logsEnabled) {
+            if (CloudSim.running()) {
+                logPrintStream.println((clock() - lastTime) + " (" + clock() + ") " + msg);
+                lastTime = clock();
+            } else {
+                logPrintStream.println(msg);
+            }
+        }
     }
 
-    public void disableLogging() {
-        Log.disable();
+    /**
+     * @param logsEnabled Whether logging should be enabled.
+     */
+    public void setLogsEnabled(boolean logsEnabled) {
+        this.logsEnabled = logsEnabled;
     }
 
-    public void print(String string) {
-        Log.print(string);
-    }
-
+    /**
+     * @return Simulation wall time in nanos.
+     */
     public double getSimulationWallTime() {
         return simulationFinishWallTime - simulationStartWallTime;
     }

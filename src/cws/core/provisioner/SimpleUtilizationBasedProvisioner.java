@@ -30,6 +30,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         if (initialNumVMs == 0) {
             initialNumVMs = engine.getAvailableVMs().size();
             if (initialNumVMs == 0) {// send event to initiate next provisioning cycle
+                // We need to wait after initial VMs are created.
                 getCloudsim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL,
                         WorkflowEvent.PROVISIONING_REQUEST, null);
                 return;

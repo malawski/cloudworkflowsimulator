@@ -31,7 +31,6 @@ public class VMTest {
         public VMDriver(VM vm, CloudSimWrapper cloudsim) {
             super("VMDriver", cloudsim);
             this.vm = vm;
-            getCloudsim().addEntity(this);
         }
 
         public void setJobs(Job[] jobs) {
@@ -69,7 +68,6 @@ public class VMTest {
     private class VMDummyDriver extends CWSSimEntity {
         public VMDummyDriver(CloudSimWrapper cloudsim) {
             super("VMDummyDriver", cloudsim);
-            getCloudsim().addEntity(this);
         }
     }
 

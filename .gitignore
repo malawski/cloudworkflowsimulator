@@ -9,10 +9,11 @@ paper/paper.pdf
 *.jpeg
 *.png
 
-# integration tests output some .txt files
+# simulation usual outputs
 *.txt
-
-# simulation output files
+*.log
+*.postlog
+*.dat
 *.csv
 *.csv[#]
 
@@ -25,3 +26,4 @@ cloudworkflowsimulator.iml
 
 # python
 *.pyc
+

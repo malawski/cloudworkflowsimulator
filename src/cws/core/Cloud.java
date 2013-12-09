@@ -22,7 +22,6 @@ public class Cloud extends CWSSimEntity {
 
     public Cloud(CloudSimWrapper cloudsim) {
         super("Cloud", cloudsim);
-        cloudsim.addEntity(this);
     }
 
     public void addVMListener(VMListener l) {

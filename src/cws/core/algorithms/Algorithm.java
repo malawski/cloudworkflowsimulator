@@ -30,8 +30,8 @@ public abstract class Algorithm extends CWSSimEntity {
     /** WorkflowLog instance. Logs some interesting data to a file. */
     WorkflowLog workflowLog = new WorkflowLog(getCloudsim());
 
-    /** Should we dump WorkflowLog's logs */
-    private boolean shouldGenerateLog = true; // TODO(bryk): Parametrize this.
+    /** Should we dump WorkflowLog's logs? */
+    private boolean shouldGenerateWorkflowLogs = true; // TODO(bryk): Parameterize this.
 
     /** Simulation's budget */
     private double budget;
@@ -57,17 +57,17 @@ public abstract class Algorithm extends CWSSimEntity {
     /** Should return the number of wall time nanos spent for planning */
     abstract public long getPlanningnWallTime();
 
-    public void simulate(String logname) {
+    public void simulate() {
         simulateInternal();
-        if (shouldGenerateLog()) {
-            printWorkflowLogs(logname);
+        if (shouldGenerateWorkflowLogs) {
+            printWorkflowLogs();
         }
         conductSanityChecks();
     }
 
-    private void printWorkflowLogs(String logname) {
-        workflowLog.printJobs(logname);
-        workflowLog.printVmList(logname);
+    private void printWorkflowLogs() {
+        workflowLog.printJobs();
+        workflowLog.printVmList();
         workflowLog.printDAGJobs();
     }
 
@@ -140,11 +140,7 @@ public abstract class Algorithm extends CWSSimEntity {
         return this.getClass().getSimpleName();
     }
 
-    public boolean shouldGenerateLog() {
-        return this.shouldGenerateLog;
-    }
-
     public void setGenerateLog(boolean generateLog) {
-        this.shouldGenerateLog = generateLog;
+        this.shouldGenerateWorkflowLogs = generateLog;
     }
 }

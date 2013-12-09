@@ -28,7 +28,6 @@ public class RandomTransferManagerTest {
         public TransferDriver(CloudSimWrapper cloudsim) {
             super("TransferDriver", cloudsim);
             this.tm = new TransferManager(cloudsim);
-            cloudsim.addEntity(this);
         }
 
         public void setTransfers(List<Transfer> transfers) {

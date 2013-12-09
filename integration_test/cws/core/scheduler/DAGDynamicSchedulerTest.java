@@ -99,7 +99,7 @@ public class DAGDynamicSchedulerTest {
         assertEquals(vms.size(), engine.getAvailableVMs().size());
         assertEquals(0, engine.getQueuedJobs().size());
 
-        jobLog.printJobs("testDynamicSchedulerDag");
+        jobLog.printJobs();
     }
 
     @Test
@@ -126,6 +126,6 @@ public class DAGDynamicSchedulerTest {
         assertEquals(vms.size(), engine.getAvailableVMs().size());
         assertEquals(0, engine.getQueuedJobs().size());
 
-        jobLog.printJobs("testDynamicSchedulerDag_CyberShake_100");
+        jobLog.printJobs();
     }
 }
