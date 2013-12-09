@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.experimental.categories.Categories.ExcludeCategory;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -194,7 +193,7 @@ public class VMTest {
         assertEquals(true, vm.isTerminated());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalStateException.class)
     public void testVMShouldNotAcceptEventsAfterTermination() {
         VM vm = new VM(testDefaultVMType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(cloudsim);
@@ -225,7 +224,7 @@ public class VMTest {
         assertEquals(Job.Result.FAILURE, job.getResult());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalStateException.class)
     public void testVMShouldNotAcceptNewJobsAfterTermination() {
         Job job2 = new Job(cloudsim);
         job2.setTask(new Task("task_id1", "transformation", 1000));
@@ -239,6 +238,18 @@ public class VMTest {
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
         cloudsim.send(driver.getId(), vm.getId(), 0.3, WorkflowEvent.JOB_SUBMIT, job2);
+        cloudsim.startSimulation();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testLaunchVMTwice() {
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+
+        VM vm = new VM(vmType, cloudsim);
+        VMDummyDriver driver = new VMDummyDriver(cloudsim);
+
+        cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
+        cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.VM_LAUNCH);
         cloudsim.startSimulation();
     }
 }
