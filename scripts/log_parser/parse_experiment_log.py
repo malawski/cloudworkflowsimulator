@@ -19,43 +19,43 @@ from validation.common import ExperimentSettingsWithId, ExperimentSettings
 
 PATTERNS = [
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<started>\d+.\d+)\)\s+Starting computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+)',
+        regex=r'\((?P<started>\d+.\d+)\)\s+Starting computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+)',
         type=TaskLog,
         set_values={'finished': None, 'result': None}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<finished>\d+.\d+)\)\s+Computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+), retry = false\) on VM (?P<vm>\d+) finished',
+        regex=r'\((?P<finished>\d+.\d+)\)\s+Computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+), retry = false\) on VM (?P<vm>\d+) finished',
         type=TaskLog,
         set_values={'started': None, 'result': 'OK'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<finished>\d+.\d+)\)\s+Computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+), retry = true\) on VM (?P<vm>\d+) finished',
+        regex=r'\((?P<finished>\d+.\d+)\)\s+Computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+), retry = true\) on VM (?P<vm>\d+) finished',
         type=TaskLog,
         set_values={'started': None, 'result': 'RETRY_OK'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<finished>\d+.\d+)\)\s+Job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow_id = (?P<workflow>\w+), retry = false\) failed on VM (?P<vm>\d+). Resubmitting...',
+        regex=r'\((?P<finished>\d+.\d+)\)\s+Job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow_id = (?P<workflow>\w+), retry = false\) failed on VM (?P<vm>\d+). Resubmitting...',
         type=TaskLog,
         set_values={'started': None, 'result': 'FAILED'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<finished>\d+.\d+)\)\s+Job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow_id = (?P<workflow>\w+), retry = true\) failed on VM (?P<vm>\d+). Resubmitting...',
+        regex=r'\((?P<finished>\d+.\d+)\)\s+Job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow_id = (?P<workflow>\w+), retry = true\) failed on VM (?P<vm>\d+). Resubmitting...',
         type=TaskLog,
         set_values={'started': None, 'result': 'RETRY_FAILED'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<started>\d+.\d+)\)\s+Global write transfer (?P<id>\d+) started: (?P<file_id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+), job_id: (?P<job_id>\d+)',
+        regex=r'\((?P<started>\d+.\d+)\)\s+Global write transfer (?P<id>\d+) started: (?P<file_id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+), job_id: (?P<job_id>\d+)',
         type=TransferLog,
         set_values={'finished': None, 'direction': 'UPLOAD'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<started>\d+.\d+)\)\s+Global read transfer (?P<id>\d+) started: (?P<file_id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+), job_id: (?P<job_id>\d+)',
+        regex=r'\((?P<started>\d+.\d+)\)\s+Global read transfer (?P<id>\d+) started: (?P<file_id>(\w|\.)+), size: (\d+), vm: (?P<vm>\d+), job_id: (?P<job_id>\d+)',
         type=TransferLog,
         set_values={'finished': None, 'direction': 'DOWNLOAD'}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<finished>\d+.\d+)\)\s+Global (read|write) transfer (?P<id>\d+) finished: ((\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
+        regex=r'\((?P<finished>\d+.\d+)\)\s+Global (read|write) transfer (?P<id>\d+) finished: ((\w|\.)+), bytes transferred: (\d+), duration: (\d+.\d+)',
         type=TransferLog,
         set_values={'started': None, 'vm': None, 'direction': None, 'job_id': None, 'file_id': None}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) started',
+        regex=r'\((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) started',
         type=VMLog,
         set_values={'finished': None}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<finished>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) terminated',
+        regex=r'\((?P<finished>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) terminated',
         type=VMLog,
         set_values={'started': None}),
     log_parser.Pattern(
@@ -71,7 +71,7 @@ PATTERNS = [
         type=ExperimentSettingsWithId,
         set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None}),
     log_parser.Pattern(
-        regex=r'\d+.\d+(E(\+|-)?\d+)? \((?P<time>\d+.\d+)\)\s+GS state has changed: readers = (?P<readers_number>\d+), writers = (?P<writers_number>\d+), read_speed = (?P<read_speed>\d+.\d+), write_speed = (?P<write_speed>\d+.\d+)',
+        regex=r'\((?P<time>\d+.\d+)\)\s+GS state has changed: readers = (?P<readers_number>\d+), writers = (?P<writers_number>\d+), read_speed = (?P<read_speed>\d+.\d+), write_speed = (?P<write_speed>\d+.\d+)',
         type=StorageState,
         set_values={}),
 
