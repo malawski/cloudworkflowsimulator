@@ -14,6 +14,7 @@ First two commands are equivalent. They fire all accessible validators.
 """
 
 import argparse
+import sys
 
 from validation import constraints_validator
 from validation import order_validator
@@ -35,14 +36,18 @@ class ExperimentValidatorError(Exception):
     pass
 
 
+def get_return_code(validation_errors):
+    return 0 if not validation_errors else 1
+
+
 def main():
     args = parse_arguments()
     execution_log = load_experiment_log(args.filename)
     validators = get_validators(args.validator)
 
     validation_errors = validate_with(validators, execution_log)
-
     print_errors(validation_errors)
+    sys.exit(get_return_code(validation_errors))
 
 
 def parse_arguments():
