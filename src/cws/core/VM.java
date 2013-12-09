@@ -74,6 +74,9 @@ public class VM extends CWSSimEntity {
     /** Has this VM been terminated? */
     private boolean isTerminated;
 
+    /** Has this VM been started? */
+    private boolean isLaunched;
+
     /** Number of CPU seconds consumed by jobs on this VM */
     private double cpuSecondsConsumed;
 
@@ -99,6 +102,7 @@ public class VM extends CWSSimEntity {
         this.terminateTime = -1.0;
         this.cpuSecondsConsumed = 0.0;
         this.isTerminated = false;
+        this.isLaunched = false;
     }
 
     /**
@@ -162,14 +166,19 @@ public class VM extends CWSSimEntity {
             default:
                 throw new UnknownWorkflowEventException("Unknown event: " + ev);
             }
+        } else {
+            if (ev.getTag() == WorkflowEvent.VM_LAUNCH || ev.getTag() == WorkflowEvent.JOB_SUBMIT) {
+                throw new IllegalStateException("Attempted to send launch or submit event to terminated VM:"
+                        + this.getId());
+            }
         }
     }
 
     private void launchVM() {
-        // Reset dynamic state
-        jobs.clear();
-        idleCores = vmType.getCores();
-        cpuSecondsConsumed = 0.0;
+        if (this.isLaunched) {
+            throw new IllegalStateException("Attempted to launch already launched VM:" + this.getId());
+        }
+        this.isLaunched = true;
         getCloudsim().log(String.format("VM %d started", getId()));
     }
 
@@ -231,6 +240,9 @@ public class VM extends CWSSimEntity {
     }
 
     private void allOutputsTransferred(Job job) {
+        if (!runningJobs.contains(job) || job.getState() != Job.State.RUNNING) {
+            throw new IllegalStateException("Outputs of non-running job transferred:" + job.getID());
+        }
         // remove from the running set
         runningJobs.remove(job);
 
@@ -252,10 +264,18 @@ public class VM extends CWSSimEntity {
     }
 
     private void jobStart(Job job) {
+        if (job.getState() != Job.State.IDLE) {
+            throw new IllegalStateException("Attempted to start non-idle job:" + job.getID());
+        } else if (idleCores != 1) {
+            // NOTE(bryk): Here we assume that VMs always have only one core. It should be changed once we enable more
+            // cores in VMs.
+            throw new IllegalStateException("Number of idle cores is not 1, actual number:" + idleCores);
+        }
         getCloudsim().log("Starting job " + job.getTask().getId() + " on VM " + job.getVM().getId());
         // The job is now running
         job.setStartTime(getCloudsim().clock());
         job.setState(Job.State.RUNNING);
+
         // add it to the running set
         runningJobs.add(job);
 
@@ -270,12 +290,14 @@ public class VM extends CWSSimEntity {
     }
 
     private void jobFinish(Job job) {
+        if (job.getState() != Job.State.RUNNING) {
+            throw new RuntimeException("Non-running job finished:" + job.getID());
+        }
 
-        getCloudsim().log(
-                String.format(
-                        "Computational part of job %s (task_id = %s, workflow = %s, retry = %s) on VM %s finished", job
-                                .getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(), job
-                                .getVM().getId()));
+        String msg = String.format("Computational part of job %s "
+                + "(task_id = %s, workflow = %s, retry = %s) on VM %s finished", job.getID(), job.getTask().getId(),
+                job.getDAGJob().getDAG().getId(), job.isRetry(), job.getVM().getId());
+        getCloudsim().log(msg);
 
         getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
                 WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
