@@ -10,6 +10,8 @@ import cws.core.jobs.Job;
  * means that transfers aren't taken into account.
  */
 public class VoidStorageManager extends StorageManager {
+    private int transferId = 0;
+
     public VoidStorageManager(CloudSimWrapper cloudsim) {
         super(cloudsim);
     }
@@ -18,6 +20,7 @@ public class VoidStorageManager extends StorageManager {
     public void onBeforeTaskStart(Job job) {
         for (DAGFile file : job.getTask().getInputFiles()) {
             statistics.addActualBytesRead(file.getSize());
+            logInstantTransfer(job, file, "read");
         }
         statistics.addActualFilesRead(job.getTask().getInputFiles().size());
         notifyThatBeforeTransfersCompleted(job);
@@ -25,11 +28,27 @@ public class VoidStorageManager extends StorageManager {
 
     @Override
     public void onAfterTaskCompleted(Job job) {
+        for (DAGFile file : job.getTask().getOutputFiles()) {
+            logInstantTransfer(job, file, "write");
+        }
+
         notifyThatAfterTransfersCompleted(job);
     }
 
     @Override
     public double getTransferTimeEstimation(Task task) {
         return 0.0; // instant transfer
+    }
+
+    private void logInstantTransfer(Job job, DAGFile file, String type) {
+        String downloadMsg = String.format("Global %s transfer %d started: %s, size: %s, vm: %s, job_id: %d", type,
+                transferId, file.getName(), file.getSize(), job.getVM().getId(), job.getID());
+        String uploadMsg = String.format("Global %s transfer %d finished: %s, bytes transferred: %d, duration: %f",
+                type, transferId, file.getName(), file.getSize(), 0.0);
+
+        transferId++;
+
+        getCloudsim().log(downloadMsg);
+        getCloudsim().log(uploadMsg);
     }
 }
