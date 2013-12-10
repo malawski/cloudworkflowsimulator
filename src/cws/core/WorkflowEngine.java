@@ -230,11 +230,15 @@ public class WorkflowEngine extends CWSSimEntity {
                 freeVMs.add(vm);
         } else if (job.getResult() == Job.Result.FAILURE) { // If the job failed
             // Retry the job
-            getCloudsim().log(
-                    String.format(
-                            "Job %d (task_id = %s, workflow_id = %s, retry = %s) failed on VM %s. Resubmitting...", job
-                                    .getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(),
-                            job.getVM().getId()));
+
+            // Log only if it was running job
+            if (job.getStartTime() > 0.0) {
+                getCloudsim().log(
+                        String.format(
+                                "Job %d (task_id = %s, workflow_id = %s, retry = %s) failed on VM %s. Resubmitting...",
+                                job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(),
+                                job.getVM().getId()));
+            }
             Job retry = jobFactory.createJob(dagJob, t, getId(), getCloudsim());
             retry.setRetry(true);
             VM vm = job.getVM();
