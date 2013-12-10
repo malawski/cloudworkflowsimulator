@@ -11,7 +11,7 @@ from operator import attrgetter
 from log_parser.execution_log import EventType
 from validation.common import ValidationResult
 
-JOB_ENDS, TRANSFER_ENDS, JOB_STARTS, TRANSFER_STARTS = range(4)
+JOB_ENDS, TRANSFER_ENDS, TRANSFER_STARTS, JOB_STARTS = range(4)
 
 
 def generate_events_sequentially(jobs, transfers):
@@ -85,7 +85,6 @@ def validate(jobs, transfers, vms):
     jobs_vm_ids = set(jobs_by_vm.keys()) | set(transfers_by_vm.keys())
 
     for vm_id in jobs_vm_ids:
-
         vm_jobs = jobs_by_vm[vm_id] if vm_id in jobs_by_vm else []
         vm_transfers = transfers_by_vm[vm_id] if vm_id in transfers_by_vm else []
 

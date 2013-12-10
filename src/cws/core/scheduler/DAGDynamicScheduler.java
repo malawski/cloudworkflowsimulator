@@ -68,7 +68,7 @@ public class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
 
     private void sendJobToVM(WorkflowEngine engine, VM vm, Job job) {
         getCloudsim().send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
-        getCloudsim().log("Submitting job " + job.getTask().getId() + " to VM " + job.getVM().getId());
+        getCloudsim().log("Submitting " + job.toString() + " to VM " + job.getVM().getId());
     }
 
     private boolean canBeScheduled(Queue<Job> jobs, Set<VM> freeVMs) {

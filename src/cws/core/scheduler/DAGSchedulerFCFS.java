@@ -50,7 +50,7 @@ public class DAGSchedulerFCFS implements Scheduler {
             if (vm.getQueueLength() == 0) {
                 Job job = jobs.poll(); // retrieve and remove job from ready set
                 job.setVM(vm);
-                cloudsim.log(" Submitting job " + job.getID() + " to VM " + job.getVM().getId());
+                cloudsim.log(" Submitting job " + job.toString() + " to VM " + job.getVM().getId());
                 cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
             }
         }

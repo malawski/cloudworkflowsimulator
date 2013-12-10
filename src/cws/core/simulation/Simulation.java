@@ -1,10 +1,6 @@
 package cws.core.simulation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -13,11 +9,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
-import cws.core.algorithms.Algorithm;
-import cws.core.algorithms.AlgorithmStatistics;
-import cws.core.algorithms.DPDS;
-import cws.core.algorithms.SPSS;
-import cws.core.algorithms.WADPDS;
+import cws.core.algorithms.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMTypeBuilder;
 import cws.core.dag.*;
@@ -360,6 +352,7 @@ public class Simulation {
                     cloudsim.setLogsEnabled(enableLogging);
                     cloudsim.log("budget = " + budget);
                     cloudsim.log("deadline = " + deadline);
+                    logWorkflowsDescription(dags, names, cloudsim);
 
                     environment = createEnvironment(cloudsim, simulationParams);
 
@@ -400,6 +393,15 @@ public class Simulation {
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(fileOut);
+        }
+    }
+
+    private void logWorkflowsDescription(List<DAG> dags, String[] names, CloudSimWrapper cloudsim) {
+        for (int i = 0; i < dags.size(); i++) {
+            DAG dag = dags.get(i);
+            String workflowDescription = String.format("Workflow %s, priority = %d, filename = %s", dag.getId(),
+                    dags.size() - i, names[i]);
+            cloudsim.log(workflowDescription);
         }
     }
 
