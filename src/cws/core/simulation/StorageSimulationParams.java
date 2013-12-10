@@ -1,4 +1,4 @@
-package cws.core.algorithms;
+package cws.core.simulation;
 
 import java.util.ArrayList;
 import java.util.List;

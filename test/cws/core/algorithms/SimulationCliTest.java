@@ -10,14 +10,15 @@ import org.apache.commons.cli.PosixParser;
 import org.junit.Before;
 import org.junit.Test;
 
+import cws.core.simulation.Simulation;
 import cws.core.storage.global.GlobalStorageParams;
 
-public class TestRunCliTest {
+public class SimulationCliTest {
     private Options options;
 
     @Before
     public void setUp() {
-        options = TestRun.buildOptions();
+        options = Simulation.buildOptions();
     }
 
     @Test

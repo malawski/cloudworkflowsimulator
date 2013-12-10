@@ -1,4 +1,4 @@
-package cws.core.algorithms;
+package cws.core.simulation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,6 +13,11 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
+import cws.core.algorithms.Algorithm;
+import cws.core.algorithms.AlgorithmStatistics;
+import cws.core.algorithms.DPDS;
+import cws.core.algorithms.SPSS;
+import cws.core.algorithms.WADPDS;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMTypeBuilder;
 import cws.core.dag.*;
@@ -24,7 +29,7 @@ import cws.core.storage.StorageManagerFactory;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 
-public class TestRun {
+public class Simulation {
     /**
      * The number of workflows an ensemble is comprised of.
      */
@@ -158,7 +163,7 @@ public class TestRun {
     private static void printUsage(Options options, String reason) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(120);
-        formatter.printHelp(TestRun.class.getName(), "", options, reason);
+        formatter.printHelp(Simulation.class.getName(), "", options, reason);
         System.exit(1);
     }
 
@@ -171,7 +176,7 @@ public class TestRun {
         } catch (ParseException exp) {
             printUsage(options, exp.getMessage());
         }
-        TestRun testRun = new TestRun();
+        Simulation testRun = new Simulation();
         try {
             testRun.runTest(cmd);
         } catch (IllegalCWSArgumentException e) {

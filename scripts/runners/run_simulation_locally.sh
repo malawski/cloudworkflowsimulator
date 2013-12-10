@@ -14,7 +14,7 @@ LOG_PREFIX=$2
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
-(set -x && java -cp "${DIR}/../../lib/*:${DIR}/../../bin/*:${DIR}/../../bin/" cws.core.algorithms.TestRun $ARGS)
+(set -x && java -cp "${DIR}/../../lib/*:${DIR}/../../bin/*:${DIR}/../../bin/" cws.core.simulation.Simulation $ARGS)
 
 if [ $LOG_PREFIX ] ; then
   for LOG in `ls ${LOG_PREFIX}.*.log`; do
