@@ -223,7 +223,7 @@ public class WorkflowEngine extends CWSSimEntity {
                 }
             }
 
-            getCloudsim().log("Job " + job.getTask().getId() + " finished on VM " + job.getVM().getId());
+            getCloudsim().log(job.toString() + " finished on VM " + job.getVM().getId());
             VM vm = job.getVM();
             // add to free if contained in busy set
             if (busyVMs.remove(vm))

@@ -271,7 +271,7 @@ public class VM extends CWSSimEntity {
             // cores in VMs.
             throw new IllegalStateException("Number of idle cores is not 1, actual number:" + idleCores);
         }
-        getCloudsim().log("Starting job " + job.getTask().getId() + " on VM " + job.getVM().getId());
+        getCloudsim().log("Starting " + job.toString() + " on VM " + job.getVM().getId());
         // The job is now running
         job.setStartTime(getCloudsim().clock());
         job.setState(Job.State.RUNNING);
