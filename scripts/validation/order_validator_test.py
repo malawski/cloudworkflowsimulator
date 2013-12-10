@@ -47,11 +47,11 @@ class OrderValidatorTest(unittest.TestCase):
 
         tasks = [
             TaskLog(id='parent_1', workflow='1', task_id='parent', started=0.0, finished=10.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='child1_1', workflow='1', task_id='child1', started=11.0, finished=13.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='child2_1', workflow='1', task_id='child2', started=12.0, finished=15.0,
-                    vm=2, result='OK')]
+                vm=2, result='OK')]
 
         result = order_validator.validate(dag, tasks)
 
@@ -64,16 +64,32 @@ class OrderValidatorTest(unittest.TestCase):
 
         tasks = [
             TaskLog(id='parent_1', workflow='1', task_id='parent', started=0.0, finished=10.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='child1_1', workflow='1', task_id='child1', started=11.0, finished=13.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='child2_1', workflow='1', task_id='child2', started=5.0, finished=8.0,
-                    vm=2, result='OK')]
+                vm=2, result='OK')]
 
         result = order_validator.validate(dag, tasks)
 
         self.assertFalse(result.is_valid)
         self.assertIn('child2', result.errors[0])
+
+    def test_should_pass_if_task_was_started_immediately(self):
+        dag = self._prepare_parent_child_dag()
+        dag.id = '1'
+
+        tasks = [
+            TaskLog(id='parent_1', workflow='1', task_id='parent', started=0.0, finished=10.0,
+                vm=1, result='OK'),
+            TaskLog(id='child1_1', workflow='1', task_id='child1', started=10.0, finished=13.0,
+                vm=1, result='OK'),
+            TaskLog(id='child2_1', workflow='1', task_id='child2', started=10.0, finished=15.0,
+                vm=2, result='OK')]
+
+        result = order_validator.validate(dag, tasks)
+
+        self.assertTrue(result.is_valid)
 
     def test_should_pass_if_transfers_are_ok(self):
         dag = self._prepare_file_transfer_dag()
@@ -81,15 +97,15 @@ class OrderValidatorTest(unittest.TestCase):
 
         tasks = [
             TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
-                    vm=1, result='OK')]
+                vm=1, result='OK')]
 
         transfers = [
             TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
-                        direction='UPLOAD', file_id='transferred.txt'),
+                direction='UPLOAD', file_id='transferred.txt'),
             TransferLog(id='234', job_id='after_1', vm=1, started=12.0, finished=13.0,
-                        direction='DOWNLOAD', file_id='transferred.txt')]
+                direction='DOWNLOAD', file_id='transferred.txt')]
 
         result = order_validator.validate_transfers(dag, tasks, transfers)
         self.assertTrue(result.is_valid)
@@ -101,13 +117,13 @@ class OrderValidatorTest(unittest.TestCase):
 
         tasks = [
             TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
-                    vm=1, result='OK')]
+                vm=1, result='OK')]
 
         transfers = [
             TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
-                        direction='UPLOAD', file_id='transferred.txt'),
+                direction='UPLOAD', file_id='transferred.txt'),
         ]
 
         result = order_validator.validate_transfers(dag, tasks, transfers)
@@ -119,9 +135,9 @@ class OrderValidatorTest(unittest.TestCase):
 
         tasks = [
             TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
-                    vm=1, result='OK')]
+                vm=1, result='OK')]
 
         transfers = [
             TransferLog(
@@ -137,15 +153,15 @@ class OrderValidatorTest(unittest.TestCase):
 
         tasks = [
             TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
-                    vm=1, result='OK')]
+                vm=1, result='OK')]
 
         transfers = [
             TransferLog(id='123', job_id='before_1', vm=2, started=10.0, finished=12.0,
-                        direction='UPLOAD', file_id='transferred.txt'),
+                direction='UPLOAD', file_id='transferred.txt'),
             TransferLog(id='234', job_id='after_1', vm=1, started=12.0, finished=13.0,
-                        direction='DOWNLOAD', file_id='transferred.txt')]
+                direction='DOWNLOAD', file_id='transferred.txt')]
 
         result = order_validator.validate_transfers(dag, tasks, transfers)
         self.assertFalse(result.is_valid)
@@ -156,15 +172,15 @@ class OrderValidatorTest(unittest.TestCase):
 
         tasks = [
             TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
-                    vm=1, result='OK')]
+                vm=1, result='OK')]
 
         transfers = [
             TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
-                        direction='UPLOAD', file_id='transferred.txt'),
+                direction='UPLOAD', file_id='transferred.txt'),
             TransferLog(id='234', job_id='after_1', vm=2, started=12.0, finished=13.0,
-                        direction='DOWNLOAD', file_id='transferred.txt')]
+                direction='DOWNLOAD', file_id='transferred.txt')]
 
         result = order_validator.validate_transfers(dag, tasks, transfers)
         self.assertFalse(result.is_valid)
@@ -175,15 +191,15 @@ class OrderValidatorTest(unittest.TestCase):
 
         tasks = [
             TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
-                    vm=1, result='OK')]
+                vm=1, result='OK')]
 
         transfers = [
             TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
-                        direction='UPLOAD', file_id='transferred.txt'),
+                direction='UPLOAD', file_id='transferred.txt'),
             TransferLog(id='234', job_id='after_1', vm=1, started=12.0, finished=13.0,
-                        direction='UPLOAD', file_id='transferred.txt')]
+                direction='UPLOAD', file_id='transferred.txt')]
 
         result = order_validator.validate_transfers(dag, tasks, transfers)
         self.assertFalse(result.is_valid)
@@ -194,19 +210,18 @@ class OrderValidatorTest(unittest.TestCase):
 
         tasks = [
             TaskLog(id='before_1', workflow='1', task_id='before', started=0.0, finished=10.0,
-                    vm=1, result='OK'),
+                vm=1, result='OK'),
             TaskLog(id='after_1', workflow='1', task_id='after', started=13.0, finished=18.0,
-                    vm=1, result='OK')]
+                vm=1, result='OK')]
 
         transfers = [
             TransferLog(id='123', job_id='before_1', vm=1, started=10.0, finished=12.0,
-                        direction='DOWNLOAD', file_id='transferred.txt'),
+                direction='DOWNLOAD', file_id='transferred.txt'),
             TransferLog(id='234', job_id='after_1', vm=1, started=12.0, finished=13.0,
-                        direction='DOWNLOAD', file_id='transferred.txt')]
+                direction='DOWNLOAD', file_id='transferred.txt')]
 
         result = order_validator.validate_transfers(dag, tasks, transfers)
         self.assertFalse(result.is_valid)
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -23,7 +23,9 @@ if [ $LOG_PREFIX ] ; then
     (
       cd $DIR/..
       python -m log_parser.parse_experiment_log "${LOG}" "${LOG}.postlog" &&
-      python -m validation.experiment_validator "${LOG}.postlog" &&
+      python -m validation.experiment_validator -v single_task "${LOG}.postlog" &&
+      python -m validation.experiment_validator -v simulation "${LOG}.postlog" &&
+      python -m validation.experiment_validator -v order "${LOG}.postlog" &&
       (
         cd visualisation
         ruby plot_gantt.rb results "${LOG}.postlog" "${LOG}.results.png"
