@@ -10,6 +10,7 @@ import cws.core.jobs.Job;
  * means that transfers aren't taken into account.
  */
 public class VoidStorageManager extends StorageManager {
+    /** for generating unique transfer id */
     private int transferId = 0;
 
     public VoidStorageManager(CloudSimWrapper cloudsim) {
@@ -40,6 +41,7 @@ public class VoidStorageManager extends StorageManager {
         return 0.0; // instant transfer
     }
 
+    /** We need somehow indicate (for validation scripts) that the transfer happened */
     private void logInstantTransfer(Job job, DAGFile file, String type) {
         String downloadMsg = String.format("Global %s transfer %d started: %s, size: %s, vm: %s, job_id: %d", type,
                 transferId, file.getName(), file.getSize(), job.getVM().getId(), job.getID());
