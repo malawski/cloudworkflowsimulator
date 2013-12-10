@@ -1,4 +1,4 @@
-package cws.core.algorithms;
+package cws.core.simulation;
 
 public enum StorageCacheType {
     FIFO, VOID

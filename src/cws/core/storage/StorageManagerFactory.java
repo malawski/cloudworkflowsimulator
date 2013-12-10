@@ -1,9 +1,9 @@
 package cws.core.storage;
 
-import cws.core.algorithms.StorageCacheType;
-import cws.core.algorithms.StorageSimulationParams;
-import cws.core.algorithms.StorageType;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.simulation.StorageCacheType;
+import cws.core.simulation.StorageSimulationParams;
+import cws.core.simulation.StorageType;
 import cws.core.storage.cache.FIFOCacheManager;
 import cws.core.storage.cache.VMCacheManager;
 import cws.core.storage.cache.VoidCacheManager;
