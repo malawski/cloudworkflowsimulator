@@ -122,6 +122,10 @@ def load_storage_logs(log_filename)
   logs = read_log_from_file(log_filename)
   storage_logs = logs[:storage_states]
 
+  if storage_logs.empty?
+    return []
+  end
+
   refined_storage_logs = []
   for i in 0...storage_logs.length-1
     refined_storage_logs.push(storage_logs[i])
@@ -169,6 +173,10 @@ Main {
   mode 'number' do
     def run() 
       refined_storage_logs = load_storage_logs(params['log_filename'].value)
+      if refined_storage_logs.empty?
+        print "No storage information. Probably you run simulation with void storage type.\n"
+        return
+      end
       plot_number_schedule(refined_storage_logs, params)
     end
   end
@@ -176,11 +184,16 @@ Main {
   mode 'speed' do
     def run() 
       refined_storage_logs = load_storage_logs(params['log_filename'].value)
+      if refined_storage_logs.empty?
+        print "No storage information. Probably you run simulation with void storage type.\n"
+        return
+      end
       plot_bandwidth_schedule(refined_storage_logs, params)
     end
   end
 
   def run()
     print "No mode given (number|speed)!\n"
+    return
   end
 }
