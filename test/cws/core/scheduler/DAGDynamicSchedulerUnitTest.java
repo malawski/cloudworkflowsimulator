@@ -98,8 +98,7 @@ public class DAGDynamicSchedulerUnitTest {
 
     private Job createJobMock(List<DAGFile> inputs, List<DAGFile> outputs) {
         Task task = mock(Task.class);
-        Job job = new Job(cloudsim);
-        job.setTask(task);
+        Job job = new Job(null, task, -1, cloudsim);
 
         when(task.getInputFiles()).thenReturn(inputs);
         when(task.getOutputFiles()).thenReturn(outputs);

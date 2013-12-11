@@ -59,19 +59,18 @@ public class Job {
     /** If this job is a retry of the task */
     private boolean isRetry = false;
 
-    public Job(CloudSimWrapper cloudsim) {
+    public Job(DAGJob dagJob, Task task, int owner, CloudSimWrapper cloudsim) {
         this.id = next_id++;
         this.releaseTime = cloudsim.clock();
         this.state = State.QUEUED;
         this.result = Result.NONE;
+        this.dagJob = dagJob;
+        this.task = task;
+        this.owner = owner;
     }
 
     public int getID() {
         return id;
-    }
-
-    public void setOwner(int owner) {
-        this.owner = owner;
     }
 
     public int getOwner() {
@@ -86,16 +85,8 @@ public class Job {
         return vm;
     }
 
-    public void setDAGJob(DAGJob dagJob) {
-        this.dagJob = dagJob;
-    }
-
     public DAGJob getDAGJob() {
         return dagJob;
-    }
-
-    public void setTask(Task task) {
-        this.task = task;
     }
 
     public Task getTask() {

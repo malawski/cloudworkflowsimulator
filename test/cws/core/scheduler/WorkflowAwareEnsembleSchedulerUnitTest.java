@@ -119,9 +119,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
         DAGJob dagjob = new DAGJob(dag, 0);
 
-        Job job = new Job(cloudsim);
-        job.setTask(task);
-        job.setDAGJob(dagjob);
+        Job job = new Job(dagjob, task, -1, cloudsim);
 
         when(task.getInputFiles()).thenReturn(inputs);
         when(task.getOutputFiles()).thenReturn(outputs);

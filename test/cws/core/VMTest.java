@@ -44,7 +44,6 @@ public class VMTest {
 
             // Submit all the jobs
             for (Job j : jobs) {
-                j.setOwner(getId());
                 getCloudsim().send(getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, j);
             }
         }
@@ -82,15 +81,12 @@ public class VMTest {
 
     @Test
     public void testSingleJob() {
-        Job j = new Job(cloudsim);
-        j.setTask(new Task("task_id", "transformation", 1000));
-        j.setDAGJob(new DAGJob(new DAG(), 1));
-
         VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(1).price(0.40).build();
-
         VM vm = new VM(vmType, cloudsim);
-
         VMDriver driver = new VMDriver(vm, cloudsim);
+
+        Job j = new Job(new DAGJob(new DAG(), 1), new Task("task_id", "transformation", 1000), driver.getId(), cloudsim);
+
         driver.setJobs(new Job[] { j });
 
         cloudsim.startSimulation();
@@ -103,18 +99,13 @@ public class VMTest {
 
     @Test
     public void testTwoJobs() {
-        Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id", "transformation", 1000));
-        j1.setDAGJob(new DAGJob(new DAG(), 1));
-        Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000));
-        j2.setDAGJob(new DAGJob(new DAG(), 1));
-
         VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(1).price(0.40).build();
-
         VM vm = new VM(vmType, cloudsim);
-
         VMDriver driver = new VMDriver(vm, cloudsim);
+
+        Job j1 = new Job(new DAGJob(new DAG(), 1), new Task("task_id", "transformation", 1000), driver.getId(), cloudsim);
+        Job j2 = new Job(new DAGJob(new DAG(), 1), new Task("task_id2", "transformation", 1000), driver.getId(), cloudsim);
+
         driver.setJobs(new Job[] { j1, j2 });
 
         cloudsim.startSimulation();
@@ -136,19 +127,13 @@ public class VMTest {
     @Test
     @Ignore
     public void testMultiCoreVM() {
-        Job j1 = new Job(cloudsim);
-        j1.setTask(new Task("task_id1", "transformation", 1000));
-        j1.setDAGJob(new DAGJob(new DAG(), 1));
-
-        Job j2 = new Job(cloudsim);
-        j2.setTask(new Task("task_id2", "transformation", 1000));
-        j2.setDAGJob(new DAGJob(new DAG(), 1));
-
         VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(2).price(0.40).build();
-
         VM vm = new VM(vmType, cloudsim);
-
         VMDriver driver = new VMDriver(vm, cloudsim);
+
+        Job j1 = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
+        Job j2 = new Job(new DAGJob(new DAG(), 1), new Task("task_id2", "transformation", 1000), driver.getId(), cloudsim);
+
         driver.setJobs(new Job[] { j1, j2 });
 
         cloudsim.startSimulation();
@@ -204,15 +189,11 @@ public class VMTest {
 
     @Test
     public void testVMKillJobsUponTermination() {
-        Job job = new Job(cloudsim);
-        job.setTask(new Task("task_id1", "transformation", 1000));
-        job.setDAGJob(new DAGJob(new DAG(), 1));
-
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-
         VM vm = new VM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(cloudsim);
-        job.setOwner(driver.getId());
+
+        Job job = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.JOB_SUBMIT, job);
@@ -224,14 +205,12 @@ public class VMTest {
 
     @Test(expected = IllegalStateException.class)
     public void testVMShouldNotAcceptNewJobsAfterTermination() {
-        Job job2 = new Job(cloudsim);
-        job2.setTask(new Task("task_id1", "transformation", 1000));
-        job2.setDAGJob(new DAGJob(new DAG(), 1));
-
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-
         VM vm = new VM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(cloudsim);
+
+        Job job2 = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
+
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);

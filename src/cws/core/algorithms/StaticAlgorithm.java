@@ -1,8 +1,21 @@
 package cws.core.algorithms;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeMap;
 
-import cws.core.*;
+import cws.core.Cloud;
+import cws.core.EnsembleManager;
+import cws.core.Provisioner;
+import cws.core.Scheduler;
+import cws.core.VM;
+import cws.core.VMListener;
+import cws.core.WorkflowEngine;
+import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.dag.DAG;
@@ -12,7 +25,6 @@ import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
-import cws.core.jobs.SimpleJobFactory;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.provisioner.VMFactory;
@@ -349,8 +361,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     private void prepareEnvironment() {
         Cloud cloud = new Cloud(getCloudsim());
-        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(), this, this, getBudget(), getDeadline(),
-                getCloudsim());
+        WorkflowEngine engine = new WorkflowEngine(this, this, getBudget(), getDeadline(), getCloudsim());
         EnsembleManager manager = new EnsembleManager(engine, getCloudsim());
 
         setCloud(cloud);

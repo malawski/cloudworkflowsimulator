@@ -12,7 +12,6 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
-import cws.core.jobs.JobFactory;
 import cws.core.jobs.JobListener;
 
 /**
@@ -47,9 +46,6 @@ public class WorkflowEngine extends CWSSimEntity {
     /** The list of unmatched ready jobs */
     private LinkedList<Job> queue = new LinkedList<Job>();
 
-    /** A factory for creating Job objects from Task objects */
-    private JobFactory jobFactory = null;
-
     /** The value that is used by provisioner to estimate system load */
     private int queueLength = 0;
 
@@ -61,10 +57,9 @@ public class WorkflowEngine extends CWSSimEntity {
 
     private boolean provisioningRequestSend = false;
 
-    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler, double budget,
-            double deadline, CloudSimWrapper cloudsim) {
+    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, double budget, double deadline,
+            CloudSimWrapper cloudsim) {
         super("WorkflowEngine" + (next_id++), cloudsim);
-        this.jobFactory = jobFactory;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
         this.budget = budget;
@@ -147,10 +142,7 @@ public class WorkflowEngine extends CWSSimEntity {
             Task task = dagJob.nextReadyTask();
             if (task == null)
                 break;
-            Job job = jobFactory.createJob(dagJob, task, getId(), getCloudsim());
-            job.setDAGJob(dagJob);
-            job.setTask(task);
-            job.setOwner(getId());
+            Job job = new Job(dagJob, task, getId(), getCloudsim());
             jobReleased(job);
         }
     }
@@ -214,7 +206,7 @@ public class WorkflowEngine extends CWSSimEntity {
                             "Job %d (task_id = %s, workflow_id = %s, retry = %s) failed on VM %s. Resubmitting...", job
                                     .getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(),
                             job.getVM().getId()));
-            Job retry = jobFactory.createJob(dagJob, t, getId(), getCloudsim());
+            Job retry = new Job(dagJob, t, getId(), getCloudsim());
             retry.setRetry(true);
             VM vm = job.getVM();
             // add to free if contained in busy set
