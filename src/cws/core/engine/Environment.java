@@ -7,13 +7,18 @@ import cws.core.storage.StorageManager;
 import cws.core.storage.StorageManagerStatistics;
 
 public class Environment {
-
     private VMType vmType;
     private StorageManager storageManager;
 
-    public Environment(VMType vmType, StorageManager storageManager) {
+    /**
+     * The prediction strategy, i.e. how we will predict task's runtime.
+     */
+    private PredictionStrategy predictionStrategy;
+
+    public Environment(VMType vmType, StorageManager storageManager, PredictionStrategy predictionStrategy) {
         this.vmType = vmType;
         this.storageManager = storageManager;
+        this.predictionStrategy = predictionStrategy;
     }
 
     // FIXME(mequrel): temporary encapsulation breakage for static algorithm, dynamic algorithm and provisioners
@@ -29,12 +34,7 @@ public class Environment {
      * @return task's predicted runtime as a double
      */
     public double getPredictedRuntime(Task task) {
-        return getComputationTaskEstimation(task) + storageManager.getTransferTimeEstimation(task);
-    }
-
-    // TODO(mequrel): Maybe should be moved to VMType?
-    private double getComputationTaskEstimation(Task task) {
-        return task.getSize() / vmType.getMips();
+        return predictionStrategy.getPredictedRuntime(task, vmType, storageManager);
     }
 
     public double getPredictedRuntime(DAG dag) {
@@ -61,5 +61,9 @@ public class Environment {
 
     public double getBillingTimeInSeconds() {
         return vmType.getBillingTimeInSeconds();
+    }
+
+    public PredictionStrategy getPredictionStrategy() {
+        return predictionStrategy;
     }
 }
