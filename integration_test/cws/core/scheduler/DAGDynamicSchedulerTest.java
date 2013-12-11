@@ -18,6 +18,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
+import cws.core.engine.StorageAwareEnvironment;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
 import cws.core.storage.StorageManager;
@@ -35,13 +36,12 @@ public class DAGDynamicSchedulerTest {
 
     @Before
     public void setUp() {
-        // TODO(_mequrel_): change to IoC in the future or to mock
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
 
         storageManager = new VoidStorageManager(cloudsim);
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        environment = new Environment(vmType, storageManager);
+        environment = new StorageAwareEnvironment(vmType, storageManager);
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim);
@@ -69,7 +69,6 @@ public class DAGDynamicSchedulerTest {
         cloudsim.startSimulation();
 
         assertEquals(vms.size(), engine.getAvailableVMs().size());
-
     }
 
     @Test
@@ -91,7 +90,6 @@ public class DAGDynamicSchedulerTest {
         List<DAG> dags = new ArrayList<DAG>();
         dags.add(dag);
 
-        // FIXME (_mequrel): looks awkward, a comment should be added or some logic inversed
         new EnsembleManager(dags, engine, cloudsim);
 
         cloudsim.startSimulation();
@@ -118,7 +116,6 @@ public class DAGDynamicSchedulerTest {
         List<DAG> dags = new ArrayList<DAG>();
         dags.add(dag);
 
-        // FIXME (_mequrel): looks awkward, a comment should be added or some logic inversed
         new EnsembleManager(dags, engine, cloudsim);
 
         cloudsim.startSimulation();

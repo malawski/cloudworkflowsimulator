@@ -18,6 +18,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
+import cws.core.engine.StorageAwareEnvironment;
 import cws.core.jobs.SimpleJobFactory;
 import cws.core.log.WorkflowLog;
 import cws.core.storage.StorageManager;
@@ -35,12 +36,11 @@ public class EnsembleDynamicSchedulerTest {
 
     @Before
     public void setUp() {
-        // TODO(_mequrel_): change to IoC in the future or to mock
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
 
         storageManager = new VoidStorageManager(cloudsim);
-        environment = new Environment(VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build(), storageManager);
+        environment = new StorageAwareEnvironment(VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build(), storageManager);
 
         provisioner = null;
         scheduler = new EnsembleDynamicScheduler(cloudsim);

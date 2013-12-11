@@ -6,10 +6,9 @@ import cws.core.dag.Task;
 import cws.core.storage.StorageManager;
 import cws.core.storage.StorageManagerStatistics;
 
-public class Environment {
-
-    private VMType vmType;
-    private StorageManager storageManager;
+public abstract class Environment {
+    protected VMType vmType;
+    protected StorageManager storageManager;
 
     public Environment(VMType vmType, StorageManager storageManager) {
         this.vmType = vmType;
@@ -28,12 +27,10 @@ public class Environment {
      * 
      * @return task's predicted runtime as a double
      */
-    public double getPredictedRuntime(Task task) {
-        return getComputationTaskEstimation(task) + storageManager.getTransferTimeEstimation(task);
-    }
+    public abstract double getPredictedRuntime(Task task);
 
     // TODO(mequrel): Maybe should be moved to VMType?
-    private double getComputationTaskEstimation(Task task) {
+    protected double getComputationTaskEstimation(Task task) {
         return task.getSize() / vmType.getMips();
     }
 
