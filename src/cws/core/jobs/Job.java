@@ -169,7 +169,8 @@ public class Job {
 
     @Override
     public String toString() {
-        return "<Job id=" + Integer.toString(id) + ">";
+        return String.format("Job %s (task_id = %s, workflow = %s)", getID(), getTask().getId(), getDAGJob().getDAG()
+                .getId());
     }
 
     public boolean isRetry() {

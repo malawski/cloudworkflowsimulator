@@ -186,6 +186,16 @@ public class VM extends CWSSimEntity {
         // Can no longer accept jobs
         isTerminated = true;
 
+        // Log termination only for running jobs
+        for (Job runningJob : runningJobs) {
+            getCloudsim().log("Terminating job " + runningJob.getID() + " on VM " + runningJob.getVM().getId());
+        }
+
+        // Log that queued jobs were not executed
+        for (Job queuedJob : jobs) {
+            getCloudsim().log("Removing job " + queuedJob.getID() + " from queue on VM " + queuedJob.getVM().getId());
+        }
+
         // Move running jobs back to the queue...
         jobs.addAll(runningJobs);
         runningJobs.clear();
@@ -194,7 +204,6 @@ public class VM extends CWSSimEntity {
         for (Job job : jobs) {
             job.setResult(Job.Result.FAILURE);
             getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
-            getCloudsim().log("Terminating job " + job.getID() + " on VM " + job.getVM().getId());
         }
 
         // Reset dynamic state
@@ -271,7 +280,7 @@ public class VM extends CWSSimEntity {
             // cores in VMs.
             throw new IllegalStateException("Number of idle cores is not 1, actual number:" + idleCores);
         }
-        getCloudsim().log("Starting job " + job.getTask().getId() + " on VM " + job.getVM().getId());
+        getCloudsim().log("Starting " + job.toString() + " on VM " + job.getVM().getId());
         // The job is now running
         job.setStartTime(getCloudsim().clock());
         job.setState(Job.State.RUNNING);

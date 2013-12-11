@@ -23,6 +23,7 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
+import cws.core.engine.StorageAwarePredictionStrategy;
 import cws.core.log.WorkflowLog;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
@@ -43,7 +44,8 @@ public class EnsembleDynamicSchedulerTest {
         cloudsim.init();
 
         storageManager = new VoidStorageManager(cloudsim);
-        environment = new Environment(VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build(), storageManager);
+        environment = new Environment(VMTypeBuilder.DEFAULT_VM_TYPE, storageManager,
+                new StorageAwarePredictionStrategy());
 
         provisioner = null;
         scheduler = new EnsembleDynamicScheduler(cloudsim);

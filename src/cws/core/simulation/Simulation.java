@@ -1,31 +1,32 @@
 package cws.core.simulation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
-import cws.core.algorithms.Algorithm;
-import cws.core.algorithms.AlgorithmStatistics;
-import cws.core.algorithms.DPDS;
-import cws.core.algorithms.SPSS;
-import cws.core.algorithms.WADPDS;
+import cws.core.algorithms.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMTypeBuilder;
-import cws.core.dag.*;
+import cws.core.dag.DAG;
+import cws.core.dag.DAGListGenerator;
+import cws.core.dag.DAGParser;
+import cws.core.dag.DAGStats;
+import cws.core.dag.Task;
 import cws.core.engine.Environment;
+import cws.core.engine.EnvironmentFactory;
 import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.provisioner.VMFactory;
-import cws.core.storage.StorageManager;
-import cws.core.storage.StorageManagerFactory;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 
@@ -70,6 +71,11 @@ public class Simulation {
      * The algorithm alpha parameter.
      */
     private static final String DEFAULT_ALPHA = "0.7";
+
+    /**
+     * Whether the algorithm should be aware of the underlying storage. I.e. during cumputing runtime estimations.
+     */
+    private static final String DEFAULT_IS_STORAGE_AWARE = "true";
 
     public static Options buildOptions() {
         Options options = new Options();
@@ -155,6 +161,11 @@ public class Simulation {
         alpha.setArgName("FLOAT");
         options.addOption(alpha);
 
+        Option isStorageAware = new Option("sa", "storage-aware", true,
+                "Whether the algorithms should be storage aware, defaults to " + DEFAULT_IS_STORAGE_AWARE);
+        isStorageAware.setArgName("BOOL");
+        options.addOption(isStorageAware);
+
         GlobalStorageParams.buildCliOptions(options);
         VMFactory.buildCliOptions(options);
         return options;
@@ -203,6 +214,7 @@ public class Simulation {
         int ndeadlines = Integer.parseInt(args.getOptionValue("n-deadlines", DEFAULT_N_DEADLINES));
         double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
         double alpha = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_ALPHA));
+        boolean isStorageAware = Boolean.valueOf(args.getOptionValue("storage-aware", DEFAULT_IS_STORAGE_AWARE));
 
         VMFactory.readCliOptions(args, seed);
 
@@ -268,15 +280,15 @@ public class Simulation {
         System.out.printf("ndeadlines = %d\n", ndeadlines);
         System.out.printf("alpha = %f\n", alpha);
         System.out.printf("maxScaling = %f\n", maxScaling);
+        System.out.printf("isStorageAware = %b\n", isStorageAware);
 
+        List<DAG> dags = new ArrayList<DAG>();
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams,
+                VMTypeBuilder.DEFAULT_VM_TYPE, isStorageAware);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
         double maxTime = 0.0;
-
-        Environment environment = createEnvironment(cloudsim, simulationParams);
-
-        List<DAG> dags = new ArrayList<DAG>();
         int workflow_id = 0;
         for (String name : names) {
             DAG dag = DAGParser.parseDAG(new File(name));
@@ -360,8 +372,10 @@ public class Simulation {
                     cloudsim.setLogsEnabled(enableLogging);
                     cloudsim.log("budget = " + budget);
                     cloudsim.log("deadline = " + deadline);
+                    logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = createEnvironment(cloudsim, simulationParams);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams,
+                            VMTypeBuilder.DEFAULT_VM_TYPE, isStorageAware);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
                             deadline);
@@ -403,6 +417,15 @@ public class Simulation {
         }
     }
 
+    private void logWorkflowsDescription(List<DAG> dags, String[] names, CloudSimWrapper cloudsim) {
+        for (int i = 0; i < dags.size(); i++) {
+            DAG dag = dags.get(i);
+            String workflowDescription = String.format("Workflow %s, priority = %d, filename = %s", dag.getId(),
+                    dags.size() - i, names[i]);
+            cloudsim.log(workflowDescription);
+        }
+    }
+
     /**
      * Crates algorithm instance from the given input params.
      * @return The newly created algorithm instance.
@@ -433,11 +456,5 @@ public class Simulation {
             throws FileNotFoundException {
         String name = String.format("%s.b-%.2f-d-%.2f.log", outputfile.getAbsolutePath(), budget, deadline);
         return new FileOutputStream(new File(name));
-    }
-
-    private Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams) {
-        StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
-        cws.core.core.VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        return new Environment(vmType, storageManager);
     }
 }

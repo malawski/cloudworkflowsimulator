@@ -16,7 +16,9 @@ import org.mockito.ArgumentMatcher;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAG;
 import cws.core.dag.DAGFile;
+import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
@@ -98,7 +100,7 @@ public class DAGDynamicSchedulerUnitTest {
 
     private Job createJobMock(List<DAGFile> inputs, List<DAGFile> outputs) {
         Task task = mock(Task.class);
-        Job job = new Job(null, task, -1, cloudsim);
+        Job job = new Job(new DAGJob(new DAG(), 2), task, -1, cloudsim);
 
         when(task.getInputFiles()).thenReturn(inputs);
         when(task.getOutputFiles()).thenReturn(outputs);

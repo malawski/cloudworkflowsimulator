@@ -19,6 +19,7 @@ import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.engine.Environment;
+import cws.core.engine.StorageAwarePredictionStrategy;
 import cws.core.log.WorkflowLog;
 import cws.core.storage.StorageManager;
 import cws.core.storage.cache.FIFOCacheManager;
@@ -38,19 +39,17 @@ public class DAGDynamicSchedulerStorageAwareTest {
 
     @Before
     public void setUp() {
-        // TODO(_mequrel_): change to IoC in the future or to mock
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
 
         GlobalStorageParams params = new GlobalStorageParams();
-        params.setReadSpeed(2.0);
-        params.setWriteSpeed(1.0);
+        params.setReadSpeed(2000000.0);
+        params.setWriteSpeed(1000000.0);
 
-        // XXX(bryk): note @mequrel that I've hardcoded FIFO cache here. Change this once you start refactoring this
-        // code.
         VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
         storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
-        environment = new Environment(VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build(), storageManager);
+        environment = new Environment(VMTypeBuilder.DEFAULT_VM_TYPE, storageManager,
+                new StorageAwarePredictionStrategy());
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim);
@@ -83,7 +82,6 @@ public class DAGDynamicSchedulerStorageAwareTest {
         List<DAG> dags = loadTestDAG("dags/storage_integration_tests/simpleSequence.dag");
         startSimulation(dags);
 
-        // TODO(mequrel): should be converted into automatic assertion
         /**
          * expected:
          * 
@@ -97,7 +95,6 @@ public class DAGDynamicSchedulerStorageAwareTest {
     }
 
     protected void startSimulation(List<DAG> dags) {
-        // FIXME (_mequrel): looks awkward, a comment should be added or some logic inversed
         new EnsembleManager(dags, engine, cloudsim);
 
         cloudsim.startSimulation();
@@ -117,5 +114,4 @@ public class DAGDynamicSchedulerStorageAwareTest {
         VM vm = new VM(vmType, cloudsim);
         cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
     }
-
 }
