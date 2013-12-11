@@ -1,6 +1,11 @@
 package cws.core.core;
 
 public class VMTypeBuilder {
+    /**
+     * Default VMType for simulations. It will be replaced once we introcude configurability.
+     */
+    public static final VMType DEFAULT_VM_TYPE = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+
     private static final double DEFAULT_BILLING_TIME = 3600;
 
     public static MipsStep newBuilder() {

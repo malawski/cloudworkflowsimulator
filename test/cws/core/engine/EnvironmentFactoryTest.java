@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMTypeBuilder;
 import cws.core.simulation.StorageCacheType;
 import cws.core.simulation.StorageSimulationParams;
 import cws.core.simulation.StorageType;
@@ -26,13 +27,15 @@ public class EnvironmentFactoryTest {
 
     @Test
     public void testCreateStorageAwareEnvironment() {
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, storageParams, true);
-        assertTrue(environment instanceof StorageAwareEnvironment);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, storageParams,
+                VMTypeBuilder.DEFAULT_VM_TYPE, true);
+        assertTrue(environment.getPredictionStrategy() instanceof StorageAwarePredictionStrategy);
     }
 
     @Test
     public void testCreateStorageUnawareEnvironment() {
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, storageParams, false);
-        assertTrue(environment instanceof StorageUnawareEnvironment);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, storageParams,
+                VMTypeBuilder.DEFAULT_VM_TYPE, false);
+        assertTrue(environment.getPredictionStrategy() instanceof StorageUnawarePredictionStrategy);
     }
 }

@@ -2,7 +2,6 @@ package cws.core.engine;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeBuilder;
 import cws.core.simulation.StorageSimulationParams;
 import cws.core.storage.StorageManager;
 import cws.core.storage.StorageManagerFactory;
@@ -21,13 +20,12 @@ public class EnvironmentFactory {
      * @return Newly created {@link Environment} instance.
      */
     public static Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams,
-            boolean isStorageAware) {
+            VMType vmType, boolean isStorageAware) {
         StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
-        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         if (isStorageAware) {
-            return new StorageAwareEnvironment(vmType, storageManager);
+            return new Environment(vmType, storageManager, new StorageAwarePredictionStrategy());
         } else {
-            return new StorageUnawareEnvironment(vmType, storageManager);
+            return new Environment(vmType, storageManager, new StorageUnawarePredictionStrategy());
         }
     }
 }

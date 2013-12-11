@@ -25,6 +25,7 @@ import cws.core.algorithms.DPDS;
 import cws.core.algorithms.SPSS;
 import cws.core.algorithms.WADPDS;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGListGenerator;
 import cws.core.dag.DAGParser;
@@ -290,7 +291,8 @@ public class Simulation {
         System.out.printf("isStorageAware = %b\n", isStorageAware);
 
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, isStorageAware);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams,
+                VMTypeBuilder.DEFAULT_VM_TYPE, isStorageAware);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -379,7 +381,8 @@ public class Simulation {
                     cloudsim.log("budget = " + budget);
                     cloudsim.log("deadline = " + deadline);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, isStorageAware);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams,
+                            VMTypeBuilder.DEFAULT_VM_TYPE, isStorageAware);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
                             deadline);
