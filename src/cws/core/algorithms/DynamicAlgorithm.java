@@ -6,6 +6,7 @@ import java.util.List;
 import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
+import cws.core.jobs.SimpleJobFactory;
 import cws.core.provisioner.CloudAwareProvisioner;
 import cws.core.provisioner.VMFactory;
 
@@ -33,9 +34,7 @@ public class DynamicAlgorithm extends Algorithm {
         setCloud(new Cloud(getCloudsim()));
         provisioner.setCloud(getCloud());
 
-        setWorkflowEngine(new WorkflowEngine(provisioner, scheduler, getCloudsim()));
-        getWorkflowEngine().setDeadline(getDeadline());
-        getWorkflowEngine().setBudget(getBudget());
+        setWorkflowEngine(new WorkflowEngine(new SimpleJobFactory(), provisioner, scheduler, getBudget(), getDeadline(), getCloudsim()));
 
         setEnsembleManager(new EnsembleManager(getAllDags(), getWorkflowEngine(), getCloudsim()));
 

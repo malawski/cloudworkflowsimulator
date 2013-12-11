@@ -1,6 +1,10 @@
 package cws.core;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -10,7 +14,6 @@ import cws.core.dag.Task;
 import cws.core.jobs.Job;
 import cws.core.jobs.JobFactory;
 import cws.core.jobs.JobListener;
-import cws.core.jobs.SimpleJobFactory;
 
 /**
  * The workflow engine is an entity that executes workflows by scheduling their
@@ -21,13 +24,8 @@ import cws.core.jobs.SimpleJobFactory;
 public class WorkflowEngine extends CWSSimEntity {
     public static int next_id = 0;
 
+    /** The list of current {@link DAGJob}s. */
     private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
-
-    /**
-     * XXX How is this different than the one above?
-     * TODO(bryk): anyone can answer this question?
-     */
-    private LinkedList<DAGJob> allDAGJobs = new LinkedList<DAGJob>();
 
     private HashSet<JobListener> jobListeners = new HashSet<JobListener>();
 
@@ -49,46 +47,28 @@ public class WorkflowEngine extends CWSSimEntity {
     /** The list of unmatched ready jobs */
     private LinkedList<Job> queue = new LinkedList<Job>();
 
-    /**
-     * A factory for creating Job objects from Task objects
-     */
+    /** A factory for creating Job objects from Task objects */
     private JobFactory jobFactory = null;
 
-    /**
-     * The value that is used by provisioner to estimate system load
-     * FIXME This seems unnecessary
-     * TODO(bryk): As far as I can see this is used in the code. So it IS necessary. I'll remove this comment if no one
-     * votes against.
-     */
+    /** The value that is used by provisioner to estimate system load */
     private int queueLength = 0;
 
-    /**
-     * Deadline
-     * XXX Why should the workflow engine know about the deadline?
-     * TODO(bryk): As far as I can see this is used in the code. So it IS necessary. I'll remove this comment if no one
-     * votes against.
-     */
-    private double deadline = Double.MAX_VALUE;
+    /** The simulation's deadline. */
+    private double deadline;
 
-    /**
-     * Budget
-     * XXX Why should the workflow engine know about the budget?
-     * TODO(bryk): As far as I can see this is used in the code. So it IS necessary. I'll remove this comment if no one
-     * votes against.
-     */
-    double budget = Double.MAX_VALUE;
+    /** The simulation's budget. */
+    private double budget;
 
     private boolean provisioningRequestSend = false;
 
-    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler, CloudSimWrapper cloudsim) {
+    public WorkflowEngine(JobFactory jobFactory, Provisioner provisioner, Scheduler scheduler, double budget,
+            double deadline, CloudSimWrapper cloudsim) {
         super("WorkflowEngine" + (next_id++), cloudsim);
         this.jobFactory = jobFactory;
         this.provisioner = provisioner;
         this.scheduler = scheduler;
-    }
-
-    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, CloudSimWrapper cloudsim) {
-        this(new SimpleJobFactory(), provisioner, scheduler, cloudsim);
+        this.budget = budget;
+        this.deadline = deadline;
     }
 
     @Override
@@ -153,7 +133,6 @@ public class WorkflowEngine extends CWSSimEntity {
 
     private void dagSubmit(DAGJob dj) {
         dags.add(dj);
-        allDAGJobs.add(dj);
 
         // The DAG starts immediately
         sendNow(dj.getOwner(), WorkflowEvent.DAG_STARTED, dj);
@@ -258,28 +237,20 @@ public class WorkflowEngine extends CWSSimEntity {
         scheduler.scheduleJobs(this);
     }
 
-    public int getQueueLength() {
-        return queueLength;
-    }
-
-    public void setQueueLength(int queueLength) {
-        this.queueLength = queueLength;
-    }
-
     public double getDeadline() {
         return deadline;
-    }
-
-    public void setDeadline(double deadline) {
-        this.deadline = deadline;
     }
 
     public double getBudget() {
         return budget;
     }
 
-    public void setBudget(double budget) {
-        this.budget = budget;
+    public int getQueueLength() {
+        return queueLength;
+    }
+
+    public void setQueueLength(int queueLength) {
+        this.queueLength = queueLength;
     }
 
     public Queue<Job> getQueuedJobs() {
@@ -296,10 +267,6 @@ public class WorkflowEngine extends CWSSimEntity {
 
     public Set<VM> getBusyVMs() {
         return busyVMs;
-    }
-
-    public LinkedList<DAGJob> getAllDags() {
-        return allDAGJobs;
     }
 
     public void addJobListener(JobListener l) {

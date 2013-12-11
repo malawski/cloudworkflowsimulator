@@ -12,6 +12,7 @@ import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
+import cws.core.jobs.SimpleJobFactory;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 import cws.core.provisioner.VMFactory;
@@ -348,7 +349,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     private void prepareEnvironment() {
         Cloud cloud = new Cloud(getCloudsim());
-        WorkflowEngine engine = new WorkflowEngine(this, this, getCloudsim());
+        WorkflowEngine engine = new WorkflowEngine(new SimpleJobFactory(), this, this, getBudget(), getDeadline(),
+                getCloudsim());
         EnsembleManager manager = new EnsembleManager(engine, getCloudsim());
 
         setCloud(cloud);
