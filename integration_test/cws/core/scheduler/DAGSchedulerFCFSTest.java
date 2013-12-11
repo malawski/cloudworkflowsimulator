@@ -41,7 +41,8 @@ public class DAGSchedulerFCFSTest {
         storageManager = new VoidStorageManager(cloudsim);
         provisioner = null;
         scheduler = new DAGSchedulerFCFS(cloudsim);
-        engine = new WorkflowEngine(new SimpleJobFactory(1000), provisioner, scheduler, cloudsim);
+        engine = new WorkflowEngine(new SimpleJobFactory(), provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE,
+                cloudsim);
         cloud = new Cloud(cloudsim);
 
         jobLog = new WorkflowLog(cloudsim);
