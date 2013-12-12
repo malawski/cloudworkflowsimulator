@@ -67,8 +67,8 @@ public class VMTypeLoader {
         double unitPrice = ((Number) billingConfig.get(VM_BILLING_PRICE_CONFIG_ENTRY)).doubleValue();
         double unitTime = ((Number) billingConfig.get(VM_BILLING_TIME_CONFIG_ENTRY)).doubleValue();
 
-        int mips = (int) config.get(VM_MIPS_CONFIG_ENTRY);
-        int cores = (int) config.get(VM_CORES_CONFIG_ENTRY);
+        int mips = ((Number) config.get(VM_MIPS_CONFIG_ENTRY)).intValue();
+        int cores = ((Number) config.get(VM_CORES_CONFIG_ENTRY)).intValue();
         long cacheSize = ((Number) config.get(VM_CACHE_SIZE_CONFIG_ENTRY)).longValue();
 
         DistributionFactory factory = new DistributionFactory();

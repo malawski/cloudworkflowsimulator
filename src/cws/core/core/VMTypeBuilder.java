@@ -5,20 +5,16 @@ import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 import cws.core.provisioner.ConstantDistribution;
 
 public class VMTypeBuilder {
-    /**
-     * Default VMType for simulations. It will be replaced once we introcude configurability.
-     */
-    public static final VMType DEFAULT_VM_TYPE = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-
     private static final double DEFAULT_BILLING_TIME = 3600;
-    private static final double DEFAULT_PROVISIONING_DELAY = 0.0;
-    private static final double DEFAULT_DEPROVISIONING_DELAY = 10.0;
     private static final long DEFAULT_CACHE_SIZE = 100000000;
 
-    private static ContinuousDistribution provisioningDelayDistribution = new ConstantDistribution(
-            DEFAULT_PROVISIONING_DELAY);
-    private static ContinuousDistribution deprovisioningDelayDistribution = new ConstantDistribution(
-            DEFAULT_DEPROVISIONING_DELAY);
+    private static final ContinuousDistribution DEFAULT_PROVISIONING_DELAY = new ConstantDistribution(0.0);
+    private static final ContinuousDistribution DEFAULT_DEPROVISIONING_DELAY = new ConstantDistribution(10.0);
+
+    /**
+     * Default VMType for simulations. It will be replaced once we introduce configurability.
+     */
+    public static final VMType DEFAULT_VM_TYPE = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
     public static MipsStep newBuilder() {
         return new Steps();
@@ -54,14 +50,9 @@ public class VMTypeBuilder {
         private double price;
 
         private double billingTimeInSeconds = DEFAULT_BILLING_TIME;
-        private ContinuousDistribution provisioningTime;
-        private ContinuousDistribution deprovisioningTime;
+        private ContinuousDistribution provisioningTime = DEFAULT_PROVISIONING_DELAY;
+        private ContinuousDistribution deprovisioningTime = DEFAULT_DEPROVISIONING_DELAY;
         private long cacheSize = DEFAULT_CACHE_SIZE;
-
-        public Steps() {
-            this.provisioningTime = provisioningDelayDistribution;
-            this.deprovisioningTime = deprovisioningDelayDistribution;
-        }
 
         @Override
         public CoresStep mips(int mips) {

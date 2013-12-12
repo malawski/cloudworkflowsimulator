@@ -3,6 +3,7 @@ package cws.core.simulation;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +19,17 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
+import cws.core.algorithms.Algorithm;
+import cws.core.algorithms.AlgorithmStatistics;
+import cws.core.algorithms.DPDS;
+import cws.core.algorithms.SPSS;
+import cws.core.algorithms.WADPDS;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.InvalidDistributionException;
 import cws.core.core.MissingParameterException;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeLoader;
 import cws.core.core.VMTypeBuilder;
+import cws.core.core.VMTypeLoader;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGListGenerator;
 import cws.core.dag.DAGParser;
@@ -33,8 +39,6 @@ import cws.core.engine.Environment;
 import cws.core.engine.EnvironmentFactory;
 import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.provisioner.VMFactory;
-import cws.core.storage.StorageManager;
-import cws.core.storage.StorageManagerFactory;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 
@@ -452,7 +456,7 @@ public class Simulation {
                     dags.size() - i, names[i]);
             cloudsim.log(workflowDescription);
         }
-	}
+    }
 
     private void logVMType(VMType vmType) {
         System.out.printf("VM mips = %d\n", vmType.getMips());

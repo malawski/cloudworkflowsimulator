@@ -31,7 +31,7 @@ public class VMType implements Cloneable {
     /**
      * Delay from when the VM is terminated until it is no longer charged
      */
-    private final ContinuousDistribution deprovisioningDelay; // TODO(bryk): There is no CLI param for this.
+    private final ContinuousDistribution deprovisioningDelay;
 
     /**
      * The number of bytes on internal disk that can be used as a cache

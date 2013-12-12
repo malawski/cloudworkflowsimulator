@@ -36,7 +36,7 @@ public class VMTypeLoaderTest {
     }
 
     @Test
-    public void shouldLoadBasicParams() throws MissingParameterException {
+    public void shouldLoadBasicParams() throws MissingParameterException, InvalidDistributionException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put("mips", 1000);
         config.put("cores", 1);
@@ -47,6 +47,17 @@ public class VMTypeLoaderTest {
         billingConfig.put("unitPrice", 2.4);
 
         config.put("billing", billingConfig);
+
+        Map<String, Object> provisioningConfig = new HashMap<String, Object>();
+        provisioningConfig.put("value", 0.0);
+        provisioningConfig.put("distribution", "constant");
+
+        Map<String, Object> deprovisioningConfig = new HashMap<String, Object>();
+        deprovisioningConfig.put("value", 0.0);
+        deprovisioningConfig.put("distribution", "constant");
+
+        config.put("provisioningDelay", provisioningConfig);
+        config.put("deprovisioningDelay", deprovisioningConfig);
 
         VMType vmType = vmLoader.loadVM(config);
 
@@ -59,7 +70,7 @@ public class VMTypeLoaderTest {
     }
 
     @Test(expected = MissingParameterException.class)
-    public void shouldFailIfMipsIsMissing() throws MissingParameterException {
+    public void shouldFailIfMipsIsMissing() throws MissingParameterException, InvalidDistributionException {
         Map<String, Object> config = createValidConfig();
         config.remove("mips");
 
@@ -67,7 +78,7 @@ public class VMTypeLoaderTest {
     }
 
     @Test(expected = MissingParameterException.class)
-    public void shouldFailIfCoreIsMissing() throws MissingParameterException {
+    public void shouldFailIfCoreIsMissing() throws MissingParameterException, InvalidDistributionException {
         Map<String, Object> config = createValidConfig();
         config.remove("cores");
 
@@ -75,7 +86,7 @@ public class VMTypeLoaderTest {
     }
 
     @Test(expected = MissingParameterException.class)
-    public void shouldFailIfCacheIsMissing() throws MissingParameterException {
+    public void shouldFailIfCacheIsMissing() throws MissingParameterException, InvalidDistributionException {
         Map<String, Object> config = createValidConfig();
         config.remove("cacheSize");
 
