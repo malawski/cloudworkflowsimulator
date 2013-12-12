@@ -59,7 +59,7 @@ public class Cloud extends CWSSimEntity {
         vms.add(vm);
 
         // We launch the VM now...
-        sendNow(vm.getId(), WorkflowEvent.VM_LAUNCH);
+        getCloudsim().sendNow(this.getId(), vm.getId(), WorkflowEvent.VM_LAUNCH, null);
 
         // But it isn't ready until after the delay
         getCloudsim().send(getId(), getId(), vm.getProvisioningDelay(), WorkflowEvent.VM_LAUNCHED, vm);
@@ -77,7 +77,7 @@ public class Cloud extends CWSSimEntity {
         }
 
         // The owner learns about the launch
-        sendNow(vm.getOwner(), WorkflowEvent.VM_LAUNCHED, vm);
+        getCloudsim().sendNow(this.getId(), vm.getOwner(), WorkflowEvent.VM_LAUNCHED, vm);
     }
 
     private void terminateVM(VM vm) {
@@ -87,7 +87,7 @@ public class Cloud extends CWSSimEntity {
         }
 
         // We terminate the VM now...
-        sendNow(vm.getId(), WorkflowEvent.VM_TERMINATE);
+        getCloudsim().sendNow(this.getId(), vm.getId(), WorkflowEvent.VM_TERMINATE, null);
 
         // But it isn't gone until after the delay
         getCloudsim().send(getId(), getId(), vm.getDeprovisioningDelay(), WorkflowEvent.VM_TERMINATED, vm);
@@ -109,6 +109,6 @@ public class Cloud extends CWSSimEntity {
         }
 
         // The owner finds out
-        sendNow(vm.getOwner(), WorkflowEvent.VM_TERMINATED, vm);
+        getCloudsim().sendNow(this.getId(), vm.getOwner(), WorkflowEvent.VM_TERMINATED, vm);
     }
 }

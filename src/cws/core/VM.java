@@ -224,6 +224,12 @@ public class VM extends CWSSimEntity {
     }
 
     private void allInputsTrasferred(Job job) {
+        if (runningJobs.contains(job)) {
+            throw new IllegalStateException("Job already running: " + job);
+        }
+        // add it to the running set
+        runningJobs.add(job);
+
         // Compute the duration of the job on this VM
         double size = job.getTask().getSize();
         double predictedRuntime = size / vmType.getMips();
@@ -284,9 +290,6 @@ public class VM extends CWSSimEntity {
         // The job is now running
         job.setStartTime(getCloudsim().clock());
         job.setState(Job.State.RUNNING);
-
-        // add it to the running set
-        runningJobs.add(job);
 
         // Tell the owner
         getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_STARTED, job);
@@ -414,9 +417,5 @@ public class VM extends CWSSimEntity {
 
     public boolean isTerminated() {
         return isTerminated;
-    }
-
-    public void setTerminated(boolean terminated) {
-        isTerminated = terminated;
     }
 }

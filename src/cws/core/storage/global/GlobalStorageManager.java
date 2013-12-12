@@ -133,7 +133,7 @@ public class GlobalStorageManager extends StorageManager {
         cacheManager.putFileToCache(read.getFile(), read.getJob());
         congestedParams.removeReads(1);
         updateSpeedCongestion();
-        statistics.addActualBytesRead(read.getFile().getSize());
+        statistics.addActualBytesRead(read.getBytesTransferred());
         statistics.addActualFilesRead(1);
     }
 
@@ -146,10 +146,12 @@ public class GlobalStorageManager extends StorageManager {
      */
     private boolean onTransferFinished(GlobalStorageTransfer transfer, Map<Job, List<GlobalStorageTransfer>> transfers,
             String transferType) {
-        String logMsg = String.format("Global %s transfer %s finished: %s, bytes transferred: %d, duration: %f",
-                transferType, transfer.getId(), transfer.getFile().getName(), transfer.getFile().getSize(),
-                transfer.getDuration());
-        getCloudsim().log(logMsg);
+        if (!transfer.getJob().getVM().isTerminated()) {
+            String logMsg = String.format("Global %s transfer %s finished: %s, bytes transferred: %d, duration: %f",
+                    transferType, transfer.getId(), transfer.getFile().getName(), transfer.getFile().getSize(),
+                    transfer.getDuration());
+            getCloudsim().log(logMsg);
+        }
         List<GlobalStorageTransfer> jobTransfers = transfers.get(transfer.getJob());
         jobTransfers.remove(transfer);
         if (jobTransfers.isEmpty()) {
@@ -205,7 +207,7 @@ public class GlobalStorageManager extends StorageManager {
 
     /** Called on GLOBAL_STORAGE_WRITE_PROGRESS event. */
     private void onWriteProgress(GlobalStorageTransfer write) {
-        if (write.isCompleted()) {
+        if (write.isCompleted() || write.getJob().getVM().isTerminated()) {
             getCloudsim().sendNow(getId(), getId(), WorkflowEvent.GLOBAL_STORAGE_WRITE_FINISHED, write);
         } else {
             progressTransfer(write, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS, congestedParams.getWriteSpeed());
@@ -214,7 +216,7 @@ public class GlobalStorageManager extends StorageManager {
 
     /** Called on GLOBAL_STORAGE_READ_FINISHED event */
     private void onReadProgress(GlobalStorageTransfer read) {
-        if (read.isCompleted()) {
+        if (read.isCompleted() || read.getJob().getVM().isTerminated()) {
             getCloudsim().sendNow(getId(), getId(), WorkflowEvent.GLOBAL_STORAGE_READ_FINISHED, read);
         } else {
             progressTransfer(read, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS, congestedParams.getReadSpeed());

@@ -9,7 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import cws.core.Cloud;
 import cws.core.WorkflowEvent;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
@@ -182,6 +185,41 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());
         Assert.assertEquals((size / numSmaller) / (params.getReadSpeed() / (numSmaller + 1))
                 + ((numSmaller - 1) * size / numSmaller) / params.getReadSpeed() + params.getLatency(), time, 1.0);
+    }
+
+    @Test
+    public void testTerminated() {
+        long size = 1234567;
+        double terminateTime = 444;
+        Cloud cloud = new Cloud(cloudsim);
+
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        files.add(new DAGFile("abc.txt", size));
+        Mockito.when(task.getOutputFiles()).thenReturn(files);
+        skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
+        skipEvent(100, WorkflowEvent.VM_LAUNCH, cloudsim);
+        skipEvent(100, WorkflowEvent.VM_LAUNCHED, cloudsim);
+        skipEvent(100, WorkflowEvent.VM_TERMINATE, cloudsim);
+        Mockito.when(vm.isTerminated()).thenReturn(false);
+        Mockito.when(vm.getOwner()).thenReturn(100);
+        Mockito.verifyNoMoreInteractions(vm);
+        CloudSim.send(cloud.getId(), cloud.getId(), 0, WorkflowEvent.VM_LAUNCH, vm);
+        CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
+        CloudSim.send(cloud.getId(), cloud.getId(), terminateTime, WorkflowEvent.VM_TERMINATE, vm);
+        Mockito.doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                Mockito.when(vm.isTerminated()).thenReturn(true);
+                return null;
+            }
+        })
+                .when(cloudsim)
+                .send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+                        Matchers.eq(WorkflowEvent.VM_TERMINATED), Matchers.any());
+
+        double time = CloudSim.startSimulation();
+
+        Assert.assertEquals(terminateTime + params.getChunkTransferTime(), time, 0.01);
     }
 
     @Test
