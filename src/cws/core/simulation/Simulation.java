@@ -25,8 +25,6 @@ import cws.core.algorithms.DPDS;
 import cws.core.algorithms.SPSS;
 import cws.core.algorithms.WADPDS;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.core.InvalidDistributionException;
-import cws.core.core.MissingParameterException;
 import cws.core.core.VMType;
 import cws.core.core.VMTypeLoader;
 import cws.core.dag.DAG;
@@ -230,21 +228,8 @@ public class Simulation {
         double alpha = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_ALPHA));
         boolean isStorageAware = Boolean.valueOf(args.getOptionValue("storage-aware", DEFAULT_IS_STORAGE_AWARE));
 
-        VMType vmType = null;
         VMTypeLoader loader = new VMTypeLoader();
-        try {
-            vmType = loader.determineVMType(args);
-        } catch (MissingParameterException e) {
-            e.printStackTrace();
-            return;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return;
-        } catch (InvalidDistributionException e) {
-            e.printStackTrace();
-            return;
-        }
-
+        VMType vmType = loader.determineVMType(args);
         logVMType(vmType);
 
         VMFactory.readCliOptions(args, seed);

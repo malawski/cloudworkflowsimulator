@@ -12,6 +12,8 @@ import org.apache.commons.cli.Options;
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 import org.yaml.snakeyaml.Yaml;
 
+import cws.core.exception.IllegalCWSArgumentException;
+
 public class VMTypeLoader {
     // explanatory constant
     private static final boolean HAS_ARG = true;
@@ -57,10 +59,13 @@ public class VMTypeLoader {
     private static final String DISTRIBUTION_TYPE_CONFIG_ENTRY = "distribution";
     private static final String DISTRIBUTION_VALUE_CONFIG_ENTRY = "value";
 
-    public VMType loadVM(Map<String, Object> config) throws MissingParameterException, InvalidDistributionException {
-        if (!config.containsKey(VM_MIPS_CONFIG_ENTRY) || !config.containsKey(VM_CORES_CONFIG_ENTRY)
-                || !config.containsKey(VM_CACHE_SIZE_CONFIG_ENTRY)) {
-            throw new MissingParameterException();
+    public VMType loadVM(Map<String, Object> config) throws IllegalCWSArgumentException {
+        if (!config.containsKey(VM_MIPS_CONFIG_ENTRY)) {
+            throw new IllegalCWSArgumentException("mips configuration is missing in VM config file");
+        } else if (!config.containsKey(VM_CORES_CONFIG_ENTRY)) {
+            throw new IllegalCWSArgumentException("cores configuration is missing in VM config file");
+        } else if (!config.containsKey(VM_CACHE_SIZE_CONFIG_ENTRY)) {
+            throw new IllegalCWSArgumentException("cache size configuration is missing in VM config file");
         }
 
         Map<String, Object> billingConfig = getBillingSection(config);
@@ -74,14 +79,22 @@ public class VMTypeLoader {
         DistributionFactory factory = new DistributionFactory();
 
         Map<String, Object> provisioningConfig = getProvisioningSection(config);
-        ContinuousDistribution provisioningDelay = factory.createDistribution(provisioningConfig);
+        ContinuousDistribution provisioningDelay = loadDistribution(factory, provisioningConfig);
 
         Map<String, Object> deprovisioningConfig = getDeprovisioningSection(config);
-        ContinuousDistribution deprovisioningDelay = factory.createDistribution(deprovisioningConfig);
+        ContinuousDistribution deprovisioningDelay = loadDistribution(factory, deprovisioningConfig);
 
         return VMTypeBuilder.newBuilder().mips(mips).cores(cores).price(unitPrice).cacheSize(cacheSize)
                 .billingTimeInSeconds(unitTime).provisioningTime(provisioningDelay)
                 .deprovisioningTime(deprovisioningDelay).build();
+    }
+
+    private ContinuousDistribution loadDistribution(DistributionFactory factory, Map<String, Object> provisioningConfig) {
+        try {
+            return factory.createDistribution(provisioningConfig);
+        } catch (InvalidDistributionException e) {
+            throw new IllegalCWSArgumentException("Illegal argument for provisioning delay: " + e.getMessage());
+        }
     }
 
     public static void buildCliOptions(Options options) {
@@ -140,12 +153,18 @@ public class VMTypeLoader {
         options.addOption(deprovisioningDelayValue);
     }
 
-    public VMType determineVMType(CommandLine args) throws MissingParameterException, FileNotFoundException,
-            InvalidDistributionException {
-        Map<String, Object> vmConfig = loadVMFromConfigFile(args);
+    public VMType determineVMType(CommandLine args) throws IllegalCWSArgumentException {
+        Map<String, Object> vmConfig = tryLoadVMFromConfigFile(args);
         overrideConfigFromFileWithCliArgs(vmConfig, args);
-
         return loadVM(vmConfig);
+    }
+
+    private Map<String, Object> tryLoadVMFromConfigFile(CommandLine args) {
+        try {
+            return loadVMFromConfigFile(args);
+        } catch (FileNotFoundException e) {
+            throw new IllegalCWSArgumentException("Cannot load VM config file: " + e.getMessage());
+        }
     }
 
     private void overrideConfigFromFileWithCliArgs(Map<String, Object> vmConfig, CommandLine args) {
