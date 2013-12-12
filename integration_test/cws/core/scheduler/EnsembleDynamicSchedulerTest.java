@@ -38,6 +38,7 @@ public class EnsembleDynamicSchedulerTest {
     private WorkflowLog jobLog;
     private StorageManager storageManager;
     private Environment environment;
+    private VMType vmType;
 
     @Before
     public void setUp() {
@@ -45,8 +46,8 @@ public class EnsembleDynamicSchedulerTest {
         cloudsim.init();
 
         storageManager = new VoidStorageManager(cloudsim);
-        environment = new Environment(VMTypeBuilder.DEFAULT_VM_TYPE, storageManager,
-                new StorageAwarePredictionStrategy());
+        vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+        environment = new Environment(vmType, storageManager, new StorageAwarePredictionStrategy());
 
         provisioner = null;
         scheduler = new EnsembleDynamicScheduler(cloudsim);

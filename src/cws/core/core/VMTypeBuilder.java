@@ -11,11 +11,6 @@ public class VMTypeBuilder {
     private static final ContinuousDistribution DEFAULT_PROVISIONING_DELAY = new ConstantDistribution(0.0);
     private static final ContinuousDistribution DEFAULT_DEPROVISIONING_DELAY = new ConstantDistribution(10.0);
 
-    /**
-     * Default VMType for simulations. It will be replaced once we introduce configurability.
-     */
-    public static final VMType DEFAULT_VM_TYPE = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-
     public static MipsStep newBuilder() {
         return new Steps();
     }

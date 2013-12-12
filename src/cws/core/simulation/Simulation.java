@@ -28,7 +28,6 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.InvalidDistributionException;
 import cws.core.core.MissingParameterException;
 import cws.core.core.VMType;
-import cws.core.core.VMTypeBuilder;
 import cws.core.core.VMTypeLoader;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGListGenerator;
@@ -315,8 +314,8 @@ public class Simulation {
         System.out.printf("isStorageAware = %b\n", isStorageAware);
 
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams,
-                VMTypeBuilder.DEFAULT_VM_TYPE, isStorageAware);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType,
+                isStorageAware);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -406,8 +405,8 @@ public class Simulation {
                     cloudsim.log("deadline = " + deadline);
                     logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams,
-                            VMTypeBuilder.DEFAULT_VM_TYPE, isStorageAware);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType,
+                            isStorageAware);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
                             deadline);
