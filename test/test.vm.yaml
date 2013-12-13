@@ -1,10 +1,10 @@
-mips: 1
-cores: 1
-cacheSize: 100000000
+mips: 10
+cores: 3
+cacheSize: 12345
 
 billing:
-    unitTime: 3600.0
-    unitPrice: 1.0
+    unitTime: 600.0
+    unitPrice: 3.5
 
 provisioningDelay:
     distribution: constant

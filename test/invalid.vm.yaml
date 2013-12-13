@@ -1,10 +1,5 @@
-mips: 1
+mips: invalid
 cores: 1
-cacheSize: 100000000
-
-billing:
-    unitTime: 3600.0
-    unitPrice: 1.0
 
 provisioningDelay:
     distribution: constant
@@ -13,4 +8,3 @@ provisioningDelay:
 deprovisioningDelay:
     distribution: constant
     value: 10.0
-
