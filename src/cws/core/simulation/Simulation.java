@@ -86,6 +86,15 @@ public class Simulation {
      */
     private static final String DEFAULT_IS_STORAGE_AWARE = "true";
 
+    /**
+     * Loads VMType from file and/or from CLI args
+     */
+    private final VMTypeLoader loader;
+
+    public Simulation(VMTypeLoader loader) {
+        this.loader = loader;
+    }
+
     public static Options buildOptions() {
         Options options = new Options();
 
@@ -199,7 +208,7 @@ public class Simulation {
         } catch (ParseException exp) {
             printUsage(options, exp.getMessage());
         }
-        Simulation testRun = new Simulation();
+        Simulation testRun = new Simulation(new VMTypeLoader());
         try {
             testRun.runTest(cmd);
         } catch (IllegalCWSArgumentException e) {
@@ -228,7 +237,6 @@ public class Simulation {
         double alpha = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_ALPHA));
         boolean isStorageAware = Boolean.valueOf(args.getOptionValue("storage-aware", DEFAULT_IS_STORAGE_AWARE));
 
-        VMTypeLoader loader = new VMTypeLoader();
         VMType vmType = loader.determineVMType(args);
         logVMType(vmType);
 
