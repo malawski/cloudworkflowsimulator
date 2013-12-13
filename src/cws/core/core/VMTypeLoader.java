@@ -24,40 +24,40 @@ public class VMTypeLoader {
     private static final String VM_TYPE_SHORT_OPTION_NAME = "vm";
     private static final String DEFAULT_VM_FILENAME = "default.vm.yaml";
 
-    private static final String VM_CACHE_SIZE_CONFIG_ENTRY = "cacheSize";
-    private static final String VM_CACHE_SIZE_SHORT_OPTION_NAME = "vcs";
-    private static final String VM_CACHE_SIZE_OPTION_NAME = "vm-cache-size";
+    static final String VM_CACHE_SIZE_CONFIG_ENTRY = "cacheSize";
+    static final String VM_CACHE_SIZE_SHORT_OPTION_NAME = "vcs";
+    static final String VM_CACHE_SIZE_OPTION_NAME = "vm-cache-size";
 
-    private static final String VM_MIPS_CONFIG_ENTRY = "mips";
-    private static final String VM_MIPS_SHORT_OPTION_NAME = "vmi";
-    private static final String VM_MIPS_OPTION_NAME = "vm-mips";
+    static final String VM_MIPS_CONFIG_ENTRY = "mips";
+    static final String VM_MIPS_SHORT_OPTION_NAME = "vmi";
+    static final String VM_MIPS_OPTION_NAME = "vm-mips";
 
-    private static final String VM_CORES_CONFIG_ENTRY = "cores";
-    private static final String VM_CORES_SHORT_OPTION_NAME = "vco";
-    private static final String VM_CORES_OPTION_NAME = "vm-cores";
+    static final String VM_CORES_CONFIG_ENTRY = "cores";
+    static final String VM_CORES_SHORT_OPTION_NAME = "vco";
+    static final String VM_CORES_OPTION_NAME = "vm-cores";
 
-    private static final String VM_BILLING_PRICE_CONFIG_ENTRY = "unitPrice";
-    private static final String VM_BILLING_PRICE_SHORT_OPTION_NAME = "vbp";
-    private static final String VM_BILLING_PRICE_OPTION_NAME = "vm-billing-price";
+    static final String VM_BILLING_PRICE_CONFIG_ENTRY = "unitPrice";
+    static final String VM_BILLING_PRICE_SHORT_OPTION_NAME = "vbp";
+    static final String VM_BILLING_PRICE_OPTION_NAME = "vm-billing-price";
 
-    private static final String VM_BILLING_TIME_CONFIG_ENTRY = "unitTime";
-    private static final String VM_BILLING_UNIT_SHORT_OPTION_NAME = "vbu";
-    private static final String VM_BILLING_UNIT_OPTION_NAME = "vm-billing-unit";
+    static final String VM_BILLING_TIME_CONFIG_ENTRY = "unitTime";
+    static final String VM_BILLING_UNIT_SHORT_OPTION_NAME = "vbu";
+    static final String VM_BILLING_UNIT_OPTION_NAME = "vm-billing-unit";
 
-    private static final String VM_PROVISIONING_DELAY_DISTRIBUTION_SHORT_OPTION_NAME = "vpd";
-    private static final String VM_PROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME = "vm-provisioning-distribution";
+    static final String VM_PROVISIONING_DELAY_DISTRIBUTION_SHORT_OPTION_NAME = "vpd";
+    static final String VM_PROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME = "vm-provisioning-distribution";
 
-    private static final String VM_DEPROVISIONING_DELAY_DISTRIBUTION_SHORT_OPTION_NAME = "vdd";
-    private static final String VM_DEPROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME = "vm-deprovisioning-distribution";
+    static final String VM_DEPROVISIONING_DELAY_DISTRIBUTION_SHORT_OPTION_NAME = "vdd";
+    static final String VM_DEPROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME = "vm-deprovisioning-distribution";
 
-    private static final String VM_PROVISIONING_DELAY_VALUE_SHORT_OPTION_NAME = "vpv";
-    private static final String VM_PROVISIONING_DELAY_VALUE_OPTION_NAME = "vm-provisioning-value";
+    static final String VM_PROVISIONING_DELAY_VALUE_SHORT_OPTION_NAME = "vpv";
+    static final String VM_PROVISIONING_DELAY_VALUE_OPTION_NAME = "vm-provisioning-value";
 
-    private static final String VM_DEPROVISIONING_DELAY_VALUE_SHORT_OPTION_NAME = "vdv";
-    private static final String VM_DEPROVISIONING_DELAY_VALUE_OPTION_NAME = "vm-deprovisioning-value";
+    static final String VM_DEPROVISIONING_DELAY_VALUE_SHORT_OPTION_NAME = "vdv";
+    static final String VM_DEPROVISIONING_DELAY_VALUE_OPTION_NAME = "vm-deprovisioning-value";
 
-    private static final String DISTRIBUTION_TYPE_CONFIG_ENTRY = "distribution";
-    private static final String DISTRIBUTION_VALUE_CONFIG_ENTRY = "value";
+    static final String DISTRIBUTION_TYPE_CONFIG_ENTRY = "distribution";
+    static final String DISTRIBUTION_VALUE_CONFIG_ENTRY = "value";
 
     public VMType loadVM(Map<String, Object> config) throws IllegalCWSArgumentException {
         if (!config.containsKey(VM_MIPS_CONFIG_ENTRY)) {
@@ -167,7 +167,7 @@ public class VMTypeLoader {
         }
     }
 
-    private void overrideConfigFromFileWithCliArgs(Map<String, Object> vmConfig, CommandLine args) {
+    void overrideConfigFromFileWithCliArgs(Map<String, Object> vmConfig, CommandLine args) {
         if (args.hasOption(VM_MIPS_OPTION_NAME)) {
             Integer mips = Integer.parseInt(args.getOptionValue(VM_MIPS_OPTION_NAME));
             vmConfig.put(VM_MIPS_CONFIG_ENTRY, mips);
