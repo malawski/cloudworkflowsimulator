@@ -132,4 +132,54 @@ public class VMTypeLoaderTest {
 
         vmLoader.loadVM(config);
     }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfBillingSectionIsMissing() {
+        config.remove("billing");
+
+        vmLoader.loadVM(config);
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfPricingUnitIsMissing() {
+        billingConfig.remove("unitTime");
+
+        vmLoader.loadVM(config);
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfUnitPriceIsMissing() {
+        billingConfig.remove("unitPrice");
+
+        vmLoader.loadVM(config);
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfProvisioningDelaySectionIsMissing() {
+        config.remove("provisioningDelay");
+
+        vmLoader.loadVM(config);
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfProvisioningDelayDistributionIsInvalid() {
+        provisioningConfig.remove("distribution");
+
+        vmLoader.loadVM(config);
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfDeprovisioningDelaySectionIsMissing() {
+        config.remove("deprovisioningDelay");
+
+        vmLoader.loadVM(config);
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfDeprovisioningDelayDistributionIsInvalid() {
+        deprovisioningConfig.remove("distribution");
+
+        vmLoader.loadVM(config);
+    }
+
 }

@@ -66,6 +66,16 @@ public class VMTypeLoader {
             throw new IllegalCWSArgumentException("cores configuration is missing in VM config file");
         } else if (!config.containsKey(VM_CACHE_SIZE_CONFIG_ENTRY)) {
             throw new IllegalCWSArgumentException("cache size configuration is missing in VM config file");
+        } else if (!config.containsKey("billing")) {
+            throw new IllegalCWSArgumentException("billing configuration is missing in VM config file");
+        } else if (!getBillingSection(config).containsKey(VM_BILLING_TIME_CONFIG_ENTRY)) {
+            throw new IllegalCWSArgumentException("billing:unitTime configuration is missing in VM config file");
+        } else if (!getBillingSection(config).containsKey(VM_BILLING_PRICE_CONFIG_ENTRY)) {
+            throw new IllegalCWSArgumentException("billing:unitPrice configuration is missing in VM config file");
+        } else if (!config.containsKey("provisioningDelay")) {
+            throw new IllegalCWSArgumentException("provisioningDelay configuration is missing in VM config file");
+        } else if (!config.containsKey("deprovisioningDelay")) {
+            throw new IllegalCWSArgumentException("deprovisioningDelay configuration is missing in VM config file");
         }
 
         Map<String, Object> billingConfig = getBillingSection(config);
