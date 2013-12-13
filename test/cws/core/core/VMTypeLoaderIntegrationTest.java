@@ -42,7 +42,7 @@ public class VMTypeLoaderIntegrationTest {
 
     @Test
     public void shouldLoadCustomVM() throws ParseException {
-        CommandLine cmd = parseArgs(new String[] { "--vm", "../test/test.vm.yaml" });
+        CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "../test/test.vm.yaml" });
 
         VMType vmType = loader.determineVMType(cmd);
 
@@ -55,14 +55,14 @@ public class VMTypeLoaderIntegrationTest {
 
     @Test(expected = IllegalCWSArgumentException.class)
     public void shouldFailWhenFilePathIsInvalid() throws ParseException {
-        CommandLine cmd = parseArgs(new String[] { "--vm", "nosuchfile.vm.yaml" });
+        CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "nosuchfile.vm.yaml" });
 
         loader.determineVMType(cmd);
     }
 
     @Test(expected = IllegalCWSArgumentException.class)
     public void shouldFailWhenConfigIsInvalid() throws ParseException {
-        CommandLine cmd = parseArgs(new String[] { "--vm", "../test/invalid.vm.yaml" });
+        CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "../test/invalid.vm.yaml" });
 
         loader.determineVMType(cmd);
     }

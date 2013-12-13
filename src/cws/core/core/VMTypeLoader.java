@@ -20,9 +20,9 @@ public class VMTypeLoader {
 
     private static final String VMS_DIRECTORY = "vms/";
 
-    private static final String VM_TYPE_OPTION_NAME = "vm";
-    private static final String VM_TYPE_SHORT_OPTION_NAME = "vm";
-    private static final String DEFAULT_VM_FILENAME = "default.vm.yaml";
+    static final String VM_TYPE_OPTION_NAME = "vm";
+    static final String VM_TYPE_SHORT_OPTION_NAME = "vm";
+    static final String DEFAULT_VM_FILENAME = "default.vm.yaml";
 
     static final String VM_CACHE_SIZE_CONFIG_ENTRY = "cacheSize";
     static final String VM_CACHE_SIZE_SHORT_OPTION_NAME = "vcs";
@@ -59,7 +59,7 @@ public class VMTypeLoader {
     static final String DISTRIBUTION_TYPE_CONFIG_ENTRY = "distribution";
     static final String DISTRIBUTION_VALUE_CONFIG_ENTRY = "value";
 
-    public VMType loadVM(Map<String, Object> config) throws IllegalCWSArgumentException {
+    VMType loadVM(Map<String, Object> config) throws IllegalCWSArgumentException {
         if (!config.containsKey(VM_MIPS_CONFIG_ENTRY)) {
             throw new IllegalCWSArgumentException("mips configuration is missing in VM config file");
         } else if (!config.containsKey(VM_CORES_CONFIG_ENTRY)) {
