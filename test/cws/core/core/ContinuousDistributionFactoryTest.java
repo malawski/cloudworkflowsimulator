@@ -10,13 +10,13 @@ import org.cloudbus.cloudsim.distributions.UniformDistr;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DistributionFactoryTest {
-    private DistributionFactory factory;
+public class ContinuousDistributionFactoryTest {
+    private ContinuousDistributionFactory factory;
     private Map<String, Object> distributionConfig;
 
     @Before
     public void setUp() {
-        factory = new DistributionFactory();
+        factory = new ContinuousDistributionFactory();
         distributionConfig = new HashMap<String, Object>();
     }
 

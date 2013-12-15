@@ -52,7 +52,7 @@ public class VMTypeLoaderTest {
     }
 
     @Test
-    public void shouldLoadMips() throws MissingParameterException, InvalidDistributionException {
+    public void shouldLoadMips() throws InvalidDistributionException {
         config.put("mips", 1234);
 
         VMType vmType = vmLoader.loadVM(config);
@@ -113,21 +113,21 @@ public class VMTypeLoaderTest {
     }
 
     @Test(expected = IllegalCWSArgumentException.class)
-    public void shouldFailIfMipsIsMissing() throws MissingParameterException, InvalidDistributionException {
+    public void shouldFailIfMipsIsMissing() throws InvalidDistributionException {
         config.remove("mips");
 
         vmLoader.loadVM(config);
     }
 
     @Test(expected = IllegalCWSArgumentException.class)
-    public void shouldFailIfCoreIsMissing() throws MissingParameterException, InvalidDistributionException {
+    public void shouldFailIfCoreIsMissing() throws InvalidDistributionException {
         config.remove("cores");
 
         vmLoader.loadVM(config);
     }
 
     @Test(expected = IllegalCWSArgumentException.class)
-    public void shouldFailIfCacheIsMissing() throws MissingParameterException, InvalidDistributionException {
+    public void shouldFailIfCacheIsMissing() throws InvalidDistributionException {
         config.remove("cacheSize");
 
         vmLoader.loadVM(config);

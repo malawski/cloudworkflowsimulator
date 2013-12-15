@@ -7,7 +7,21 @@ import org.cloudbus.cloudsim.distributions.UniformDistr;
 
 import cws.core.provisioner.ConstantDistribution;
 
-public class DistributionFactory {
+/**
+ * Creates a distribution from distribution config.
+ * Handles two types of distribution:
+ * - constant (needs `value` param)
+ * - uniform (needs `minValue` and `maxValue` params)
+ */
+public class ContinuousDistributionFactory {
+
+    /**
+     * Factory method.
+     * 
+     * @param distributionConfig
+     * @return concrete ContinuousDistribution
+     * @throws InvalidDistributionException when invalid distribution type or params given
+     */
     public ContinuousDistribution createDistribution(Map<String, Object> distributionConfig)
             throws InvalidDistributionException {
         String distributionType = getDistributionType(distributionConfig);

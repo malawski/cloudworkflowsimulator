@@ -183,7 +183,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
-        spare = spare - environment.getProvisioningDelays();
+        spare = spare - environment.getVMProvisioningOverallDelayEstimation();
         for (int i = 0; i < numlevels; i++) {
 
             double taskPart = alpha * (totalTasksByLevel[i] / totalTasks);
@@ -380,7 +380,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = new CriticalPath(order, runtimes, environment);
-        double minimalTime = path.getCriticalPathLength() + environment.getProvisioningDelays();
+        double minimalTime = path.getCriticalPathLength() + environment.getVMProvisioningOverallDelayEstimation();
         if (minimalTime > getDeadline()) {
             throw new NoFeasiblePlan("Best critical path + provisioning estimates (" + minimalTime + ") "
                     + "> deadline (" + getDeadline() + ")");
@@ -436,7 +436,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
             }
             double last = schedule.lastKey();
             Slot lastSlot = schedule.get(last);
-            return last + lastSlot.duration + environment.getOnlyDeprovisioningDelay();
+            return last + lastSlot.duration + environment.getDeprovisioningDelayEstimation();
         }
 
         public int getFullBillingUnits() {

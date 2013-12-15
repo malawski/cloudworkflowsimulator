@@ -34,7 +34,5 @@ public class VMFactoryTest {
 
         assertTrue(provisioningDelayDistribution.sample() > 0.0);
         assertTrue(deprovisioningDelayDistribution.sample() > 0.0);
-        // TODO(mequrel): the test was really testing only this but 1000 times with cloudsim unnecessary invocation.
-        // Should be rewritten.
     }
 }

@@ -14,6 +14,15 @@ import org.yaml.snakeyaml.Yaml;
 
 import cws.core.exception.IllegalCWSArgumentException;
 
+/**
+ * Loads VMType from *.vm.yaml config files.
+ * 
+ * Uses --vm filename option. When the option is not specified
+ * loads vms/default.vm.yaml file. VM files paths should be
+ * specified relatively to vms/ directory.
+ * 
+ * VM params can be overrode by CLI args like --vm-mips.
+ */
 public class VMTypeLoader {
     // explanatory constant
     private static final boolean HAS_ARG = true;
@@ -86,7 +95,7 @@ public class VMTypeLoader {
         int cores = ((Number) config.get(VM_CORES_CONFIG_ENTRY)).intValue();
         long cacheSize = ((Number) config.get(VM_CACHE_SIZE_CONFIG_ENTRY)).longValue();
 
-        DistributionFactory factory = new DistributionFactory();
+        ContinuousDistributionFactory factory = new ContinuousDistributionFactory();
 
         Map<String, Object> provisioningConfig = getProvisioningSection(config);
         ContinuousDistribution provisioningDelay = loadDistribution(factory, provisioningConfig);
@@ -99,7 +108,8 @@ public class VMTypeLoader {
                 .deprovisioningTime(deprovisioningDelay).build();
     }
 
-    private ContinuousDistribution loadDistribution(DistributionFactory factory, Map<String, Object> provisioningConfig) {
+    private ContinuousDistribution loadDistribution(ContinuousDistributionFactory factory,
+            Map<String, Object> provisioningConfig) {
         try {
             return factory.createDistribution(provisioningConfig);
         } catch (InvalidDistributionException e) {

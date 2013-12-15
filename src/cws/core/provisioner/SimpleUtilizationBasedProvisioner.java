@@ -66,7 +66,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
             double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds() - vmRuntime;
 
             // we add delay estimate to include also the deprovisioning time
-            if (secondsRemaining <= environment.getProvisioningDelays()) {
+            if (secondsRemaining <= environment.getVMProvisioningOverallDelayEstimation()) {
                 completingVMs.add(vm);
             }
         }
