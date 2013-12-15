@@ -190,4 +190,32 @@ public class GlobalStorageParamsLoaderTest {
         assertEquals(3, params.getNumReplicas());
     }
 
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfReplicasNumberIsMissing() {
+        config.remove(GlobalStorageParamsLoader.GS_REPLICAS_NUMBER_CONFIG_ENTRY);
+
+        loader.loadParams(config);
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfChunkTransferTimeIsNotAnInteger() {
+        config.put(GlobalStorageParamsLoader.GS_REPLICAS_NUMBER_CONFIG_ENTRY, 2.3);
+
+        loader.loadParams(config);
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfReplicasNumberIsLessThanZero() {
+        config.put(GlobalStorageParamsLoader.GS_REPLICAS_NUMBER_CONFIG_ENTRY, -3);
+
+        loader.loadParams(config);
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfReplicasNumberIsZero() {
+        config.put(GlobalStorageParamsLoader.GS_REPLICAS_NUMBER_CONFIG_ENTRY, 0);
+
+        loader.loadParams(config);
+    }
+
 }

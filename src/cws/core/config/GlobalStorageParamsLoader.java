@@ -38,6 +38,17 @@ public class GlobalStorageParamsLoader {
     static final String GS_CONFIGS_DIRECTORY_SHORT_OPTION_NAME = "gsd";
     private static final String DEFAULT_GS_CONFIGS_DIRECTORY = "gs/";
 
+    static final String GS_READ_SPEED_OPTION_NAME = "gs-read-speed";
+    static final String GS_READ_SPEED_SHORT_OPTION_NAME = "gsrs";
+    static final String GS_WRITE_SPEED_OPTION_NAME = "gs-write-speed";
+    static final String GS_WRITE_SPEED_SHORT_OPTION_NAME = "gsws";
+    static final String GS_LATENCY_OPTION_NAME = "gs-latency";
+    static final String GS_LATENCY_SHORT_OPTION_NAME = "gsl";
+    static final String GS_CHUNK_TRANSFER_TIME_OPTION_NAME = "gs-chunk-time";
+    static final String GS_CHUNK_TRANSFER_TIME_SHORT_OPTION_NAME = "gsct";
+    static final String GS_REPLICAS_NUMBER_OPTION_NAME = "gs-replicas";
+    static final String GS_REPLICAS_NUMBER_SHORT_OPTION_NAME = "gsr";
+
     public static void buildCliOptions(Options options) {
         Option globalStorage = new Option(GS_TYPE_SHORT_OPTION_NAME, GS_TYPE_OPTION_NAME, HAS_ARG, String.format(
                 "Global storage config filename, defaults to %s", DEFAULT_GS_TYPE_FILENAME));
@@ -53,11 +64,104 @@ public class GlobalStorageParamsLoader {
                         DEFAULT_GS_CONFIGS_DIRECTORY));
         configsDirectory.setArgName("DIRPATH");
         options.addOption(configsDirectory);
+
+        Option readSpeed = new Option(GS_READ_SPEED_SHORT_OPTION_NAME, GS_READ_SPEED_OPTION_NAME, HAS_ARG,
+                "Overrides Global Storage read speed");
+        readSpeed.setArgName("BYTES/SEC");
+        options.addOption(readSpeed);
+
+        Option writeSpeed = new Option(GS_WRITE_SPEED_SHORT_OPTION_NAME, GS_WRITE_SPEED_OPTION_NAME, HAS_ARG,
+                "Overrides Global Storage write speed");
+        writeSpeed.setArgName("BYTES/SEC");
+        options.addOption(writeSpeed);
+
+        Option replicasNumber = new Option(GS_REPLICAS_NUMBER_SHORT_OPTION_NAME, GS_REPLICAS_NUMBER_OPTION_NAME,
+                HAS_ARG, "Overrides Global Storage replicas number");
+        replicasNumber.setArgName("NUM");
+        options.addOption(replicasNumber);
+
+        Option latency = new Option(GS_LATENCY_SHORT_OPTION_NAME, GS_LATENCY_OPTION_NAME, HAS_ARG,
+                "Overrides Global Storage latency");
+        latency.setArgName("SECONDS");
+        options.addOption(latency);
+
+        Option chunkTransferTime = new Option(GS_CHUNK_TRANSFER_TIME_SHORT_OPTION_NAME,
+                GS_CHUNK_TRANSFER_TIME_OPTION_NAME, HAS_ARG, "Overrides Global Storage transfer time");
+        chunkTransferTime.setArgName("SECONDS");
+        options.addOption(chunkTransferTime);
     }
 
     public GlobalStorageParams determineGlobalStorageParams(CommandLine args) throws IllegalCWSArgumentException {
         Map<String, Object> globalStorageConfig = tryLoadConfigFromFile(args);
+        overrideConfigFromFileWithCliArgs(globalStorageConfig, args);
         return loadParams(globalStorageConfig);
+    }
+
+    void overrideConfigFromFileWithCliArgs(Map<String, Object> globalStorageConfig, CommandLine args) {
+        overrideReadSpeed(globalStorageConfig, args);
+        overrideWriteSpeed(globalStorageConfig, args);
+        overrideLatency(globalStorageConfig, args);
+        overrideChunkTransferTime(globalStorageConfig, args);
+        overrideReplicasNumber(globalStorageConfig, args);
+    }
+
+    private void overrideReplicasNumber(Map<String, Object> globalStorageConfig, CommandLine args) {
+        if (args.hasOption(GS_REPLICAS_NUMBER_OPTION_NAME)) {
+            try {
+                Integer replicasNumber = Integer.parseInt(args.getOptionValue(GS_REPLICAS_NUMBER_OPTION_NAME));
+                globalStorageConfig.put(GS_REPLICAS_NUMBER_CONFIG_ENTRY, replicasNumber);
+            } catch (NumberFormatException e) {
+                throw new IllegalCWSArgumentException(GS_REPLICAS_NUMBER_CONFIG_ENTRY
+                        + " was overrode with a non-integer value");
+            }
+        }
+    }
+
+    private void overrideChunkTransferTime(Map<String, Object> globalStorageConfig, CommandLine args) {
+        if (args.hasOption(GS_CHUNK_TRANSFER_TIME_OPTION_NAME)) {
+            try {
+                Double chunkTransferTime = Double.parseDouble(args.getOptionValue(GS_CHUNK_TRANSFER_TIME_OPTION_NAME));
+                globalStorageConfig.put(GS_CHUNK_TRANSFER_TIME_CONFIG_ENTRY, chunkTransferTime);
+            } catch (NumberFormatException e) {
+                throw new IllegalCWSArgumentException(GS_CHUNK_TRANSFER_TIME_CONFIG_ENTRY
+                        + " was overrode with a non-number value");
+            }
+        }
+    }
+
+    private void overrideLatency(Map<String, Object> globalStorageConfig, CommandLine args) {
+        if (args.hasOption(GS_LATENCY_OPTION_NAME)) {
+            try {
+                Double latency = Double.parseDouble(args.getOptionValue(GS_LATENCY_OPTION_NAME));
+                globalStorageConfig.put(GS_LATENCY_CONFIG_ENTRY, latency);
+            } catch (NumberFormatException e) {
+                throw new IllegalCWSArgumentException(GS_LATENCY_CONFIG_ENTRY + " was overrode with a non-number value");
+            }
+        }
+    }
+
+    private void overrideWriteSpeed(Map<String, Object> globalStorageConfig, CommandLine args) {
+        if (args.hasOption(GS_WRITE_SPEED_OPTION_NAME)) {
+            try {
+                Double writeSpeed = Double.parseDouble(args.getOptionValue(GS_WRITE_SPEED_OPTION_NAME));
+                globalStorageConfig.put(GS_WRITE_SPEED_CONFIG_ENTRY, writeSpeed);
+            } catch (NumberFormatException e) {
+                throw new IllegalCWSArgumentException(GS_WRITE_SPEED_CONFIG_ENTRY
+                        + " was overrode with a non-number value");
+            }
+        }
+    }
+
+    private void overrideReadSpeed(Map<String, Object> globalStorageConfig, CommandLine args) {
+        if (args.hasOption(GS_READ_SPEED_OPTION_NAME)) {
+            try {
+                Double readSpeed = Double.parseDouble(args.getOptionValue(GS_READ_SPEED_OPTION_NAME));
+                globalStorageConfig.put(GS_READ_SPEED_CONFIG_ENTRY, readSpeed);
+            } catch (NumberFormatException e) {
+                throw new IllegalCWSArgumentException(GS_READ_SPEED_CONFIG_ENTRY
+                        + " was overrode with a non-number value");
+            }
+        }
     }
 
     private Map<String, Object> tryLoadConfigFromFile(CommandLine args) {
@@ -97,7 +201,7 @@ public class GlobalStorageParamsLoader {
 
     private int loadReplicasNumber(Map<String, Object> config) {
         assertRequiredOptionIsNotMissing(config, GS_REPLICAS_NUMBER_CONFIG_ENTRY);
-        assertIsNumber(config, GS_REPLICAS_NUMBER_CONFIG_ENTRY);
+        assertIsInteger(config, GS_REPLICAS_NUMBER_CONFIG_ENTRY);
         int replicasNumber = toInt(config, GS_REPLICAS_NUMBER_CONFIG_ENTRY);
         assertIsGreaterThanZero(replicasNumber, GS_REPLICAS_NUMBER_CONFIG_ENTRY);
         return replicasNumber;
@@ -156,6 +260,12 @@ public class GlobalStorageParamsLoader {
     private void assertIsNumber(Map<String, Object> config, String configEntry) {
         if (!(config.get(configEntry) instanceof Number)) {
             throw new IllegalCWSArgumentException(configEntry + " configuration is not a number");
+        }
+    }
+
+    private void assertIsInteger(Map<String, Object> config, String configEntry) {
+        if (!(config.get(configEntry) instanceof Integer)) {
+            throw new IllegalCWSArgumentException(configEntry + " configuration is not an integer number");
         }
     }
 

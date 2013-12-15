@@ -79,4 +79,29 @@ public class GlobalStorageParamsLoaderIntegrationTest {
 
         assertEquals(12345678.0, globalStorageParams.getReadSpeed());
     }
+
+    @Test
+    public void shouldAllowToOverrideConfigEntries() throws ParseException {
+        CommandLine cmd = parseArgs(new String[] { "--" + GlobalStorageParamsLoader.GS_READ_SPEED_OPTION_NAME, "3333",
+                "--" + GlobalStorageParamsLoader.GS_WRITE_SPEED_OPTION_NAME, "555.3",
+                "--" + GlobalStorageParamsLoader.GS_LATENCY_OPTION_NAME, "0.23",
+                "--" + GlobalStorageParamsLoader.GS_CHUNK_TRANSFER_TIME_OPTION_NAME, "2.3",
+                "--" + GlobalStorageParamsLoader.GS_REPLICAS_NUMBER_OPTION_NAME, "4", });
+
+        GlobalStorageParams globalStorageParams = loader.determineGlobalStorageParams(cmd);
+
+        assertEquals(3333.0, globalStorageParams.getReadSpeed());
+        assertEquals(555.3, globalStorageParams.getWriteSpeed());
+        assertEquals(0.23, globalStorageParams.getLatency());
+        assertEquals(4, globalStorageParams.getNumReplicas());
+        assertEquals(2.3, globalStorageParams.getChunkTransferTime());
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailIfOverrodeConfigIsNotValid() throws ParseException {
+        CommandLine cmd = parseArgs(new String[] { "--" + GlobalStorageParamsLoader.GS_READ_SPEED_OPTION_NAME,
+                "invalid" });
+
+        loader.determineGlobalStorageParams(cmd);
+    }
 }
