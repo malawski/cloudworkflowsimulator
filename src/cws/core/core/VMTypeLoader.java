@@ -19,7 +19,7 @@ import cws.core.exception.IllegalCWSArgumentException;
  * 
  * Uses --vm filename option. When the option is not specified
  * loads vms/default.vm.yaml file. VM files paths should be
- * specified relatively to vms/ directory.
+ * specified relatively to vms/ directory by default.
  * 
  * VM params can be overrode by CLI args like --vm-mips.
  */
@@ -27,7 +27,9 @@ public class VMTypeLoader {
     // explanatory constant
     private static final boolean HAS_ARG = true;
 
-    private static final String VMS_DIRECTORY = "vms/";
+    static final String VM_CONFIGS_DIRECTORY_OPTION_NAME = "vm-directory";
+    static final String VM_CONFIGS_DIRECTORY_SHORT_OPTION_NAME = "vmd";
+    static final String DEFAULT_VM_CONFIGS_DIRECTORY = "vms/";
 
     static final String VM_TYPE_OPTION_NAME = "vm";
     static final String VM_TYPE_SHORT_OPTION_NAME = "vm";
@@ -118,8 +120,15 @@ public class VMTypeLoader {
     }
 
     public static void buildCliOptions(Options options) {
+        Option vmConfigDirectory = new Option(VM_CONFIGS_DIRECTORY_SHORT_OPTION_NAME, VM_CONFIGS_DIRECTORY_OPTION_NAME,
+                HAS_ARG, String.format(
+                        "VM config directory, config files are loaded relatively to its path, defaults to %s",
+                        DEFAULT_VM_CONFIGS_DIRECTORY));
+        vmConfigDirectory.setArgName("DIRPATH");
+        options.addOption(vmConfigDirectory);
+
         Option vm = new Option(VM_TYPE_SHORT_OPTION_NAME, VM_TYPE_OPTION_NAME, HAS_ARG, String.format(
-                "VM config filename, relative to %s, defaults to %s", VMS_DIRECTORY, DEFAULT_VM_FILENAME));
+                "VM config filename, defaults to %s", DEFAULT_VM_FILENAME));
         vm.setArgName("FILENAME");
         options.addOption(vm);
 
@@ -256,8 +265,9 @@ public class VMTypeLoader {
 
     private Map<String, Object> loadVMFromConfigFile(CommandLine args) throws FileNotFoundException {
         String vmConfigFilename = args.getOptionValue(VM_TYPE_OPTION_NAME, DEFAULT_VM_FILENAME);
+        String vmConfigDirectory = args.getOptionValue(VM_CONFIGS_DIRECTORY_OPTION_NAME, DEFAULT_VM_CONFIGS_DIRECTORY);
 
-        InputStream input = new FileInputStream(new File(VMS_DIRECTORY + vmConfigFilename));
+        InputStream input = new FileInputStream(new File(vmConfigDirectory, vmConfigFilename));
         Yaml yaml = new Yaml();
         return (Map<String, Object>) yaml.load(input);
     }

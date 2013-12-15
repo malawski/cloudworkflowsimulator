@@ -53,6 +53,16 @@ public class VMTypeLoaderIntegrationTest {
         assertEquals(12345L, vmType.getCacheSize());
     }
 
+    @Test
+    public void shouldLoadVMFromCustomPath() throws ParseException {
+        CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_CONFIGS_DIRECTORY_OPTION_NAME, "test",
+                "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "test.vm.yaml" });
+
+        VMType vmType = loader.determineVMType(cmd);
+
+        assertEquals(10, vmType.getMips());
+    }
+
     @Test(expected = IllegalCWSArgumentException.class)
     public void shouldFailWhenFilePathIsInvalid() throws ParseException {
         CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "nosuchfile.vm.yaml" });
