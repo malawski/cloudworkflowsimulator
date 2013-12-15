@@ -1,0 +1,6 @@
+readSpeed: 12345678
+latency: invalid
+replicas: 2
+chunkTransferTime: 3
+
+
