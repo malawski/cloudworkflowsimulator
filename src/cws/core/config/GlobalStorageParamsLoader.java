@@ -1,10 +1,15 @@
 package cws.core.config;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.yaml.snakeyaml.Yaml;
 
 import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.storage.global.GlobalStorageParams;
@@ -22,23 +27,54 @@ import cws.core.storage.global.GlobalStorageParams;
 public class GlobalStorageParamsLoader {
     static final String GS_TYPE_SHORT_OPTION_NAME = "gs";
     static final String GS_TYPE_OPTION_NAME = "global-storage";
-    private static final Object DEFAULT_GS_TYPE_FILENAME = "default.gs.yaml";
+    private static final String DEFAULT_GS_TYPE_FILENAME = "default.gs.yaml";
     private static final boolean HAS_ARG = true;
     static final String GS_READ_SPEED_CONFIG_ENTRY = "readSpeed";
     static final String GS_WRITE_SPEED_CONFIG_ENTRY = "writeSpeed";
     static final String GS_LATENCY_CONFIG_ENTRY = "latency";
     static final String GS_CHUNK_TRANSFER_TIME_CONFIG_ENTRY = "chunkTransferTime";
-    public static final String GS_REPLICAS_NUMBER_CONFIG_ENTRY = "replicas";
+    static final String GS_REPLICAS_NUMBER_CONFIG_ENTRY = "replicas";
+    static final String GS_CONFIGS_DIRECTORY_OPTION_NAME = "global-storage-directory";
+    static final String GS_CONFIGS_DIRECTORY_SHORT_OPTION_NAME = "gsd";
+    private static final String DEFAULT_GS_CONFIGS_DIRECTORY = "gs/";
 
     public static void buildCliOptions(Options options) {
         Option globalStorage = new Option(GS_TYPE_SHORT_OPTION_NAME, GS_TYPE_OPTION_NAME, HAS_ARG, String.format(
                 "Global storage config filename, defaults to %s", DEFAULT_GS_TYPE_FILENAME));
         globalStorage.setArgName("FILENAME");
         options.addOption(globalStorage);
+
+        Option configsDirectory = new Option(
+                GS_CONFIGS_DIRECTORY_SHORT_OPTION_NAME,
+                GS_CONFIGS_DIRECTORY_OPTION_NAME,
+                HAS_ARG,
+                String.format(
+                        "Global storage config directory, config files are loaded relatively to its path, defaults to %s",
+                        DEFAULT_GS_CONFIGS_DIRECTORY));
+        configsDirectory.setArgName("DIRPATH");
+        options.addOption(configsDirectory);
     }
 
-    public GlobalStorageParams determineGlobalStorageParams(CommandLine cmd) {
-        throw new IllegalCWSArgumentException("");
+    public GlobalStorageParams determineGlobalStorageParams(CommandLine args) throws IllegalCWSArgumentException {
+        Map<String, Object> globalStorageConfig = tryLoadConfigFromFile(args);
+        return loadParams(globalStorageConfig);
+    }
+
+    private Map<String, Object> tryLoadConfigFromFile(CommandLine args) {
+        try {
+            return loadConfigFromFile(args);
+        } catch (FileNotFoundException e) {
+            throw new IllegalCWSArgumentException("Cannot load Global Storage config file: " + e.getMessage());
+        }
+    }
+
+    private Map<String, Object> loadConfigFromFile(CommandLine args) throws FileNotFoundException {
+        String gsConfigFilename = args.getOptionValue(GS_TYPE_OPTION_NAME, DEFAULT_GS_TYPE_FILENAME);
+        String gsConfigDirectory = args.getOptionValue(GS_CONFIGS_DIRECTORY_OPTION_NAME, DEFAULT_GS_CONFIGS_DIRECTORY);
+
+        InputStream input = new FileInputStream(new File(gsConfigDirectory, gsConfigFilename));
+        Yaml yaml = new Yaml();
+        return (Map<String, Object>) yaml.load(input);
     }
 
     public GlobalStorageParams loadParams(Map<String, Object> config) throws IllegalCWSArgumentException {

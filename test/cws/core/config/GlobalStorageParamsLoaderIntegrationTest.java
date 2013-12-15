@@ -41,11 +41,42 @@ public class GlobalStorageParamsLoaderIntegrationTest {
         assertEquals(1.0, globalStorageParams.getChunkTransferTime());
     }
 
+    @Test
+    public void shouldLoadCustomVM() throws ParseException {
+        CommandLine cmd = parseArgs(new String[] { "--" + GlobalStorageParamsLoader.GS_TYPE_OPTION_NAME,
+                "../test/test.gs.yaml" });
+
+        GlobalStorageParams globalStorageParams = loader.determineGlobalStorageParams(cmd);
+
+        assertEquals(12345678.0, globalStorageParams.getReadSpeed());
+        assertEquals(3216547.0, globalStorageParams.getWriteSpeed());
+        assertEquals(0.15, globalStorageParams.getLatency());
+        assertEquals(2, globalStorageParams.getNumReplicas());
+        assertEquals(3.0, globalStorageParams.getChunkTransferTime());
+    }
+
+    @Test(expected = IllegalCWSArgumentException.class)
+    public void shouldFailWhenFilePathIsInvalid() throws ParseException {
+        CommandLine cmd = parseArgs(new String[] { "--" + GlobalStorageParamsLoader.GS_TYPE_OPTION_NAME,
+                "nosuchfile.vm.yaml" });
+
+        loader.determineGlobalStorageParams(cmd);
+    }
+
     @Test(expected = IllegalCWSArgumentException.class)
     public void shouldFailWhenConfigIsInvalid() throws ParseException {
         CommandLine cmd = parseArgs(new String[] { "--" + GlobalStorageParamsLoader.GS_TYPE_OPTION_NAME,
                 "../test/invalid.gs.yaml" });
-
         loader.determineGlobalStorageParams(cmd);
+    }
+
+    @Test
+    public void shouldLoadVMFromCustomPath() throws ParseException {
+        CommandLine cmd = parseArgs(new String[] { "--" + GlobalStorageParamsLoader.GS_CONFIGS_DIRECTORY_OPTION_NAME,
+                "test", "--" + GlobalStorageParamsLoader.GS_TYPE_OPTION_NAME, "test.gs.yaml" });
+
+        GlobalStorageParams globalStorageParams = loader.determineGlobalStorageParams(cmd);
+
+        assertEquals(12345678.0, globalStorageParams.getReadSpeed());
     }
 }
