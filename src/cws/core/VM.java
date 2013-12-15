@@ -12,7 +12,6 @@ import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
-import cws.core.storage.cache.VMCacheManager;
 
 /**
  * A VM is a virtual machine that executes Jobs.
@@ -50,12 +49,6 @@ public class VM extends CWSSimEntity {
     /** The Cloud that runs this VM */
     private int cloud;
 
-    /**
-     * The number of bytes on internal disk that can be used as a cache
-     * @see {@link VMCacheManager}
-     */
-    private long cacheSize;
-
     /** Current idle cores */
     private int idleCores;
 
@@ -79,12 +72,6 @@ public class VM extends CWSSimEntity {
 
     /** Number of CPU seconds consumed by jobs on this VM */
     private double cpuSecondsConsumed;
-
-    /** Delay from when the VM is launched until it is ready */
-    private double provisioningDelay;
-
-    /** Delay from when the VM is terminated until it is no longer charged */
-    private double deprovisioningDelay;
 
     /** Varies the actual runtime of tasks according to the specified distribution */
     private RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
@@ -209,6 +196,7 @@ public class VM extends CWSSimEntity {
         // Reset dynamic state
         jobs.clear();
         idleCores = vmType.getCores();
+        getCloudsim().log(String.format("VM %d terminated", getId()));
     }
 
     private void jobSubmit(Job job) {
@@ -323,22 +311,6 @@ public class VM extends CWSSimEntity {
         }
     }
 
-    public void setDeprovisioningDelay(double deprovisioningDelay) {
-        this.deprovisioningDelay = deprovisioningDelay;
-    }
-
-    public double getDeprovisioningDelay() {
-        return deprovisioningDelay;
-    }
-
-    public void setProvisioningDelay(double provisioningDelay) {
-        this.provisioningDelay = provisioningDelay;
-    }
-
-    public double getProvisioningDelay() {
-        return provisioningDelay;
-    }
-
     public int getOwner() {
         return owner;
     }
@@ -403,19 +375,19 @@ public class VM extends CWSSimEntity {
         this.failureModel = failureModel;
     }
 
-    public long getCacheSize() {
-        return cacheSize;
-    }
-
-    public void setCacheSize(long cacheSize) {
-        this.cacheSize = cacheSize;
-    }
-
     public void setVmType(VMType vmType) {
         this.vmType = vmType;
     }
 
     public boolean isTerminated() {
         return isTerminated;
+    }
+
+    public double getProvisioningDelay() {
+        return vmType.getProvisioningDelay().sample();
+    }
+
+    public double getDeprovisioningDelay() {
+        return vmType.getDeprovisioningDelay().sample();
     }
 }

@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 
 import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
@@ -20,6 +21,7 @@ public abstract class VMCacheManagerTest {
     protected CloudSimWrapper cloudsim;
     protected Job job;
     protected VM vm;
+    protected VMType vmType;
     protected Task task;
 
     @Before
@@ -29,7 +31,9 @@ public abstract class VMCacheManagerTest {
 
         job = Mockito.mock(Job.class);
         vm = Mockito.mock(VM.class);
+        vmType = Mockito.mock(VMType.class);
         Mockito.when(vm.getId()).thenReturn(100);
+        Mockito.when(vm.getVmType()).thenReturn(vmType);
         job.setVM(vm);
         Mockito.when(job.getVM()).thenReturn(vm);
         task = Mockito.mock(Task.class);
@@ -45,7 +49,7 @@ public abstract class VMCacheManagerTest {
 
     @Test
     public void testTooBigFile() {
-        Mockito.when(vm.getCacheSize()).thenReturn((long) 100);
+        Mockito.when(vmType.getCacheSize()).thenReturn((long) 100);
         DAGFile file = new DAGFile("abc.txt", 10000);
         cm.putFileToCache(file, job);
         Assert.assertFalse(cm.getFileFromCache(file, job));

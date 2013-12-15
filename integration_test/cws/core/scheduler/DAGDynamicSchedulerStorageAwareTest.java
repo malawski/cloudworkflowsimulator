@@ -28,6 +28,7 @@ import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
 
 public class DAGDynamicSchedulerStorageAwareTest {
+    private VMType vmType;
     private CloudSimWrapper cloudsim;
     private Provisioner provisioner;
     private DAGDynamicScheduler scheduler;
@@ -48,8 +49,8 @@ public class DAGDynamicSchedulerStorageAwareTest {
 
         VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
         storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
-        environment = new Environment(VMTypeBuilder.DEFAULT_VM_TYPE, storageManager,
-                new StorageAwarePredictionStrategy());
+        vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+        environment = new Environment(vmType, storageManager, new StorageAwarePredictionStrategy());
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim);

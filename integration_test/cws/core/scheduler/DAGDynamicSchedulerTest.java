@@ -25,6 +25,7 @@ import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.engine.StorageAwarePredictionStrategy;
 import cws.core.log.WorkflowLog;
+import cws.core.provisioner.ConstantDistribution;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 
@@ -37,6 +38,7 @@ public class DAGDynamicSchedulerTest {
     private WorkflowLog jobLog;
     private StorageManager storageManager;
     private Environment environment;
+    private VMType vmType;
 
     @Before
     public void setUp() {
@@ -44,8 +46,8 @@ public class DAGDynamicSchedulerTest {
         cloudsim.init();
 
         storageManager = new VoidStorageManager(cloudsim);
-        environment = new Environment(VMTypeBuilder.DEFAULT_VM_TYPE, storageManager,
-                new StorageAwarePredictionStrategy());
+        vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+        environment = new Environment(vmType, storageManager, new StorageAwarePredictionStrategy());
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim);
@@ -61,11 +63,11 @@ public class DAGDynamicSchedulerTest {
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0)
+                    .provisioningTime(new ConstantDistribution(0.0)).deprovisioningTime(new ConstantDistribution(0.0))
+                    .build();
 
             VM vm = new VM(vmType, cloudsim);
-            vm.setProvisioningDelay(0.0);
-            vm.setDeprovisioningDelay(0.0);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.1, WorkflowEvent.VM_LAUNCH, vm);
         }

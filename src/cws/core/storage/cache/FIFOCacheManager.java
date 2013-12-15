@@ -32,7 +32,7 @@ public class FIFOCacheManager extends VMCacheManager {
         private Set<DAGFile> filesSet = new HashSet<DAGFile>();
 
         public VMCache(VM vm) {
-            this.size = vm.getCacheSize();
+            this.size = vm.getVmType().getCacheSize();
             this.remainingSize = this.size;
         }
 

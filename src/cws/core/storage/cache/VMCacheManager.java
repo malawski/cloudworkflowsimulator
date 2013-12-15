@@ -1,6 +1,5 @@
 package cws.core.storage.cache;
 
-import cws.core.VM;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGFile;
@@ -15,7 +14,7 @@ import cws.core.jobs.Job;
  * called before with the same arguments.</li>
  * <li>Files bigger than VM's cache cannot be put into it.</li>
  * </ul>
- * @see {@link VM#getCacheSize()}
+ * @see {@link cws.core.core.VMType#getCacheSize()}
  */
 public abstract class VMCacheManager extends CWSSimEntity {
     public VMCacheManager(CloudSimWrapper cloudsim) {

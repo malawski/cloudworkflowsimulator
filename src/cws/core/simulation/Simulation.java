@@ -1,6 +1,10 @@
 package cws.core.simulation;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,9 +19,14 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
-import cws.core.algorithms.*;
+import cws.core.algorithms.Algorithm;
+import cws.core.algorithms.AlgorithmStatistics;
+import cws.core.algorithms.DPDS;
+import cws.core.algorithms.SPSS;
+import cws.core.algorithms.WADPDS;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.core.VMTypeBuilder;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeLoader;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGListGenerator;
 import cws.core.dag.DAGParser;
@@ -76,6 +85,15 @@ public class Simulation {
      * Whether the algorithm should be aware of the underlying storage. I.e. during cumputing runtime estimations.
      */
     private static final String DEFAULT_IS_STORAGE_AWARE = "true";
+
+    /**
+     * Loads VMType from file and/or from CLI args
+     */
+    private final VMTypeLoader loader;
+
+    public Simulation(VMTypeLoader loader) {
+        this.loader = loader;
+    }
 
     public static Options buildOptions() {
         Options options = new Options();
@@ -139,7 +157,7 @@ public class Simulation {
         options.addOption(deadline);
 
         Option budget = new Option("b", "budget", true, "Optional budget, which overrides max and min budgets");
-        budget.setArgName("DEADLINE");
+        budget.setArgName("BUDGET");
         options.addOption(budget);
 
         Option nBudgets = new Option("nb", "n-budgets", true, "Optional number of generated budgets, defaults to "
@@ -168,6 +186,9 @@ public class Simulation {
 
         GlobalStorageParams.buildCliOptions(options);
         VMFactory.buildCliOptions(options);
+
+        VMTypeLoader.buildCliOptions(options);
+
         return options;
     }
 
@@ -187,7 +208,7 @@ public class Simulation {
         } catch (ParseException exp) {
             printUsage(options, exp.getMessage());
         }
-        Simulation testRun = new Simulation();
+        Simulation testRun = new Simulation(new VMTypeLoader());
         try {
             testRun.runTest(cmd);
         } catch (IllegalCWSArgumentException e) {
@@ -215,6 +236,9 @@ public class Simulation {
         double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
         double alpha = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_ALPHA));
         boolean isStorageAware = Boolean.valueOf(args.getOptionValue("storage-aware", DEFAULT_IS_STORAGE_AWARE));
+
+        VMType vmType = loader.determineVMType(args);
+        logVMType(vmType);
 
         VMFactory.readCliOptions(args, seed);
 
@@ -283,8 +307,8 @@ public class Simulation {
         System.out.printf("isStorageAware = %b\n", isStorageAware);
 
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams,
-                VMTypeBuilder.DEFAULT_VM_TYPE, isStorageAware);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType,
+                isStorageAware);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -353,7 +377,7 @@ public class Simulation {
             fileOut.println("application,distribution,seed,dags,scale,budget,"
                     + "deadline,algorithm,completed,exponential,linear,"
                     + "planning,simulation,scorebits,cost,jobfinish,dagfinish,"
-                    + "vmfinish,runtimeVariance,delay,failureRate,minBudget," + "maxBudget,minDeadline,maxDeadline,"
+                    + "vmfinish,runtimeVariance,failureRate,minBudget," + "maxBudget,minDeadline,maxDeadline,"
                     + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
                     + "actualBytesRead,actualBytesTransferred,"
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
@@ -374,8 +398,8 @@ public class Simulation {
                     cloudsim.log("deadline = " + deadline);
                     logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams,
-                            VMTypeBuilder.DEFAULT_VM_TYPE, isStorageAware);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType,
+                            isStorageAware);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
                             deadline);
@@ -395,9 +419,9 @@ public class Simulation {
                     fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, algorithmStatistics.getScoreBitString(),
                             algorithmStatistics.getActualCost(), algorithmStatistics.getActualJobFinishTime(),
                             algorithmStatistics.getActualDagFinishTime());
-                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getActualVMFinishTime(),
-                            VMFactory.getRuntimeVariance(), VMFactory.getProvisioningDelay(),
-                            VMFactory.getFailureRate(), minBudget, maxBudget, minDeadline, maxDeadline);
+                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getActualVMFinishTime(),
+                            VMFactory.getRuntimeVariance(), VMFactory.getFailureRate(), minBudget, maxBudget,
+                            minDeadline, maxDeadline);
 
                     StorageManagerStatistics stats = environment.getStorageManagerStatistics();
                     fileOut.printf("%s,%d,%d,%d,%d,%d,", storageManagerType, stats.getTotalBytesToRead(),
@@ -424,6 +448,16 @@ public class Simulation {
                     dags.size() - i, names[i]);
             cloudsim.log(workflowDescription);
         }
+    }
+
+    private void logVMType(VMType vmType) {
+        System.out.printf("VM mips = %d\n", vmType.getMips());
+        System.out.printf("VM cores = %d\n", vmType.getCores());
+        System.out.printf("VM price = %f\n", vmType.getPriceForBillingUnit());
+        System.out.printf("VM unit = %f\n", vmType.getBillingTimeInSeconds());
+        System.out.printf("VM cache = %d\n", vmType.getCacheSize());
+        System.out.printf("VM provisioningDelay = %s\n", vmType.getProvisioningDelay());
+        System.out.printf("VM deprovisioningDelay = %s\n", vmType.getDeprovisioningDelay());
     }
 
     /**

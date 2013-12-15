@@ -1,0 +1,16 @@
+mips: 10
+cores: 3
+cacheSize: 12345
+
+billing:
+    unitTime: 600.0
+    unitPrice: 3.5
+
+provisioningDelay:
+    distribution: constant
+    value: 0.0
+
+deprovisioningDelay:
+    distribution: constant
+    value: 10.0
+

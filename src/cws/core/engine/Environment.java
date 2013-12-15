@@ -66,4 +66,12 @@ public class Environment {
     public PredictionStrategy getPredictionStrategy() {
         return predictionStrategy;
     }
+
+    public double getVMProvisioningOverallDelayEstimation() {
+        return vmType.getProvisioningDelay().sample() + vmType.getDeprovisioningDelay().sample();
+    }
+
+    public double getDeprovisioningDelayEstimation() {
+        return vmType.getProvisioningDelay().sample();
+    }
 }

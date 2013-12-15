@@ -1,0 +1,10 @@
+mips: invalid
+cores: 1
+
+provisioningDelay:
+    distribution: constant
+    value: 0.0
+
+deprovisioningDelay:
+    distribution: constant
+    value: 10.0

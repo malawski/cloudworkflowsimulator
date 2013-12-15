@@ -19,7 +19,7 @@ public class FIFOVMCacheManagerTest extends VMCacheManagerTest {
 
     @Test
     public void shouldCacheOneFile() {
-        Mockito.when(vm.getCacheSize()).thenReturn((long) 100);
+        Mockito.when(vmType.getCacheSize()).thenReturn((long) 100);
         DAGFile df = new DAGFile("xxxxxx", 100);
         cm.putFileToCache(df, job);
         Assert.assertTrue(cm.getFileFromCache(df, job));
@@ -28,7 +28,7 @@ public class FIFOVMCacheManagerTest extends VMCacheManagerTest {
     @Test
     public void shouldEvictOldCacheEntries() {
         int cs = 1000;
-        Mockito.when(vm.getCacheSize()).thenReturn((long) cs);
+        Mockito.when(vmType.getCacheSize()).thenReturn((long) cs);
         int sz = 79;
         int ndags = 30;
         DAGFile[] dfs = new DAGFile[ndags];
@@ -49,7 +49,7 @@ public class FIFOVMCacheManagerTest extends VMCacheManagerTest {
 
     @Test
     public void shouldNotAddAndEvictOnTooBigFile() {
-        Mockito.when(vm.getCacheSize()).thenReturn((long) 100);
+        Mockito.when(vmType.getCacheSize()).thenReturn((long) 100);
         DAGFile df = new DAGFile("xxxxxx", 20);
         cm.putFileToCache(df, job);
         DAGFile dfBig = new DAGFile("xxxxxx222", 101);

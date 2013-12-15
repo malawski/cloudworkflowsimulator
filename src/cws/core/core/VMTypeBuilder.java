@@ -1,12 +1,15 @@
 package cws.core.core;
 
-public class VMTypeBuilder {
-    /**
-     * Default VMType for simulations. It will be replaced once we introcude configurability.
-     */
-    public static final VMType DEFAULT_VM_TYPE = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
+import cws.core.provisioner.ConstantDistribution;
+
+public class VMTypeBuilder {
     private static final double DEFAULT_BILLING_TIME = 3600;
+    private static final long DEFAULT_CACHE_SIZE = 100000000;
+
+    private static final ContinuousDistribution DEFAULT_PROVISIONING_DELAY = new ConstantDistribution(0.0);
+    private static final ContinuousDistribution DEFAULT_DEPROVISIONING_DELAY = new ConstantDistribution(10.0);
 
     public static MipsStep newBuilder() {
         return new Steps();
@@ -27,6 +30,12 @@ public class VMTypeBuilder {
     public interface OptionalsStep {
         OptionalsStep billingTimeInSeconds(double billingTimeInSeconds);
 
+        OptionalsStep provisioningTime(ContinuousDistribution provisioningTime);
+
+        OptionalsStep deprovisioningTime(ContinuousDistribution deprovisioningTime);
+
+        OptionalsStep cacheSize(long cacheSize);
+
         VMType build();
     }
 
@@ -34,7 +43,11 @@ public class VMTypeBuilder {
         private int mips;
         private int cores;
         private double price;
+
         private double billingTimeInSeconds = DEFAULT_BILLING_TIME;
+        private ContinuousDistribution provisioningTime = DEFAULT_PROVISIONING_DELAY;
+        private ContinuousDistribution deprovisioningTime = DEFAULT_DEPROVISIONING_DELAY;
+        private long cacheSize = DEFAULT_CACHE_SIZE;
 
         @Override
         public CoresStep mips(int mips) {
@@ -61,8 +74,27 @@ public class VMTypeBuilder {
         }
 
         @Override
+        public OptionalsStep provisioningTime(ContinuousDistribution provisioningTime) {
+            this.provisioningTime = provisioningTime;
+            return this;
+        }
+
+        @Override
+        public OptionalsStep deprovisioningTime(ContinuousDistribution deprovisioningTime) {
+            // TODO(mequrel): add checks for >= 0.0 somewhere
+            this.deprovisioningTime = deprovisioningTime;
+            return this;
+        }
+
+        @Override
+        public OptionalsStep cacheSize(long cacheSize) {
+            this.cacheSize = cacheSize;
+            return this;
+        }
+
+        @Override
         public VMType build() {
-            return new VMType(mips, cores, price, billingTimeInSeconds);
+            return new VMType(mips, cores, price, billingTimeInSeconds, provisioningTime, deprovisioningTime, cacheSize);
         }
     }
 }
