@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-
 import cws.core.exception.IllegalCWSArgumentException;
 
 /**
@@ -38,32 +34,6 @@ public class GlobalStorageParams {
      */
     private double chunkTransferTime = DEFAULT_CHUNK_TRANSFER_TIME;
 
-    public static void buildCliOptions(Options options) {
-        Option storageManagerRead = new Option(null, "storage-manager-read", true,
-                "(required for storage-manager=global) Global storage manager read speed");
-        storageManagerRead.setArgName("SPEED");
-        options.addOption(storageManagerRead);
-
-        Option storageManagerWrite = new Option(null, "storage-manager-write", true,
-                "(required for storage-manager=global) Global storage manager write speed");
-        storageManagerWrite.setArgName("SPEED");
-        options.addOption(storageManagerWrite);
-
-        Option numReplicas = new Option(null, "num-replicas", true, "Global storage num replicas, defaults to "
-                + DEFAULT_NUM_REPLICAS);
-        numReplicas.setArgName("NUM");
-        options.addOption(numReplicas);
-
-        Option latency = new Option(null, "latency", true, "Global storage latency, defaults to " + DEFAULT_LATENCY);
-        latency.setArgName("LATENCY");
-        options.addOption(latency);
-
-        Option ctt = new Option(null, "chunk-transfer-time", true,
-                "Global storage file chunk transfer time, defaults to " + DEFAULT_CHUNK_TRANSFER_TIME);
-        ctt.setArgName("TIME");
-        options.addOption(ctt);
-    }
-
     public void storeProperties(Properties properties) {
         properties.setProperty("readSpeed", "" + readSpeed);
         properties.setProperty("writeSpeed", "" + writeSpeed);
@@ -80,27 +50,6 @@ public class GlobalStorageParams {
                 DEFAULT_CHUNK_TRANSFER_TIME + ""));
         params.latency = Double.valueOf(properties.getProperty("latency", DEFAULT_LATENCY + ""));
         params.numReplicas = Integer.valueOf(properties.getProperty("numReplicas", DEFAULT_NUM_REPLICAS + ""));
-        return params;
-    }
-
-    public static GlobalStorageParams readCliOptions(CommandLine args) {
-        GlobalStorageParams params = new GlobalStorageParams();
-        if (!args.hasOption("storage-manager-read") || !args.hasOption("storage-manager-write")) {
-            throw new IllegalCWSArgumentException(
-                    "storage-manager-read and storage-manager-read required for GlobalStorageManager");
-        }
-        params.readSpeed = Double.parseDouble(args.getOptionValue("storage-manager-read"));
-        params.writeSpeed = Double.parseDouble(args.getOptionValue("storage-manager-write"));
-        params.chunkTransferTime = Double.parseDouble(args.getOptionValue("chunk-transfer-time",
-                DEFAULT_CHUNK_TRANSFER_TIME + ""));
-        params.latency = Double.parseDouble(args.getOptionValue("latency", DEFAULT_LATENCY + ""));
-        params.numReplicas = Integer.parseInt(args.getOptionValue("num-replicas", DEFAULT_NUM_REPLICAS + ""));
-
-        System.out.printf("storage-manager-read = %f\n", params.readSpeed);
-        System.out.printf("storage-manager-write = %f\n", params.writeSpeed);
-        System.out.printf("latency = %f\n", params.latency);
-        System.out.printf("chunk-transfer-time = %f\n", params.chunkTransferTime);
-        System.out.printf("num-replicas = %d\n", params.numReplicas);
         return params;
     }
 

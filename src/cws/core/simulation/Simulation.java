@@ -25,6 +25,7 @@ import cws.core.algorithms.DPDS;
 import cws.core.algorithms.SPSS;
 import cws.core.algorithms.WADPDS;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.config.GlobalStorageParamsLoader;
 import cws.core.core.VMType;
 import cws.core.core.VMTypeLoader;
 import cws.core.dag.DAG;
@@ -89,10 +90,16 @@ public class Simulation {
     /**
      * Loads VMType from file and/or from CLI args
      */
-    private final VMTypeLoader loader;
+    private final VMTypeLoader vmTypeLoader;
 
-    public Simulation(VMTypeLoader loader) {
-        this.loader = loader;
+    /**
+     * Loads GlobalStorageParams from file and/or from CLI args
+     */
+    private final GlobalStorageParamsLoader globalStorageParamsLoader;
+
+    public Simulation(VMTypeLoader vmTypeLoader, GlobalStorageParamsLoader globalStorageParamsLoader) {
+        this.vmTypeLoader = vmTypeLoader;
+        this.globalStorageParamsLoader = globalStorageParamsLoader;
     }
 
     public static Options buildOptions() {
@@ -184,10 +191,10 @@ public class Simulation {
         isStorageAware.setArgName("BOOL");
         options.addOption(isStorageAware);
 
-        GlobalStorageParams.buildCliOptions(options);
         VMFactory.buildCliOptions(options);
 
         VMTypeLoader.buildCliOptions(options);
+        GlobalStorageParamsLoader.buildCliOptions(options);
 
         return options;
     }
@@ -208,7 +215,7 @@ public class Simulation {
         } catch (ParseException exp) {
             printUsage(options, exp.getMessage());
         }
-        Simulation testRun = new Simulation(new VMTypeLoader());
+        Simulation testRun = new Simulation(new VMTypeLoader(), new GlobalStorageParamsLoader());
         try {
             testRun.runTest(cmd);
         } catch (IllegalCWSArgumentException e) {
@@ -237,7 +244,7 @@ public class Simulation {
         double alpha = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_ALPHA));
         boolean isStorageAware = Boolean.valueOf(args.getOptionValue("storage-aware", DEFAULT_IS_STORAGE_AWARE));
 
-        VMType vmType = loader.determineVMType(args);
+        VMType vmType = vmTypeLoader.determineVMType(args);
         logVMType(vmType);
 
         VMFactory.readCliOptions(args, seed);
@@ -279,8 +286,9 @@ public class Simulation {
         }
 
         if (storageManagerType.equals("global")) {
-            GlobalStorageParams params = GlobalStorageParams.readCliOptions(args);
-            simulationParams.setStorageParams(params);
+            GlobalStorageParams globalStorageParams = globalStorageParamsLoader.determineGlobalStorageParams(args);
+            logGlobalStorageParams(globalStorageParams);
+            simulationParams.setStorageParams(globalStorageParams);
             simulationParams.setStorageType(StorageType.GLOBAL);
         } else if (storageManagerType.equals("void")) {
             simulationParams.setStorageType(StorageType.VOID);
@@ -458,6 +466,14 @@ public class Simulation {
         System.out.printf("VM cache = %d\n", vmType.getCacheSize());
         System.out.printf("VM provisioningDelay = %s\n", vmType.getProvisioningDelay());
         System.out.printf("VM deprovisioningDelay = %s\n", vmType.getDeprovisioningDelay());
+    }
+
+    private void logGlobalStorageParams(GlobalStorageParams globalStorageParams) {
+        System.out.printf("GS read speed = %f\n", globalStorageParams.getReadSpeed());
+        System.out.printf("GS write speed = %f\n", globalStorageParams.getWriteSpeed());
+        System.out.printf("GS latency = %f\n", globalStorageParams.getLatency());
+        System.out.printf("GS chunk transfer time = %f\n", globalStorageParams.getChunkTransferTime());
+        System.out.printf("GS replicas number = %d\n", globalStorageParams.getNumReplicas());
     }
 
     /**

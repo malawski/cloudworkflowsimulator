@@ -1,0 +1,7 @@
+readSpeed: 12345678
+writeSpeed: 3216547
+latency: 0.15
+replicas: 2
+chunkTransferTime: 3
+
+
