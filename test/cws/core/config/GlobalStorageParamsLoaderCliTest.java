@@ -2,16 +2,12 @@ package cws.core.config;
 
 import static junit.framework.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -180,37 +176,4 @@ public class GlobalStorageParamsLoaderCliTest {
         loader.overrideConfigFromFileWithCliArgs(config, args);
     }
 
-    private static class CommandLineBuilder {
-        Options options;
-        List<String> argList = new ArrayList<String>();
-
-        public CommandLineBuilder(Options options) {
-            this.options = options;
-        }
-
-        public static CommandLineBuilder fromOptions(Options options) {
-            return new CommandLineBuilder(options);
-        }
-
-        public CommandLineBuilder addOption(String optionName, String value) {
-            argList.add("--" + optionName);
-            argList.add(value);
-            return this;
-        }
-
-        public CommandLineBuilder addShortOption(String shortOptionName, String value) {
-            argList.add("-" + shortOptionName);
-            argList.add(value);
-            return this;
-        }
-
-        public CommandLine build() throws ParseException {
-            CommandLineParser parser = new PosixParser();
-            return parser.parse(options, getArgs());
-        }
-
-        private String[] getArgs() {
-            return argList.toArray(new String[argList.size()]);
-        }
-    }
 }
