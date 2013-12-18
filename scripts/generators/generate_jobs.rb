@@ -60,7 +60,7 @@ OptionParser.new do |opts|
   opts.on("--distributions x,y", Array, "Optional list of distributions, defaults to #{distributions.join(',')}") do |val|
     distributions = val
   end
-  opts.on("--delays x,y", Array, "Optional list of delays, defaults to #{delays.join(',')}") do |val|
+  opts.on("--vm-deprovisioning-value x,y", Array, "Optional list of vm-deprovisioning-value, defaults to #{delays.join(',')}") do |val|
     delays = val
   end
   opts.on("--seeds x,y", Array, "Optional list of seeds, defaults to #{seeds.join(',')}") do |val|
@@ -70,19 +70,19 @@ OptionParser.new do |opts|
       "defaults to #{storage_managers.join(',')}") do |val|
     storage_managers = val
   end
-  opts.on("--storage-manager-reads x,y", Array, "Optional list of storage manager read " +
-      "speeds, defaults to #{read_speeds.join(',')}") do |val|
+  opts.on("--gs-read-speeds x,y", Array, "Optional list of gs-read-speeds " +
+      ", defaults to #{read_speeds.join(',')}") do |val|
     read_speeds = val
   end
-  opts.on("--storage-manager-writes x,y", Array, "Optional list of storage manager write " +
-      "speeds, defaults to #{write_speeds.join(',')}") do |val|
+  opts.on("--gs-write-speeds x,y", Array, "Optional list of gs-write-speeds " +
+      ", defaults to #{write_speeds.join(',')}") do |val|
     write_speeds = val
   end
-  opts.on("--num-replicas x,y", Array, "Optional list of the number of replicas for storage manager, " +
+  opts.on("--gs-replicas x,y", Array, "Optional list of the number of replicas for storage manager, " +
       "defaults to #{num_replicas.join(',')}") do |val|
     num_replicas = val
   end
-  opts.on("--latencies x,y", Array, "Optional list latencies for storage manager, " +
+  opts.on("--gs-latencies x,y", Array, "Optional list latencies for storage manager, " +
       "defaults to #{latencies.join(',')}") do |val|
     latencies = val
   end
@@ -159,14 +159,14 @@ for seed in seeds do
                         "--seed #{seed} " +
                         "--failure-rate #{failure_rate} " +
                         "--runtime-variance #{variation} " +
-                        "--delay #{delay} " +
+                        "--vm-deprovisioning-value #{delay} " +
                         "--storage-manager #{storage_manager} " +
                         "--enable-logging #{cws_logs} "
                     if storage_manager != 'void' then
-                      args = args + "--storage-manager-read #{read_speed} " +
-                          "--storage-manager-write #{write_speed} " +
-                          "--latency #{latency} " +
-                          "--num-replicas #{num_replica}"
+                      args = args + "--gs-read-speed #{read_speed} " +
+                          "--gs-write-speed #{write_speed} " +
+                          "--gs-latency #{latency} " +
+                          "--gs-replicas #{num_replica}"
                     elsif !void_manager_written then
                       void_manager_written = true
                     else
