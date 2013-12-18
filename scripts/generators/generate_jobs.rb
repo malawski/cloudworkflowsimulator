@@ -161,7 +161,9 @@ for seed in seeds do
                         "--runtime-variance #{variation} " +
                         "--vm-deprovisioning-value #{delay} " +
                         "--storage-manager #{storage_manager} " +
-                        "--enable-logging #{cws_logs} "
+                        "--enable-logging #{cws_logs} " +
+                        "--vm-directory #{mydir}/../../vms " +
+                        "--global-storage-directory #{mydir}/../../gs "
                     if storage_manager != 'void' then
                       args = args + "--gs-read-speed #{read_speed} " +
                           "--gs-write-speed #{write_speed} " +
