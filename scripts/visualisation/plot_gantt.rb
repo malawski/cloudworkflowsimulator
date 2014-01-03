@@ -98,8 +98,8 @@ class GanttPlotter
         end
 
         plot.set "style fill"
-        plot.xlabel "Time"
-        plot.ylabel "VM"
+        plot.xlabel "Time (seconds)"
+        plot.ylabel "VM Id"
         plot.ytics 1
         plot.set "key right outside"
         plot.terminal "png size #{resolution}"

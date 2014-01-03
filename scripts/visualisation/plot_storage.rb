@@ -23,8 +23,8 @@ def plot_number_schedule(logs, params)
 
   Gnuplot.open do |gp|
     Gnuplot::Plot.new( gp ) do |plot|
-      plot.xlabel "Time"
-      plot.ylabel "Read/Write number"
+      plot.xlabel "Time (seconds)"
+      plot.ylabel "Number of readers/writers"
       plot.set "key right outside"
       plot.terminal "png size #{resolution}"
       plot.output filename + ".png"
@@ -74,8 +74,8 @@ def plot_bandwidth_schedule(logs, params)
 
   Gnuplot.open do |gp|
     Gnuplot::Plot.new( gp ) do |plot|
-      plot.xlabel "Time"
-      plot.ylabel "Bandwidth"
+      plot.xlabel "Time (seconds)"
+      plot.ylabel "Bandwidth (bytes/second)"
       plot.set "key right outside"
       plot.terminal "png size #{resolution}"
       plot.output filename + ".png"
