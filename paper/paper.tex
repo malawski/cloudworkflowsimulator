@@ -277,7 +277,10 @@ the counting approach, a less efficient algorithm may be able to complete a
 large number of low-priority workflows by executing the smallest workflows
 first. In order to account for the priority, we use an exponential
 scoring defined as:
-$$ Score(e) = \sum_{w~\in~Completed(e)}{2^{-Priority(w)}} $$
+\begin{equation}
+\label{eq:score}
+Score(e) = \sum_{w~\in~Completed(e)}{2^{-Priority(w)}}
+\end{equation}
 where $Completed(e)$ is the set of workflows in ensemble $e$ that was completed
 by the algorithm, and $Priority(w)$ is the priority of workflow $w$ such that
 the highest-priority workflow has $Priority(w)=0$, the next highest workflow has
@@ -418,10 +421,7 @@ occupy idle VMs when higher-priority tasks are not available. Since there is
 no preemption, long-running low-priority tasks may delay the execution of
 higher-priority tasks. In addition, tasks from low priority workflows may be
 executed even though there is no chance that those workflows will be completed
-within the current budget and deadline. Figure~\ref{fig:algorithm-example-dpds}
-shows an example schedule generated using the DPDS algorithm. The figure
-illustrates how tasks from lower priority workflows backfill idle VMs when
-tasks from higher priority workflows are not ready for execution.
+within the current budget and deadline. 
 
 
 \subsection{Workflow-Aware DPDS (WA-DPDS)}
@@ -643,6 +643,96 @@ existing blocks large enough or early enough to complete the task by its
 deadline, and it will only allocate a new VM if it cannot add a block to an
 existing VM to complete the task by its deadline.
 
+
+
+\subsection{Illustrative example}
+
+To illustrate how the algorithms perform, we parepared an artificial ensemble 
+of three workflows, as seen in Fig.~\ref{fig:example-ensemble}. 
+The deadline is set to 6 hours and the budget to \$18. In this example we assume
+that there are no VM provisioning delays, the runtime estimates are accurate, 
+there are no failures and the cost of 1 VM-hour is \$1.
+For dynamic algorithms we assume that the low utilization threshold ($u_l$) for deprovisioning is 50\%
+and that the autoscaling parameter $v_{max} = 1$. 
+
+
+\begin{figure}[htb] 
+  \centering
+  \includegraphics[width=0.80\columnwidth]{figures/example-ensemble}
+  \caption{Artificial ensemble consisting of three workflows \{a, b, c\}, with priorities \{1, 2, 3\}.
+  Task labels indicate estimated execution time in minutes, 
+  so e.g. task $a.70$ has estimated execution time of 70 minutes.}
+  \label{fig:example-ensemble}
+\end{figure}
+
+The resulting schedule produced by DPDS algorithm is shown in Fig.~\ref{fig:algorithms-example-dpds}.
+The algorithm at the beginning estimates that it needs 3 VM instances by dividing the budget by the deadline ($18 / 6 = 3$). 
+Next, it schedules all the ready tasks in the priority order, so $a.70$ is started first, 
+and immediately $b.70$ and $c.60$ are started, since no other tasks of workflow a are ready. 
+When task $a.60$ completes, there are again other no higher priority tasks ready, 
+so the next task from workflow $c$ can be started ($c.45$). Since there is no preemption,
+this results in workflow $a$ being delayed by the lower priority workflow $c$.
+Finally, the outcome of this dynamic scheduling policy is that none of the workflows completes within the deadline.
+Actually, the tasks $b.100$, $c.65$ and $a.160$ are not finished since all the VMs 
+are terminated due to running out of budget. 
+The exponential score achieved by the algorithm computed according to equation~\ref{eq:score} is 0.
+On the other hand, we can observe that the utilization of the VMs is kept on the level of 100\% throughout the 
+whole execution time, which may be considered an advantage in some cases.
+
+\begin{figure}[htb] 
+  \centering
+  \includegraphics[width=0.80\columnwidth]{figures/algorithms-example-dpds}
+  \caption{Schedule produced by DPDS algorithm for the example ensemble from Figure~\ref{fig:example-ensemble}.
+  White boxes indicate VM instances provisioned for their hourly time slots, 
+  and solid boxes indicate running tasks.
+  None of the workflows completes within the deadline.}
+  \label{fig:algorithms-example-dpds}
+\end{figure}
+
+
+The resulting schedule produced by WA-DPDS algorithm is shown in Fig.~\ref{fig:algorithms-example-wadpds}.
+The schedule is generated in a similar way as in DPDS algorithm, with the one notable difference. 
+After scheduling tasks $a.70$ and $b.70$, the algorithm estimates whether it has enough budget to 
+admit workflow $c$. The answer is that based on the sum of task runtimes there is no room for workflow $c$,
+so the whole workflow is rejected. As a consequence, task $a.100$ can start at time $t=70$ minutes
+thus workflow $a$ is not delayed as in the case of DPDS. One can also observe that $VM.2$ and $VM.3$ remain idle for
+one hour, which is the consequence of the conservative provisioning settings we assume in this example.  
+This means that VM utilization at the level of 2/3 does not trigger deprovisioning in this case, and the maximum autoscaling
+factor set to 1 prevents from provisioning of new VMs over the initial number even if utilization is 100\%.
+In the resulting schedule only workflow $a$ completes, so the score is $2^{-1} = 0.5$, which is better than DPDS.
+
+\begin{figure}[htb] 
+  \centering
+  \includegraphics[width=0.80\columnwidth]{figures/algorithms-example-wadpds}
+  \caption{Schedule produced by WA-DPDS algorithm for the example ensemble from Figure~\ref{fig:example-ensemble}.
+  Workflow a completes within the deadline.}
+  \label{fig:algorithms-example-wadpds}
+\end{figure}
+
+
+The resulting schedule produced by SPSS algorithm is shown in Fig.~\ref{fig:algorithms-example-spss}.
+
+
+\begin{figure}[htb] 
+  \centering
+  \includegraphics[width=0.80\columnwidth]{figures/algorithms-example-spss}
+  \caption{Schedule produced by DPDS algorithm for the example ensemble from Figure~\ref{fig:example-ensemble}.
+  Workflows a and c complete within the deadline.}
+  \label{fig:algorithms-example-spss}
+\end{figure}
+
+The example given above illustrates the main concepts of the algorithms using the artificial ensemble.
+Two additional example schedules generated using our simulator are shown in 
+Figure~\ref{fig:examples-simulated}. 
+The schedule generated using DPDS (Figure~\ref{fig:algorithm-example-dpds})
+illustrates how tasks from lower priority workflows backfill idle VMs when
+tasks from higher priority workflows are not ready for execution.
+On the other hand, the schedule generated by SPSS (Figure~\ref{fig:algorithm-example-spss})
+shows how SPSS tends to start many workflows in parallel, running each workflow
+over a longer period of time on only a few VMs to minimize cost. In comparison,
+the dynamic algorithms tend to run one workflow at a time across many VMs in
+parallel.
+
 \begin{figure}[tb] 
   \centering
   \subfloat[DPDS]{
@@ -656,14 +746,11 @@ existing VM to complete the task by its deadline.
   \caption[Example schedules generated by the algorithms]{Example
   schedules generated by the algorithms. Each row is a different
   VM. Boxes are tasks colored by workflow.}
+  \label{fig:examples-simulated}
 
 \end{figure}
 
-An example schedule generated by SPSS (Figure~\ref{fig:algorithm-example-spss})
-shows how SPSS tends to start many workflows in parallel, running each workflow
-over a longer period of time on only a few VMs to minimize cost. In comparison,
-the dynamic algorithms tend to run one workflow at a time across many VMs in
-parallel.
+
 
 
 \section{Evaluation Methods}
