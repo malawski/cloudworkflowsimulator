@@ -710,14 +710,26 @@ In the resulting schedule only workflow $a$ completes, so the score is $2^{-1} =
 \end{figure}
 
 
-The resulting schedule produced by SPSS algorithm is shown in Fig.~\ref{fig:algorithms-example-spss}.
-
+The resulting schedule produced by SPSS algorithm is shown in
+Fig.~\ref{fig:algorithms-example-spss}. SPSS generates the schedule by
+considering workflows in priority order. It first considers workflow $a$, and
+develops a schedule that completes $a$ by its deadline using the minimum
+number of node-hours. Once $a$ has been scheduled, SPSS will develop a
+low-cost schedule that includes workflow $b$. However, after adding $b$,
+the algorithm will determine that the total cost of the combined schedule
+for $a$ and $b$ is greater than the budget, and will reject workflow $b$ and
+remove it from the schedule. It will then consider workflow $c$, and develop
+a low-cost schedule that adds $c$ to the existing schedule for $a$. In order
+to complete each job in $c$ by its deadline, SPSS provisions 6 additional
+VM-hours. The resulting schedule has a total cost of 16 VM-hours, or
+\$16, which is less than the budget of \$18 and completes both $a$ and $c$ by
+their deadlines.
 
 \begin{figure}[htb] 
   \centering
   \includegraphics[width=0.80\columnwidth]{figures/algorithms-example-spss}
-  \caption{Schedule produced by DPDS algorithm for the example ensemble from Figure~\ref{fig:example-ensemble}.
-  Workflows a and c complete within the deadline.}
+  \caption{Schedule produced by SPSS algorithm for the example ensemble from Figure~\ref{fig:example-ensemble}.
+  Workflows $a$ and $c$ complete within the given budget and deadline.}
   \label{fig:algorithms-example-spss}
 \end{figure}
 
