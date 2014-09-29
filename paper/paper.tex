@@ -578,9 +578,10 @@ with more tasks (large $\alpha$) or more runtime (small $\alpha$).
 
 The deadline of a task $t$ is then:
 %
-$$
+\begin{equation}
+\label{eq:spss-deadline}
 DL(t) = LST(t) + RT(t) + ST(Level(t))
-$$
+\end{equation}
 %
 where $Level(t)$ is the level of $t$, $RT(t)$ is the runtime of $t$, and 
 $LST(t)$ is the latest start time of $t$ determined by:
@@ -647,7 +648,7 @@ existing VM to complete the task by its deadline.
 
 \subsection{Illustrative example}
 
-To illustrate how the algorithms perform, we parepared an artificial ensemble 
+To illustrate how the algorithms perform, we prepared an artificial ensemble 
 of three workflows, as seen in Fig.~\ref{fig:example-ensemble}. 
 The deadline is set to 6 hours and the budget to \$18. In this example we assume
 that there are no VM provisioning delays, the runtime estimates are accurate, 
@@ -710,20 +711,26 @@ In the resulting schedule only workflow $a$ completes, so the score is $2^{-1} =
 \end{figure}
 
 
-The resulting schedule produced by SPSS algorithm is shown in
-Fig.~\ref{fig:algorithms-example-spss}. SPSS generates the schedule by
+The final schedule produced by the SPSS algorithm is shown in
+Fig.~\ref{fig:algorithms-example-spss}. SPSS generates this schedule by
 considering workflows in priority order. It first considers workflow $a$, and
-develops a schedule that completes $a$ by its deadline using the minimum
-number of node-hours. Once $a$ has been scheduled, SPSS will develop a
-low-cost schedule that includes workflow $b$. However, after adding $b$,
+develops a low-cost schedule that completes $a$ by its deadline using a minimum
+number of VM-hours. This process involves assigning a deadline to each task
+according to Equation~\ref{eq:spss-deadline}, and then scheduling tasks in
+deadline-order on the VM that can complete each task by its deadline with the
+the minimum increase in cost. Once $a$ has been scheduled, SPSS will develop an
+updated low-cost schedule that includes workflow $b$. However, after adding $b$,
 the algorithm will determine that the total cost of the combined schedule
 for $a$ and $b$ is greater than the budget, and will reject workflow $b$ and
 remove it from the schedule. It will then consider workflow $c$, and develop
 a low-cost schedule that adds $c$ to the existing schedule for $a$. In order
 to complete each job in $c$ by its deadline, SPSS provisions 6 additional
-VM-hours. The resulting schedule has a total cost of 16 VM-hours, or
-\$16, which is less than the budget of \$18 and completes both $a$ and $c$ by
-their deadlines.
+VM-hours, which includes adding an hour to the start time of $VM.2$ for task
+$c.60$, adding an hour to the end of $VM.2$ for task $c.45$, adding an hour
+to the end of $VM.3$ for $c.50$, adding a new VM, $VM.4$, for 2 hours to run
+$c.65$, and finally adding another hour to the end of $VM.2$ for $c.55$. The
+resulting schedule has a total cost of 16 VM-hours, or \$16, which is less
+than the budget of \$18 and completes both $a$ and $c$ by the deadline.
 
 \begin{figure}[htb] 
   \centering
