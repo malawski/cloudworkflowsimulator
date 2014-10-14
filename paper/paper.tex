@@ -150,7 +150,7 @@ Here we present a more detailed performance evaluation, including the discussion
 of results based on varying deadline and budget constraints. We also report on new
 results and discussion of task granularity in the context of the resource
 billing cycle, which is an important aspect of scheduling and resource provisioning
-on cloud infrastructures. The section on the related work and the examples of algorithms 
+on cloud infrastructures. The related work section and the algorithm examples
 have been also extended to provide a better positioning and increase the readability of the paper.
 
 
@@ -177,7 +177,7 @@ of these autoscaling systems, but no support for complex applications is provide
 
 
 Policy-based approaches for scientific workloads (e.g. \cite{Marshall2010,
-Kim2011,Chen2011}) also allow to scale the cloud resource pool or to extend the
+Kim2011,Chen2011}) also enable scaling the cloud resource pool or to extending the
 capabilities of clusters using cloud-burst techniques. Our approach is different
 in that we consider workflows, while policy based approaches typically consider
 bags of independent tasks or unpredictable batch workloads. This enables us to
@@ -209,16 +209,16 @@ of work completed) is subject to optimization, whereas time and cost are
 treated as constraints, which is not addressed by other works.
 
 
-Our work can also be regarded as an extension of the budget-constrained 
-workflow scheduling~\cite{Sakellariou2007}, the cost optimization for workflows 
+Our work can also be regarded as an extension of budget-constrained 
+workflow scheduling~\cite{Sakellariou2007}, cost optimization for workflows 
 under deadline constraints~\cite{Yu2005}, 
 or methods of stretching and compacting the workflow to optimize time and cost~\cite{Lee2013}, 
 in the sense that we are dealing with workflow ensembles
 and the deadline constraint is added. 
-Interesting discussion of uncertainties and the way to address them using Monte Carlo approach 
+An interesting discussion of uncertainties and the way to address them using a Monte Carlo approach 
 is also presented in~\cite{Zheng2013b}, where the objective is makespan optimization.  
 
-Multiple workflows has been also considered in previous research, 
+Scheduling optimization for multiple workflows has been also considered in previous research, 
 either in the context of heterogeneous systems~\cite{Zhao2006} 
 where makespan and fairness optimization is applied, 
 or in the context of grids~\cite{Hirales2010} 
@@ -236,14 +236,14 @@ Other approaches for scheduling workflows on grids and clouds such as ~\cite{Tal
 metaheuristics that usually run for a long time before producing good results,
 which makes them less useful in the scenarios we consider in this paper. 
 
-Noteworthy are also methods based on mathematical programming, 
+Also noteworthy are methods based on mathematical programming, 
 using linear programming or mixed-integer programming. 
-Such method is applied to scheduling workflows on hybrid clouds using time discretization~\cite{Genez13b}, 
+Such a method is applied to scheduling workflows on hybrid clouds using time discretization in~\cite{Genez13b}, 
 but the model presented there is limited to small scale workflows. 
 Large-scale applications on hybrid clouds are addressed in~\cite{VandenBossche2010,VandenBossche2013973}, 
 but their model considers bag-of-task applications instead of workflows. 
-The cloud bursting scenario where private cloud is combined with a public one, described in~\cite{BittencourtM11}, 
-addresses workflows, and the goal is to minimize the cost while keeping the deadline. 
+The cloud bursting scenario described in~\cite{BittencourtM11}, where a private cloud is combined with a public one, 
+addresses workflows, and the goal is to minimize the cost while satisfying the deadline. 
 In our related paper~\cite{optimization-ppam13}, we also use the mixed-integer programming approach 
 to schedule multi-level deadline-constrained workflows, but workflow ensembles are not considered.
 
@@ -257,29 +257,29 @@ to schedule multi-level deadline-constrained workflows, but workflow ensembles a
 
 
 The analysis of related work is summarized in Table~\ref{tab:related}, where we classify the methods based on 7 categories. 
-Infrastructure type can be grid or cloud, where grid includes also utility grids 
-and heterogeneous computing systems where cost can be also relevant (such as in~\cite{Sakellariou2007}). 
+Infrastructure type can be grid or cloud, where grid includes utility grids 
+and heterogeneous computing systems where cost can be relevant (such as in~\cite{Sakellariou2007}). 
 Application types of interest are bags of tasks, single workflows or multiple workflows. 
 The workload can be static, where the scheduling process can plan the tasks in advance, 
 or dynamic, where the algorithm has to deal with unpredictable stream of jobs arriving. 
 The provisioning methods are divided into dynamic and static approaches, 
 where static means that the provisioning plan is prepared prior to execution. 
-For simplification, we classify all the algorithms for grid and heterogeneous systems into the static category, 
+To simplify, we classify all the algorithms for grid and heterogeneous systems into the static category, 
 since these systems do not allow for creation of new resources on demand, 
 even if some mechanisms for dynamic provisioning such as pilot jobs are available. 
 The related work addresses multiple optimization objectives, 
 including time, monetary cost, reliability, energy or fairness, 
-and there are examples of multicriteria optimization among them. 
-Most of the scheduling approaches consider also constraints for optimization, 
-and most commonly addressed ones are budget and deadline, 
-whereas such additional constraints as bandwidth, storage capacity or job throughput are also present. 
+and there are examples of multi-criteria optimization among them. 
+Most of the scheduling approaches also consider constraints for optimization, 
+and the most commonly addressed ones are budget and deadline. 
+Other constraints, such as bandwidth, storage capacity or job throughput, are also present. 
 Finally, we divide the algorithmic methods into heuristics, 
 including various list scheduling techniques based on graph analysis, 
 metaheuristics that use genetic or evolutionary algorithms, 
 and the approaches using mathematical programming such as linear 
 or mixed-integer programming for which ready to use solvers exist.
 
-The analysis of the table suggests that there are many approaches to workflow scheduling 
+An analysis of the table suggests that there are many approaches to workflow scheduling 
 and resource provisioning on clouds, but there is still room for improvement. 
 New infrastructure types, including hybrid and federated clouds should be investigated, 
 more emphasis should be put on problems with multiple workflows, 
@@ -287,7 +287,7 @@ and new methods for combining static and dynamic workloads and algorithms offer 
 Finally, other objectives and constraints in addition to budget and execution time can be explored. 
 
 In this context, we consider our attempt to address workflow ensembles using both static and dynamic algorithms 
-presented in this paper an interesting and original contribution that has not been explored before.    
+presented in this paper an interesting and original contribution that has not been explored before.
 
 
  
@@ -875,15 +875,15 @@ System~\cite{Deelman2005}.
 %The modified file format was created for the
 %synthetic workflow generator developed by Bharathi, et al~\cite{Bharathi2008}.
 
-The decision to use a simulator instead of actual execution of workflows on clouds 
+The decision to use a simulator instead of actually executing workflows on clouds 
 was motivated by our intention to perform an extensive analysis of the algorithms
-in various aspects. This results in a large parameter space, since e.g. for analysis 
-presented in Section~\ref{sec:variances}, we needed to execute 525,000 simulations 
-of workflow ensembles, each ensemble consisting of 50 workflows of up to 1000 tasks.
+in various aspects. This results in a very large parameter space. For example, the analysis 
+presented in Section~\ref{sec:variances} required 525,000 simulations 
+of workflow ensembles, each ensemble consisting of 50 workflows with up to 1000 tasks per workflow.
 Not only would this be impractical to run on a real infrastructure for obvious reasons, 
-but also it would not allow to study such interesting aspects as the influence 
-of task graularity presented in Section~\ref{sec:granularity}. 
-The usage of simulator, although also quite compute intensive, allowed us
+but it would also not enable us to study interesting aspects of the problem, such as the influence 
+of task granularity presented in Section~\ref{sec:granularity}. 
+Our use of a simulator, although quite compute-intensive itself, enabled us
 to study all these aspects in detail.
 
 \subsection{Workflow Ensembles}
