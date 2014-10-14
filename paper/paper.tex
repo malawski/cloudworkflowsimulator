@@ -150,7 +150,8 @@ Here we present a more detailed performance evaluation, including the discussion
 of results based on varying deadline and budget constraints. We also report on new
 results and discussion of task granularity in the context of the resource
 billing cycle, which is an important aspect of scheduling and resource provisioning
-on cloud infrastructures.
+on cloud infrastructures. The section on the related work and the examples of algorithms 
+have been also extended to provide a better positioning and increase the readability of the paper.
 
 
 The paper is organized as follows: after an analysis of related work in
@@ -874,6 +875,16 @@ System~\cite{Deelman2005}.
 %The modified file format was created for the
 %synthetic workflow generator developed by Bharathi, et al~\cite{Bharathi2008}.
 
+The decision to use a simulator instead of actual execution of workflows on clouds 
+was motivated by our intention to perform an extensive analysis of the algorithms
+in various aspects. This results in a large parameter space, since e.g. for analysis 
+presented in Section~\ref{sec:variances}, we needed to execute 525,000 simulations 
+of workflow ensembles, each ensemble consisting of 50 workflows of up to 1000 tasks.
+Not only would this be impractical to run on a real infrastructure for obvious reasons, 
+but also it would not allow to study such interesting aspects as the influence 
+of task graularity presented in Section~\ref{sec:granularity}. 
+The usage of simulator, although also quite compute intensive, allowed us
+to study all these aspects in detail.
 
 \subsection{Workflow Ensembles}
 \label{sec:ensembles}
@@ -1273,7 +1284,9 @@ desired budget and deadline constraints.
 In this experiment the actual runtime of each task is adjusted in the
 simulation by adding a random error to the estimated runtime of $\pm p\%$.
 Since the sampling is done uniformly, we expect to get just as many
-overestimates as underestimates in any given simulation.
+overestimates as underestimates in any given simulation. 
+Our approach for generating errors is similar to the one used in~\cite{Zheng2013b},
+where the random error represents the Quality of Estimation metric.
 
 Figure~\ref{fig:variances} shows the results for estimate errors
 ranging from $0\%$ to $50\%$. The figure summarizes the outcome of an
