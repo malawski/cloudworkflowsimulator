@@ -1,0 +1,24 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}
+\BOOKMARK [1][-]{section.2}{Related Work}{}
+\BOOKMARK [1][-]{section.3}{Problem Description}{}
+\BOOKMARK [2][-]{subsection.3.1}{Resource Model}{section.3}
+\BOOKMARK [2][-]{subsection.3.2}{Application Model}{section.3}
+\BOOKMARK [2][-]{subsection.3.3}{Performance Metric}{section.3}
+\BOOKMARK [1][-]{section.4}{Algorithms}{}
+\BOOKMARK [2][-]{subsection.4.1}{Dynamic Provisioning Dynamic Scheduling \(DPDS\)}{section.4}
+\BOOKMARK [2][-]{subsection.4.2}{Workflow-Aware DPDS \(WA-DPDS\)}{section.4}
+\BOOKMARK [2][-]{subsection.4.3}{Static Provisioning Static Scheduling \(SPSS\)}{section.4}
+\BOOKMARK [2][-]{subsection.4.4}{Illustrative example}{section.4}
+\BOOKMARK [1][-]{section.5}{Evaluation Methods}{}
+\BOOKMARK [2][-]{subsection.5.1}{Simulator}{section.5}
+\BOOKMARK [2][-]{subsection.5.2}{Workflow Ensembles}{section.5}
+\BOOKMARK [2][-]{subsection.5.3}{Experimental Parameters}{section.5}
+\BOOKMARK [1][-]{section.6}{Discussion of Results}{}
+\BOOKMARK [2][-]{subsection.6.1}{Relative Performance of Algorithms}{section.6}
+\BOOKMARK [2][-]{subsection.6.2}{Results vs. varying deadline and budget}{section.6}
+\BOOKMARK [2][-]{subsection.6.3}{Task Granularity}{section.6}
+\BOOKMARK [2][-]{subsection.6.4}{Inaccurate Task Runtime Estimates}{section.6}
+\BOOKMARK [2][-]{subsection.6.5}{Provisioning Delays}{section.6}
+\BOOKMARK [2][-]{subsection.6.6}{Task Failures}{section.6}
+\BOOKMARK [2][-]{subsection.6.7}{SPSS Planning Time}{section.6}
+\BOOKMARK [1][-]{section.7}{Conclusions and Future Work}{}

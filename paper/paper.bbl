@@ -1,0 +1,346 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{Callaghan2011}
+S.~Callaghan, P.~Maechling, P.~Small, K.~Milner, G.~Juve, T.~Jordan,
+  E.~Deelman, G.~Mehta, K.~Vahi, D.~Gunter, K.~Beattie, C.~X. Brooks, Metrics
+  for heterogeneous scientific workflows: A case study of an earthquake science
+  application, International Journal of High Performance Computing Applications
+  25~(3) (2011) 274--285.
+
+\bibitem{CyberShake13.4}
+\href{http://scec.usc.edu/scecpedia/CyberShake_Study_13.4}{{CyberShake Study
+  13.4}}.
+\newline\urlprefix\url{http://scec.usc.edu/scecpedia/CyberShake_Study_13.4}
+
+\bibitem{Deelman2008}
+E.~Deelman, G.~Singh, M.~Livny, B.~Berriman, J.~Good, The cost of doing science
+  on the cloud: The montage example, in: {2008 ACM/IEEE Conference on
+  Supercomputing (SC 08)}, 2008.
+
+\bibitem{GalacticPlane}
+\href{http://pegasus.isi.edu/applications/galactic-plane}{{Montage Galactic
+  Plane}}.
+\newline\urlprefix\url{http://pegasus.isi.edu/applications/galactic-plane}
+
+\bibitem{Vockler2011}
+J.~V\"ockler, G.~Juve, E.~Deelman, M.~Rynge, G.~B. Berriman, Experiences using
+  cloud computing for a scientific workflow application, in: 2nd Workshop on
+  Scientific Cloud Computing {(ScienceCloud '11)}, 2011.
+
+\bibitem{Ostermann2010}
+S.~Ostermann, A.~Iosup, N.~Yigitbasi, R.~Prodan, T.~Fahringer, D.~Epema, A
+  performance analysis of {EC2} cloud computing services for scientific
+  computing, in: O.~Akan, et~al. (Eds.), Cloud Computing, Vol.~34 of Lecture
+  Notes of the Institute for Computer Sciences, Social Informatics and
+  Telecommunications Engineering, Springer Berlin Heidelberg, 2010, pp.
+  115--131.
+
+\bibitem{Keahey2009}
+K.~Keahey, M.~Tsugawa, A.~Matsunaga, J.~Fortes, Sky computing, {IEEE} Internet
+  Computing 13~(5) (2009) 43--51.
+
+\bibitem{Durkee2010}
+D.~Durkee, Why cloud computing will never be free, Communications of the ACM
+  53~(5) (2010) 62--69.
+
+\bibitem{Calheiros2011}
+R.~N. Calheiros, R.~Ranjan, A.~Beloglazov, C.~A.~F. De~Rose, R.~Buyya,
+  {CloudSim:} a toolkit for modeling and simulation of cloud computing
+  environments and evaluation of resource provisioning algorithms, Software:
+  Practice and Experience 41~(1) (2011) 23--50.
+
+\bibitem{Malawski-SC12}
+M.~Malawski, G.~Juve, E.~Deelman, J.~Nabrzyski,
+  \href{http://portal.acm.org/citation.cfm?id=2389026}{Cost- and
+  deadline-constrained provisioning for scientific workflow ensembles in {IaaS}
+  clouds}, in: Proceedings of the International Conference on High Performance
+  Computing, Networking, Storage and Analysis, SC '12, IEEE Computer Society
+  Press, 2012.
+\newline\urlprefix\url{http://portal.acm.org/citation.cfm?id=2389026}
+
+\bibitem{Autoscaling}
+\href{http://aws.amazon.com/autoscaling}{{Amazon Auto Scaling}}.
+\newline\urlprefix\url{http://aws.amazon.com/autoscaling}
+
+\bibitem{RightScale}
+\href{http://www.rightscale.com}{{RightScale}}.
+\newline\urlprefix\url{http://www.rightscale.com}
+
+\bibitem{Marshall2010}
+P.~Marshall, K.~Keahey, T.~Freeman, Elastic site: Using clouds to elastically
+  extend site resources, in: 10th {IEEE/ACM} International Symposium on
+  Cluster, Cloud and Grid Computing {(CCGrid} 2010), 2010.
+
+\bibitem{Kim2011}
+H.~Kim, Y.~{el-Khamra}, I.~Rodero, S.~Jha, M.~Parashar, Autonomic management of
+  application workflows on hybrid computing infrastructure, Scientific
+  Programming 19 (2011) 75--89.
+
+\bibitem{Chen2011}
+J.~Chen, C.~Wang, B.~B. Zhou, L.~Sun, Y.~C. Lee, A.~Y. Zomaya, Tradeoffs
+  between profit and customer satisfaction for service provisioning in the
+  cloud, in: Proceedings of the 20th international symposium on High
+  performance distributed computing, HPDC '11, ACM, New York, NY, USA, 2011,
+  pp. 229--238.
+
+\bibitem{Yu2005}
+J.~Yu, R.~Buyya, C.~Tham, {Cost-Based} scheduling of scientific workflow
+  application on utility grids, in: First International Conference on
+  {e-Science} and Grid Computing, 2005.
+
+\bibitem{Abrishami2013158}
+S.~Abrishami, M.~Naghibzadeh, D.~H. Epema,
+  \href{http://www.sciencedirect.com/science/article/pii/S0167739X12001008}{De%
+adline-constrained workflow scheduling algorithms for infrastructure as a
+  service clouds}, Future Generation Computer Systems 29~(1) (2013) 158 -- 169.
+\newblock \href {http://dx.doi.org/10.1016/j.future.2012.05.004}
+  {\path{doi:10.1016/j.future.2012.05.004}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S01677%
+39X12001008}
+
+\bibitem{Young2013}
+Y.~C. Lee, A.~Y. Zomaya,
+  \href{http://dx.doi.org/10.1109/ccgrid.2013.55}{Stretch out and compact:
+  Workflow scheduling with resource abundance}, in: Cluster, Cloud and Grid
+  Computing (CCGrid), 2013 13th IEEE/ACM International Symposium on, IEEE,
+  2013, pp. 219--226.
+\newblock \href {http://dx.doi.org/10.1109/ccgrid.2013.55}
+  {\path{doi:10.1109/ccgrid.2013.55}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1109/ccgrid.2013.55}
+
+\bibitem{Mao2011}
+M.~Mao, M.~Humphrey, Auto-scaling to minimize cost and meet application
+  deadlines in cloud workflows, in: {2011 ACM/IEEE Conference on Supercomputing
+  (SC '11)}, 2011.
+
+\bibitem{Wieczorek2009}
+M.~Wieczorek, A.~Hoheisel, R.~Prodan, {Towards a general model of the
+  multi-criteria workflow scheduling on the grid}, Future Generation Computer
+  Systems 25~(3) (2009) 237--256.
+
+\bibitem{Prodan2010}
+R.~Prodan, M.~Wieczorek, {Bi-Criteria Scheduling of Scientific Grid Workflows},
+  IEEE Transactions on Automation Science and Engineering 7~(2) (2010)
+  364--376.
+
+\bibitem{Dongarra2007}
+J.~J. Dongarra, E.~Jeannot, E.~Saule, Z.~Shi, {Bi-objective Scheduling
+  Algorithms for Optimizing Makespan and Reliability on Heterogeneous Systems},
+  in: {19th Annual ACM Symposium on Parallel Algorithms and Architectures (SPAA
+  '07)}, 2007.
+
+\bibitem{Durillo2013}
+J.~J. Durillo, V.~Nae, R.~Prodan,
+  \href{http://dx.doi.org/10.1109/ccgrid.2013.62}{Multi-objective workflow
+  scheduling: An analysis of the energy efficiency and makespan tradeoff}, in:
+  Cluster, Cloud and Grid Computing (CCGrid), 2013 13th IEEE/ACM International
+  Symposium on, IEEE, 2013, pp. 203--210.
+\newblock \href {http://dx.doi.org/10.1109/ccgrid.2013.62}
+  {\path{doi:10.1109/ccgrid.2013.62}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1109/ccgrid.2013.62}
+
+\bibitem{Sakellariou2007}
+R.~Sakellariou, H.~Zhao, E.~Tsiakkouri, M.~D. Dikaiakos, Scheduling workflows
+  with budget constraints, in: Integrated Research in {GRID} Computing,
+  {COREGrid Series}, {Springer-Verlag}, 2007.
+
+\bibitem{Lee2013}
+Y.~C. Lee, A.~Zomaya, Stretch out and compact: Workflow scheduling with
+  resource abundance, in: Cluster, Cloud and Grid Computing (CCGrid), 2013 13th
+  IEEE/ACM International Symposium on, 2013, pp. 219--226.
+\newblock \href {http://dx.doi.org/10.1109/CCGrid.2013.55}
+  {\path{doi:10.1109/CCGrid.2013.55}}.
+
+\bibitem{Zheng2013b}
+W.~Zheng, R.~Sakellariou,
+  \href{http://www.sciencedirect.com/science/article/pii/S0743731513001573}{{S%
+tochastic {DAG} scheduling using a Monte Carlo approach}}, Journal of Parallel
+  and Distributed Computing 73~(12) (2013) 1673--1689, heterogeneity in
+  Parallel and Distributed Computing.
+\newblock \href {http://dx.doi.org/10.1016/j.jpdc.2013.07.019}
+  {\path{doi:10.1016/j.jpdc.2013.07.019}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S07437%
+31513001573}
+
+\bibitem{Zhao2006}
+H.~Zhao, R.~Sakellariou, Scheduling multiple dags onto heterogeneous systems,
+  in: Parallel and Distributed Processing Symposium, 2006. IPDPS 2006. 20th
+  International, 2006, pp. 14 pp.--.
+\newblock \href {http://dx.doi.org/10.1109/IPDPS.2006.1639387}
+  {\path{doi:10.1109/IPDPS.2006.1639387}}.
+
+\bibitem{Hirales2010}
+A.~Hirales-Carbajal, A.~Tchernykh, R.~Yahyapour, J.~Gonz{\'a}lez-Garc{\'i}a,
+  T.~R{\"o}blitz, J.~Ram{\'i}rez-Alcaraz,
+  \href{http://dx.doi.org/10.1007/s10723-012-9215-6}{{Multiple Workflow
+  Scheduling Strategies with User Run Time Estimates on a Grid}}, Journal of
+  Grid Computing 10~(2) (2012) 325--346.
+\newblock \href {http://dx.doi.org/10.1007/s10723-012-9215-6}
+  {\path{doi:10.1007/s10723-012-9215-6}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1007/s10723-012-9215-6}
+
+\bibitem{Duan2012}
+R.~Duan, R.~Prodan, X.~Li, \href{http://dx.doi.org/10.1109/Grid.2012.14}{A
+  sequential cooperative game theoretic approach to {Storage-Aware} scheduling
+  of multiple {Large-Scale} workflow applications in grids}, in: Grid Computing
+  (GRID), 2012 ACM/IEEE 13th International Conference on, IEEE, 2012, pp.
+  31--39.
+\newblock \href {http://dx.doi.org/10.1109/Grid.2012.14}
+  {\path{doi:10.1109/Grid.2012.14}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1109/Grid.2012.14}
+
+\bibitem{Duan2014}
+R.~Duan, R.~Prodan, X.~Li, Multi-objective game theoretic schedulingof
+  bag-of-tasks workflows on hybrid clouds, IEEE Transactions on Cloud Computing
+  2~(1) (2014) 29--42.
+\newblock \href
+  {http://dx.doi.org/http://doi.ieeecomputersociety.org/10.1109/TCC.2014.23030%
+77} {\path{doi:http://doi.ieeecomputersociety.org/10.1109/TCC.2014.2303077}}.
+
+\bibitem{TolosanaCalasanz20121300}
+R.~Tolosana-Calasanz, J.~A. Banares, C.~Pham, O.~F. Rana,
+  \href{http://www.sciencedirect.com/science/article/pii/S0022000011001607}{En%
+forcing qos in scientific workflow systems enacted over cloud infrastructures},
+  Journal of Computer and System Sciences 78~(5) (2012) 1300 -- 1315.
+\newblock \href {http://dx.doi.org/10.1016/j.jcss.2011.12.015}
+  {\path{doi:10.1016/j.jcss.2011.12.015}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S00220%
+00011001607}
+
+\bibitem{Zheng2013a}
+W.~Zheng, R.~Sakellariou,
+  \href{http://dx.doi.org/10.1007/s10723-013-9257-4}{{Budget-Deadline
+  Constrained Workflow Planning for Admission Control}}, Journal of Grid
+  Computing 11~(4) (2013) 633--651.
+\newblock \href {http://dx.doi.org/10.1007/s10723-013-9257-4}
+  {\path{doi:10.1007/s10723-013-9257-4}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1007/s10723-013-9257-4}
+
+\bibitem{Talukder2009}
+A.~K. M. K.~A. Talukder, M.~Kirley, R.~Buyya, {Multiobjective differential
+  evolution for scheduling workflow applications on global Grids}, Concurrency
+  Computation: Practice and Experience 21~(13) (2009) 1742--1756.
+
+\bibitem{Pandey2010}
+S.~Pandey, L.~Wu, S.~M. Guru, R.~Buyya, {A Particle Swarm Optimization-Based
+  Heuristic for Scheduling Workflow Applications in Cloud Computing
+  Environments}, in: International Conference on Advanced Information
+  Networking and Applications, 2010.
+
+\bibitem{Genez13b}
+T.~A.~L. Genez, L.~F. Bittencourt, E.~R.~M. Madeira,
+  \href{http://ieeexplore.ieee.org/articleDetails.jsp?arnumber=6676686}{{Using
+  Time Discretization to Schedule Scientific Workflows in Multiple Cloud
+  Providers}}, in: 2013 IEEE Sixth International Conference on Cloud Computing,
+  IEEE, 2013, pp. 123--130.
+\newblock \href {http://dx.doi.org/10.1109/CLOUD.2013.141}
+  {\path{doi:10.1109/CLOUD.2013.141}}.
+\newline\urlprefix\url{http://ieeexplore.ieee.org/articleDetails.jsp?arnumber=%
+6676686}
+
+\bibitem{VandenBossche2010}
+R.~{Van den Bossche}, K.~Vanmechelen, J.~Broeckhove,
+  \href{http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=5557990}%
+{{Cost-Optimal Scheduling in Hybrid IaaS Clouds for Deadline Constrained
+  Workloads}}, in: 2010 IEEE 3rd International Conference on Cloud Computing,
+  IEEE, 2010, pp. 228--235.
+\newblock \href {http://dx.doi.org/10.1109/CLOUD.2010.58}
+  {\path{doi:10.1109/CLOUD.2010.58}}.
+\newline\urlprefix\url{http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?ar%
+number=5557990}
+
+\bibitem{VandenBossche2013973}
+R.~V. den Bossche, K.~Vanmechelen, J.~Broeckhove,
+  \href{http://www.sciencedirect.com/science/article/pii/S0167739X12002324}{On%
+line cost-efficient scheduling of deadline-constrained workloads on hybrid
+  clouds}, Future Generation Computer Systems 29~(4) (2013) 973 -- 985.
+\newblock \href {http://dx.doi.org/10.1016/j.future.2012.12.012}
+  {\path{doi:10.1016/j.future.2012.12.012}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S01677%
+39X12002324}
+
+\bibitem{BittencourtM11}
+L.~F. Bittencourt, E.~R.~M. Madeira, Hcoc: a cost optimization algorithm for
+  workflow scheduling in hybrid clouds, J. Internet Services and Applications
+  2~(3) (2011) 207--227.
+
+\bibitem{optimization-ppam13}
+M.~Malawski, K.~Figiela, M.~Bubak, E.~Deelman, J.~Nabrzyski, Cost optimization
+  of execution of multi-level deadline-constrained scientific workflows on
+  clouds, in: Parallel Processing and Applied Mathematics - 10th International
+  Conference, PPAM 2013, Warsaw, Poland, September 8-11, 2013, Revised Selected
+  Papers, Part I, Vol. 8384 of Lecture Notes in Computer Science, Springer,
+  2014, pp. 251--260.
+
+\bibitem{Juve2009}
+G.~Juve, E.~Deelman, K.~Vahi, G.~Mehta, B.~Berriman, B.~P. Berman,
+  P.~Maechling, Scientific workflow applications on amazon {EC2}, in: 2009 5th
+  {IEEE} International Conference on {E-Science} Workshops, 2009.
+
+\bibitem{Bharathi2008}
+S.~Bharathi, A.~Chervenak, E.~Deelman, G.~Mehta, M.~Su, K.~Vahi,
+  Characterization of scientific workflows, in: 3rd Workshop on Workflows in
+  Support of Large Scale Science {(WORKS} 08), 2008.
+
+\bibitem{WorkflowGenerator}
+\href{https://confluence.pegasus.isi.edu/display/pegasus/WorkflowGenerator}{{W%
+orkflow Generator}}.
+\newline\urlprefix\url{https://confluence.pegasus.isi.edu/display/pegasus/Work%
+flowGenerator}
+
+\bibitem{CloudWorkflowSimulator}
+\href{https://github.com/malawski/cloudworkflowsimulator}{{Cloud Workflow
+  Simulator}}.
+\newline\urlprefix\url{https://github.com/malawski/cloudworkflowsimulator}
+
+\bibitem{Deelman2005}
+E.~Deelman, G.~Singh, M.~Su, J.~Blythe, Y.~Gil, C.~Kesselman, G.~Mehta,
+  K.~Vahi, G.~B. Berriman, J.~Good, A.~Laity, J.~C. Jacob, D.~S. Katz, Pegasus:
+  A framework for mapping complex scientific workflows onto distributed
+  systems, Scientific Programming 13~(3) (2005) 219--237.
+
+\bibitem{Malawski-FGCS-13}
+M.~Malawski, K.~Figiela, J.~Nabrzyski,
+  \href{http://dx.doi.org/10.1016/j.future.2013.01.004}{Cost minimization for
+  computational applications on hybrid cloud infrastructures}, Future
+  Generation Computer Systems\href
+  {http://dx.doi.org/10.1016/j.future.2013.01.004}
+  {\path{doi:10.1016/j.future.2013.01.004}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1016/j.future.2013.01.004}
+
+\bibitem{ChenD12}
+W.~Chen, E.~Deelman, Fault tolerant clustering in scientific workflows, in:
+  Eighth IEEE World Congress on Services, SERVICES 2012, Honolulu, HI, USA,
+  June 24-29, 2012, IEEE, 2012, pp. 9--16.
+
+\bibitem{Juve2010}
+G.~Juve, E.~Deelman, K.~Vahi, G.~Mehta, B.~P. Berman, B.~Berriman,
+  P.~Maechling, Data sharing options for scientific workflows on amazon {EC2},
+  in: 2010 {ACM/IEEE} conference on Supercomputing {(SC} 10), 2010.
+
+\bibitem{Nurmi2008b}
+D.~Nurmi, R.~Wolski, C.~Grzegorczyk, G.~Obertelli, S.~Soman, L.~Youseff,
+  D.~Zagorodnov, Eucalyptus: A technical report on an elastic utility computing
+  architecture linking your programs to useful systems, {UCSB} Computer Science
+  Technical Report 2008-10 (2008).
+
+\bibitem{Juve2011}
+G.~Juve, E.~Deelman, {Automating Application Deployment in Infrastructure
+  Clouds}, in: {3rd IEEE International Conference on Cloud Computing Technology
+  and Science (CloudCom 2011)}, 2011.
+
+\bibitem{Magellan}
+{National Energy Research Scientific Computing Center (NERSC)},
+  \href{http://magellan.nersc.gov}{Magellan}.
+\newline\urlprefix\url{http://magellan.nersc.gov}
+
+\bibitem{FutureGrid}
+\href{http://futuregrid.org/}{{FutureGrid}}.
+\newline\urlprefix\url{http://futuregrid.org/}
+
+\end{thebibliography}

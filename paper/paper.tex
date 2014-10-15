@@ -43,7 +43,7 @@ Ensembles in IaaS Clouds}
 Large-scale applications expressed as scientific workflows are often grouped
 into ensembles of inter-related workflows. In this paper, we address a new and
 important problem concerning the efficient management of such ensembles under
-budget and deadline constraints on Infrastructure- as-a-Service (IaaS) clouds.
+budget and deadline constraints on Infrastructure-as-a-Service (IaaS) clouds.
 IaaS clouds are characterized by on-demand resource provisioning capabilities
 and a pay-per-use model. We discuss, develop, and assess algorithms based on
 static and dynamic strategies for both task scheduling and resource
@@ -345,7 +345,7 @@ this model.
 
 \subsection{Performance Metric}
 \label{sec:perf_metric}
-In order to precisely define the objective of the algrithms it is necessary to
+In order to precisely define the objective of the algorithms it is necessary to
 introduce a metric that can be used to score the performance of the different
 algorithms on a given problem (ensemble, budget, and deadline). The simplest
 approach is to count the number of workflows in the ensemble that each algorithm
@@ -1136,7 +1136,7 @@ Similar results were obtained for other applications.
 
 Figure~\ref{fig:completed-deadlines} shows the results depending on normalized
 deadline. It can be observed, that with increasing deadline, the number of
-completed worklfows grows steeply and then stabilizes. This means that for
+completed workflows grows steeply and then stabilizes. This means that for
 longer deadlines it is usually not possible to complete more workflows due to
 the budget constraint. For short deadlines, the algorithms need to allocate more
 VM instances in parallel, making it more difficult to utilize the resources
@@ -1144,9 +1144,9 @@ efficiently, which results in lower numbers of completed workflows.
 
 We can also observe that the algorithms are able to complete more workflows in
 the ensembles that have priorities assigned randomly (unsorted), in comparison
-to the ensembes where the priorities are assigned based on workflow size
+to the ensembles where the priorities are assigned based on workflow size
 (sorted). This results from the fact that in the unsorted distributions the large
-workflows often have low priorities, so they can be rejected by the algoritms,
+workflows often have low priorities, so they can be rejected by the algorithms,
 thus making more space in the schedule for smaller high-priority workflows.
 
 One interesting observation from Figure~\ref{fig:completed-deadlines} is that for
@@ -1157,7 +1157,7 @@ the provisioning mechanism that tries to shut down unused VM instances before a
 full hour. The second one is that when the deadline increases, it may become
 possible to admit a larger workflow with higher priority instead of several
 smaller ones with lower priority. That is why the number of completed workflows
-may decrese, but the exponential score (utility function) based on priorities
+may decrease, but the exponential score (utility function) based on priorities
 will be higher. These effects are visible for CyberShake application, for which
 the maximum deadline is 3 hours, but they become less important for LIGO
 application, for which the maximum deadline is 20 hours. See also the discussion
@@ -1174,7 +1174,7 @@ budgets. This reflects the fact that the in sorted ensembles the largest
 workflows have the highest priority, so it requires a large increment of a small
 budget to fir the next workflow into the schedule.
 
-The chacacteristics discussed in this section can be useful not only for
+The characteristics discussed in this section can be useful not only for
 analysis of our algorithms, but also for planning scientific experiments and
 understanding tradeoffs between cost, deadline and the number of work
 complete~\cite{Malawski-FGCS-13}.
@@ -1274,7 +1274,7 @@ characteristics from preliminary runs~\cite{Bharathi2008,Deelman2005,Juve2010}.
 Some applications, like Periodograms~\cite{Vockler2011} even include a
 performance model that estimates task runtimes and automatically annotates
 workflow description with these data. In practice, however, these
-estimates are often inaccurate. Given inaccuate estimates, the question is: How
+estimates are often inaccurate. Given inaccurate estimates, the question is: How
 do errors in task runtime estimates impact the performance of our scheduling and
 provisioning algorithms?  To examine this we introduced uniform errors in the
 task runtime and observed the behavior of the algorithms in terms of meeting the
@@ -1295,7 +1295,7 @@ applications x 5 distributions x 10 budgets x 10 deadlines x 7 error values x
 3 algorithms). Box plots show the ratio of the ensemble cost to
 budget, and of ensemble makespan to deadline. Whiskers on the plots
 indicate maximum and minimum values. The ratio indicates whether the value 
-(for example, the simulated cost) exeeded the constraint (the budget). Values
+(for example, the simulated cost) exceeded the constraint (the budget). Values
 greater than 1 indicate that the constraint was exceeded. 
 
 Figure~\ref{fig:variances-budget} shows the ratio of simulated cost to budget. This
@@ -1310,7 +1310,7 @@ algorithm makes all of its decisions ahead of the execution and is not able to a
 to changing circumstances.
 
 The SPSS plan describes what tasks to execute on which VMs, but not when to
-execute them. At runtime, the worklow engine is forced to spend extra money
+execute them. At runtime, the workflow engine is forced to spend extra money
 to extend the runtime of some VMs so that all of the tasks assigned to that
 VM can be completed. At the same time, other VMs can be terminated early
 because the tasks they were assigned finished earlier than expected. However,

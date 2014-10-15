@@ -1,0 +1,60 @@
+This is BibTeX, Version 0.99c (Web2C 7.5.7)
+The top-level auxiliary file: paper.aux
+The style file: elsarticle-num.bst
+Database file #1: paper.bib
+Warning--empty pages in Deelman2008
+Warning--empty pages in Vockler2011
+Warning--empty pages in Malawski-SC12
+Warning--empty pages in Marshall2010
+Warning--empty pages in Yu2005
+Warning--empty pages in Mao2011
+Warning--empty pages in Dongarra2007
+Warning--empty pages in Sakellariou2007
+Warning--empty pages in Pandey2010
+Warning--empty pages in Juve2009
+Warning--empty pages in Bharathi2008
+Warning--empty pages in Juve2010
+Warning--empty institution in Nurmi2008b
+Warning--empty pages in Juve2011
+You've used 51 entries,
+            2937 wiz_defined-function locations,
+            1009 strings with 17331 characters,
+and the built_in function-call counts, 16906 in all, are:
+= -- 1489
+> -- 589
+< -- 14
++ -- 230
+- -- 179
+* -- 1242
+:= -- 2165
+add.period$ -- 65
+call.type$ -- 51
+change.case$ -- 52
+chr.to.int$ -- 0
+cite$ -- 65
+duplicate$ -- 616
+empty$ -- 2048
+format.name$ -- 222
+if$ -- 4458
+int.to.chr$ -- 0
+int.to.str$ -- 51
+missing$ -- 42
+newline$ -- 196
+num.names$ -- 46
+pop$ -- 434
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 1102
+stack$ -- 0
+substring$ -- 734
+swap$ -- 173
+text.length$ -- 14
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 14
+while$ -- 103
+width$ -- 53
+write$ -- 458
+(There were 14 warnings)
