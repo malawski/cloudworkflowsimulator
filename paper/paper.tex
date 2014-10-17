@@ -188,7 +188,7 @@ independent tasks.
 Our work is related to the strategies for deadline-con\-strained
 cost-minimization workflow scheduling, developed for utility grid and cloud
 systems. However, our problem is different from
-\cite{Yu2005},\cite{Abrishami2013158} and~\cite{Young2013} in that we consider
+\cite{Yu2005},\cite{Abrishami2013158} and~\cite{Lee2013} in that we consider
 ensembles of workflows instead of individual workflows.
 Our work is also different from cloud-targeted autoscaling
 solution~\cite{Mao2011} in that we consider ensembles of workflows rather than
@@ -198,10 +198,12 @@ that there is more work to be done than the available budget, so some work must
 be rejected.
 Therefore, cost is not something we optimize (i.e. an objective), but rather a
 constraint.
+In~\cite{Arabnejad2014} authors introduced a novel single DAG static scheduling PEFT algorithm, 
+which outperforms well-known list-based heuristics for makespan optimization, but the budget is not taken into account.
 
 
 This work is related to bi-criteria scheduling and multi-criteria scheduling of
-workflows~\cite{Wieczorek2009,Prodan2010,Dongarra2007,Durillo2013}. These approaches are
+workflows~\cite{Wieczorek2009,Prodan2010,Dongarra2007,Durillo2013,Durillo2012}. These approaches are
 similar to ours in that we have two scheduling criteria: cost and makespan. The
 challenge in multi-criteria scheduling is to derive an objective function that
 takes into account all of the criteria. In our case one objective (amount
@@ -232,7 +234,7 @@ but the difference is that we address the problem from the end-user perspective,
 while in their work they assume that the resource provider decides 
 whether to admit or reject the workflow based on the resource estimates and the deadline constraints.
 
-Other approaches for scheduling workflows on grids and clouds such as ~\cite{Talukder2009,Pandey2010} use
+Other approaches for scheduling workflows on grids and clouds such as ~\cite{Talukder2009,Pandey2010,Durillo2014} use
 metaheuristics that usually run for a long time before producing good results,
 which makes them less useful in the scenarios we consider in this paper. 
 
