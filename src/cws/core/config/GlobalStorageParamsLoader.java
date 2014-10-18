@@ -172,7 +172,8 @@ public class GlobalStorageParamsLoader {
         }
     }
 
-    private Map<String, Object> loadConfigFromFile(CommandLine args) throws FileNotFoundException {
+    @SuppressWarnings("unchecked")
+	private Map<String, Object> loadConfigFromFile(CommandLine args) throws FileNotFoundException {
         String gsConfigFilename = args.getOptionValue(GS_TYPE_OPTION_NAME, DEFAULT_GS_TYPE_FILENAME);
         String gsConfigDirectory = args.getOptionValue(GS_CONFIGS_DIRECTORY_OPTION_NAME, DEFAULT_GS_CONFIGS_DIRECTORY);
 
