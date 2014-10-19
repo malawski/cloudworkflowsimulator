@@ -251,19 +251,23 @@ public class VMTypeLoader {
 
     }
 
-    private Map<String, Object> getProvisioningSection(Map<String, Object> vmConfig) {
+    @SuppressWarnings("unchecked")
+	private Map<String, Object> getProvisioningSection(Map<String, Object> vmConfig) {
         return (Map<String, Object>) vmConfig.get("provisioningDelay");
     }
 
-    private Map<String, Object> getDeprovisioningSection(Map<String, Object> config) {
+    @SuppressWarnings("unchecked")
+	private Map<String, Object> getDeprovisioningSection(Map<String, Object> config) {
         return (Map<String, Object>) config.get("deprovisioningDelay");
     }
 
-    private Map<String, Object> getBillingSection(Map<String, Object> vmConfig) {
+    @SuppressWarnings("unchecked")
+	private Map<String, Object> getBillingSection(Map<String, Object> vmConfig) {
         return (Map<String, Object>) vmConfig.get("billing");
     }
 
-    private Map<String, Object> loadVMFromConfigFile(CommandLine args) throws FileNotFoundException {
+    @SuppressWarnings("unchecked")
+	private Map<String, Object> loadVMFromConfigFile(CommandLine args) throws FileNotFoundException {
         String vmConfigFilename = args.getOptionValue(VM_TYPE_OPTION_NAME, DEFAULT_VM_FILENAME);
         String vmConfigDirectory = args.getOptionValue(VM_CONFIGS_DIRECTORY_OPTION_NAME, DEFAULT_VM_CONFIGS_DIRECTORY);
 

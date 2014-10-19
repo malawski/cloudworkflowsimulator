@@ -1,7 +1,9 @@
 package cws.core.core;
 
 public class InvalidDistributionException extends Exception {
-    public InvalidDistributionException(String message) {
+	private static final long serialVersionUID = 1L;
+
+	public InvalidDistributionException(String message) {
         super(message);
     }
 }
