@@ -43,9 +43,9 @@ Ensembles in IaaS Clouds}
 Large-scale applications expressed as scientific workflows are often grouped
 into ensembles of inter-related workflows. In this paper, we address a new and
 important problem concerning the efficient management of such ensembles under
-budget and deadline constraints on Infrastructure-as-a-Service (IaaS) clouds.
+budget and deadline constraints on Infrastructure as a Service (IaaS) clouds.
 IaaS clouds are characterized by on-demand resource provisioning capabilities
-and a pay-per-use model. We discuss, develop, and assess algorithms based on
+and a pay-per-use model. We discuss, develop, and assess novel algorithms based on
 static and dynamic strategies for both task scheduling and resource
 provisioning. We perform the evaluation via simulation using a set of scientific
 workflow ensembles with a broad range of budget and deadline parameters, taking
@@ -84,8 +84,8 @@ of hazard maps over 286 sites that required an ensemble of 2288
 workflows~\cite{CyberShake13.4}. Similarly, users of Montage~\cite{Deelman2008}
 often need several workflows  with different parameters to generate a set of
 image mosaics that can be combined  into a single, large mosaic. The Galactic
-Plane ensemble~\cite{GalacticPlane}, which generates several mosaics of the
-entire sky in different wavelengths, consists of 17 workflows,
+Plane ensemble~\cite{GalacticPlane}, which generates several mosaics 
+in different wavelengths, consists of 17 workflows,
 each of which contains 900 sub-workflows.  Another ensemble example is the
 Periodograms application~\cite{Vockler2011}, which searches for extrasolar
 planets by detecting periodic dips in the light intensity of their host star.
@@ -115,7 +115,7 @@ more control also requires the development of new methods for task
 scheduling and resource provisioning. Resource management decisions required 
 in cloud scenarios not only have to take into account performance-related 
 metrics such as workflow makespan or resource utilization, but must also consider
-budget constraints, since the resources from commercial clouds
+budget constraints, since commercial cloud resources
 usually have monetary costs associated with them~\cite{Durkee2010}.
 
 In this paper, we aim to gain insight into resource management challenges when
@@ -177,9 +177,9 @@ of these autoscaling systems, but no support for complex applications is provide
 
 
 Policy-based approaches for scientific workloads (e.g. \cite{Marshall2010,
-Kim2011,Chen2011}) also enable scaling the cloud resource pool or to extending the
+Kim2011,Chen2011}) also enable scaling the cloud resource pool or the extension of the
 capabilities of clusters using cloud-burst techniques. Our approach is different
-in that we consider workflows, while policy based approaches typically consider
+in that we consider workflows, while policy-based approaches typically consider
 bags of independent tasks or unpredictable batch workloads. This enables us to
 take advantage of workflow-aware heuristics that cannot be applied to
 independent tasks.
@@ -221,9 +221,9 @@ An interesting discussion of uncertainties and the way to address them using a M
 is also presented in~\cite{Zheng2013b}, where the objective is makespan optimization.  
 
 Scheduling optimization for multiple workflows has been also considered in previous research, 
-either in the context of heterogeneous systems~\cite{Zhao2006} 
+either in the context of heterogeneous systems~\cite{Zhao2006}, 
 where makespan and fairness optimization is applied, 
-or in the context of grids~\cite{Hirales2010} 
+or in the context of grids~\cite{Hirales2010}, 
 where multiple heuristics are evaluated with respect to the makespan of schedules they produce. 
 Scheduling multiple workflows in~\cite{Duan2012,Duan2014} applies multiobjective optimization 
 of time and cost under storage bandwidth and capacity constraints with the use of heuristics based on game theory. 
@@ -259,16 +259,16 @@ to schedule multi-level deadline-constrained workflows, but workflow ensembles a
 
 
 The analysis of related work is summarized in Table~\ref{tab:related}, where we classify the methods based on 7 categories. 
-Infrastructure type can be grid or cloud, where grid includes utility grids 
-and heterogeneous computing systems where cost can be relevant (such as in~\cite{Sakellariou2007}). 
-Application types of interest are bags of tasks, single workflows or multiple workflows. 
+The infrastructure type can be a grid or a cloud, where a grid includes utility grids 
+and heterogeneous computing systems, where cost can be relevant (such as in~\cite{Sakellariou2007}). 
+Application types of interest are bags of tasks, single workflows, or multiple workflows. 
 The workload can be static, where the scheduling process can plan the tasks in advance, 
 or dynamic, where the algorithm has to deal with unpredictable stream of jobs arriving. 
 The provisioning methods are divided into dynamic and static approaches, 
 where static means that the provisioning plan is prepared prior to execution. 
 To simplify, we classify all the algorithms for grid and heterogeneous systems into the static category, 
 since these systems do not allow for creation of new resources on demand, 
-even if some mechanisms for dynamic provisioning such as pilot jobs are available. 
+even if some mechanisms for dynamic provisioning such as pilot jobs~\cite{Sfiligoi08} are available. 
 The related work addresses multiple optimization objectives, 
 including time, monetary cost, reliability, energy or fairness, 
 and there are examples of multi-criteria optimization among them. 
@@ -284,8 +284,8 @@ or mixed-integer programming for which ready to use solvers exist.
 An analysis of the table suggests that there are many approaches to workflow scheduling 
 and resource provisioning on clouds, but there is still room for improvement. 
 New infrastructure types, including hybrid and federated clouds should be investigated, 
-more emphasis should be put on problems with multiple workflows, 
-and new methods for combining static and dynamic workloads and algorithms offer potentially interesting area of research. 
+more emphasis should be put on problems with multiple interrelated workflows, 
+and new methods for combining static and dynamic workloads and algorithms offer potentially interesting areas of research. 
 Finally, other objectives and constraints in addition to budget and execution time can be explored. 
 
 In this context, we consider our attempt to address workflow ensembles using both static and dynamic algorithms 
@@ -729,7 +729,7 @@ existing VM to complete the task by its deadline.
 \subsection{Illustrative example}
 
 To illustrate how the algorithms perform, we prepared an artificial ensemble 
-of three workflows, as seen in Fig.~\ref{fig:example-ensemble}. 
+of three workflows, as seen in Figure~\ref{fig:example-ensemble}. 
 The deadline is set to 6 hours and the budget to \$18. In this example we assume
 that there are no VM provisioning delays, the runtime estimates are accurate, 
 there are no failures and the cost of 1 VM-hour is \$1.
@@ -740,21 +740,21 @@ and that the autoscaling parameter $v_{max} = 1$.
 \begin{figure}[htb] 
   \centering
   \includegraphics[width=0.80\columnwidth]{figures/example-ensemble}
-  \caption{Artificial ensemble consisting of three workflows \{a, b, c\}, with priorities \{1, 2, 3\}.
+  \caption{Artificial ensemble consisting of three workflows \{$a$, $b$, $c$\}, with priorities \{1, 2, 3\}.
   Task labels indicate estimated execution time in minutes, 
   so e.g. task $a.70$ has estimated execution time of 70 minutes.}
   \label{fig:example-ensemble}
 \end{figure}
 
-The resulting schedule produced by DPDS algorithm is shown in Fig.~\ref{fig:algorithms-example-dpds}.
+The resulting schedule produced by DPDS algorithm is shown in Figure~\ref{fig:algorithms-example-dpds}.
 The algorithm at the beginning estimates that it needs 3 VM instances by dividing the budget by the deadline ($18 / 6 = 3$). 
 Next, it schedules all the ready tasks in the priority order, so $a.70$ is started first, 
-and immediately $b.70$ and $c.60$ are started, since no other tasks of workflow a are ready. 
+and immediately $b.70$ and $c.60$ are started, since no other tasks of workflow $a$ are ready. 
 When task $a.60$ completes, there are again other no higher priority tasks ready, 
 so the next task from workflow $c$ can be started ($c.45$). Since there is no preemption,
 this results in workflow $a$ being delayed by the lower priority workflow $c$.
 Finally, the outcome of this dynamic scheduling policy is that none of the workflows completes within the deadline.
-Actually, the tasks $b.100$, $c.65$ and $a.160$ are not finished since all the VMs 
+Actually, tasks $b.100$, $c.65$ and $a.160$ are not finished since all the VMs 
 are terminated due to running out of budget. 
 The exponential score achieved by the algorithm computed according to equation~\ref{eq:score} is 0.
 On the other hand, we can observe that the utilization of the VMs is kept on the level of 100\% throughout the 
@@ -771,12 +771,12 @@ whole execution time, which may be considered an advantage in some cases.
 \end{figure}
 
 
-The resulting schedule produced by WA-DPDS algorithm is shown in Fig.~\ref{fig:algorithms-example-wadpds}.
-The schedule is generated in a similar way as in DPDS algorithm, with the one notable difference. 
+The resulting schedule produced by the WA-DPDS algorithm is shown in Figure~\ref{fig:algorithms-example-wadpds}.
+The schedule is generated in a similar way as in DPDS algorithm, with one notable difference. 
 After scheduling tasks $a.70$ and $b.70$, the algorithm estimates whether it has enough budget to 
-admit workflow $c$. The answer is that based on the sum of task runtimes there is no room for workflow $c$,
-so the whole workflow is rejected. As a consequence, task $a.100$ can start at time $t=70$ minutes
-thus workflow $a$ is not delayed as in the case of DPDS. One can also observe that $VM.2$ and $VM.3$ remain idle for
+admit workflow $c$. Since based on the sum of task runtimes there is no room for workflow $c$,
+the whole workflow is rejected. As a consequence, task $a.100$ can start at time $t=70$ minutes.
+Therefore workflow $a$ is not delayed as in the case of DPDS. One can also observe that $VM.2$ and $VM.3$ remain idle for
 one hour, which is the consequence of the conservative provisioning settings we assume in this example.  
 This means that VM utilization at the level of 2/3 does not trigger deprovisioning in this case, and the maximum autoscaling
 factor set to 1 prevents from provisioning of new VMs over the initial number even if utilization is 100\%.
@@ -792,7 +792,7 @@ In the resulting schedule only workflow $a$ completes, so the score is $2^{-1} =
 
 
 The final schedule produced by the SPSS algorithm is shown in
-Fig.~\ref{fig:algorithms-example-spss}. SPSS generates this schedule by
+Figure~\ref{fig:algorithms-example-spss}. SPSS generates this schedule by
 considering workflows in priority order. It first considers workflow $a$, and
 develops a low-cost schedule that completes $a$ by its deadline using a minimum
 number of VM-hours. This process involves assigning a deadline to each task
@@ -836,11 +836,11 @@ parallel.
 \begin{figure}[tb] 
   \centering
   \subfloat[DPDS]{
-  \includegraphics[width=0.80\columnwidth]{figures/output-test-DPDS}
+  \includegraphics[width=\columnwidth]{figures/output-test-DPDS}
   \label{fig:algorithm-example-dpds}
   }\\
   \subfloat[SPSS]{
-  \includegraphics[width=0.80\columnwidth]{figures/output-test-SPSS}
+  \includegraphics[width=\columnwidth]{figures/output-test-SPSS}
   \label{fig:algorithm-example-spss}
   }
   \caption[Example schedules generated by the algorithms]{Example
@@ -894,7 +894,7 @@ to study all these aspects in detail.
 
 In order to evaluate the algorithms on a standard set of workflows, we created
 randomized ensembles using workflows available from the workflow generator
-gallery~\cite{WorkflowGenerator}. The
+gallery~\cite{WorkflowGenerator,Silva2014}. The
 gallery contains synthetic workflows modeled using structures and parameters
 that were taken from real applications. Ensembles were created using synthetic
 workflows from five real applications: SIPHT, LIGO, Epigenomics, Montage and
@@ -946,7 +946,7 @@ occurs in a Pareto ensemble is shown in Figure~\ref{fig:ensemble-pareto}.
 
 \begin{figure}[t] 
     \centering
-    \includegraphics[width=0.6\columnwidth]{figures/ensemble-pareto}
+    \includegraphics[width=0.8\columnwidth]{figures/ensemble-pareto}
     \caption[Histogram of workflow sizes in Pareto ensembles]{Histogram of
     workflow sizes in Pareto ensembles. Workflow size is measured in number of
     tasks.}
@@ -1110,13 +1110,13 @@ tasks into the idle VM slots at the end of the schedule.
 
 \begin{figure*}[htb]
     \centering
-    \includegraphics[width=0.9\textwidth]{run-finish-variations-test-0-output-deadlines-app-dist-selected}    
+    \includegraphics[width=\textwidth]{run-finish-variations-test-0-output-deadlines-app-dist-selected}    
     \caption{Number of completed workflows from the ensemble depending on normalized deadline.}
     \label{fig:completed-deadlines}
 \end{figure*}
 \begin{figure*}[htb]
     \centering
-    \includegraphics[width=0.9\textwidth]{run-finish-variations-test-0-output-budgets-app-dist-selected}    
+    \includegraphics[width=\textwidth]{run-finish-variations-test-0-output-budgets-app-dist-selected}    
     \caption{Number of completed workflows from the ensemble depending on normalized budget.}
     \label{fig:completed-budgets}
 \end{figure*}
@@ -1165,7 +1165,7 @@ the maximum deadline is 3 hours, but they become less important for LIGO
 application, for which the maximum deadline is 20 hours. See also the discussion
 on task granularity in Setion~\ref{sec:granularity}.
 
-Fig~\ref{fig:completed-budgets} shows the results based on normalized budget,
+Figure\ref{fig:completed-budgets} shows the results based on normalized budget,
 each point being the average over all deadline and random seed. What becomes
 apparent is that for constant and unsorted distributions the number of completed
 workflows is almost linear. This confirms that the budget constraint has the
@@ -1174,11 +1174,11 @@ eliminated by averaging. On the other hand, for sorted distributions the
 functions are convex, increasing slowly for small budgets and steeper for larger
 budgets. This reflects the fact that the in sorted ensembles the largest
 workflows have the highest priority, so it requires a large increment of a small
-budget to fir the next workflow into the schedule.
+budget to fit the next workflow into the schedule.
 
 The characteristics discussed in this section can be useful not only for
 analysis of our algorithms, but also for planning scientific experiments and
-understanding tradeoffs between cost, deadline and the number of work
+understanding trade-offs between cost, deadline and the number of work
 complete~\cite{Malawski-FGCS-13}.
 
 
@@ -1191,10 +1191,10 @@ complete~\cite{Malawski-FGCS-13}.
 \begin{figure*}[htb]
     \centering
 %    \subfloat[CyberShake]{
-    \includegraphics[width=0.6\textwidth]{run-stretching-test-output-scaling-CYBERSHAKE}
+    \includegraphics[width=0.64\textwidth]{run-stretching-test-output-scaling-CYBERSHAKE}
 %    }\\
 %    \subfloat[Montage]{
-    \includegraphics[width=0.6\textwidth]{run-stretching-test-output-scaling-MONTAGE}
+    \includegraphics[width=0.64\textwidth]{run-stretching-test-output-scaling-MONTAGE}
 %    }
     \caption{Percentage of high scores achieved by each algorithm for CyberShake (top)
     and Montage (bottom) ensembles when task runtime is scaled by a constant factor. A
@@ -1234,8 +1234,8 @@ CloudSigma\footnote{\url{http://www.cloudsigma.com}} or every 1 minute in the
 case of Google Compute
 Engine\footnote{\url{https://cloud.google.com/pricing/compute-engine}} (after
 first 10 minutes). Our results indicate that when the task granularity is close
-to the length of the billing period, the SPSS produces better results, while for
-tasks that are shorter than the billing period, the dynamic algorithms perform
+to the length of the billing period,  SPSS produces better results, while for
+tasks that are shorter than the billing period,  dynamic algorithms perform
 better. This suggests that these granularity effects have to be taken into account when
 selecting a cloud provider, and also when using task clustering algorithms that
 group smaller tasks into larger groups~\cite{ChenD12}.
@@ -1305,7 +1305,7 @@ plot illustrates two important algorithm characteristics. First, the dynamic
 algorithms very rarely exceeded the budget, even with very large errors. This
 indicates that the dynamic algorithms are able to adapt to uncertainties at
 runtime to ensure that the constraints are not exceeded, even when the quality
-of information available to them is low. Second, unlike the dynamic
+of information available to them is low. Second, unlike dynamic
 algorithms, the static algorithm frequently exceeded the budget constraint; by
 large amounts in some cases. This is a result of the fact that the static
 algorithm makes all of its decisions ahead of the execution and is not able to adapt
@@ -1515,7 +1515,7 @@ Figure~\ref{fig:failures-scores} shows the relative performance as a percentage 
 the number of high scores achieved by each algorithm as the failure rate
 increases. The results are similar to the ones of
 Figure~\ref{fig:delays-scores}. Comparing Figure~\ref{fig:failures} to
-Figs.~\ref{fig:variances} and~\ref{fig:delays} one may conclude that failures
+Figures~\ref{fig:variances} and~\ref{fig:delays} one may conclude that failures
 are worse than provisioning delays and runtime estimate errors, since their
 impact is larger. However, we consider higher failure rates as rare events that
 suggest a significant system malfunction or invalid selection of resources.
@@ -1638,7 +1638,7 @@ in real workflow applications, would take many hours to plan using SPSS. This
 makes the dynamic algorithms much more attractive for large scale problems.
 
 This study suggests several areas for future work. Our current approach models
-data access as part of the task execution time and does not consider data
+data access as part of the task execution time and does not explicitly consider data
 storage and transfer costs. In the future we plan to extend the application
 and infrastructure model to  include the various data storage options
 available on clouds. A previous experimental study \cite{Juve2010} suggests
@@ -1661,7 +1661,7 @@ associated trade-offs.
 
 
 \section*{Acknowledgments}
-This work was supported by the NSF under award OCI-0943725 (STCI) and
+This work was supported by the NSF under award ACI-1148515 and
 by the EU FP7 project VPH-Share (269978).
 
 % ACM style
