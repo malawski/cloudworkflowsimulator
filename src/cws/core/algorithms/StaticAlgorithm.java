@@ -297,7 +297,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         LinkedList<Task> vmqueue = vmQueues.get(vm);
         // Get next task for VM
         Task task = vmqueue.peek();
-        if (task == null || getDeadline() < getCloudsim().clock()) {
+        if (task == null) {
             // No more tasks
             getCloudsim().send(getWorkflowEngine().getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
         } else {

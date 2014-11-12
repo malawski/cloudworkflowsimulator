@@ -100,13 +100,8 @@ public class Cloud extends CWSSimEntity {
     }
 
     private void vmTerminated(VM vm) {
-        // Sanity check
-//        if (!vms.contains(vm)) {
-//            throw new RuntimeException("Unknown VM: " + vm.getId());
-//        }
         getCloudsim().log(String.format("VM %d terminated", vm.getId()));
 
-       
         // Listeners find out
         for (VMListener l : vmListeners) {
             l.vmTerminated(vm);

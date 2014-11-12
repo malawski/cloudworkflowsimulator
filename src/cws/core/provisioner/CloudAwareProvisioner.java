@@ -15,7 +15,6 @@ public abstract class CloudAwareProvisioner extends CWSSimEntity implements Prov
 
     // maximum autoscaling factor over initial number of provisioned VMs
     protected double maxScaling;
-    private int initialNumVms;
 
     public CloudAwareProvisioner(CloudSimWrapper cloudsim) {
         this(DEFAULT_AUTOSCALING_FACTOR, cloudsim);
@@ -36,17 +35,6 @@ public abstract class CloudAwareProvisioner extends CWSSimEntity implements Prov
 
     public double getMaxScaling() {
         return maxScaling;
-    }
-    
-    public void setInitialNumOfVms(int num) {
-        this.initialNumVms = num;
-    }
-    
-    public int getInitialNumOfVms() {
-        if (initialNumVms == -1) {
-            throw new IllegalStateException();
-        }
-        return initialNumVms;
     }
     
     public void setCloud(Cloud cloud) {
