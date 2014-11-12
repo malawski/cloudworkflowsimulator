@@ -346,7 +346,7 @@ public class Simulation {
             maxCost += dagStats.getMinCost();
         }
         maxCost *= 2;
-        minCost *= 2;
+        maxTime *= 2;
 
         double minBudget;
         double maxBudget;
