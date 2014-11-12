@@ -154,7 +154,7 @@ Main {
   option('resolution') {
     argument :required
     description "Resolution of created graph."
-    default "1024,768"
+    default "1600,900"
     validate { |comma_separated_resolution| /\d+,\d+/ =~ comma_separated_resolution }
   }
 
@@ -174,7 +174,7 @@ Main {
     def run() 
       refined_storage_logs = load_storage_logs(params['log_filename'].value)
       if refined_storage_logs.empty?
-        print "No storage information. Probably you run simulation with void storage type.\n"
+        print "No storage information. Probably all schedules were rejected or you run simulation with void storage type.\n"
         return
       end
       plot_number_schedule(refined_storage_logs, params)
@@ -185,7 +185,7 @@ Main {
     def run() 
       refined_storage_logs = load_storage_logs(params['log_filename'].value)
       if refined_storage_logs.empty?
-        print "No storage information. Probably you run simulation with void storage type.\n"
+        print "No storage information. Probably all schedules were rejected or you run simulation with void storage type.\n"
         return
       end
       plot_bandwidth_schedule(refined_storage_logs, params)

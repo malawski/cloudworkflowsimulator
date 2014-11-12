@@ -51,12 +51,12 @@ def _validate_transfer_order(workflow_id, task, jobs, transfers):
 
         if not transfer_job or transfer_job.vm != job.vm or transfer_job.direction != 'DOWNLOAD':
             errors.append(
-                'File {} was not downloaded to VM {} despite the fact that job {} needed that as an input file'.format(
-                    file_id, job.vm, job.id))
+                'File {} was not downloaded to VM {} despite the fact that job {} (task {}) needed that as an input file'.format(
+                    file_id, job.vm, job.id, task.id))
         elif not _is_done_before(transfer_job, job):
             errors.append(
-                'Job {} started before file {} was transferred to VM {} despite the fact this file is its input file'.format(
-                    job.id, file_id, job.vm))
+                'Job {} (task {}) started before file {} was transferred to VM {} despite the fact this file is its input file'.format(
+                    job.id, task.id, file_id, job.vm))
 
     for file_id in task.files_produced:
         transfer_job = get_transfer_task_for(file_id, job.id)

@@ -11,26 +11,27 @@ out_dir = nil
 
 # Parameters with default values. They can be overriden.
 name_prefix = "generated"
-applications = ["CYBERSHAKE", "GENOME"]
+applications = ["MONTAGE", "GENOME"]
 algorithms = ["DPDS", "WADPDS", "SPSS"]
 input_dirs = {"CYBERSHAKE" => "CyberShake", "GENOME" => "Genome",
     "LIGO" => "LIGO", "MONTAGE" => "Montage", "SIPHT" => "SIPHT"}
-distributions = ["pareto_unsorted", "pareto_sorted"]
-delays = [0, 30]
-num_replicas = [1, 100]
-latencies = [1, 100]
+distributions = ["pareto_unsorted"]
+delays = [30]
+num_replicas = [100]
+latencies = [1]
 storage_managers = ["void", "global"]
-read_speeds = [1000000, 100000000]
-write_speeds = [1000000, 100000000]
+read_speeds = [100000000]
+write_speeds = [100000000]
 failure_rate = 0
-ensemble_size = 20
+ensemble_size = 7
 variation = 0.0
-seeds = [0, 1, 2]
+seeds = [Time.now().sec]
 queue_name = "l_short"
 qsub_params = ""
 local = false
 run = false
-cws_logs = false
+cws_logs = true 
+awares = [true, false]
 
 
 OptionParser.new do |opts|
@@ -65,6 +66,10 @@ OptionParser.new do |opts|
   end
   opts.on("--seeds x,y", Array, "Optional list of seeds, defaults to #{seeds.join(',')}") do |val|
     seeds = val
+  end
+  opts.on("--storage-aware x,y", Array, "Optional list of storage awarenesses, " +
+      "defaults to #{awares.join(',')}") do |val|
+    awares = val
   end
   opts.on("--storage-managers x,y", Array, "Optional list of storage managers, " +
       "defaults to #{storage_managers.join(',')}") do |val|
@@ -102,7 +107,7 @@ OptionParser.new do |opts|
     variation = val
   end
   opts.on("--cws-enable-logging", "Whether to enable logging in CWS, defaults to \"#{cws_logs}\"") do |val|
-    cws_logs = val
+    cws_logs = (val == 'true')
   end
   opts.on("-l", "--[no-]local", "Generate bash_commandands for running simulations locally, defaults to #{local}") do |val|
     local = val
@@ -134,6 +139,7 @@ for seed in seeds do
     FileUtils.mkdir_p run_dir
   rescue
   end
+  run_dir = run_dir.realpath
   file_name = run_dir + Pathname.new(run_dir_name + ".txt")
   file = File.open("#{file_name}", "w")
 
@@ -147,35 +153,38 @@ for seed in seeds do
               for read_speed in read_speeds do
                 for num_replica in num_replicas do
                   for latency in latencies do
-                    id = id + 1
-                    task_id = task_id + 1
-                    id_string = "%08d" % id
-                    args = "--application #{application} " +
-                        "--input-dir #{dag_dir}/#{input_dirs[application]}/ " +
-                        "--output-file #{run_dir}/#{name_prefix}-output-#{id_string}.dat " +
-                        "--distribution #{distribution} " +
-                        "--ensemble-size #{ensemble_size} " +
-                        "--algorithm #{algorithm} " +
-                        "--seed #{seed} " +
-                        "--failure-rate #{failure_rate} " +
-                        "--runtime-variance #{variation} " +
-                        "--vm-deprovisioning-value #{delay} " +
-                        "--storage-manager #{storage_manager} " +
-                        "--enable-logging #{cws_logs} " +
-                        "--vm-directory #{mydir}/../../vms " +
-                        "--global-storage-directory #{mydir}/../../gs "
-                    if storage_manager != 'void' then
-                      args = args + "--gs-read-speed #{read_speed} " +
-                          "--gs-write-speed #{write_speed} " +
-                          "--gs-latency #{latency} " +
-                          "--gs-replicas #{num_replica}"
-                    elsif !void_manager_written then
-                      void_manager_written = true
-                    else
-                      break
+                    for aware in awares do
+                      id = id + 1
+                      task_id = task_id + 1
+                      id_string = "%08d" % id
+                      args = "--application #{application} " +
+                          "--input-dir #{dag_dir}/#{input_dirs[application]}/ " +
+                          "--output-file #{run_dir}/#{name_prefix}-output-#{id_string}-#{application}-#{algorithm}-#{storage_manager}-#{aware}.dat " +
+                          "--distribution #{distribution} " +
+                          "--ensemble-size #{ensemble_size} " +
+                          "--algorithm #{algorithm} " +
+                          "--seed #{seed} " +
+                          "--storage-aware #{aware} " +
+                          "--failure-rate #{failure_rate} " +
+                          "--runtime-variance #{variation} " +
+                          "--vm-deprovisioning-value #{delay} " +
+                          "--storage-manager #{storage_manager} " +
+                          "--enable-logging #{cws_logs} " +
+                          "--vm-directory #{mydir}/../../vms " +
+                          "--global-storage-directory #{mydir}/../../gs "
+                      if storage_manager != 'void' then
+                        args = args + "--gs-read-speed #{read_speed} " +
+                            "--gs-write-speed #{write_speed} " +
+                            "--gs-latency #{latency} " +
+                            "--gs-replicas #{num_replica}"
+                      #elsif !void_manager_written then
+                      #  void_manager_written = true
+                      #else
+                      #  break
+                      end
+                      args = args + "\n"
+                      file.write args
                     end
-                    args = args + "\n"
-                    file.write args
                   end
                 end
               end
@@ -187,12 +196,19 @@ for seed in seeds do
   end
   file.close
   absolute_running_script_path = mydir + Pathname.new("../runners/run_simulation_set_locally.sh")
-  absolute_input_file_path = mydir + Pathname.new(file_name)
+  visualise_path = mydir + Pathname.new("../visualisation/visualize_all.sh")
+  absolute_input_file_path = Pathname.new(".").realpath + Pathname.new(file_name)
   bash_command = nil
+  absolute_out = Pathname.new(".").realpath + Pathname.new("#{run_dir}/#{name_prefix}-output")
+  visualise = "#{visualise_path} #{absolute_out}"
+  the_command = "#{absolute_running_script_path} #{absolute_input_file_path}"
+  if cws_logs then
+    the_command = "#{the_command} && #{visualise}"
+  end
   if local then
-    bash_command = "#{absolute_running_script_path} #{absolute_input_file_path}"
+    bash_command = the_command
   else 
-    bash_command = "echo \"#{absolute_running_script_path} #{absolute_input_file_path}\" " +
+    bash_command = "echo \"#{the_command}\" " +
       "| qsub -q #{queue_name} #{qsub_params}"
   end
   if run then
@@ -202,3 +218,4 @@ for seed in seeds do
     puts bash_command
   end
 end
+

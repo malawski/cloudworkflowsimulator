@@ -27,3 +27,8 @@ cloudworkflowsimulator.iml
 # python
 *.pyc
 
+# workspace
+.DS_Store
+SyntheticWorkflows
+dags_local
+

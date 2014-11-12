@@ -8,5 +8,9 @@ fi
 INPUT=$1
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cat $INPUT | xargs -n 1 -d "\n" ${DIR}/run_simulation_locally.sh
+if hash gxargs 2>/dev/null; then
+  cat $INPUT | gxargs -n 1 -d "\n" ${DIR}/run_simulation_locally.sh
+else
+  cat $INPUT | xargs -n 1 -d "\n" ${DIR}/run_simulation_locally.sh
+fi;
 

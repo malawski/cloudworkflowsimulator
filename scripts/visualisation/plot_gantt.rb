@@ -242,7 +242,7 @@ Main {
   option('resolution') {
     argument :required
     description "Resolution of created graph."
-    default "1024,768"
+    default "1600,900"
     validate { |comma_separated_resolution| /\d+,\d+/ =~ comma_separated_resolution }
   }
 

@@ -3,5 +3,3 @@ writeSpeed: 10000000.0
 latency: 0.01
 replicas: 1
 chunkTransferTime: 1.0
-
-
