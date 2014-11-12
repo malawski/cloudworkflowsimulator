@@ -13,7 +13,7 @@ import cws.core.log.WorkflowLog;
 
 public abstract class Algorithm extends CWSSimEntity {
     /** Environment of simulation (VMs, storage info) */
-    protected Environment environment;
+    private Environment environment;
 
     /** Provides statistics about this algorithm's run */
     protected AlgorithmStatistics algorithmStatistics;
@@ -92,7 +92,6 @@ public abstract class Algorithm extends CWSSimEntity {
         this.manager = ensembleManager;
         this.manager.addDAGJobListener(algorithmStatistics);
         this.manager.addDAGJobListener(workflowLog);
-
     }
 
     private void conductSanityChecks() {
@@ -133,6 +132,10 @@ public abstract class Algorithm extends CWSSimEntity {
 
     public double getDeadline() {
         return deadline;
+    }
+    
+    public Environment getEnvironment() {
+        return environment;
     }
 
     @Override

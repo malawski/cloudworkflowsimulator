@@ -32,8 +32,8 @@ public class DynamicAlgorithm extends Algorithm {
     }
 
     private void prepareEnvironment() {
-        provisioner.setEnvironment(environment);
-        scheduler.setEnvironment(environment);
+        provisioner.setEnvironment(getEnvironment());
+        scheduler.setEnvironment(getEnvironment());
 
         setCloud(new Cloud(getCloudsim()));
         provisioner.setCloud(getCloud());
@@ -54,22 +54,22 @@ public class DynamicAlgorithm extends Algorithm {
             return 0;
         }
 
-        return (int) Math.ceil(getMaxSpendingSpeedWeCanAfford() / environment.getSingleVMPrice());
+        return (int) Math.ceil(getMaxSpendingSpeedWeCanAfford() / getEnvironment().getSingleVMPrice());
     }
 
     private double getMaxSpendingSpeedWeCanAfford() {
-        return Math.floor(getBudget()) / Math.ceil((getDeadline() / environment.getBillingTimeInSeconds()));
+        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getBillingTimeInSeconds()));
     }
 
     private boolean canAffordAtLeastOneVM() {
-        return environment.getSingleVMPrice() <= getBudget();
+        return getEnvironment().getSingleVMPrice() <= getBudget();
     }
 
     private void launchVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numEstimatedVMs; i++) {
             // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
-            VM vm = VMFactory.createVM(environment.getVMType(), getCloudsim());
+            VM vm = VMFactory.createVM(getEnvironment().getVMType(), getCloudsim());
             vms.add(vm);
             getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }

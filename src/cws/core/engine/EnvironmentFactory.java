@@ -22,10 +22,6 @@ public class EnvironmentFactory {
     public static Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams,
             VMType vmType, boolean isStorageAware) {
         StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
-        if (isStorageAware) {
-            return new Environment(vmType, storageManager, new StorageAwarePredictionStrategy());
-        } else {
-            return new Environment(vmType, storageManager, new StorageUnawarePredictionStrategy());
-        }
+        return new Environment(vmType, storageManager, isStorageAware);
     }
 }

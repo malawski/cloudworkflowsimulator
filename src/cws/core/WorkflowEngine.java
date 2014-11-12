@@ -252,7 +252,7 @@ public class WorkflowEngine extends CWSSimEntity {
     public List<VM> getAvailableVMs() {
         return vms;
     }
-
+    
     public Set<VM> getFreeVMs() {
         return freeVMs;
     }

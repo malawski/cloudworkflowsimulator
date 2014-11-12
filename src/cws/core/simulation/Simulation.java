@@ -65,12 +65,12 @@ public class Simulation {
     /**
      * Number of budgets generated. It is ignored when budget is explicitly set.
      */
-    private static final String DEFAULT_N_BUDGETS = "10";
+    private static final String DEFAULT_N_BUDGETS = "5";
 
     /**
      * Number of deadlines generated. It is ignored when deadline is explicitly set.
      */
-    private static final String DEFAULT_N_DEADLINES = "10";
+    private static final String DEFAULT_N_DEADLINES = "5";
 
     /**
      * How many times more can the number of VMs be increased? 1.0 means 0%, 2.0 means 100%, etc..
@@ -83,7 +83,7 @@ public class Simulation {
     private static final String DEFAULT_ALPHA = "0.7";
 
     /**
-     * Whether the algorithm should be aware of the underlying storage. I.e. during cumputing runtime estimations.
+     * Whether the algorithm should be aware of the underlying storage. I.e. during computing runtime estimations.
      */
     private static final String DEFAULT_IS_STORAGE_AWARE = "true";
 
@@ -316,7 +316,7 @@ public class Simulation {
 
         List<DAG> dags = new ArrayList<DAG>();
         Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType,
-                isStorageAware);
+                false);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -345,6 +345,8 @@ public class Simulation {
             maxTime += dagStats.getCriticalPath();
             maxCost += dagStats.getMinCost();
         }
+        maxCost *= 2;
+        minCost *= 2;
 
         double minBudget;
         double maxBudget;
@@ -389,7 +391,7 @@ public class Simulation {
                     + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
                     + "actualBytesRead,actualBytesTransferred,"
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
-                    + "actualFilesRead,actualFilesTransferred");
+                    + "actualFilesRead,actualFilesTransferred,isStorageAware");
 
             for (double budget = minBudget; budget <= maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
@@ -436,9 +438,10 @@ public class Simulation {
                             stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
                             stats.getActualBytesRead(), stats.getActualBytesRead() + stats.getTotalBytesToWrite());
 
-                    fileOut.printf("%d,%d,%d,%d,%d\n", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
+                    fileOut.printf("%d,%d,%d,%d,%d,", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
                             stats.getTotalFilesToRead() + stats.getTotalFilesToWrite(), stats.getActualFilesRead(),
                             stats.getActualFilesRead() + stats.getTotalFilesToWrite());
+                    fileOut.printf("%b\n", isStorageAware);
                 }
             }
             System.out.println();

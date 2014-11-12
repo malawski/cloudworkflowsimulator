@@ -128,7 +128,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
      * @return
      */
     private double estimateCost(DAGJob dj) {
-        double sumRuntime = environment.getPredictedRuntime(dj.getDAG());
+        double sumRuntime = environment.getTotalPredictedRuntime(dj.getDAG());
         double vmPrice = environment.getSingleVMPrice();
         return vmPrice * sumRuntime / environment.getBillingTimeInSeconds();
     }
@@ -189,7 +189,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
             if (!admittedDJ.isComplete(task)) {
-                cost += environment.getPredictedRuntime(task) * environment.getSingleVMPrice();
+                cost += environment.getTotalPredictedRuntime(task) * environment.getSingleVMPrice();
             }
         }
         return cost / environment.getBillingTimeInSeconds();

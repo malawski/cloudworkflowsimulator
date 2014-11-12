@@ -25,7 +25,7 @@ public class DAGStats {
         totalRuntime = 0.0;
         HashMap<Task, Double> runTimes = new HashMap<Task, Double>();
         for (Task task : order) {
-            double runtime = environment.getPredictedRuntime(task);
+            double runtime = environment.getTotalPredictedRuntime(task);
             runTimes.put(task, runtime);
             totalRuntime += runtime;
         }

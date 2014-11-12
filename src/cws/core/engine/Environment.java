@@ -7,18 +7,14 @@ import cws.core.storage.StorageManager;
 import cws.core.storage.StorageManagerStatistics;
 
 public class Environment {
-    private VMType vmType;
-    private StorageManager storageManager;
+    private final VMType vmType;
+    private final StorageManager storageManager;
+    private final boolean isStorageAware;
 
-    /**
-     * The prediction strategy, i.e. how we will predict task's runtime.
-     */
-    private PredictionStrategy predictionStrategy;
-
-    public Environment(VMType vmType, StorageManager storageManager, PredictionStrategy predictionStrategy) {
+    public Environment(VMType vmType, StorageManager storageManager, boolean isStorageAware) {
         this.vmType = vmType;
         this.storageManager = storageManager;
-        this.predictionStrategy = predictionStrategy;
+        this.isStorageAware = isStorageAware;
     }
 
     // FIXME(mequrel): temporary encapsulation breakage for static algorithm, dynamic algorithm and provisioners
@@ -33,18 +29,22 @@ public class Environment {
      * 
      * @return task's predicted runtime as a double
      */
-    public double getPredictedRuntime(Task task) {
-        return predictionStrategy.getPredictedRuntime(task, vmType, storageManager);
+    public double getTotalPredictedRuntime(Task task) {
+        double time = task.getSize() / vmType.getMips();
+        if (isStorageAware) {
+            time += storageManager.getTransferTimeEstimation(task);
+        }
+        return time;
     }
 
-    public double getPredictedRuntime(DAG dag) {
+    public double getTotalPredictedRuntime(DAG dag) {
         double sum = 0.0;
         for (String taskName : dag.getTasks()) {
-            sum += getPredictedRuntime(dag.getTaskById(taskName));
+            sum += getTotalPredictedRuntime(dag.getTaskById(taskName));
         }
         return sum;
     }
-
+    
     public StorageManagerStatistics getStorageManagerStatistics() {
         return storageManager.getStorageManagerStatistics();
     }
@@ -61,10 +61,6 @@ public class Environment {
 
     public double getBillingTimeInSeconds() {
         return vmType.getBillingTimeInSeconds();
-    }
-
-    public PredictionStrategy getPredictionStrategy() {
-        return predictionStrategy;
     }
 
     public double getVMProvisioningOverallDelayEstimation() {

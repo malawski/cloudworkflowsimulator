@@ -170,6 +170,7 @@ public class VM extends CWSSimEntity {
     }
 
     private void terminateVM() {
+
         // Can no longer accept jobs
         isTerminated = true;
 
@@ -196,7 +197,7 @@ public class VM extends CWSSimEntity {
         // Reset dynamic state
         jobs.clear();
         idleCores = vmType.getCores();
-        getCloudsim().log(String.format("VM %d terminated", getId()));
+        getCloudsim().log(String.format("VM %d terminate request success", getId()));
     }
 
     private void jobSubmit(Job job) {
@@ -347,12 +348,12 @@ public class VM extends CWSSimEntity {
         return launchTime;
     }
 
-    public void setTerminateTime(double terminateTime) {
-        this.terminateTime = terminateTime;
-    }
-
     public double getTerminateTime() {
         return terminateTime;
+    }
+
+    public void setTerminateTime(double terminateTime) {
+        this.terminateTime = terminateTime;
     }
 
     public VMType getVmType() {
@@ -389,5 +390,9 @@ public class VM extends CWSSimEntity {
 
     public double getDeprovisioningDelay() {
         return vmType.getDeprovisioningDelay().sample();
+    }
+
+    public void setTerminated(boolean b) {
+        this.isTerminated = b;
     }
 }

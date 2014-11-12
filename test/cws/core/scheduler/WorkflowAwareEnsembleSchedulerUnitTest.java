@@ -78,7 +78,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
         Queue<Job> expected = new LinkedList<Job>();
 
-        when(environment.getPredictedRuntime(job.getDAGJob().getDAG())).thenReturn(10.0);
+        when(environment.getTotalPredictedRuntime(job.getDAGJob().getDAG())).thenReturn(10.0);
 
         scheduler.scheduleJobs(engine);
 

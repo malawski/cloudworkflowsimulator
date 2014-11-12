@@ -88,7 +88,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
         for (Resource r : plan.resources) {
             // create VM
-            VMType vmType = environment.getVMType();
+            VMType vmType = getEnvironment().getVMType();
             // TODO(mequrel): should have exposed interface for that!
             VM vm = VMFactory.createVM(vmType, getCloudsim());
 
@@ -179,11 +179,11 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
          * as the total runtime of those tasks.
          */
         double[] shares = new double[numlevels];
-        CriticalPath path = new CriticalPath(order, runtimes, environment);
+        CriticalPath path = new CriticalPath(order, runtimes, getEnvironment());
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
-        spare = spare - environment.getVMProvisioningOverallDelayEstimation();
+        spare = spare - getEnvironment().getVMProvisioningOverallDelayEstimation();
         for (int i = 0; i < numlevels; i++) {
 
             double taskPart = alpha * (totalTasksByLevel[i] / totalTasks);
@@ -290,14 +290,14 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
     private void submitNextTaskFor(VM vm) {
         // If the VM is busy, do nothing
-        if (!idleVms.contains(vm))
+        if (!idleVms.contains(vm)) {
             return;
+        }
 
         LinkedList<Task> vmqueue = vmQueues.get(vm);
-
         // Get next task for VM
         Task task = vmqueue.peek();
-        if (task == null) {
+        if (task == null || getDeadline() < getCloudsim().clock()) {
             // No more tasks
             getCloudsim().send(getWorkflowEngine().getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
         } else {
@@ -373,14 +373,14 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
         TopologicalOrder order = new TopologicalOrder(dag);
         for (Task task : order) {
-            double runtime = environment.getPredictedRuntime(task);
+            double runtime = getEnvironment().getTotalPredictedRuntime(task);
             runtimes.put(task, runtime);
         }
 
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
-        CriticalPath path = new CriticalPath(order, runtimes, environment);
-        double minimalTime = path.getCriticalPathLength() + environment.getVMProvisioningOverallDelayEstimation();
+        CriticalPath path = new CriticalPath(order, runtimes, getEnvironment());
+        double minimalTime = path.getCriticalPathLength() + getEnvironment().getVMProvisioningOverallDelayEstimation();
         if (minimalTime > getDeadline()) {
             throw new NoFeasiblePlan("Best critical path + provisioning estimates (" + minimalTime + ") "
                     + "> deadline (" + getDeadline() + ")");

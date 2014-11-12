@@ -89,7 +89,7 @@ public class MinMin extends StaticAlgorithm {
                 // One option is to allocate a new resource
                 Solution best = null;
                 {
-                    Resource r = new Resource(environment);
+                    Resource r = new Resource(getEnvironment());
                     double cost = r.getCostWith(earliestStart, earliestStart + runtime);
                     Slot sl = new Slot(t, earliestStart, runtime);
                     best = new Solution(r, sl, cost, true);
@@ -122,9 +122,9 @@ public class MinMin extends StaticAlgorithm {
 
                         // Option 2: Leave a big gap
                         biggap: {
-                            int runtimeBillingUnits = (int) Math.ceil(runtime / environment.getBillingTimeInSeconds());
+                            int runtimeBillingUnits = (int) Math.ceil(runtime / getEnvironment().getBillingTimeInSeconds());
 
-                            double ast = r.getStart() - (runtimeBillingUnits * environment.getBillingTimeInSeconds());
+                            double ast = r.getStart() - (runtimeBillingUnits * getEnvironment().getBillingTimeInSeconds());
                             if (ast < earliestStart) {
                                 ast = earliestStart;
                             }
@@ -144,7 +144,7 @@ public class MinMin extends StaticAlgorithm {
 
                         // Option 3: Use some slack time (medium gap)
                         slack: {
-                            double slack = (r.getFullBillingUnits() * environment.getBillingTimeInSeconds())
+                            double slack = (r.getFullBillingUnits() * getEnvironment().getBillingTimeInSeconds())
                                     - (r.getEnd() - r.getStart());
 
                             double ast = r.getStart() - slack;

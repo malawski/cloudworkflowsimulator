@@ -1,6 +1,7 @@
 package cws.core;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -30,6 +31,10 @@ public class Cloud extends CWSSimEntity {
 
     public void removeVMListener(VMListener l) {
         vmListeners.remove(l);
+    }
+    
+    public Set<VM> getAllVms() {
+        return vms;
     }
 
     @Override
@@ -83,30 +88,31 @@ public class Cloud extends CWSSimEntity {
     private void terminateVM(VM vm) {
         // Sanity check
         if (!vms.contains(vm)) {
-            throw new RuntimeException("Unknown VM");
+            throw new RuntimeException("Unknown VM: " + vm.getId());
         }
-
+        vm.setTerminated(true);
         // We terminate the VM now...
         getCloudsim().sendNow(this.getId(), vm.getId(), WorkflowEvent.VM_TERMINATE, null);
 
         // But it isn't gone until after the delay
         getCloudsim().send(getId(), getId(), vm.getDeprovisioningDelay(), WorkflowEvent.VM_TERMINATED, vm);
+        vms.remove(vm);
     }
 
     private void vmTerminated(VM vm) {
         // Sanity check
-        if (!vms.contains(vm)) {
-            throw new RuntimeException("Unknown VM");
-        }
+//        if (!vms.contains(vm)) {
+//            throw new RuntimeException("Unknown VM: " + vm.getId());
+//        }
         getCloudsim().log(String.format("VM %d terminated", vm.getId()));
 
-        vm.setTerminateTime(getCloudsim().clock());
-        vms.remove(vm);
-
+       
         // Listeners find out
         for (VMListener l : vmListeners) {
             l.vmTerminated(vm);
         }
+        
+        vm.setTerminateTime(getCloudsim().clock());
 
         // The owner finds out
         getCloudsim().sendNow(this.getId(), vm.getOwner(), WorkflowEvent.VM_TERMINATED, vm);

@@ -38,7 +38,7 @@ public class Backtrack extends StaticAlgorithm {
         HashMap<Task, Double> deadlines = new HashMap<Task, Double>();
         for (Task t : order.reverse()) {
             double deadline = getDeadline();
-            deadline = deadline - environment.getVMProvisioningOverallDelayEstimation();
+            deadline = deadline - getEnvironment().getVMProvisioningOverallDelayEstimation();
             for (Task c : t.getChildren()) {
                 deadline = Math.min(deadline, deadlines.get(c) - runtimes.get(c));
             }
@@ -55,7 +55,7 @@ public class Backtrack extends StaticAlgorithm {
             best = new Plan(currentPlan);
             N++;
             for (int i = 0; i < N; i++) {
-                best.resources.add(new Resource(this.environment));
+                best.resources.add(new Resource(getEnvironment()));
             }
         } while (best.getCost() <= getBudget());
 
@@ -124,9 +124,9 @@ public class Backtrack extends StaticAlgorithm {
 
                     // Option 2: Leave a big gap
                     biggap: {
-                        int runtimeBillingUnits = (int) Math.ceil(runtime / environment.getBillingTimeInSeconds());
+                        int runtimeBillingUnits = (int) Math.ceil(runtime / getEnvironment().getBillingTimeInSeconds());
 
-                        double ast = r.getStart() - (runtimeBillingUnits * environment.getBillingTimeInSeconds());
+                        double ast = r.getStart() - (runtimeBillingUnits * getEnvironment().getBillingTimeInSeconds());
                         if (ast < earliestStart) {
                             ast = earliestStart;
                         }
@@ -146,7 +146,7 @@ public class Backtrack extends StaticAlgorithm {
 
                     // Option 3: Use some slack time (medium gap)
                     slack: {
-                        double slack = (r.getFullBillingUnits() * environment.getBillingTimeInSeconds())
+                        double slack = (r.getFullBillingUnits() * getEnvironment().getBillingTimeInSeconds())
                                 - (r.getEnd() - r.getStart());
 
                         double ast = r.getStart() - slack;

@@ -17,14 +17,14 @@ public class Wide extends Backtrack {
     @Override
     public void plan() {
         // Estimate number of nodes we can use
-        double units = getDeadline() / environment.getBillingTimeInSeconds();
-        double nodeUnits = getBudget() / environment.getSingleVMPrice();
+        double units = getDeadline() / getEnvironment().getBillingTimeInSeconds();
+        double nodeUnits = getBudget() / getEnvironment().getSingleVMPrice();
         int N = (int) Math.floor(nodeUnits / units);
 
         // Add them to the initial plan
         Plan plan = getPlan();
         for (int i = 0; i < N; i++) {
-            plan.resources.add(new Resource(environment));
+            plan.resources.add(new Resource(getEnvironment()));
         }
 
         super.plan();

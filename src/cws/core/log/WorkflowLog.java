@@ -83,7 +83,9 @@ public class WorkflowLog implements JobListener, VMListener, DAGJobListener {
         DecimalFormat dft = new DecimalFormat("###.##");
 
         for (VM vm : vms) {
-
+            if (!vm.isTerminated()) {
+                throw new RuntimeException("VM is not terminated: " + vm.getId());
+            }
             pw.print(indent + vm.getId() + indent + indent);
 
             pw.println(indent + indent + dft.format(vm.getLaunchTime()) + indent + indent
