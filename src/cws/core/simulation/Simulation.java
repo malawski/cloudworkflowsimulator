@@ -316,7 +316,7 @@ public class Simulation {
 
         List<DAG> dags = new ArrayList<DAG>();
         Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType,
-                isStorageAware);
+                false);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -345,6 +345,8 @@ public class Simulation {
             maxTime += dagStats.getCriticalPath();
             maxCost += dagStats.getMinCost();
         }
+        maxCost *= 2;
+        maxTime *= 2;
 
         double minBudget;
         double maxBudget;
