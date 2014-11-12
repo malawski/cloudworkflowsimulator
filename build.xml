@@ -57,7 +57,8 @@
   <target name="compile" depends="init"
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpathref="build.classpath"/>
+    <javac srcdir="${src}" destdir="${build}" classpathref="build.classpath"
+           includeantruntime="false"/>
   </target>
 
 
@@ -71,16 +72,17 @@
   </target>
 
 
-
   <target name="test-build" depends="compile"
           description="build the java unit and integration tests" >
     <javac srcdir="${test}"
            destdir="${testbuild}"
-           classpathref="testbuild.classpath"/>
+           classpathref="testbuild.classpath"
+           includeantruntime="false" />
 
     <javac srcdir="integration_test"
            destdir="${testbuild}"
-           classpathref="testbuild.classpath"/>
+           classpathref="testbuild.classpath"
+           includeantruntime="false" />
   </target>
 
 
