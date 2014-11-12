@@ -1,3 +1,17 @@
+
 Quick start:
 
 https://github.com/malawski/cloudworkflowsimulator/wiki/Running-simulations-with-CWS
+
+
+To (re-)build the project run
+
+    ant
+
+in the project root directory. Similarly the unit and integration tests can be run with
+
+    ant test
+
+in the root directory.
+
+All dependencies are included in the `lib` directory.
