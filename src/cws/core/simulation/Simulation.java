@@ -339,11 +339,12 @@ public class Simulation {
 
             DAGStats dagStats = new DAGStats(dag, environment);
 
-            minTime = Math.min(minTime, dagStats.getCriticalPath())
-                    + environment.getVMProvisioningOverallDelayEstimation();
+            minTime = Math.min(minTime, dagStats.getCriticalPathLength())
+                + environment.getVMProvisioningOverallDelayEstimation();
             minCost = Math.min(minCost, dagStats.getMinCost());
 
-            maxTime += dagStats.getCriticalPath() + environment.getVMProvisioningOverallDelayEstimation();
+            maxTime += dagStats.getCriticalPathLength() 
+                + environment.getVMProvisioningOverallDelayEstimation();
             maxCost += dagStats.getMinCost();
         }
 
