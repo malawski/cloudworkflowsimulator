@@ -61,8 +61,7 @@ public class CriticalPath {
      */
     public double getCriticalPathLength() {
         double len = 0.0;
-        for (Task task : eft.keySet()) {
-            double eft = getEarliestFinishTime(task);
+        for (double eft : earliestFinishTimes.values()) {
             if (eft > len)
                 len = eft;
         }
