@@ -132,7 +132,26 @@
 
 
   <target name="test-python" description="run python tests">
-    <exec executable="${script.dir}/run_unit_tests.sh" dir="${script.dir}"/>
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.single_task_validator_test"/>
+    </exec>
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.order_validator_test"/>
+    </exec>
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.simulation_validator_test"/>
+    </exec>
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.constraints_validator_test"/>
+    </exec>
+    <exec executable="/usr/bin/python"  dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="log_parser.parse_experiment_log_test "/>
+    </exec>
   </target>
 
 
