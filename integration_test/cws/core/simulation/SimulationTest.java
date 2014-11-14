@@ -43,7 +43,7 @@ public class SimulationTest {
     }
 
     private void mockLoadersValidReturnTypes(CommandLine args) {
-        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(12.0).build();
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1.0).cores(1).price(12.0).build();
         when(vmTypeLoader.determineVMType(args)).thenReturn(vmType);
 
         GlobalStorageParams globalStorageParams = new GlobalStorageParams();

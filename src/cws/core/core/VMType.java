@@ -6,7 +6,7 @@ public class VMType implements Cloneable {
     /**
      * The processing power of this VM
      */
-    private final int mips;
+    private final double mips;
 
     /**
      * The number of cores of this VM
@@ -39,7 +39,7 @@ public class VMType implements Cloneable {
      */
     private final long cacheSize;
 
-    public int getMips() {
+    public double getMips() {
         return mips;
     }
 
@@ -67,7 +67,7 @@ public class VMType implements Cloneable {
         return cacheSize;
     }
 
-    public VMType(int mips, int cores, double billingUnitPrice, double billingTimeInSeconds,
+    public VMType(double mips, int cores, double billingUnitPrice, double billingTimeInSeconds,
             ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
         this.mips = mips;
         this.cores = cores;

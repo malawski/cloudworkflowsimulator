@@ -467,7 +467,7 @@ public class Simulation {
     }
 
     private void logVMType(VMType vmType) {
-        System.out.printf("VM mips = %d\n", vmType.getMips());
+        System.out.printf("VM mips = %f\n", vmType.getMips());
         System.out.printf("VM cores = %d\n", vmType.getCores());
         System.out.printf("VM price = %f\n", vmType.getPriceForBillingUnit());
         System.out.printf("VM unit = %f\n", vmType.getBillingTimeInSeconds());

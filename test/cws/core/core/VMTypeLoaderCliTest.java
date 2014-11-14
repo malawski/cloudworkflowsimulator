@@ -28,7 +28,7 @@ public class VMTypeLoaderCliTest {
 
     private void createValidConfig() {
         config = new HashMap<String, Object>();
-        config.put("mips", 1);
+        config.put("mips", 1.0);
         config.put("cores", 1);
         config.put("cacheSize", 1);
 
@@ -86,20 +86,20 @@ public class VMTypeLoaderCliTest {
 
     @Test
     public void shouldEnableToOverrideMips() throws ParseException {
-        CommandLine cmd = parseArgs(new String[] { makeOption(VMTypeLoader.VM_MIPS_OPTION_NAME), "1000" });
+        CommandLine cmd = parseArgs(new String[] { makeOption(VMTypeLoader.VM_MIPS_OPTION_NAME), "1000.0" });
 
         vmTypeLoader.overrideConfigFromFileWithCliArgs(config, cmd);
 
-        assertEquals(1000, config.get(VMTypeLoader.VM_MIPS_CONFIG_ENTRY));
+        assertEquals(1000.0, config.get(VMTypeLoader.VM_MIPS_CONFIG_ENTRY));
     }
 
     @Test
     public void shouldEnableToOverrideMipsWithShortOption() throws ParseException {
-        CommandLine cmd = parseArgs(new String[] { makeShortOption(VMTypeLoader.VM_MIPS_SHORT_OPTION_NAME), "1000" });
+        CommandLine cmd = parseArgs(new String[] { makeShortOption(VMTypeLoader.VM_MIPS_SHORT_OPTION_NAME), "1000.0" });
 
         vmTypeLoader.overrideConfigFromFileWithCliArgs(config, cmd);
 
-        assertEquals(1000, config.get(VMTypeLoader.VM_MIPS_CONFIG_ENTRY));
+        assertEquals(1000.0, config.get(VMTypeLoader.VM_MIPS_CONFIG_ENTRY));
     }
 
     @Test
