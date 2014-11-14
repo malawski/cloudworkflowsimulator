@@ -94,12 +94,16 @@
            haltonfailure="no"
            errorProperty="test.failed"
            failureProperty="test.failed"
-           fork="true">
+           fork="true"
+           forkMode="once">
+
+      <!-- Forking once allows ant to automatically set the classpath so
+           that it can find the required junit and ant files. -->
 
       <classpath refid="test.classpath" />
 
       <!-- Find and run tests in 'test' and 'integration_test' dirs -->
-      <batchtest fork="yes" todir="${test.data.dir}">
+      <batchtest todir="${test.data.dir}">
         <!-- Exclude abstract classes -->
         <fileset dir="test" includes="**/*Test.java"
                  excludes="**/StorageManagerTest.java,
