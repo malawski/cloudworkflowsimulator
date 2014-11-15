@@ -177,7 +177,7 @@ public class WorkflowEngine extends CWSSimEntity {
         Task t = job.getTask();
 
         // If the job succeeded
-        if (job.getResult() == Job.Result.SUCCESS && getCloudsim().clock() <= deadline) {
+        if (job.getResult() == Job.Result.SUCCESS /* && getCloudsim().clock() <= deadline */) {
 
             // FIXME: temporary hack - when data transfer job
             if (dagJob != null) {

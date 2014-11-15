@@ -43,7 +43,8 @@ def get_intersecting_events(jobs, transfers):
             intersecting_jobs.extend(intersections)
             started_jobs.add(event)
         elif event_type == JOB_ENDS:
-            started_jobs.remove(event)
+            if event in started_jobs:
+                started_jobs.remove(event)
         elif event_type == TRANSFER_STARTS:
             intersections = get_intersections(started_jobs, event)
             intersecting_transfers.extend(intersections)
@@ -76,6 +77,7 @@ def validate(jobs, transfers, vms):
     :param vms: list
     :return: ValidationResult
     """
+    print jobs
     jobs_by_vm = group_by_dict(jobs, attrgetter('vm'))
     transfers_by_vm = group_by_dict(transfers, attrgetter('vm'))
     vms = {vm.id: vm for vm in vms}

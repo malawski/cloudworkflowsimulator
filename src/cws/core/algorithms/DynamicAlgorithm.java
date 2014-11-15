@@ -46,7 +46,7 @@ public class DynamicAlgorithm extends Algorithm {
 
         printEstimations(estimatedNumVMs);
 
-        launchVMs(getCloud(), getWorkflowEngine(), estimatedNumVMs);
+        launchInitialVMs(getCloud(), getWorkflowEngine(), estimatedNumVMs);
     }
 
     private int estimateVMsNumber() {
@@ -65,7 +65,7 @@ public class DynamicAlgorithm extends Algorithm {
         return getEnvironment().getSingleVMPrice() <= getBudget();
     }
 
-    private void launchVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
+    private void launchInitialVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numEstimatedVMs; i++) {
             // TODO(mequrel): should be extracted, the best would be to have an interface createVM available

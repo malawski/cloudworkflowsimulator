@@ -8,9 +8,9 @@ billing:
 
 provisioningDelay:
     distribution: constant
-    value: 0.0
+    value: 60.0
 
 deprovisioningDelay:
     distribution: constant
-    value: 10.0
+    value: 30.0
 

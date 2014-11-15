@@ -68,6 +68,6 @@ public class Environment {
     }
 
     public double getDeprovisioningDelayEstimation() {
-        return vmType.getProvisioningDelay().sample();
+        return vmType.getDeprovisioningDelay().sample();
     }
 }

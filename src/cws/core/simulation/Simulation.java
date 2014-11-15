@@ -87,6 +87,8 @@ public class Simulation {
      */
     private static final String DEFAULT_IS_STORAGE_AWARE = "true";
 
+    private static final String DEFAULT_LOG_TO_STDOUT = "false";
+
     /**
      * Loads VMType from file and/or from CLI args
      */
@@ -158,6 +160,11 @@ public class Simulation {
                 + DEFAULT_ENABLE_LOGGING);
         enableLogging.setArgName("BOOL");
         options.addOption(enableLogging);
+        
+        Option logToStdout = new Option("std", "log-to-stdout", true, "Whether to log to stdout, defaults to "
+                + DEFAULT_LOG_TO_STDOUT);
+        logToStdout.setArgName("BOOL");
+        options.addOption(logToStdout);
 
         Option deadline = new Option("d", "deadline", true, "Optional deadline, which overrides max and min deadlines");
         deadline.setArgName("DEADLINE");
@@ -238,6 +245,7 @@ public class Simulation {
         long seed = Long.parseLong(args.getOptionValue("seed", System.currentTimeMillis() + ""));
         String storageCacheType = args.getOptionValue("storage-cache", DEFAULT_STORAGE_CACHE);
         boolean enableLogging = Boolean.valueOf(args.getOptionValue("enable-logging", DEFAULT_ENABLE_LOGGING));
+        boolean logToStdout = Boolean.valueOf(args.getOptionValue("log-to-stdout", DEFAULT_LOG_TO_STDOUT));
         int nbudgets = Integer.parseInt(args.getOptionValue("n-budgets", DEFAULT_N_BUDGETS));
         int ndeadlines = Integer.parseInt(args.getOptionValue("n-deadlines", DEFAULT_N_DEADLINES));
         double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
@@ -339,10 +347,10 @@ public class Simulation {
 
             DAGStats dagStats = new DAGStats(dag, environment);
 
-            minTime = Math.min(minTime, dagStats.getCriticalPath());
+            minTime = Math.min(minTime, dagStats.getCriticalPath()) + environment.getVMProvisioningOverallDelayEstimation();
             minCost = Math.min(minCost, dagStats.getMinCost());
 
-            maxTime += dagStats.getCriticalPath();
+            maxTime += dagStats.getCriticalPath() + environment.getVMProvisioningOverallDelayEstimation();
             maxCost += dagStats.getMinCost();
         }
         maxCost *= 2;
@@ -398,7 +406,11 @@ public class Simulation {
                 for (double deadline = minDeadline; deadline <= maxDeadline + (deadlineStep / 2.0); deadline += deadlineStep) {
                     System.out.print(".");
                     if (enableLogging) {
-                        cloudsim = new CloudSimWrapper(getLogOutputStream(budget, deadline, outputfile));
+                        if (logToStdout) {
+                            cloudsim = new CloudSimWrapper(System.out);
+                        } else {
+                            cloudsim = new CloudSimWrapper(getLogOutputStream(budget, deadline, outputfile));
+                        }
                     } else {
                         cloudsim = new CloudSimWrapper();
                     }

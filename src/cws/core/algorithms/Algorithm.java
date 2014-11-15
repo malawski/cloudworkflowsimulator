@@ -30,9 +30,6 @@ public abstract class Algorithm extends CWSSimEntity {
     /** WorkflowLog instance. Logs some interesting data to a file. */
     WorkflowLog workflowLog = new WorkflowLog(getCloudsim());
 
-    /** Should we dump WorkflowLog's logs? */
-    private boolean shouldGenerateWorkflowLogs = true; // TODO(bryk): Parameterize this.
-
     /** Simulation's budget */
     private double budget;
 
@@ -57,11 +54,9 @@ public abstract class Algorithm extends CWSSimEntity {
     /** Should return the number of wall time nanos spent for planning */
     abstract public long getPlanningnWallTime();
 
-    public void simulate() {
+    public final void simulate() {
         simulateInternal();
-        if (shouldGenerateWorkflowLogs) {
-            printWorkflowLogs();
-        }
+        printWorkflowLogs();
         conductSanityChecks();
     }
 
@@ -71,79 +66,75 @@ public abstract class Algorithm extends CWSSimEntity {
         workflowLog.printDAGJobs();
     }
 
-    public void setCloud(Cloud cloud) {
+    public final void setCloud(Cloud cloud) {
         this.cloud = cloud;
         this.cloud.addVMListener(algorithmStatistics);
         this.cloud.addVMListener(workflowLog);
     }
 
-    public void setWorkflowEngine(WorkflowEngine workflowEngine) {
+    public final void setWorkflowEngine(WorkflowEngine workflowEngine) {
         this.engine = workflowEngine;
         this.engine.addJobListener(algorithmStatistics);
         this.engine.addJobListener(workflowLog);
 
     }
 
-    public void setEnvironment(Environment environment) {
+    public final void setEnvironment(Environment environment) {
         this.environment = environment;
     }
 
-    public void setEnsembleManager(EnsembleManager ensembleManager) {
+    public final void setEnsembleManager(EnsembleManager ensembleManager) {
         this.manager = ensembleManager;
         this.manager.addDAGJobListener(algorithmStatistics);
         this.manager.addDAGJobListener(workflowLog);
     }
 
-    private void conductSanityChecks() {
+    private final void conductSanityChecks() {
         if (algorithmStatistics.getActualDagFinishTime() > getDeadline()) {
-            System.err.println("WARNING: Exceeded deadline: " + algorithmStatistics.getActualDagFinishTime() + ">"
+            System.err.println("NOTE: Exceeded deadline: " + algorithmStatistics.getActualDagFinishTime() + ">"
                     + getDeadline() + " budget: " + getBudget());
         }
 
         if (algorithmStatistics.getActualCost() > getBudget()) {
-            System.err.println("WARNING: Cost exceeded budget: " + algorithmStatistics.getActualCost() + ">"
+            System.err.println("NOTE: Cost exceeded budget: " + algorithmStatistics.getActualCost() + ">"
                     + getBudget() + " deadline: " + getDeadline());
         }
     }
 
-    public EnsembleManager getEnsembleManager() {
+    public final EnsembleManager getEnsembleManager() {
         return manager;
     }
 
-    public WorkflowEngine getWorkflowEngine() {
+    public final WorkflowEngine getWorkflowEngine() {
         return engine;
     }
 
-    public Cloud getCloud() {
+    public final Cloud getCloud() {
         return cloud;
     }
 
-    public AlgorithmStatistics getAlgorithmStatistics() {
+    public final AlgorithmStatistics getAlgorithmStatistics() {
         return this.algorithmStatistics;
     }
 
-    public List<DAG> getAllDags() {
+    public final List<DAG> getAllDags() {
         return dags;
     }
 
-    public double getBudget() {
+    public final double getBudget() {
         return budget;
     }
 
-    public double getDeadline() {
+    public final double getDeadline() {
         return deadline;
     }
     
-    public Environment getEnvironment() {
+    public final Environment getEnvironment() {
         return environment;
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return this.getClass().getSimpleName();
-    }
-
-    public void setGenerateLog(boolean generateLog) {
-        this.shouldGenerateWorkflowLogs = generateLog;
     }
 }

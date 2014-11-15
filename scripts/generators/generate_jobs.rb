@@ -16,7 +16,6 @@ algorithms = ["DPDS", "WADPDS", "SPSS"]
 input_dirs = {"CYBERSHAKE" => "CyberShake", "GENOME" => "Genome",
     "LIGO" => "LIGO", "MONTAGE" => "Montage", "SIPHT" => "SIPHT"}
 distributions = ["pareto_unsorted"]
-delays = [30]
 num_replicas = [100]
 latencies = [1]
 storage_managers = ["void", "global"]
@@ -30,7 +29,8 @@ queue_name = "l_short"
 qsub_params = ""
 local = false
 run = false
-cws_logs = true 
+cws_logs = false 
+clear = false 
 awares = [true, false]
 
 
@@ -40,7 +40,7 @@ OptionParser.new do |opts|
   opts.on("--dag-dir DIR", String, "Required dag dir prefix. This is the folder with " +
   "all your *.dag files. It should contain subfolders like \"CyberShake\" or \"LIGO\". " +
   "Additionally, on grid environments this directory should be located on fast-access filesystem.") do |val|
-    dag_dir = val
+    dag_dir = Pathname.new(val).realpath
   end
   opts.on("--out-dir DIR", String, "Required output path prefix. This is the location " +
   "that output files of this script will be located. On grid environments this should be " +
@@ -60,9 +60,6 @@ OptionParser.new do |opts|
   end
   opts.on("--distributions x,y", Array, "Optional list of distributions, defaults to #{distributions.join(',')}") do |val|
     distributions = val
-  end
-  opts.on("--vm-deprovisioning-value x,y", Array, "Optional list of vm-deprovisioning-value, defaults to #{delays.join(',')}") do |val|
-    delays = val
   end
   opts.on("--seeds x,y", Array, "Optional list of seeds, defaults to #{seeds.join(',')}") do |val|
     seeds = val
@@ -106,8 +103,11 @@ OptionParser.new do |opts|
   opts.on("--variation VARIATION", Float, "Optional variation, defaults to \"#{variation}\"") do |val|
     variation = val
   end
-  opts.on("--cws-enable-logging", "Whether to enable logging in CWS, defaults to \"#{cws_logs}\"") do |val|
-    cws_logs = (val == 'true')
+  opts.on("-c", "--[no-]clear", "Whether to rm -r * in out directory, defaults to \"#{clear}\"") do |val|
+    clear = val
+  end
+  opts.on("-v", "--[no-]visualise", "Whether to visualise results, defaults to \"#{cws_logs}\"") do |val|
+    cws_logs = val
   end
   opts.on("-l", "--[no-]local", "Generate bash_commandands for running simulations locally, defaults to #{local}") do |val|
     local = val
@@ -131,6 +131,12 @@ end
 
 mydir = Pathname.new(File.dirname(__FILE__)).realpath
 id = 0
+
+if clear then
+  cmd = "cd #{out_dir} && rm -r *"  
+  `#{cmd}`
+end
+
 for seed in seeds do
   task_id = 0
   run_dir_name = "run-%s-%02d" % [name_prefix, seed]
@@ -140,51 +146,49 @@ for seed in seeds do
   rescue
   end
   run_dir = run_dir.realpath
+  
   file_name = run_dir + Pathname.new(run_dir_name + ".txt")
   file = File.open("#{file_name}", "w")
 
-  for delay in delays do
-    for application in applications do
-      for algorithm in algorithms do
-        for distribution in distributions do
-          void_manager_written = false
-          for storage_manager in storage_managers do
-            for write_speed in write_speeds do
-              for read_speed in read_speeds do
-                for num_replica in num_replicas do
-                  for latency in latencies do
-                    for aware in awares do
-                      id = id + 1
-                      task_id = task_id + 1
-                      id_string = "%08d" % id
-                      args = "--application #{application} " +
-                          "--input-dir #{dag_dir}/#{input_dirs[application]}/ " +
-                          "--output-file #{run_dir}/#{name_prefix}-output-#{id_string}-#{application}-#{algorithm}-#{storage_manager}-#{aware}.dat " +
-                          "--distribution #{distribution} " +
-                          "--ensemble-size #{ensemble_size} " +
-                          "--algorithm #{algorithm} " +
-                          "--seed #{seed} " +
-                          "--storage-aware #{aware} " +
-                          "--failure-rate #{failure_rate} " +
-                          "--runtime-variance #{variation} " +
-                          "--vm-deprovisioning-value #{delay} " +
-                          "--storage-manager #{storage_manager} " +
-                          "--enable-logging #{cws_logs} " +
-                          "--vm-directory #{mydir}/../../vms " +
-                          "--global-storage-directory #{mydir}/../../gs "
-                      if storage_manager != 'void' then
-                        args = args + "--gs-read-speed #{read_speed} " +
-                            "--gs-write-speed #{write_speed} " +
-                            "--gs-latency #{latency} " +
-                            "--gs-replicas #{num_replica}"
+  for application in applications do
+    for algorithm in algorithms do
+      for distribution in distributions do
+        void_manager_written = false
+        for storage_manager in storage_managers do
+          for write_speed in write_speeds do
+            for read_speed in read_speeds do
+              for num_replica in num_replicas do
+                for latency in latencies do
+                  for aware in awares do
+                    id = id + 1
+                    task_id = task_id + 1
+                    id_string = "%08d" % id
+                    args = "--application #{application} " +
+                      "--input-dir #{dag_dir}/#{input_dirs[application]}/ " +
+                    "--output-file #{run_dir}/#{name_prefix}-output-#{id_string}-#{application}-#{algorithm}-#{storage_manager}-#{aware}.dat " +
+                    "--distribution #{distribution} " +
+                      "--ensemble-size #{ensemble_size} " +
+                      "--algorithm #{algorithm} " +
+                      "--seed #{seed} " +
+                      "--storage-aware #{aware} " +
+                      "--failure-rate #{failure_rate} " +
+                      "--runtime-variance #{variation} " +
+                      "--storage-manager #{storage_manager} " +
+                      "--enable-logging #{cws_logs} " +
+                      "--vm-directory #{mydir}/../../vms " +
+                      "--global-storage-directory #{mydir}/../../gs "
+                    if storage_manager != 'void' then
+                      args = args + "--gs-read-speed #{read_speed} " +
+                        "--gs-write-speed #{write_speed} " +
+                        "--gs-latency #{latency} " +
+                        "--gs-replicas #{num_replica}"
                       #elsif !void_manager_written then
                       #  void_manager_written = true
                       #else
                       #  break
-                      end
-                      args = args + "\n"
-                      file.write args
                     end
+                    args = args + "\n"
+                    file.write args
                   end
                 end
               end

@@ -130,7 +130,7 @@ public class VM extends CWSSimEntity {
 
     @Override
     public void processEvent(CWSSimEvent ev) {
-        if (!isTerminated) {
+        if (!isTerminated || ev.getTag() == WorkflowEvent.VM_TERMINATE) {
             switch (ev.getTag()) {
             case WorkflowEvent.VM_LAUNCH:
                 launchVM();
@@ -170,7 +170,7 @@ public class VM extends CWSSimEntity {
     }
 
     private void terminateVM() {
-
+        getCloudsim().log("VM " + getId() + " is going to terminate");
         // Can no longer accept jobs
         isTerminated = true;
 
@@ -237,8 +237,8 @@ public class VM extends CWSSimEntity {
         }
 
         getCloudsim().log(
-                String.format("Starting computational part of job %s (task_id = %s, workflow = %s) on VM %s",
-                        job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.getVM().getId()));
+                String.format("Starting computational part of job %s (task_id = %s, workflow = %s) on VM %s. Will finish in %f",
+                        job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.getVM().getId(), actualRuntime));
 
         getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
     }
