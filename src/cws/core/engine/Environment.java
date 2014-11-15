@@ -70,4 +70,8 @@ public class Environment {
     public double getDeprovisioningDelayEstimation() {
         return vmType.getDeprovisioningDelay().sample();
     }
+    
+    public boolean isStorageAware() {
+        return isStorageAware;
+    }
 }

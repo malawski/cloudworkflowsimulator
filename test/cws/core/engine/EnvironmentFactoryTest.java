@@ -1,6 +1,7 @@
 package cws.core.engine;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,12 +32,12 @@ public class EnvironmentFactoryTest {
     @Test
     public void testCreateStorageAwareEnvironment() {
         Environment environment = EnvironmentFactory.createEnvironment(cloudsim, storageParams, vmType, true);
-        assertTrue(environment.getPredictionStrategy() instanceof StorageAwarePredictionStrategy);
+        assertTrue(environment.isStorageAware());
     }
 
     @Test
     public void testCreateStorageUnawareEnvironment() {
         Environment environment = EnvironmentFactory.createEnvironment(cloudsim, storageParams, vmType, false);
-        assertTrue(environment.getPredictionStrategy() instanceof StorageUnawarePredictionStrategy);
+        assertFalse(environment.isStorageAware());
     }
 }

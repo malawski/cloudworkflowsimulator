@@ -19,7 +19,6 @@ import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.engine.Environment;
-import cws.core.engine.StorageAwarePredictionStrategy;
 import cws.core.log.WorkflowLog;
 import cws.core.storage.StorageManager;
 import cws.core.storage.cache.FIFOCacheManager;
@@ -50,7 +49,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
         VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
         storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        environment = new Environment(vmType, storageManager, new StorageAwarePredictionStrategy());
+        environment = new Environment(vmType, storageManager, true);
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim);

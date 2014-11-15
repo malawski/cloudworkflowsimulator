@@ -23,7 +23,6 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
-import cws.core.engine.StorageAwarePredictionStrategy;
 import cws.core.log.WorkflowLog;
 import cws.core.provisioner.ConstantDistribution;
 import cws.core.storage.StorageManager;
@@ -47,7 +46,7 @@ public class DAGDynamicSchedulerTest {
 
         storageManager = new VoidStorageManager(cloudsim);
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        environment = new Environment(vmType, storageManager, new StorageAwarePredictionStrategy());
+        environment = new Environment(vmType, storageManager, true);
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim);

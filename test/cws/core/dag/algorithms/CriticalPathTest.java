@@ -14,7 +14,6 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
-import cws.core.engine.StorageAwarePredictionStrategy;
 import cws.core.storage.VoidStorageManager;
 
 public class CriticalPathTest {
@@ -28,7 +27,7 @@ public class CriticalPathTest {
 
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         VoidStorageManager storageManager = new VoidStorageManager(cloudsim);
-        environment = new Environment(vmType, storageManager, new StorageAwarePredictionStrategy());
+        environment = new Environment(vmType, storageManager, true);
     }
 
     @Test
