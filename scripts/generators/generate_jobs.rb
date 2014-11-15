@@ -13,8 +13,8 @@ out_dir = nil
 name_prefix = "generated"
 applications = ["MONTAGE", "GENOME"]
 algorithms = ["DPDS", "WADPDS", "SA-WADPDS", "SPSS", "SA-SPSS"]
-input_dirs = {"CYBERSHAKE" => "CyberShake", "GENOME" => "Genome",
-    "LIGO" => "LIGO", "MONTAGE" => "Montage", "SIPHT" => "SIPHT"}
+input_dirs = {"CYBERSHAKE" => "CYBERSHAKE", "GENOME" => "GENOME",
+    "LIGO" => "LIGO", "MONTAGE" => "MONTAGE", "SIPHT" => "SIPHT"}
 distributions = ["pareto_unsorted"]
 num_replicas = [100]
 latencies = [1]
