@@ -21,12 +21,8 @@ import cws.core.jobs.Job;
 public class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
     protected Environment environment;
 
-    public DAGDynamicScheduler(CloudSimWrapper cloudsim) {
+    public DAGDynamicScheduler(CloudSimWrapper cloudsim, Environment environment) {
         super("DAGDynamicScheduler", cloudsim);
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
         this.environment = environment;
     }
 

@@ -49,8 +49,7 @@ public class DAGDynamicSchedulerTest {
         environment = new Environment(vmType, storageManager, true);
 
         provisioner = null;
-        scheduler = new DAGDynamicScheduler(cloudsim);
-        scheduler.setEnvironment(environment);
+        scheduler = new DAGDynamicScheduler(cloudsim, environment);
         engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
         cloud = new Cloud(cloudsim);
 

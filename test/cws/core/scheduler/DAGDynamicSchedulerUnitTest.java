@@ -37,8 +37,7 @@ public class DAGDynamicSchedulerUnitTest {
         cloudsim = mock(CloudSimWrapper.class);
         environment = mock(Environment.class);
 
-        scheduler = new DAGDynamicScheduler(cloudsim);
-        scheduler.setEnvironment(environment);
+        scheduler = new DAGDynamicScheduler(cloudsim, environment);
         engine = mock(WorkflowEngine.class);
 
         jobs = new LinkedList<Job>();

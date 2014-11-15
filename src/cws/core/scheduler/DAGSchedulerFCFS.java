@@ -9,7 +9,6 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 
 /**
@@ -22,15 +21,9 @@ public class DAGSchedulerFCFS implements Scheduler {
     private List<VM> vms;
 
     private CloudSimWrapper cloudsim;
-    protected Environment environment;
 
     public DAGSchedulerFCFS(CloudSimWrapper cloudsim) {
         this.cloudsim = cloudsim;
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
     }
 
     @Override

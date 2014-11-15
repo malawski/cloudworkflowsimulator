@@ -6,6 +6,7 @@ import java.util.Queue;
 
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 
 /**
@@ -16,8 +17,8 @@ import cws.core.jobs.Job;
  */
 public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
 
-    public EnsembleDynamicScheduler(CloudSimWrapper cloudsim) {
-        super(cloudsim);
+    public EnsembleDynamicScheduler(CloudSimWrapper cloudsim, Environment environment) {
+        super(cloudsim, environment);
     }
 
     /**

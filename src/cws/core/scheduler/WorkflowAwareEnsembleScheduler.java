@@ -10,6 +10,7 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 
 /**
@@ -20,8 +21,8 @@ import cws.core.jobs.Job;
  * @author malawski
  */
 public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
-    public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim) {
-        super(cloudsim);
+    public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment) {
+        super(cloudsim, environment);
     }
 
     private Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();

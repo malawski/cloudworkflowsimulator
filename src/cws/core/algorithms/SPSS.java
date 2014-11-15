@@ -6,6 +6,7 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.engine.Environment;
 
 /**
  * @author Gideon Juve <juve@usc.edu>
@@ -16,8 +17,8 @@ public class SPSS extends StaticAlgorithm {
     private double alpha;
 
     public SPSS(double budget, double deadline, List<DAG> dags, double alpha, AlgorithmStatistics ensembleStatistics,
-            CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, cloudsim);
+            Environment environment, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
         this.alpha = alpha;
     }
 

@@ -424,9 +424,8 @@ public class Simulation {
                             isStorageAware);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
-                            deadline);
+                            deadline, environment);
 
-                    algorithm.setEnvironment(environment);
                     algorithm.simulate();
 
                     AlgorithmStatistics algorithmStatistics = algorithm.getAlgorithmStatistics();
@@ -493,18 +492,19 @@ public class Simulation {
 
     /**
      * Crates algorithm instance from the given input params.
+     * @param environment 
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
-            CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline) {
+            CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
         AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, cloudsim);
 
         if ("SPSS".equals(algorithmName)) {
-            return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, cloudsim);
+            return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
         } else if ("DPDS".equals(algorithmName)) {
-            return new DPDS(budget, deadline, dags, maxScaling, ensembleStatistics, cloudsim);
+            return new DPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
         } else if ("WADPDS".equals(algorithmName)) {
-            return new WADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, cloudsim);
+            return new WADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }

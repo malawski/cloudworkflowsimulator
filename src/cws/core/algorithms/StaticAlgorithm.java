@@ -52,8 +52,8 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     private long planningFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-            CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, cloudsim);
+            Environment environment, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
     }
 
     public Plan getPlan() {

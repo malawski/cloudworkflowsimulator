@@ -1,6 +1,5 @@
 package cws.core;
 
-import cws.core.engine.Environment;
 
 /**
  * An interface for job schedulers used by the WorkflowEngine.
@@ -9,6 +8,4 @@ import cws.core.engine.Environment;
  */
 public interface Scheduler {
     public void scheduleJobs(WorkflowEngine engine);
-
-    public void setEnvironment(Environment environment);
 }
