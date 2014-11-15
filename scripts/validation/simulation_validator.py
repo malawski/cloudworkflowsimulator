@@ -77,7 +77,6 @@ def validate(jobs, transfers, vms):
     :param vms: list
     :return: ValidationResult
     """
-    print jobs
     jobs_by_vm = group_by_dict(jobs, attrgetter('vm'))
     transfers_by_vm = group_by_dict(transfers, attrgetter('vm'))
     vms = {vm.id: vm for vm in vms}

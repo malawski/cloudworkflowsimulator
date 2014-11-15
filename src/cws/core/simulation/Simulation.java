@@ -23,6 +23,8 @@ import cws.core.algorithms.Algorithm;
 import cws.core.algorithms.AlgorithmStatistics;
 import cws.core.algorithms.DPDS;
 import cws.core.algorithms.SPSS;
+import cws.core.algorithms.StorageAwareSPSS;
+import cws.core.algorithms.StorageAwareWADPDS;
 import cws.core.algorithms.WADPDS;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.config.GlobalStorageParamsLoader;
@@ -81,11 +83,6 @@ public class Simulation {
      * The algorithm alpha parameter.
      */
     private static final String DEFAULT_ALPHA = "0.7";
-
-    /**
-     * Whether the algorithm should be aware of the underlying storage. I.e. during computing runtime estimations.
-     */
-    private static final String DEFAULT_IS_STORAGE_AWARE = "true";
 
     private static final String DEFAULT_LOG_TO_STDOUT = "false";
 
@@ -160,7 +157,7 @@ public class Simulation {
                 + DEFAULT_ENABLE_LOGGING);
         enableLogging.setArgName("BOOL");
         options.addOption(enableLogging);
-        
+
         Option logToStdout = new Option("std", "log-to-stdout", true, "Whether to log to stdout, defaults to "
                 + DEFAULT_LOG_TO_STDOUT);
         logToStdout.setArgName("BOOL");
@@ -192,11 +189,6 @@ public class Simulation {
         Option alpha = new Option("alp", "alpha", true, "Optional alpha factor, defaults to " + DEFAULT_ALPHA);
         alpha.setArgName("FLOAT");
         options.addOption(alpha);
-
-        Option isStorageAware = new Option("sa", "storage-aware", true,
-                "Whether the algorithms should be storage aware, defaults to " + DEFAULT_IS_STORAGE_AWARE);
-        isStorageAware.setArgName("BOOL");
-        options.addOption(isStorageAware);
 
         VMFactory.buildCliOptions(options);
 
@@ -250,7 +242,6 @@ public class Simulation {
         int ndeadlines = Integer.parseInt(args.getOptionValue("n-deadlines", DEFAULT_N_DEADLINES));
         double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
         double alpha = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_ALPHA));
-        boolean isStorageAware = Boolean.valueOf(args.getOptionValue("storage-aware", DEFAULT_IS_STORAGE_AWARE));
 
         VMType vmType = vmTypeLoader.determineVMType(args);
         logVMType(vmType);
@@ -320,11 +311,9 @@ public class Simulation {
         System.out.printf("ndeadlines = %d\n", ndeadlines);
         System.out.printf("alpha = %f\n", alpha);
         System.out.printf("maxScaling = %f\n", maxScaling);
-        System.out.printf("isStorageAware = %b\n", isStorageAware);
 
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType,
-                false);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -347,7 +336,8 @@ public class Simulation {
 
             DAGStats dagStats = new DAGStats(dag, environment);
 
-            minTime = Math.min(minTime, dagStats.getCriticalPath()) + environment.getVMProvisioningOverallDelayEstimation();
+            minTime = Math.min(minTime, dagStats.getCriticalPath())
+                    + environment.getVMProvisioningOverallDelayEstimation();
             minCost = Math.min(minCost, dagStats.getMinCost());
 
             maxTime += dagStats.getCriticalPath() + environment.getVMProvisioningOverallDelayEstimation();
@@ -420,8 +410,7 @@ public class Simulation {
                     cloudsim.log("deadline = " + deadline);
                     logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType,
-                            isStorageAware);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
                             deadline, environment);
@@ -449,10 +438,9 @@ public class Simulation {
                             stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
                             stats.getActualBytesRead(), stats.getActualBytesRead() + stats.getTotalBytesToWrite());
 
-                    fileOut.printf("%d,%d,%d,%d,%d,", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
+                    fileOut.printf("%d,%d,%d,%d,%d\n", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
                             stats.getTotalFilesToRead() + stats.getTotalFilesToWrite(), stats.getActualFilesRead(),
                             stats.getActualFilesRead() + stats.getTotalFilesToWrite());
-                    fileOut.printf("%b\n", isStorageAware);
                 }
             }
             System.out.println();
@@ -492,7 +480,7 @@ public class Simulation {
 
     /**
      * Crates algorithm instance from the given input params.
-     * @param environment 
+     * @param environment
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
@@ -505,6 +493,10 @@ public class Simulation {
             return new DPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
         } else if ("WADPDS".equals(algorithmName)) {
             return new WADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
+        } else if ("SA-SPSS".equals(algorithmName)) {
+            return new StorageAwareSPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
+        } else if ("SA-WADPDS".equals(algorithmName)) {
+            return new StorageAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }

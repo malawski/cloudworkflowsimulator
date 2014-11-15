@@ -27,7 +27,7 @@ public class CriticalPathTest {
 
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         VoidStorageManager storageManager = new VoidStorageManager(cloudsim);
-        environment = new Environment(vmType, storageManager, true);
+        environment = new Environment(vmType, storageManager);
     }
 
     @Test

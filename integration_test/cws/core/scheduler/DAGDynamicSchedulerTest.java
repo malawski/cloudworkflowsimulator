@@ -46,7 +46,7 @@ public class DAGDynamicSchedulerTest {
 
         storageManager = new VoidStorageManager(cloudsim);
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        environment = new Environment(vmType, storageManager, true);
+        environment = new Environment(vmType, storageManager);
 
         provisioner = null;
         scheduler = new DAGDynamicScheduler(cloudsim, environment);

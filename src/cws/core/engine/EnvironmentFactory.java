@@ -20,8 +20,8 @@ public class EnvironmentFactory {
      * @return Newly created {@link Environment} instance.
      */
     public static Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams,
-            VMType vmType, boolean isStorageAware) {
+            VMType vmType) {
         StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
-        return new Environment(vmType, storageManager, isStorageAware);
+        return new Environment(vmType, storageManager);
     }
 }

@@ -25,7 +25,7 @@ public class CriticalPath {
         if (runtimes == null) {
             runtimes = new HashMap<Task, Double>();
             for (Task task : order) {
-                runtimes.put(task, environment.getTotalPredictedRuntime(task));
+                runtimes.put(task, environment.getComputationPredictedRuntime(task));
             }
         }
 

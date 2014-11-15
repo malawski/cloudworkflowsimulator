@@ -373,7 +373,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     protected TopologicalOrder computeTopologicalOrder(DAG dag, HashMap<Task, Double> runtimes) throws NoFeasiblePlan {
         TopologicalOrder order = new TopologicalOrder(dag);
         for (Task task : order) {
-            double runtime = getEnvironment().getTotalPredictedRuntime(task);
+            double runtime = getPredictedTaskRuntime(task);
             runtimes.put(task, runtime);
         }
 
@@ -386,6 +386,10 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
                     + "> deadline (" + getDeadline() + ")");
         }
         return order;
+    }
+    
+    protected double getPredictedTaskRuntime(Task task) {
+        return getEnvironment().getComputationPredictedRuntime(task);
     }
 
     class Slot {

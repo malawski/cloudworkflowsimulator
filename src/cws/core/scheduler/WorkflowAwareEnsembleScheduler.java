@@ -125,20 +125,15 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
     /**
      * Estimate cost of this workflow
-     * @param dj
-     * @return
      */
     private double estimateCost(DAGJob dj) {
-        double sumRuntime = environment.getTotalPredictedRuntime(dj.getDAG());
+        double sumRuntime = getPredictedRuntime(dj.getDAG());
         double vmPrice = environment.getSingleVMPrice();
         return vmPrice * sumRuntime / environment.getBillingTimeInSeconds();
     }
 
     /**
      * Estimate budget remaining, including unused $ and running VMs
-     * TODO: compute budget consumed/remaining by already admitted workflows
-     * @param engine
-     * @return
      */
     private double estimateBudgetRemaining(WorkflowEngine engine) {
         // remaining budget for starting new vms
@@ -190,9 +185,17 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
             if (!admittedDJ.isComplete(task)) {
-                cost += environment.getTotalPredictedRuntime(task) * environment.getSingleVMPrice();
+                cost += getPredictedRuntime(task) * environment.getSingleVMPrice();
             }
         }
         return cost / environment.getBillingTimeInSeconds();
+    }
+    
+    protected double getPredictedRuntime(Task task) {
+        return environment.getComputationPredictedRuntime(task);
+    }
+    
+    protected double getPredictedRuntime(DAG dag) {
+        return environment.getComputationPredictedRuntime(dag);
     }
 }

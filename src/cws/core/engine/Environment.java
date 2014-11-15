@@ -9,12 +9,10 @@ import cws.core.storage.StorageManagerStatistics;
 public class Environment {
     private final VMType vmType;
     private final StorageManager storageManager;
-    private final boolean isStorageAware;
 
-    public Environment(VMType vmType, StorageManager storageManager, boolean isStorageAware) {
+    public Environment(VMType vmType, StorageManager storageManager) {
         this.vmType = vmType;
         this.storageManager = storageManager;
-        this.isStorageAware = isStorageAware;
     }
 
     // FIXME(mequrel): temporary encapsulation breakage for static algorithm, dynamic algorithm and provisioners
@@ -29,18 +27,26 @@ public class Environment {
      * 
      * @return task's predicted runtime as a double
      */
-    public double getTotalPredictedRuntime(Task task) {
-        double time = task.getSize() / vmType.getMips();
-        if (isStorageAware) {
-            time += storageManager.getTransferTimeEstimation(task);
-        }
-        return time;
+    public double getComputationPredictedRuntime(Task task) {
+        return task.getSize() / vmType.getMips();
     }
 
-    public double getTotalPredictedRuntime(DAG dag) {
+    public double getComputationPredictedRuntime(DAG dag) {
         double sum = 0.0;
         for (String taskName : dag.getTasks()) {
-            sum += getTotalPredictedRuntime(dag.getTaskById(taskName));
+            sum += getComputationPredictedRuntime(dag.getTaskById(taskName));
+        }
+        return sum;
+    }
+    
+    public double getTransfersPredictedRuntime(Task task) {
+        return storageManager.getTransferTimeEstimation(task);
+    }
+   
+    public double getTransfersPredictedRuntime(DAG dag) {
+        double sum = 0.0;
+        for (String taskName : dag.getTasks()) {
+            sum += getTransfersPredictedRuntime(dag.getTaskById(taskName));
         }
         return sum;
     }
@@ -69,9 +75,5 @@ public class Environment {
 
     public double getDeprovisioningDelayEstimation() {
         return vmType.getDeprovisioningDelay().sample();
-    }
-    
-    public boolean isStorageAware() {
-        return isStorageAware;
     }
 }
