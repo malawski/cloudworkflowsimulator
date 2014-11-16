@@ -294,16 +294,13 @@ public class GlobalStorageManager extends StorageManager {
     @Override
     public double getTransferTimeEstimation(Task task) {
         double time = 0.0;
-        double bytes = 0;
         for (DAGFile file : task.getInputFiles()) {
             time += file.getSize() / params.getReadSpeed();
             time += params.getLatency();
-            bytes += file.getSize();
         }
         for (DAGFile file : task.getOutputFiles()) {
             time += file.getSize() / params.getWriteSpeed();
             time += params.getLatency();
-            bytes += file.getSize();
         }
         return time;
     }

@@ -17,26 +17,24 @@ import cws.core.dag.DAG;
  * See: http://algs4.cs.princeton.edu/42directed/
  * 
  * @author malawski
- * 
  */
 public class TopologicalOrder implements Iterable<Task> {
-    private Set<Task> marked = new HashSet<Task>();
-    private Deque<Task> postorder = new LinkedList<Task>();
+    private final Deque<Task> postorder = new LinkedList<Task>();
 
     public TopologicalOrder(DAG dag) {
+        Set<Task> marked = new HashSet<Task>();
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
             if (!marked.contains(task))
-                dfs(task);
+                dfs(task, marked);
         }
-        marked = null;
     }
 
-    private void dfs(Task task) {
+    private void dfs(Task task, Set<Task> marked) {
         marked.add(task);
         for (Task child : task.getChildren()) {
             if (!marked.contains(child))
-                dfs(child);
+                dfs(child, marked);
         }
         postorder.add(task);
     }

@@ -12,16 +12,13 @@ import cws.core.engine.Environment;
  * @author malawski
  */
 public class CriticalPath {
-    private Map<Task, Double> eft;
-    private Double length = null;
+    private final Map<Task, Double> eft = new HashMap<Task, Double>();
 
     public CriticalPath(TopologicalOrder order, Environment environment) {
         this(order, null, environment);
     }
 
     public CriticalPath(TopologicalOrder order, Map<Task, Double> runtimes, Environment environment) {
-        this.eft = new HashMap<Task, Double>();
-
         if (runtimes == null) {
             runtimes = new HashMap<Task, Double>();
             for (Task task : order) {
@@ -61,15 +58,12 @@ public class CriticalPath {
      * @return Length of critical path
      */
     public double getCriticalPathLength() {
-        if (length == null) { // Cache
-            double len = 0.0;
-            for (Task task : eft.keySet()) {
-                double eft = getEarliestFinishTime(task);
-                if (eft > len)
-                    len = eft;
-            }
-            length = len;
+        double len = 0.0;
+        for (Task task : eft.keySet()) {
+            double eft = getEarliestFinishTime(task);
+            if (eft > len)
+                len = eft;
         }
-        return length;
+        return len;
     }
 }
