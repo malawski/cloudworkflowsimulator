@@ -1,10 +1,15 @@
 package cws.core.storage.global;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -29,10 +34,9 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
     @Before
     public void setUpGlobalStorageManagerTest() {
-        cacheManager = Mockito.mock(VMCacheManager.class);
-        Mockito.doNothing().when(cacheManager).putFileToCache(Matchers.any(DAGFile.class), Matchers.any(Job.class));
-        Mockito.when(cacheManager.getFileFromCache(Matchers.any(DAGFile.class), Matchers.any(Job.class))).thenReturn(
-                false);
+        cacheManager = mock(VMCacheManager.class);
+        doNothing().when(cacheManager).putFileToCache(Matchers.any(DAGFile.class), Matchers.any(Job.class));
+        when(cacheManager.getFileFromCache(Matchers.any(DAGFile.class), Matchers.any(Job.class))).thenReturn(false);
         params = new GlobalStorageParams();
         params.setReadSpeed(123);
         params.setWriteSpeed(321);
@@ -47,14 +51,14 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         List<DAGFile> files = new ArrayList<DAGFile>();
         long sz = 2442;
         files.add(new DAGFile("abc.txt", sz));
-        Mockito.when(task.getInputFiles()).thenReturn(files);
+        when(task.getInputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         double time = CloudSim.startSimulation();
 
-        Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+        verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());
-        Assert.assertEquals(sz / params.getReadSpeed() + params.getLatency(), time, 0.01);
+        assertEquals(sz / params.getReadSpeed() + params.getLatency(), time, 0.01);
     }
 
     @Test
@@ -62,14 +66,14 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         List<DAGFile> files = new ArrayList<DAGFile>();
         long sz = 2442;
         files.add(new DAGFile("abc.txt", sz));
-        Mockito.when(task.getOutputFiles()).thenReturn(files);
+        when(task.getOutputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
         double time = CloudSim.startSimulation();
 
-        Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+        verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED), Matchers.any());
-        Assert.assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.01);
+        assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.01);
     }
 
     @Test
@@ -78,14 +82,14 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         long sz = 2442;
         files.add(new DAGFile("abc.txt", sz));
         files.add(new DAGFile("abc2.txt", sz));
-        Mockito.when(task.getOutputFiles()).thenReturn(files);
+        when(task.getOutputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
         double time = CloudSim.startSimulation();
 
-        Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+        verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED), Matchers.any());
-        Assert.assertEquals((sz * 2) / params.getWriteSpeed() + params.getLatency(), time, 0.01);
+        assertEquals(2 * (sz / params.getWriteSpeed() + params.getLatency()), time, 0.01);
     }
 
     @Test
@@ -94,7 +98,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         params.setWriteSpeed(9713);
         long sz = 324324;
         double time = runTwoWrites(sz);
-        Assert.assertEquals((sz * 2) / params.getWriteSpeed() + params.getLatency(), time, 0.01);
+        assertEquals((sz * 2) / params.getWriteSpeed() + params.getLatency(), time, 0.01);
     }
 
     @Test
@@ -103,7 +107,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         params.setWriteSpeed(9713);
         long sz = 324324;
         double time = runTwoWrites(sz);
-        Assert.assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.01);
+        assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.01);
     }
 
     @Test
@@ -112,7 +116,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         params.setWriteSpeed(9713);
         long sz = 324324;
         double time = runTwoWrites(sz);
-        Assert.assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.01);
+        assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.01);
     }
 
     /**
@@ -122,22 +126,22 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
     private double runTwoWrites(long size) {
         Job job2 = Mockito.mock(Job.class);
         job2.setVM(vm);
-        Mockito.when(job2.getVM()).thenReturn(vm);
+        when(job2.getVM()).thenReturn(vm);
         Task task2 = Mockito.mock(Task.class);
-        Mockito.when(job2.getTask()).thenReturn(task2);
+        when(job2.getTask()).thenReturn(task2);
         List<DAGFile> files2 = new ArrayList<DAGFile>();
         files2.add(new DAGFile("abc2.txt", size));
-        Mockito.when(task2.getOutputFiles()).thenReturn(files2);
+        when(task2.getOutputFiles()).thenReturn(files2);
 
         List<DAGFile> files = new ArrayList<DAGFile>();
         files.add(new DAGFile("abc.txt", size));
-        Mockito.when(task.getOutputFiles()).thenReturn(files);
+        when(task.getOutputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job2);
         double time = CloudSim.startSimulation();
 
-        Mockito.verify(cloudsim, Mockito.times(2)).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+        verify(cloudsim, Mockito.times(2)).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED), Matchers.any());
         return time;
     }
@@ -148,14 +152,14 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         long size = 2313244;
         List<DAGFile> files = new ArrayList<DAGFile>();
         files.add(new DAGFile("abc.txt", size));
-        Mockito.when(task.getInputFiles()).thenReturn(files);
+        when(task.getInputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         double time = CloudSim.startSimulation();
 
-        Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+        verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());
-        Assert.assertEquals(size / params.getReadSpeed() + params.getLatency(), time, 1.0);
+        assertEquals(size / params.getReadSpeed() + params.getLatency(), time, 1.0);
     }
 
     @Test
@@ -164,27 +168,26 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         int numSmaller = 10;
         Job job2 = Mockito.mock(Job.class);
         job2.setVM(vm);
-        Mockito.when(job2.getVM()).thenReturn(vm);
+        when(job2.getVM()).thenReturn(vm);
         Task task2 = Mockito.mock(Task.class);
-        Mockito.when(job2.getTask()).thenReturn(task2);
+        when(job2.getTask()).thenReturn(task2);
         List<DAGFile> files2 = new ArrayList<DAGFile>();
         for (int i = 0; i < numSmaller; i++) {
             files2.add(new DAGFile("abc.txt" + i, size / numSmaller));
         }
-        Mockito.when(task2.getInputFiles()).thenReturn(files2);
+        when(task2.getInputFiles()).thenReturn(files2);
 
         List<DAGFile> files = new ArrayList<DAGFile>();
         files.add(new DAGFile("abc.txt", size));
-        Mockito.when(task.getInputFiles()).thenReturn(files);
+        when(task.getInputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job2);
         double time = CloudSim.startSimulation();
 
-        Mockito.verify(cloudsim, Mockito.times(2)).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
+        verify(cloudsim, Mockito.times(2)).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());
-        Assert.assertEquals((size / numSmaller) / (params.getReadSpeed() / (numSmaller + 1))
-                + ((numSmaller - 1) * size / numSmaller) / params.getReadSpeed() + params.getLatency(), time, 1.0);
+        assertEquals(time, 1744, 1.0);
     }
 
     @Test
@@ -195,13 +198,13 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
         List<DAGFile> files = new ArrayList<DAGFile>();
         files.add(new DAGFile("abc.txt", size));
-        Mockito.when(task.getOutputFiles()).thenReturn(files);
+        when(task.getOutputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         skipEvent(100, WorkflowEvent.VM_LAUNCH, cloudsim);
         skipEvent(100, WorkflowEvent.VM_LAUNCHED, cloudsim);
         skipEvent(100, WorkflowEvent.VM_TERMINATE, cloudsim);
-        Mockito.when(vm.isTerminated()).thenReturn(false);
-        Mockito.when(vm.getOwner()).thenReturn(100);
+        when(vm.isTerminated()).thenReturn(false);
+        when(vm.getOwner()).thenReturn(100);
         Mockito.verifyNoMoreInteractions(vm);
         CloudSim.send(cloud.getId(), cloud.getId(), 0, WorkflowEvent.VM_LAUNCH, vm);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
@@ -209,7 +212,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         Mockito.doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                Mockito.when(vm.isTerminated()).thenReturn(true);
+                when(vm.isTerminated()).thenReturn(true);
                 return null;
             }
         })
@@ -219,7 +222,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
         double time = CloudSim.startSimulation();
 
-        Assert.assertEquals(terminateTime + params.getChunkTransferTime(), time, 0.01);
+        assertEquals(terminateTime + params.getChunkTransferTime(), time, 0.01);
     }
 
     @Test
@@ -230,7 +233,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         Task t = new Task("xx", "xx", 222);
         t.addInputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
-        Assert.assertEquals(sz / params.getReadSpeed() + params.getLatency(), time, 0.00001);
+        assertEquals(sz / params.getReadSpeed() + params.getLatency(), time, 0.00001);
     }
 
     @Test
@@ -241,6 +244,6 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         Task t = new Task("xx", "xx", 222);
         t.addOutputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
-        Assert.assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.00001);
+        assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.00001);
     }
 }
