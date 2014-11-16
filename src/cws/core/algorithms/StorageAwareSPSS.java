@@ -13,6 +13,8 @@ import cws.core.engine.Environment;
 
 /**
  * Storage aware version of the SPSS algorithm.
+ * 
+ * Storage awareness here means that during task runtime estimations, file transfer estimation is taken into account.
  */
 public class StorageAwareSPSS extends SPSS {
     public StorageAwareSPSS(double budget, double deadline, List<DAG> dags, double alpha,
