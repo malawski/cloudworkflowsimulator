@@ -25,7 +25,7 @@ public class CriticalPath {
         if (runtimes == null) {
             runtimes = new HashMap<Task, Double>();
             for (Task task : order) {
-                runtimes.put(task, environment.getComputationPredictedRuntime(task));
+                runtimes.put(task, getPredictedTaskRuntime(environment, task));
             }
         }
 
@@ -41,6 +41,11 @@ public class CriticalPath {
             }
         }
     }
+    
+    protected double getPredictedTaskRuntime(Environment environment, Task task) {
+        return environment.getComputationPredictedRuntime(task);
+    }
+        
 
     /**
      * @return Earliest finish time of task

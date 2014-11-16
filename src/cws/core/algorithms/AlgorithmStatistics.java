@@ -18,18 +18,22 @@ import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 
 public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener, VMListener, JobListener {
-    private List<DAG> allDags;
+    private final List<DAG> allDags;
+    private final double budget;
+    private final double deadline;
 
-    public AlgorithmStatistics(List<DAG> allDags, CloudSimWrapper cloudsim) {
+    public AlgorithmStatistics(List<DAG> allDags, double budget, double deadline, CloudSimWrapper cloudsim) {
         super("AlgorithmStatistics", cloudsim);
         this.allDags = allDags;
+        this.budget = budget;
+        this.deadline = deadline;
     }
 
     private double actualJobFinishTime = 0.0;
     private double actualVmFinishTime = 0.0;
     private double actualDagFinishTime = 0.0;
     private List<DAG> finishedDags = new ArrayList<DAG>();
-    private double cost = 0.0;
+    private List<VM> allVMs =  new ArrayList<VM>();
 
     @Override
     public void shutdownEntity() {
@@ -104,6 +108,10 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
     }
 
     public double getActualCost() {
+        double cost = 0;
+        for (VM vm : allVMs) {
+            cost += vm.getCost();
+        }
         return cost;
     };
 
@@ -129,14 +137,18 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
             actualJobFinishTime = Math.max(actualJobFinishTime, job.getFinishTime());
         }
     }
+    
+    private boolean withinBudgetAndDeadline() {
+        return getActualCost() <= budget && getCloudsim().clock() <= deadline;
+    }
 
     @Override
     public void vmLaunched(VM vm) {
+        this.allVMs.add(vm);
     }
 
     @Override
     public void vmTerminated(VM vm) {
-        cost += vm.getCost();
         actualVmFinishTime = Math.max(actualVmFinishTime, getCloudsim().clock());
     }
 
@@ -147,7 +159,9 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
     @Override
     public void dagFinished(DAGJob dagJob) {
         actualDagFinishTime = Math.max(actualDagFinishTime, getCloudsim().clock());
-        finishedDags.add(dagJob.getDAG());
+        if (withinBudgetAndDeadline()) {
+            finishedDags.add(dagJob.getDAG());
+        }
     }
 
     @Override

@@ -23,19 +23,23 @@ import cws.core.storage.cache.VMCacheManager;
  */
 public class GlobalStorageManager extends StorageManager {
     /** Map of jobs' active reads - the ones that progress at any given moment */
-    private Map<Job, List<GlobalStorageTransfer>> reads = new HashMap<Job, List<GlobalStorageTransfer>>();
+    private final Map<Job, List<GlobalStorageTransfer>> reads = new HashMap<Job, List<GlobalStorageTransfer>>();
 
     /** Map of jobs' active writes - the ones that progress at any given moment */
-    private Map<Job, List<GlobalStorageTransfer>> writes = new HashMap<Job, List<GlobalStorageTransfer>>();
+    private final Map<Job, List<GlobalStorageTransfer>> writes = new HashMap<Job, List<GlobalStorageTransfer>>();
+
+    private final Map<Job, List<DAGFile>> remainingToRead = new HashMap<Job, List<DAGFile>>();
+    
+    private final Map<Job, List<DAGFile>> remainingToWrite = new HashMap<Job, List<DAGFile>>();
 
     /** A set of parameters for this storage */
-    private GlobalStorageParams params;
+    private final GlobalStorageParams params;
 
     /** A set of parameters used to simulate congestion */
-    private CongestedGlobalStorageParams congestedParams;
+    private final CongestedGlobalStorageParams congestedParams;
 
     /** Cache manager used by this storage */
-    private VMCacheManager cacheManager;
+    private final VMCacheManager cacheManager;
 
     /**
      * Initializes GlobalStorageManager with the appropriate parameters. Check their documentation for more information.
@@ -64,9 +68,11 @@ public class GlobalStorageManager extends StorageManager {
         if (notCachedFiles.size() == 0) {
             notifyThatBeforeTransfersCompleted(job);
         } else {
-            startTransfers(notCachedFiles, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS, "read");
-            congestedParams.addReads(notCachedFiles.size());
-            updateSpeedCongestion();
+            if (remainingToRead.containsKey(job)) {
+                throw new IllegalStateException("There should be no remaining read transfers");
+            }
+            remainingToRead.put(job, notCachedFiles);
+            startReadForJob(job);
         }
     }
 
@@ -82,10 +88,24 @@ public class GlobalStorageManager extends StorageManager {
         if (files.size() == 0) {
             notifyThatAfterTransfersCompleted(job);
         } else {
-            startTransfers(files, job, writes, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS, "write");
-            congestedParams.addWrites(files.size());
-            updateSpeedCongestion();
+            if (remainingToWrite.containsKey(job)) {
+                throw new IllegalStateException("There should be no remaining write transfers");
+            }
+            remainingToWrite.put(job, files);
+            startWriteForJob(job);
         }
+    }
+    
+    private void startWriteForJob(Job job) {
+        startTransfers(remainingToWrite, job, writes, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS, "write");
+        congestedParams.addWrites(1);
+        updateSpeedCongestion();
+    }
+    
+    private void startReadForJob(Job job) {
+        startTransfers(remainingToRead, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS, "read");
+        congestedParams.addReads(1);
+        updateSpeedCongestion();
     }
 
     /**
@@ -96,27 +116,37 @@ public class GlobalStorageManager extends StorageManager {
      * @param progressEvent - the event that will be sent upon transfer start.
      * @param transferType - the type of this transfer, e.g. "write".
      */
-    private void startTransfers(List<DAGFile> files, Job job, Map<Job, List<GlobalStorageTransfer>> transfers,
-            int progressEvent, String transferType) {
-        List<GlobalStorageTransfer> jobTransfers = new ArrayList<GlobalStorageTransfer>();
-        transfers.put(job, jobTransfers);
-        for (DAGFile file : files) {
-            GlobalStorageTransfer write = new GlobalStorageTransfer(job, file);
-            jobTransfers.add(write);
-            String logMsg = String.format("Global %s transfer %s started: %s, size: %s, vm: %s, job_id: %d",
-                    transferType, write.getId(), write.getFile().getName(), write.getFile().getSize(), job.getVM()
-                            .getId(), job.getID());
-            getCloudsim().log(logMsg);
-            getCloudsim().send(getId(), getId(), params.getLatency(), progressEvent, write);
+    private void startTransfers(Map<Job, List<DAGFile>> filesRemaining, Job job,
+            Map<Job, List<GlobalStorageTransfer>> transfers, int progressEvent, String transferType) {
+        List<GlobalStorageTransfer> jobTransfers = transfers.get(job);
+        if (jobTransfers == null) {
+            jobTransfers = new ArrayList<GlobalStorageTransfer>();
+            transfers.put(job, jobTransfers);
         }
+        List<DAGFile> remainingFiles = filesRemaining.get(job);
+        if (remainingFiles == null) {
+            throw new IllegalStateException("Remaining files cannot be null");
+        }
+        if (remainingFiles.isEmpty()) {
+            throw new IllegalStateException("Remaining files cannot be empty");
+        }
+        DAGFile file = remainingFiles.remove(remainingFiles.size() - 1);
+        GlobalStorageTransfer write = new GlobalStorageTransfer(job, file);
+        jobTransfers.add(write);
+        String logMsg = String.format("Global %s transfer %s started: %s, size: %s, vm: %s, job_id: %d", transferType,
+                write.getId(), write.getFile().getName(), write.getFile().getSize(), job.getVM().getId(), job.getID());
+        getCloudsim().log(logMsg);
+        getCloudsim().send(getId(), getId(), params.getLatency(), progressEvent, write);
     }
 
     /**
      * Called after a write has finished. Logs message. If all writes have completed then notifies appropriate VM.
      */
     private void onWriteFinished(GlobalStorageTransfer write) {
-        if (onTransferFinished(write, writes, "write")) {
+        if (onTransferFinished(write, writes, "write", remainingToWrite)) {
             notifyThatAfterTransfersCompleted(write.getJob());
+        } else {
+            startWriteForJob(write.getJob());
         }
         cacheManager.putFileToCache(write.getFile(), write.getJob());
         congestedParams.removeWrites(1);
@@ -127,8 +157,10 @@ public class GlobalStorageManager extends StorageManager {
      * Called after a read has finished. Logs message. If all reads have completed then notifies appropriate VM.
      */
     private void onReadFinished(GlobalStorageTransfer read) {
-        if (onTransferFinished(read, reads, "read")) {
+        if (onTransferFinished(read, reads, "read", remainingToRead)) {
             notifyThatBeforeTransfersCompleted(read.getJob());
+        } else {
+            startReadForJob(read.getJob());
         }
         cacheManager.putFileToCache(read.getFile(), read.getJob());
         congestedParams.removeReads(1);
@@ -145,7 +177,7 @@ public class GlobalStorageManager extends StorageManager {
      * @return true if this was the last transfer in the job, false otherwise.
      */
     private boolean onTransferFinished(GlobalStorageTransfer transfer, Map<Job, List<GlobalStorageTransfer>> transfers,
-            String transferType) {
+            String transferType, Map<Job, List<DAGFile>> remainingFiles) {
         if (!transfer.getJob().getVM().isTerminated()) {
             String logMsg = String.format("Global %s transfer %s finished: %s, bytes transferred: %d, duration: %f",
                     transferType, transfer.getId(), transfer.getFile().getName(), transfer.getFile().getSize(),
@@ -154,8 +186,7 @@ public class GlobalStorageManager extends StorageManager {
         }
         List<GlobalStorageTransfer> jobTransfers = transfers.get(transfer.getJob());
         jobTransfers.remove(transfer);
-        if (jobTransfers.isEmpty()) {
-            transfers.remove(transfer.getJob());
+        if (remainingFiles.get(transfer.getJob()).isEmpty()) {
             return true;
         } else {
             return false;
@@ -255,14 +286,18 @@ public class GlobalStorageManager extends StorageManager {
     @Override
     public double getTransferTimeEstimation(Task task) {
         double time = 0.0;
+        double bytes = 0;
         for (DAGFile file : task.getInputFiles()) {
             time += file.getSize() / params.getReadSpeed();
             time += params.getLatency();
+            bytes += file.getSize();
         }
         for (DAGFile file : task.getOutputFiles()) {
             time += file.getSize() / params.getWriteSpeed();
             time += params.getLatency();
+            bytes += file.getSize();
         }
+        System.out.println("Transfers time: " + time + ", for bytes:" + bytes);
         return time;
     }
 

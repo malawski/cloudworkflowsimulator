@@ -66,7 +66,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
             double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds() - vmRuntime;
 
             // we add delay estimate to include also the deprovisioning time
-            if (secondsRemaining <= environment.getDeprovisioningDelayEstimation()) {
+            if (secondsRemaining <= environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL) {
                 completingVMs.add(vm);
             }
         }
@@ -74,14 +74,14 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         int numVMsCompleting = completingVMs.size();
 
         // if we are close to the budget
-        if (budget - cost < vmPrice * numVMsCompleting || time > deadline) {
+        if (budget - cost < vmPrice * numVMsCompleting || time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline) {
 
             // compute number of vms to terminate
             // it is the number that would overrun the budget if not terminated
             int numToTerminate = numVMsRunning - (int) Math.floor(((budget - cost) / vmPrice));
 
             // even if we have some budget left we should terminate all the instances past the deadline.
-            if (time > deadline)
+            if (time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline)
                 numToTerminate = numVMsRunning;
 
             if (numToTerminate > numVMsRunning) {
@@ -160,7 +160,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         }
         
         // if we are close to constraints we should not provision new vms
-        boolean finishing_phase = budget - cost <= vmPrice * numVMsRunning || time > deadline;
+        boolean finishing_phase = budget - cost <= vmPrice * numVMsRunning || time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline;
 
         // if:
         // we are not in finishing phase,

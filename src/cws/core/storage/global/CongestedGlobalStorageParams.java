@@ -52,10 +52,16 @@ public class CongestedGlobalStorageParams {
     }
 
     public void removeWrites(int i) {
+        if (numWrites == 0) {
+            throw new IllegalStateException("Cannot go under 0 writes");
+        }
         numWrites -= i;
     }
 
     public void removeReads(int i) {
+        if (numReads == 0) {
+            throw new IllegalStateException("Cannot go under 0 reads");
+        }
         numReads -= i;
     }
 }

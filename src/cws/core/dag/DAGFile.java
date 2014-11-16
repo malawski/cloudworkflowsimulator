@@ -5,6 +5,7 @@ package cws.core.dag;
  */
 public class DAGFile {
     private String name;
+    /** Size in bytes. */
     private long size;
 
     public DAGFile(String name, long size) {

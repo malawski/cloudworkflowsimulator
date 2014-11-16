@@ -11,18 +11,18 @@ out_dir = nil
 
 # Parameters with default values. They can be overriden.
 name_prefix = "generated"
-applications = ["MONTAGE", "GENOME"]
+applications = ["MONTAGE", "GENOME", "CYBERSHAKE"]
 algorithms = ["DPDS", "WADPDS", "SA-WADPDS", "SPSS", "SA-SPSS"]
 input_dirs = {"CYBERSHAKE" => "CYBERSHAKE", "GENOME" => "GENOME",
     "LIGO" => "LIGO", "MONTAGE" => "MONTAGE", "SIPHT" => "SIPHT"}
 distributions = ["pareto_unsorted"]
 num_replicas = [100]
-latencies = [1]
+latencies = [0.5]
 storage_managers = ["void", "global"]
-read_speeds = [100000000]
-write_speeds = [100000000]
+read_speeds =  [31460000]
+write_speeds = [31460000]
 failure_rate = 0
-ensemble_size = 7
+ensemble_size = 20
 variation = 0.0
 seeds = [Time.now().sec]
 queue_name = "l_short"

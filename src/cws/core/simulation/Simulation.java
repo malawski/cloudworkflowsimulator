@@ -67,12 +67,12 @@ public class Simulation {
     /**
      * Number of budgets generated. It is ignored when budget is explicitly set.
      */
-    private static final String DEFAULT_N_BUDGETS = "5";
+    private static final String DEFAULT_N_BUDGETS = "10";
 
     /**
      * Number of deadlines generated. It is ignored when deadline is explicitly set.
      */
-    private static final String DEFAULT_N_DEADLINES = "5";
+    private static final String DEFAULT_N_DEADLINES = "10";
 
     /**
      * How many times more can the number of VMs be increased? 1.0 means 0%, 2.0 means 100%, etc..
@@ -343,8 +343,6 @@ public class Simulation {
             maxTime += dagStats.getCriticalPath() + environment.getVMProvisioningOverallDelayEstimation();
             maxCost += dagStats.getMinCost();
         }
-        maxCost *= 2;
-        maxTime *= 2;
 
         double minBudget;
         double maxBudget;
@@ -389,7 +387,7 @@ public class Simulation {
                     + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
                     + "actualBytesRead,actualBytesTransferred,"
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
-                    + "actualFilesRead,actualFilesTransferred,isStorageAware");
+                    + "actualFilesRead,actualFilesTransferred");
 
             for (double budget = minBudget; budget <= maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
@@ -485,7 +483,7 @@ public class Simulation {
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
             CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
-        AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, cloudsim);
+        AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim);
 
         if ("SPSS".equals(algorithmName)) {
             return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);

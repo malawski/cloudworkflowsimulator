@@ -1,7 +1,5 @@
 package cws.core.storage.global;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import cws.core.exception.IllegalCWSArgumentException;
@@ -16,10 +14,10 @@ public class GlobalStorageParams {
 
     private static final double DEFAULT_CHUNK_TRANSFER_TIME = 1;
 
-    /** Average read speed of the storage */
+    /** Average read speed of the storage, in bytes per second.*/
     private double readSpeed;
 
-    /** Average write speed of the storage */
+    /** Average write speed of the storage, in bytes per second.*/
     private double writeSpeed;
 
     /** Average latency for each operation */
@@ -59,22 +57,6 @@ public class GlobalStorageParams {
     public String getName() {
         return "rs_" + readSpeed + "ws_" + writeSpeed + "ctt_" + chunkTransferTime + "l_" + latency + "nr_"
                 + numReplicas;
-    }
-
-    /**
-     * @return All global storage params permutations.
-     */
-    public static List<GlobalStorageParams> getAllGlobalStorageParams() {
-        List<GlobalStorageParams> ret = new ArrayList<GlobalStorageParams>();
-        for (double ws = 10000; ws <= 100000; ws *= 10) {
-            for (double rs = 10000; rs <= 100000; rs *= 10) {
-                GlobalStorageParams gs = new GlobalStorageParams();
-                gs.setReadSpeed(rs);
-                gs.setWriteSpeed(ws);
-                ret.add(gs);
-            }
-        }
-        return ret;
     }
 
     public double getReadSpeed() {

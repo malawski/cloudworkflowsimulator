@@ -179,7 +179,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
          * as the total runtime of those tasks.
          */
         double[] shares = new double[numlevels];
-        CriticalPath path = new CriticalPath(order, runtimes, getEnvironment());
+        CriticalPath path = newCriticalPath(order, runtimes);
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
@@ -379,7 +379,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
 
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
-        CriticalPath path = new CriticalPath(order, runtimes, getEnvironment());
+        CriticalPath path = newCriticalPath(order, runtimes);
         double minimalTime = path.getCriticalPathLength() + getEnvironment().getVMProvisioningOverallDelayEstimation();
         if (minimalTime > getDeadline()) {
             throw new NoFeasiblePlan("Best critical path + provisioning estimates (" + minimalTime + ") "
@@ -387,7 +387,11 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         }
         return order;
     }
-    
+
+    protected CriticalPath newCriticalPath(TopologicalOrder order, HashMap<Task, Double> runtimes) {
+        return new CriticalPath(order, runtimes, getEnvironment());
+    }
+
     protected double getPredictedTaskRuntime(Task task) {
         return getEnvironment().getComputationPredictedRuntime(task);
     }

@@ -1,7 +1,5 @@
 package cws.core.simulation;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import cws.core.storage.global.GlobalStorageParams;
@@ -43,22 +41,6 @@ public class StorageSimulationParams {
         String ret = "-" + storageType + "_" + storageCacheType;
         if (storageParams != null) {
             ret += storageParams.getName();
-        }
-        return ret;
-    }
-
-    /**
-     * @return All simulation params permutations.
-     */
-    public static List<StorageSimulationParams> getAllSimulationParams() {
-        List<StorageSimulationParams> ret = new ArrayList<StorageSimulationParams>();
-        StorageSimulationParams voidAll = new StorageSimulationParams(StorageType.VOID, null, StorageCacheType.VOID);
-        ret.add(voidAll);
-        for (GlobalStorageParams gstorageParam : GlobalStorageParams.getAllGlobalStorageParams()) {
-            for (StorageCacheType cache : StorageCacheType.values()) {
-                StorageSimulationParams gstorage = new StorageSimulationParams(StorageType.GLOBAL, gstorageParam, cache);
-                ret.add(gstorage);
-            }
         }
         return ret;
     }
