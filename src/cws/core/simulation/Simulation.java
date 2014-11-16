@@ -84,6 +84,9 @@ public class Simulation {
      */
     private static final String DEFAULT_ALPHA = "0.7";
 
+    /**
+     * Should CloudSim logging be directed to STDOUT by default?
+     */
     private static final String DEFAULT_LOG_TO_STDOUT = "false";
 
     /**
@@ -382,8 +385,9 @@ public class Simulation {
             fileOut = new PrintStream(new FileOutputStream(outputfile));
             fileOut.println("application,distribution,seed,dags,scale,budget,"
                     + "deadline,algorithm,completed,exponential,linear,"
-                    + "planning,simulation,scorebits,cost,jobfinish,dagfinish,"
-                    + "vmfinish,runtimeVariance,failureRate,minBudget," + "maxBudget,minDeadline,maxDeadline,"
+                    + "planning,simulation,scorebits,cost,lastJobFinish,lastDagFinish,"
+                    + "lastVMFinish,runtimeVariance,failureRate,minBudget,"
+                    + "maxBudget,minDeadline,maxDeadline,"
                     + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
                     + "actualBytesRead,actualBytesTransferred,"
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
@@ -425,9 +429,9 @@ public class Simulation {
                             algorithmStatistics.getExponentialScore(), algorithmStatistics.getLinearScore(),
                             planningTime);
                     fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, algorithmStatistics.getScoreBitString(),
-                            algorithmStatistics.getActualCost(), algorithmStatistics.getActualJobFinishTime(),
-                            algorithmStatistics.getActualDagFinishTime());
-                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getActualVMFinishTime(),
+                            algorithmStatistics.getCost(), algorithmStatistics.getLastJobFinishTime(),
+                            algorithmStatistics.getLastDagFinishTime());
+                    fileOut.printf("%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getLastVMFinishTime(),
                             VMFactory.getRuntimeVariance(), VMFactory.getFailureRate(), minBudget, maxBudget,
                             minDeadline, maxDeadline);
 

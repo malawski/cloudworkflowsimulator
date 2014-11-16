@@ -7,6 +7,8 @@ import cws.core.engine.Environment;
 
 /**
  * Storage aware version of {@link CriticalPath}.
+ * 
+ * Storage awareness here means that during task runtime estimations, file transfer estimation is taken into account.
  */
 public class StorageAwareCriticalPath extends CriticalPath {
     public StorageAwareCriticalPath(TopologicalOrder order, Map<Task, Double> runtimes, Environment environment) {

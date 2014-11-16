@@ -34,19 +34,19 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     private Plan plan = new Plan();
 
     /** List of DAGs that were admitted to run */
-    private List<DAG> admittedDAGs = new LinkedList<DAG>();
+    private final List<DAG> admittedDAGs = new LinkedList<DAG>();
 
     /** Set of jobs that are ready to run arranged by Task */
-    private HashMap<Task, Job> readyJobs = new HashMap<Task, Job>();
+    private final HashMap<Task, Job> readyJobs = new HashMap<Task, Job>();
 
     /** Mapping of Task to the VM that will run the task */
-    private HashMap<Task, VM> taskMap = new HashMap<Task, VM>();
+    private final HashMap<Task, VM> taskMap = new HashMap<Task, VM>();
 
     /** Schedule of tasks for each VM */
-    private HashMap<VM, LinkedList<Task>> vmQueues = new HashMap<VM, LinkedList<Task>>();
+    private final HashMap<VM, LinkedList<Task>> vmQueues = new HashMap<VM, LinkedList<Task>>();
 
     /** Set of idle VMs */
-    private HashSet<VM> idleVms = new HashSet<VM>();
+    private final HashSet<VM> idleVms = new HashSet<VM>();
 
     private long planningStartWallTime;
     private long planningFinishWallTime;
@@ -54,10 +54,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
             Environment environment, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
-    }
-
-    public Plan getPlan() {
-        return plan;
     }
 
     @Override
@@ -89,7 +85,6 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         for (Resource r : plan.resources) {
             // create VM
             VMType vmType = getEnvironment().getVMType();
-            // TODO(mequrel): should have exposed interface for that!
             VM vm = VMFactory.createVM(vmType, getCloudsim());
 
             // Build task<->vm mappings
@@ -388,10 +383,18 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         return order;
     }
 
+    /**
+     * Creates and returns new {@link CriticalPath} object. May be overridden by subclasses to provide different
+     * implementations.
+     */
     protected CriticalPath newCriticalPath(TopologicalOrder order, HashMap<Task, Double> runtimes) {
         return new CriticalPath(order, runtimes, getEnvironment());
     }
 
+    /**
+     * Estimates and returns total task runtime. May be override by subclasses to provide values based on different
+     * criteria.
+     */
     protected double getPredictedTaskRuntime(Task task) {
         return getEnvironment().getComputationPredictedRuntime(task);
     }

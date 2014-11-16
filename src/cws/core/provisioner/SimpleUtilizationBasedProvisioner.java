@@ -74,7 +74,8 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         int numVMsCompleting = completingVMs.size();
 
         // if we are close to the budget
-        if (budget - cost < vmPrice * numVMsCompleting || time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline) {
+        if (budget - cost < vmPrice * numVMsCompleting
+                || time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline) {
 
             // compute number of vms to terminate
             // it is the number that would overrun the budget if not terminated
@@ -158,9 +159,10 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
                             + numVMsCompleting + ", cost: " + cost + ", budget:" + budget);
             throw new RuntimeException("Utilization is not >= 0.0");
         }
-        
+
         // if we are close to constraints we should not provision new vms
-        boolean finishing_phase = budget - cost <= vmPrice * numVMsRunning || time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline;
+        boolean finishing_phase = budget - cost <= vmPrice * numVMsRunning
+                || time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline;
 
         // if:
         // we are not in finishing phase,

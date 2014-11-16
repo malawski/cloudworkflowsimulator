@@ -87,13 +87,13 @@ public abstract class Algorithm extends CWSSimEntity {
     }
 
     private final void conductSanityChecks() {
-        if (algorithmStatistics.getActualDagFinishTime() > getDeadline()) {
-            System.err.println("NOTE: Exceeded deadline: " + algorithmStatistics.getActualDagFinishTime() + ">"
+        if (algorithmStatistics.getLastDagFinishTime() > getDeadline()) {
+            System.err.println("NOTE: Exceeded deadline: " + algorithmStatistics.getLastDagFinishTime() + ">"
                     + getDeadline() + " budget: " + getBudget());
         }
 
-        if (algorithmStatistics.getActualCost() > getBudget()) {
-            System.err.println("NOTE: Cost exceeded budget: " + algorithmStatistics.getActualCost() + ">" + getBudget()
+        if (algorithmStatistics.getCost() > getBudget()) {
+            System.err.println("NOTE: Cost exceeded budget: " + algorithmStatistics.getCost() + ">" + getBudget()
                     + " deadline: " + getDeadline());
         }
     }

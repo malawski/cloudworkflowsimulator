@@ -28,8 +28,10 @@ public class GlobalStorageManager extends StorageManager {
     /** Map of jobs' active writes - the ones that progress at any given moment */
     private final Map<Job, List<GlobalStorageTransfer>> writes = new HashMap<Job, List<GlobalStorageTransfer>>();
 
+    /** Map of jobs' files remaining to read. */
     private final Map<Job, List<DAGFile>> remainingToRead = new HashMap<Job, List<DAGFile>>();
-    
+
+    /** Map of jobs' files remaining to read. */
     private final Map<Job, List<DAGFile>> remainingToWrite = new HashMap<Job, List<DAGFile>>();
 
     /** A set of parameters for this storage */
@@ -72,7 +74,7 @@ public class GlobalStorageManager extends StorageManager {
                 throw new IllegalStateException("There should be no remaining read transfers");
             }
             remainingToRead.put(job, notCachedFiles);
-            startReadForJob(job);
+            startFileReadForJob(job);
         }
     }
 
@@ -92,17 +94,23 @@ public class GlobalStorageManager extends StorageManager {
                 throw new IllegalStateException("There should be no remaining write transfers");
             }
             remainingToWrite.put(job, files);
-            startWriteForJob(job);
+            startFileWriteForJob(job);
         }
     }
-    
-    private void startWriteForJob(Job job) {
+
+    /**
+     * Starts file write for one of the files in its write queue.
+     */
+    private void startFileWriteForJob(Job job) {
         startTransfers(remainingToWrite, job, writes, WorkflowEvent.GLOBAL_STORAGE_WRITE_PROGRESS, "write");
         congestedParams.addWrites(1);
         updateSpeedCongestion();
     }
-    
-    private void startReadForJob(Job job) {
+
+    /**
+     * Starts file read for one of the files in its read queue.
+     */
+    private void startFileReadForJob(Job job) {
         startTransfers(remainingToRead, job, reads, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS, "read");
         congestedParams.addReads(1);
         updateSpeedCongestion();
@@ -146,7 +154,7 @@ public class GlobalStorageManager extends StorageManager {
         if (onTransferFinished(write, writes, "write", remainingToWrite)) {
             notifyThatAfterTransfersCompleted(write.getJob());
         } else {
-            startWriteForJob(write.getJob());
+            startFileWriteForJob(write.getJob());
         }
         cacheManager.putFileToCache(write.getFile(), write.getJob());
         congestedParams.removeWrites(1);
@@ -160,7 +168,7 @@ public class GlobalStorageManager extends StorageManager {
         if (onTransferFinished(read, reads, "read", remainingToRead)) {
             notifyThatBeforeTransfersCompleted(read.getJob());
         } else {
-            startReadForJob(read.getJob());
+            startFileReadForJob(read.getJob());
         }
         cacheManager.putFileToCache(read.getFile(), read.getJob());
         congestedParams.removeReads(1);
@@ -297,7 +305,6 @@ public class GlobalStorageManager extends StorageManager {
             time += params.getLatency();
             bytes += file.getSize();
         }
-        System.out.println("Transfers time: " + time + ", for bytes:" + bytes);
         return time;
     }
 

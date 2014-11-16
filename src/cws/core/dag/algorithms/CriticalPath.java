@@ -41,11 +41,14 @@ public class CriticalPath {
             }
         }
     }
-    
+
+    /**
+     * Estimates and returns predicted task's runtime. May be overridden by subclasses to return estimations based on
+     * different criteria.
+     */
     protected double getPredictedTaskRuntime(Environment environment, Task task) {
         return environment.getComputationPredictedRuntime(task);
     }
-        
 
     /**
      * @return Earliest finish time of task

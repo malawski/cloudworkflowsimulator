@@ -29,18 +29,26 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
         this.deadline = deadline;
     }
 
-    private double actualJobFinishTime = 0.0;
-    private double actualVmFinishTime = 0.0;
-    private double actualDagFinishTime = 0.0;
-    private List<DAG> finishedDags = new ArrayList<DAG>();
-    private List<VM> allVMs =  new ArrayList<VM>();
+    private double lastJobFinishTime = 0.0;
+    private double lastVmFinishTime = 0.0;
+    private double lastDagFinishTime = 0.0;
+    
+    /**
+     * DAGs that finished within budget and deadline constraints.
+     */
+    private List<DAG> finishedDagsWithinBudgetAndDeadline = new ArrayList<DAG>();
+    
+    /**
+     * All VMs that were ever created in the simulation.
+     */
+    private List<VM> allVMs = new ArrayList<VM>();
 
     @Override
     public void shutdownEntity() {
-        getCloudsim().log("Actual cost: " + this.getActualCost());
-        getCloudsim().log("Last DAG finished at: " + this.getActualDagFinishTime());
-        getCloudsim().log("Last time VM terminated at: " + this.getActualVMFinishTime());
-        getCloudsim().log("Last time Job terminated at: " + this.getActualJobFinishTime());
+        getCloudsim().log("Actual cost: " + this.getCost());
+        getCloudsim().log("Last DAG finished at: " + this.getLastDagFinishTime());
+        getCloudsim().log("Last time VM terminated at: " + this.getLastVMFinishTime());
+        getCloudsim().log("Last time Job terminated at: " + this.getLastJobFinishTime());
     }
 
     public List<Integer> getFinishedDAGPriorities() {
@@ -107,7 +115,10 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
         return b.toString();
     }
 
-    public double getActualCost() {
+    /**
+     * Returns the cost of all VMs that were ever created till now.
+     */
+    public double getCost() {
         double cost = 0;
         for (VM vm : allVMs) {
             cost += vm.getCost();
@@ -115,31 +126,27 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
         return cost;
     };
 
-    public double getActualDagFinishTime() {
-        return actualDagFinishTime;
+    public double getLastDagFinishTime() {
+        return lastDagFinishTime;
     };
 
-    public double getActualJobFinishTime() {
-        return actualJobFinishTime;
+    public double getLastJobFinishTime() {
+        return lastJobFinishTime;
     };
 
-    public double getActualVMFinishTime() {
-        return actualVmFinishTime;
+    public double getLastVMFinishTime() {
+        return lastVmFinishTime;
     };
 
     public List<DAG> getFinishedDags() {
-        return finishedDags;
+        return finishedDagsWithinBudgetAndDeadline;
     };
 
     @Override
     public void jobFinished(Job job) {
         if (job.getResult() == Result.SUCCESS) {
-            actualJobFinishTime = Math.max(actualJobFinishTime, job.getFinishTime());
+            lastJobFinishTime = Math.max(lastJobFinishTime, job.getFinishTime());
         }
-    }
-    
-    private boolean withinBudgetAndDeadline() {
-        return getActualCost() <= budget && getCloudsim().clock() <= deadline;
     }
 
     @Override
@@ -149,7 +156,7 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
 
     @Override
     public void vmTerminated(VM vm) {
-        actualVmFinishTime = Math.max(actualVmFinishTime, getCloudsim().clock());
+        lastVmFinishTime = Math.max(lastVmFinishTime, getCloudsim().clock());
     }
 
     @Override
@@ -158,10 +165,17 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
 
     @Override
     public void dagFinished(DAGJob dagJob) {
-        actualDagFinishTime = Math.max(actualDagFinishTime, getCloudsim().clock());
+        lastDagFinishTime = Math.max(lastDagFinishTime, getCloudsim().clock());
         if (withinBudgetAndDeadline()) {
-            finishedDags.add(dagJob.getDAG());
+            finishedDagsWithinBudgetAndDeadline.add(dagJob.getDAG());
         }
+    }
+
+    /**
+     * Returns true when current time of simulation is within budget and deadline constraints.
+     */
+    private boolean withinBudgetAndDeadline() {
+        return getCost() <= budget && getCloudsim().clock() <= deadline;
     }
 
     @Override
