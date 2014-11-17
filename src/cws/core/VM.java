@@ -1,7 +1,9 @@
 package cws.core;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 
 import cws.core.cloudsim.CWSSimEntity;
@@ -74,6 +76,15 @@ public class VM extends CWSSimEntity {
 
     /** Varies the failure rate of tasks according to a specified distribution */
     private final FailureModel failureModel;
+
+    /** Read intervals of all jobs. */
+    private final Map<Job, Interval> readIntervals = new HashMap<Job, VM.Interval>();
+
+    /** Write intervals of all jobs. */
+    private final Map<Job, Interval> writeIntervals = new HashMap<Job, VM.Interval>();
+
+    /** Computation intervals of all jobs. */
+    private final Map<Job, Interval> computationIntervals = new HashMap<Job, VM.Interval>();
 
     VM(VMType vmType, CloudSimWrapper cloudsim, FailureModel failureModel, RuntimeDistribution runtimeDistribution) {
         super("VM" + (nextId++), cloudsim);
@@ -230,6 +241,11 @@ public class VM extends CWSSimEntity {
                                         .getId(), actualRuntime));
 
         getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
+        
+        // Mark that read has finished.
+        readIntervals.get(job).stop();
+        // Mark that computation has started.
+        computationIntervals.put(job, new Interval());
     }
 
     private void allOutputsTransferred(Job job) {
@@ -249,6 +265,9 @@ public class VM extends CWSSimEntity {
         // The core that was running the job is now free
         idleCores++;
 
+        // Mark that write has finished.
+        writeIntervals.get(job).stop();
+        
         // We may be able to start more jobs now
         startJobs();
     }
@@ -274,6 +293,9 @@ public class VM extends CWSSimEntity {
 
         // One core is now busy running the job
         idleCores--;
+
+        // Mark that read has started.
+        readIntervals.put(job, new Interval());
     }
 
     private void jobFinish(Job job) {
@@ -288,6 +310,11 @@ public class VM extends CWSSimEntity {
 
         getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
                 WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
+        
+        // Mark that computation has finished
+        computationIntervals.get(job).stop();
+        // Mark that write has started.
+        writeIntervals.put(job, new Interval());
     }
 
     private void startJobs() {
@@ -374,5 +401,65 @@ public class VM extends CWSSimEntity {
 
     public void setTerminated(boolean b) {
         this.isTerminated = b;
+    }
+    
+    /**
+     * Assumes one core VMs.
+     */
+    public double getTimeSpentOnComputations() {
+        double time = 0;
+        for (Interval interval : computationIntervals.values()) {
+            time += interval.getDuration();
+        }
+        return time;
+    }
+    
+    /**
+     * Assumes one core VMs.
+     */
+    public double getTimeSpentOnTransfers() {
+        double time = 0;
+        for (Interval interval : readIntervals.values()) {
+            time += interval.getDuration();
+        }
+        for (Interval interval : writeIntervals.values()) {
+            time += interval.getDuration();
+        }
+        return time;
+    }
+
+    /**
+     * Represents interval of time in seconds spanning from start time to end time (or VM termination time if not set).
+     */
+    private final class Interval {
+        private final double startTime = getCloudsim().clock();
+        private Double endTime;
+
+        /**
+         * Stops the interval at current simulation time.
+         */
+        public void stop() {
+            endTime = getCloudsim().clock();
+        }
+
+        /**
+         * Returns the duration in seconds of this interval.
+         */
+        public double getDuration() {
+            double duration;
+            if (endTime == null) {
+                if (isTerminated) {
+                    duration = terminateTime - startTime;
+                } else {
+                    throw new IllegalStateException("VM not terminated, but should be");
+                }
+            } else {
+                duration = endTime - startTime;
+            }
+            if (duration < 0) {
+                throw new IllegalStateException("Duration is < 0, but shouldn't be");
+            }
+            return duration;
+        }
     }
 }

@@ -32,12 +32,12 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
     private double lastJobFinishTime = 0.0;
     private double lastVmFinishTime = 0.0;
     private double lastDagFinishTime = 0.0;
-    
+
     /**
      * DAGs that finished within budget and deadline constraints.
      */
     private List<DAG> finishedDagsWithinBudgetAndDeadline = new ArrayList<DAG>();
-    
+
     /**
      * All VMs that were ever created in the simulation.
      */
@@ -176,6 +176,28 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
      */
     private boolean withinBudgetAndDeadline() {
         return getCost() <= budget && getCloudsim().clock() <= deadline;
+    }
+
+    /**
+     * Returns total time of all VMs spent on file transfers. The assumption is that VMs are 1-core.
+     */
+    public double getTimeSpentOnTransfers() {
+        double time = 0;
+        for (VM vm : allVMs) {
+            time += vm.getTimeSpentOnTransfers();
+        }
+        return time;
+    }
+    
+    /**
+     * Returns total time of all VMs spent on computations. The assumption is that VMs are 1-core.
+     */
+    public double getTimeSpentOnComputations() {
+        double time = 0;
+        for (VM vm : allVMs) {
+            time += vm.getTimeSpentOnComputations();
+        }
+        return time;
     }
 
     @Override

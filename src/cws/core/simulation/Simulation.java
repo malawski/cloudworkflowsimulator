@@ -388,6 +388,7 @@ public class Simulation {
                     + "planning,simulation,scorebits,cost,lastJobFinish,lastDagFinish,"
                     + "lastVMFinish,runtimeVariance,failureRate,minBudget,"
                     + "maxBudget,minDeadline,maxDeadline,"
+                    + "timeSpentOnTransfers,timeSpentOnComputations,"
                     + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
                     + "actualBytesRead,actualBytesTransferred,"
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
@@ -434,6 +435,8 @@ public class Simulation {
                     fileOut.printf("%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getLastVMFinishTime(),
                             VMFactory.getRuntimeVariance(), VMFactory.getFailureRate(), minBudget, maxBudget,
                             minDeadline, maxDeadline);
+                    fileOut.printf("%f,%f,", algorithmStatistics.getTimeSpentOnTransfers(),
+                            algorithmStatistics.getTimeSpentOnComputations());
 
                     StorageManagerStatistics stats = environment.getStorageManagerStatistics();
                     fileOut.printf("%s,%d,%d,%d,%d,%d,", storageManagerType, stats.getTotalBytesToRead(),
