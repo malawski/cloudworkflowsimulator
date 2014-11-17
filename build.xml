@@ -51,6 +51,10 @@
     <!-- Create directories for test output -->
     <mkdir dir="${test.data.dir}"/>
     <mkdir dir="${test.reports.dir}"/>
+
+    <!-- Dir for output from SimulationTest -->
+    <mkdir dir="${test.data.dir}/SimulationTest"/>
+
   </target>
 
 
