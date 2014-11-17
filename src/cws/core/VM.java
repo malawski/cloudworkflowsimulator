@@ -9,7 +9,6 @@ import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.exception.UnknownWorkflowEventException;
-import cws.core.jobs.IdentityRuntimeDistribution;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
 
@@ -41,13 +40,13 @@ public class VM extends CWSSimEntity {
     private static int nextId = 0;
 
     /** Contains VM parameters like cores number, price for billing unit **/
-    private VMType vmType;
+    private final VMType vmType;
 
     /** The SimEntity that owns this VM */
-    private int owner;
+    private int owner = -1;
 
     /** The Cloud that runs this VM */
-    private int cloud;
+    private int cloud = -1;
 
     /** Current idle cores */
     private int idleCores;
@@ -70,16 +69,13 @@ public class VM extends CWSSimEntity {
     /** Has this VM been started? */
     private boolean isLaunched;
 
-    /** Number of CPU seconds consumed by jobs on this VM */
-    private double cpuSecondsConsumed;
-
     /** Varies the actual runtime of tasks according to the specified distribution */
-    private RuntimeDistribution runtimeDistribution = new IdentityRuntimeDistribution();
+    private final RuntimeDistribution runtimeDistribution;
 
     /** Varies the failure rate of tasks according to a specified distribution */
-    private FailureModel failureModel = new FailureModel(0, 0.0);
+    private final FailureModel failureModel;
 
-    public VM(VMType vmType, CloudSimWrapper cloudsim) {
+    VM(VMType vmType, CloudSimWrapper cloudsim, FailureModel failureModel, RuntimeDistribution runtimeDistribution) {
         super("VM" + (nextId++), cloudsim);
         this.vmType = vmType;
         this.jobs = new LinkedList<Job>();
@@ -87,9 +83,10 @@ public class VM extends CWSSimEntity {
         this.idleCores = vmType.getCores();
         this.launchTime = -1.0;
         this.terminateTime = -1.0;
-        this.cpuSecondsConsumed = 0.0;
         this.isTerminated = false;
         this.isLaunched = false;
+        this.failureModel = failureModel;
+        this.runtimeDistribution = runtimeDistribution;
     }
 
     /**
@@ -116,16 +113,6 @@ public class VM extends CWSSimEntity {
         double billingUnits = getRuntime() / vmType.getBillingTimeInSeconds();
         double fullBillingUnits = Math.ceil(billingUnits);
         return fullBillingUnits * vmType.getPriceForBillingUnit();
-    }
-
-    public double getCPUSecondsConsumed() {
-        return cpuSecondsConsumed;
-    }
-
-    /** cpu_seconds / (runtime * cores) */
-    public double getUtilization() {
-        double totalCPUSeconds = getRuntime() * vmType.getCores();
-        return cpuSecondsConsumed / totalCPUSeconds;
     }
 
     @Override
@@ -236,9 +223,11 @@ public class VM extends CWSSimEntity {
             job.setResult(Job.Result.SUCCESS);
         }
 
-        getCloudsim().log(
-                String.format("Starting computational part of job %s (task_id = %s, workflow = %s) on VM %s. Will finish in %f",
-                        job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.getVM().getId(), actualRuntime));
+        getCloudsim()
+                .log(String
+                        .format("Starting computational part of job %s (task_id = %s, workflow = %s) on VM %s. Will finish in %f",
+                                job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.getVM()
+                                        .getId(), actualRuntime));
 
         getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
     }
@@ -253,9 +242,6 @@ public class VM extends CWSSimEntity {
         // Complete the job
         job.setFinishTime(getCloudsim().clock());
         job.setState(Job.State.TERMINATED);
-
-        // Increment the usage
-        cpuSecondsConsumed += job.getDuration();
 
         // Tell the owner
         getCloudsim().send(getId(), job.getOwner(), 0.0, WorkflowEvent.JOB_FINISHED, job);
@@ -313,6 +299,9 @@ public class VM extends CWSSimEntity {
     }
 
     public int getOwner() {
+        if (owner == -1) {
+            throw new IllegalStateException();
+        }
         return owner;
     }
 
@@ -321,6 +310,9 @@ public class VM extends CWSSimEntity {
     }
 
     public int getCloud() {
+        if (cloud == -1) {
+            throw new IllegalStateException();
+        }
         return cloud;
     }
 
@@ -364,20 +356,8 @@ public class VM extends CWSSimEntity {
         return runtimeDistribution;
     }
 
-    public void setRuntimeDistribution(RuntimeDistribution runtimeDistribution) {
-        this.runtimeDistribution = runtimeDistribution;
-    }
-
     public FailureModel getFailureModel() {
         return failureModel;
-    }
-
-    public void setFailureModel(FailureModel failureModel) {
-        this.failureModel = failureModel;
-    }
-
-    public void setVmType(VMType vmType) {
-        this.vmType = vmType;
     }
 
     public boolean isTerminated() {

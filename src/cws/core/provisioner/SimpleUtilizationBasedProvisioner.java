@@ -6,10 +6,10 @@ import java.util.Set;
 
 import cws.core.Provisioner;
 import cws.core.VM;
+import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.core.VMType;
 
 public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner implements Provisioner {
 
@@ -174,9 +174,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         if (!finishing_phase && utilization > UPPER_THRESHOLD
                 && getCloud().getAllVms().size() < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 
-            // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
-            VMType vmType = environment.getVMType();
-            VM vm = new VM(vmType, getCloudsim());
+            VM vm = VMFactory.createVM(environment.getVMType(), getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());
             getCloudsim().send(engine.getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);

@@ -19,6 +19,7 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
+import cws.core.VMFactory;
 import cws.core.algorithms.Algorithm;
 import cws.core.algorithms.AlgorithmStatistics;
 import cws.core.algorithms.DPDS;
@@ -38,7 +39,6 @@ import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.engine.EnvironmentFactory;
 import cws.core.exception.IllegalCWSArgumentException;
-import cws.core.provisioner.VMFactory;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 

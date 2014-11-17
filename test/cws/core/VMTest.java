@@ -82,7 +82,7 @@ public class VMTest {
     @Test
     public void testSingleJob() {
         VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(1).price(0.40).build();
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = VMFactory.createVM(vmType, cloudsim);
         VMDriver driver = new VMDriver(vm, cloudsim);
 
         Job j = new Job(new DAGJob(new DAG(), 1), new Task("task_id", "transformation", 1000), driver.getId(), cloudsim);
@@ -100,7 +100,7 @@ public class VMTest {
     @Test
     public void testTwoJobs() {
         VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(1).price(0.40).build();
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = VMFactory.createVM(vmType, cloudsim);
         VMDriver driver = new VMDriver(vm, cloudsim);
 
         Job j1 = new Job(new DAGJob(new DAG(), 1), new Task("task_id", "transformation", 1000), driver.getId(), cloudsim);
@@ -128,7 +128,7 @@ public class VMTest {
     @Ignore
     public void testMultiCoreVM() {
         VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(2).price(0.40).build();
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = VMFactory.createVM(vmType, cloudsim);
         VMDriver driver = new VMDriver(vm, cloudsim);
 
         Job j1 = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
@@ -151,7 +151,7 @@ public class VMTest {
 
     @Test
     public void testVMShouldNotStartAutomatically() {
-        VM vm = new VM(testDefaultVMType, cloudsim);
+        VM vm = VMFactory.createVM(testDefaultVMType, cloudsim);
         cloudsim.startSimulation();
 
         assertEquals(false, vm.isTerminated());
@@ -159,7 +159,7 @@ public class VMTest {
 
     @Test
     public void testVMShouldStartProperly() {
-        VM vm = new VM(testDefaultVMType, cloudsim);
+        VM vm = VMFactory.createVM(testDefaultVMType, cloudsim);
         cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.startSimulation();
 
@@ -168,7 +168,7 @@ public class VMTest {
 
     @Test
     public void testVMShouldTerminateProperly() {
-        VM vm = new VM(testDefaultVMType, cloudsim);
+        VM vm = VMFactory.createVM(testDefaultVMType, cloudsim);
         cloudsim.send(0, vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(0, vm.getId(), 0.2, WorkflowEvent.VM_TERMINATE);
         cloudsim.startSimulation();
@@ -178,7 +178,7 @@ public class VMTest {
 
     @Test(expected = IllegalStateException.class)
     public void testVMShouldNotAcceptEventsAfterTermination() {
-        VM vm = new VM(testDefaultVMType, cloudsim);
+        VM vm = VMFactory.createVM(testDefaultVMType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(cloudsim);
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
@@ -190,7 +190,7 @@ public class VMTest {
     @Test
     public void testVMKillJobsUponTermination() {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = VMFactory.createVM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(cloudsim);
 
         Job job = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
@@ -206,7 +206,7 @@ public class VMTest {
     @Test(expected = IllegalStateException.class)
     public void testVMShouldNotAcceptNewJobsAfterTermination() {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = VMFactory.createVM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(cloudsim);
 
         Job job2 = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
@@ -222,7 +222,7 @@ public class VMTest {
     public void testLaunchVMTwice() {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = VMFactory.createVM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(cloudsim);
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);

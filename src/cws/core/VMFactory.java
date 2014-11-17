@@ -1,11 +1,9 @@
-package cws.core.provisioner;
+package cws.core;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import cws.core.FailureModel;
-import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.jobs.IdentityRuntimeDistribution;
@@ -38,14 +36,11 @@ public class VMFactory {
     }
 
     /**
-     * @param cloudSimWrapper - initialized CloudSimWrapper instance. It needs to be inited, because we're creting
+     * @param cloudSimWrapper - initialized CloudSimWrapper instance. It needs to be inited, because we're creating
      *            storage manager here.
      */
     public static VM createVM(VMType vmType, CloudSimWrapper cloudSimWrapper) {
-        VM vm = new VM(vmType, cloudSimWrapper);
-        vm.setRuntimeDistribution(runtimeDistribution);
-        vm.setFailureModel(failureModel);
-        return vm;
+        return new VM(vmType, cloudSimWrapper, failureModel, runtimeDistribution);
     }
 
     public static void buildCliOptions(Options options) {

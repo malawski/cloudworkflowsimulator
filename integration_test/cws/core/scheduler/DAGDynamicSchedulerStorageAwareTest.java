@@ -11,6 +11,7 @@ import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
 import cws.core.VM;
+import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -110,7 +111,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
     protected void launchVM() {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
-        VM vm = new VM(vmType, cloudsim);
+        VM vm = VMFactory.createVM(vmType, cloudsim);
         cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
     }
 }

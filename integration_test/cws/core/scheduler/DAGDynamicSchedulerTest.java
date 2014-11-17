@@ -14,6 +14,7 @@ import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
 import cws.core.VM;
+import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -65,7 +66,7 @@ public class DAGDynamicSchedulerTest {
                     .provisioningTime(new ConstantDistribution(0.0)).deprovisioningTime(new ConstantDistribution(0.0))
                     .build();
 
-            VM vm = new VM(vmType, cloudsim);
+            VM vm = VMFactory.createVM(vmType, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.1, WorkflowEvent.VM_LAUNCH, vm);
         }
@@ -80,7 +81,7 @@ public class DAGDynamicSchedulerTest {
         HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < 10; i++) {
             VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-            VM vm = new VM(vmType, cloudsim);
+            VM vm = VMFactory.createVM(vmType, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }
@@ -110,7 +111,7 @@ public class DAGDynamicSchedulerTest {
         for (int i = 0; i < 10; i++) {
             VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
-            VM vm = new VM(vmType, cloudsim);
+            VM vm = VMFactory.createVM(vmType, cloudsim);
             vms.add(vm);
             cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
         }

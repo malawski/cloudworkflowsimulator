@@ -13,6 +13,7 @@ import cws.core.EnsembleManager;
 import cws.core.Provisioner;
 import cws.core.Scheduler;
 import cws.core.VM;
+import cws.core.VMFactory;
 import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
@@ -27,7 +28,6 @@ import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
-import cws.core.provisioner.VMFactory;
 
 public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener {
     /** Plan */

@@ -222,7 +222,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
         double time = CloudSim.startSimulation();
 
-        assertEquals(terminateTime + params.getChunkTransferTime(), time, 0.01);
+        assertEquals(time, terminateTime + params.getChunkTransferTime(), 0.01);
     }
 
     @Test
