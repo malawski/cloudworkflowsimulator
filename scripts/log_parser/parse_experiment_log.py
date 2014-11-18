@@ -63,11 +63,11 @@ PATTERNS = [
         type=Workflow,
         set_values={}),
     log_parser.Pattern(
-        regex=r'budget = (?P<budget>\d+.\d+)',
+        regex=r'budget = (?P<budget>.*$)',
         type=ExperimentSettingsWithId,
         set_values={'id': 0, 'deadline': None, 'vm_cost_per_hour': 1}),
     log_parser.Pattern(
-        regex=r'deadline = (?P<deadline>\d+.\d+)',
+        regex=r'deadline = (?P<deadline>.*$)',
         type=ExperimentSettingsWithId,
         set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None}),
     log_parser.Pattern(
