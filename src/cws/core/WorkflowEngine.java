@@ -195,12 +195,8 @@ public class WorkflowEngine extends CWSSimEntity {
             }
 
             getCloudsim().log(job.toString() + " finished on VM " + job.getVM().getId());
-            VM vm = job.getVM();
-            // add to free if contained in busy set
-            if (busyVMs.remove(vm))
-                freeVMs.add(vm);
+
         } else if (job.getResult() == Job.Result.FAILURE) { // If the job failed
-            // Retry the job
 
             // Log only if it was running job
             if (job.getStartTime() > 0.0) {
@@ -210,21 +206,22 @@ public class WorkflowEngine extends CWSSimEntity {
                                 job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(),
                                 job.getVM().getId()));
             }
+
+            // Retry the job
             Job retry = new Job(dagJob, t, getId(), getCloudsim());
             retry.setRetry(true);
-            VM vm = job.getVM();
-            // add to free if contained in busy set
-            if (busyVMs.remove(vm))
-                freeVMs.add(vm);
             jobReleased(retry);
+
         } else {
             getCloudsim().log(
                     String.format("Job %d (task_id = %s, workflow_id = %s, retry = %s) exceeded deadline.",
                             job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry()));
-            VM vm = job.getVM();
-            if (busyVMs.remove(vm))
-                freeVMs.add(vm);
         }
+
+        // add VM to free if contained in busy set
+        VM vm = job.getVM();
+        if (busyVMs.remove(vm))
+            freeVMs.add(vm);
 
         scheduler.scheduleJobs(this);
     }

@@ -8,7 +8,7 @@ import cws.core.engine.Environment;
 
 public class DAGStats {
     private double minCost;
-    private double criticalPath;
+    private double criticalPathLength;
     private double totalRuntime;
 
     public DAGStats(DAG dag, Environment environment) {
@@ -18,7 +18,7 @@ public class DAGStats {
 
         // Make sure a plan is feasible given the deadline and available VMs
         CriticalPath path = new CriticalPath(order, runTimes, environment);
-        criticalPath = path.getCriticalPathLength();
+        criticalPathLength = path.getCriticalPathLength();
     }
 
     private HashMap<Task, Double> computeMinimumCostOfRunningTheWorkflow(Environment environment, TopologicalOrder order) {
@@ -38,8 +38,8 @@ public class DAGStats {
         return minCost;
     }
 
-    public double getCriticalPath() {
-        return criticalPath;
+    public double getCriticalPathLength() {
+        return criticalPathLength;
     }
 
     public double getTotalRuntime() {

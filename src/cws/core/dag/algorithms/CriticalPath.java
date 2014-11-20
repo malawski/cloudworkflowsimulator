@@ -12,7 +12,7 @@ import cws.core.engine.Environment;
  * @author malawski
  */
 public class CriticalPath {
-    private final Map<Task, Double> eft = new HashMap<Task, Double>();
+    private final Map<Task, Double> earliestFinishTimes = new HashMap<Task, Double>();
 
     public CriticalPath(TopologicalOrder order, Environment environment) {
         this(order, null, environment);
@@ -28,13 +28,15 @@ public class CriticalPath {
 
         // Initially the finish time is whatever the runtime is
         for (Task task : order) {
-            eft.put(task, runtimes.get(task));
+            earliestFinishTimes.put(task, runtimes.get(task));
         }
 
         // Now we adjust the values in the topological order
         for (Task task : order) {
             for (Task child : task.getChildren()) {
-                eft.put(child, Math.max(eft.get(child), eft.get(task) + runtimes.get(child)));
+                earliestFinishTimes.put
+                    (child, Math.max(earliestFinishTimes.get(child),
+                                     earliestFinishTimes.get(task) + runtimes.get(child)));
             }
         }
     }
@@ -51,7 +53,7 @@ public class CriticalPath {
      * @return Earliest finish time of task
      */
     public double getEarliestFinishTime(Task task) {
-        return eft.get(task);
+        return earliestFinishTimes.get(task);
     }
 
     /**
@@ -59,8 +61,7 @@ public class CriticalPath {
      */
     public double getCriticalPathLength() {
         double len = 0.0;
-        for (Task task : eft.keySet()) {
-            double eft = getEarliestFinishTime(task);
+        for (double eft : earliestFinishTimes.values()) {
             if (eft > len)
                 len = eft;
         }
