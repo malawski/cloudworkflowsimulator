@@ -330,7 +330,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
         // Submit the job to the VM
         idleVms.remove(vm);
         job.setVM(vm);
-        getCloudsim().send(getWorkflowEngine().getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
+        vm.jobSubmit(job);
     }
 
     @Override

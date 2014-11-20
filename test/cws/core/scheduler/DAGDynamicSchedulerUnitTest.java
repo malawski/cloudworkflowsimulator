@@ -1,12 +1,13 @@
 package cws.core.scheduler;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
@@ -28,7 +29,7 @@ public class DAGDynamicSchedulerUnitTest {
     WorkflowEngine engine;
     CloudSimWrapper cloudsim;
     Queue<Job> jobs;
-    Set<VM> freeVMs;
+    List<VM> freeVMs;
     private Environment environment;
 
     @Before
@@ -41,7 +42,7 @@ public class DAGDynamicSchedulerUnitTest {
         engine = mock(WorkflowEngine.class);
 
         jobs = new LinkedList<Job>();
-        freeVMs = new HashSet<VM>();
+        freeVMs = new ArrayList<VM>();
 
         when(engine.getQueuedJobs()).thenReturn(jobs);
         when(engine.getFreeVMs()).thenReturn(freeVMs);
@@ -69,7 +70,6 @@ public class DAGDynamicSchedulerUnitTest {
         scheduler.scheduleJobs(engine);
 
         assertTrue(expected.equals(jobs));
-        verify(cloudsim, times(1)).send(anyInt(), anyInt(), anyDouble(), anyInt(), eq(job));
     }
 
     @Test

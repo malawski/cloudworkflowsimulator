@@ -25,19 +25,18 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         super(cloudsim, environment);
     }
 
-    private Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
-    private Set<DAGJob> rejectedDAGs = new HashSet<DAGJob>();
+    private final Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
+    private final Set<DAGJob> rejectedDAGs = new HashSet<DAGJob>();
 
     @Override
     public void scheduleJobs(WorkflowEngine engine) {
 
         // check the deadline constraints (provisioner takes care about budget)
-
         double deadline = engine.getDeadline();
         double time = getCloudsim().clock();
 
         // stop scheduling any new jobs if we are over deadline
-        if (isDeadlineExceeded(deadline, time)) {
+        if (time >= deadline) {
             return;
         }
 
@@ -49,14 +48,6 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
         // use prioritized list for scheduling
         scheduleQueue(prioritizedJobs, engine);
-
-        // update queue length for the provisioner
-        engine.setQueueLength(prioritizedJobs.size());
-
-    }
-
-    protected boolean isDeadlineExceeded(double deadline, double time) {
-        return time >= deadline;
     }
 
     /**
@@ -67,11 +58,9 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
      */
     @Override
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-        // FIXME(_mequrel_): copying references because when we remove it from list, garbage collector removes VM...
-        // imho it shouldnt working like that
         Set<VM> freeVMs = new HashSet<VM>(engine.getFreeVMs());
 
-        while (canBeScheduled(jobs, freeVMs)) {
+        while (!jobs.isEmpty() && !freeVMs.isEmpty()) {
             Job job = jobs.poll();
 
             if (isJobDagAdmitted(job, engine)) {
@@ -109,10 +98,6 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
 
     protected boolean jobHasBeenAlreadyAdmitted(DAGJob dj) {
         return admittedDAGs.contains(dj);
-    }
-
-    protected boolean canBeScheduled(Queue<Job> jobs, Set<VM> freeVMs) {
-        return !freeVMs.isEmpty() && !jobs.isEmpty();
     }
 
     // decide what to do with the job from a new dag

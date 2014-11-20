@@ -43,8 +43,8 @@ public class VMTest {
             sendNow(vm.getId(), WorkflowEvent.VM_LAUNCH);
 
             // Submit all the jobs
-            for (Job j : jobs) {
-                getCloudsim().send(getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, j);
+            for (Job job : jobs) {
+                vm.jobSubmit(job);
             }
         }
 
@@ -196,7 +196,7 @@ public class VMTest {
         Job job = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
-        cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.JOB_SUBMIT, job);
+        vm.jobSubmit(job);
         cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
         cloudsim.startSimulation();
 
@@ -211,11 +211,10 @@ public class VMTest {
 
         Job job2 = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
 
-
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
-        cloudsim.send(driver.getId(), vm.getId(), 0.3, WorkflowEvent.JOB_SUBMIT, job2);
         cloudsim.startSimulation();
+        vm.jobSubmit(job2);
     }
 
     @Test(expected = IllegalStateException.class)

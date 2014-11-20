@@ -19,13 +19,13 @@ public class DAGJob {
     private DAG dag;
 
     /** Set of tasks that have been released */
-    private Set<Task> releasedTasks;
+    private final Set<Task> releasedTasks;
 
     /** Set of tasks that are finished */
-    private Set<Task> completedTasks;
+    private final Set<Task> completedTasks;
 
     /** List of all tasks that are ready but have not been claimed */
-    private LinkedList<Task> queue;
+    private final LinkedList<Task> queue;
 
     /** Workflow priority */
     private int priority;
