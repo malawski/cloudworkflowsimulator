@@ -32,3 +32,7 @@ cloudworkflowsimulator.iml
 SyntheticWorkflows
 dags_local
 
+# test outputs
+test_results/
+junit*.properties
+junitvmwatcher*.properties

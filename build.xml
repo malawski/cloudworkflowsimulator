@@ -1,31 +1,73 @@
 <project name="CloudWorkflowSimulator" default="dist" basedir=".">
-    <description>
-        Example build file for Hello project
-    </description>
+  <description>
+    Example build file for Hello project
+  </description>
+
+  <!-- Set properties and paths
+       ============================================================-->
+
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
   <property name="build" location="bin"/>
+  <property name="test.dir" location="test"/>
+  <property name="testbuild" location="test_bin"/>
+  <property name="script.dir" location="scripts"/>
   <property name="dist"  location="dist"/>
-	<path id="build.classpath">
-	    <fileset dir="lib" includes="*.jar"/>
-	  </path>
+
+  <property name="test.data.dir" location="test_results"/>
+  <property name="test.reports.dir" location="${test.data.dir}/reports"/>
+
+
+
+  <path id="build.classpath">
+    <fileset dir="lib" includes="*.jar"/>
+  </path>
+
+  <path id="testbuild.classpath">
+    <fileset dir="lib" includes="*.jar"/>
+    <pathelement path="${build}"/>
+  </path>
+
+
+  <!-- Classpath needs to include the libs, the cws classes and the
+       tests classes -->
+  <path id="test.classpath">
+    <fileset dir="lib" includes="*.jar"/>
+    <pathelement path="${build}"/>
+    <pathelement path="${java.class.path}"/>
+    <pathelement path="${testbuild}"/>
+  </path>
+
+
+  <!-- Build commands
+       ============================================================-->
 
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}"/>
+    <mkdir dir="${testbuild}"/>
+    <!-- Create directories for test output -->
+    <mkdir dir="${test.data.dir}"/>
+    <mkdir dir="${test.reports.dir}"/>
+
+    <!-- Dir for output from SimulationTest -->
+    <mkdir dir="${test.data.dir}/SimulationTest"/>
+
   </target>
+
 
   <target name="compile" depends="init"
-        description="compile the source " >
+          description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}"
-    	classpathref="build.classpath"/>
+    <javac srcdir="${src}" destdir="${build}" classpathref="build.classpath"
+           includeantruntime="false"/>
   </target>
 
+
   <target name="dist" depends="compile"
-        description="generate the distribution" >
+          description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}"/>
 
@@ -33,10 +75,125 @@
     <jar jarfile="${dist}/cloudworkflowsimulator.jar" basedir="${build}"/>
   </target>
 
+
+  <target name="test-build" depends="compile"
+          description="build the java unit and integration tests" >
+    <javac srcdir="${test.dir}"
+           destdir="${testbuild}"
+           classpathref="testbuild.classpath"
+           includeantruntime="false" />
+
+    <javac srcdir="integration_test"
+           destdir="${testbuild}"
+           classpathref="testbuild.classpath"
+           includeantruntime="false" />
+  </target>
+
+
+
+  <target name="test-java" depends="compile,test-build"
+          description="run the java unit and integration tests" >
+
+    <junit printsummary="yes"
+           haltonfailure="no"
+           errorProperty="test.failed"
+           failureProperty="test.failed"
+           fork="true"
+           forkMode="once">
+
+      <!-- Forking once allows ant to automatically set the classpath so
+           that it can find the required junit and ant files. -->
+
+      <classpath refid="test.classpath" />
+
+      <!-- Find and run tests in 'test' and 'integration_test' dirs -->
+      <batchtest todir="${test.data.dir}">
+        <!-- Exclude abstract classes -->
+        <fileset dir="${test.dir}" includes="**/*Test.java"
+                 excludes="**/StorageManagerTest.java,
+                           **/VMCacheManagerTest.java,
+                           **/DAGDynamicSchedulerStorageAwareTest.java"/>
+
+        <fileset dir="integration_test" includes="**/*Test.java"/>
+      </batchtest>
+
+      <!-- Dump xml output to file -->
+      <formatter type="xml"/>
+    </junit>
+
+
+    <!-- Make pretty html output from the xml files -->
+    <junitreport todir="${test.data.dir}">
+      <fileset dir="${test.data.dir}">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${test.reports.dir}"/>
+    </junitreport>
+
+
+    <!-- Report failures -->
+    <fail if="test.failed">
+      Unit tests failed. Check ${test.reports.dir}/index.html for details.
+    </fail>
+
+  </target>
+
+
+  <target name="test-python" description="run python tests">
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.single_task_validator_test"/>
+    </exec>
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.order_validator_test"/>
+    </exec>
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.simulation_validator_test"/>
+    </exec>
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.constraints_validator_test"/>
+    </exec>
+    <exec executable="/usr/bin/python"  dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="log_parser.parse_experiment_log_test "/>
+    </exec>
+  </target>
+
+
+  <!-- Run all tests -->
+  <target name="test" depends="test-java,test-python" description="build and run all tests" />
+
+  <!-- Run a single test -->
+  <target name="runtest" description="Runs the test you specify on the command line with -Dtest="
+          depends="compile, test-build, ensure-test-name">
+    <junit printsummary="withOutAndErr" fork="yes">
+      <classpath refid="test.classpath" />
+      <formatter type="plain" usefile="false"/>
+      <batchtest>
+        <fileset dir="${test.dir}">
+          <include name="**/${ttr}.java"/>
+        </fileset>
+        <fileset dir="integration_test">
+          <include name="**/${ttr}.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <!-- For single test make sure we have passed the argument -->
+  <target name="ensure-test-name" unless="ttr">
+    <fail message="You must run this target with -Dttr=TestName"/>
+  </target>
+
+
   <target name="clean"
-        description="clean up" >
+          description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
+    <delete dir="${testbuild}"/>
   </target>
 </project>
