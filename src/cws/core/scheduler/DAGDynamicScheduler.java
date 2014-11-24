@@ -7,7 +7,6 @@ import java.util.Set;
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.engine.Environment;
@@ -41,10 +40,6 @@ public class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
      * @param engine
      */
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-        /*
-         * FIXME(_mequrel_): copying references because when we remove it from list, garbage collector removes VM...
-         * imho it shouldn't working like that
-         */
         Set<VM> freeVMs = new HashSet<VM>(engine.getFreeVMs());
 
         while (canBeScheduled(jobs, freeVMs)) {
@@ -53,7 +48,7 @@ public class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
         }
     }
 
-    protected void scheduleJob(Job job, Set<VM> freeVMs, WorkflowEngine engine) {
+    protected final void scheduleJob(Job job, Set<VM> freeVMs, WorkflowEngine engine) {
         VM vm = getFirst(freeVMs);
         markVMAsBusy(freeVMs, vm);
 
@@ -63,8 +58,7 @@ public class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
     }
 
     private void sendJobToVM(WorkflowEngine engine, VM vm, Job job) {
-        getCloudsim().send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
-        getCloudsim().log("Submitting " + job.toString() + " to VM " + job.getVM().getId());
+        vm.jobSubmit(job);
     }
 
     private boolean canBeScheduled(Queue<Job> jobs, Set<VM> freeVMs) {

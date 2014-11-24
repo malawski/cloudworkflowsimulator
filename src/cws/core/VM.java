@@ -101,6 +101,17 @@ public class VM extends CWSSimEntity {
     }
 
     /**
+     * Returns true when this VM is not executing any job.
+     */
+    public boolean isFree() {
+        if (isTerminated) {
+            throw new IllegalStateException(
+                    "Attempted to determine whether terminated VM is free. Check for termination first.");
+        }
+        return idleCores == 1;
+    }
+
+    /**
      * Runtime of the VM in seconds. If the VM has not been launched, then
      * the result is 0. If the VM is not terminated, then we use the current
      * simulation time as the termination time. After the VM is terminated
@@ -136,9 +147,6 @@ public class VM extends CWSSimEntity {
             case WorkflowEvent.VM_TERMINATE:
                 terminateVM();
                 break;
-            case WorkflowEvent.JOB_SUBMIT:
-                jobSubmit((Job) ev.getData());
-                break;
             case WorkflowEvent.JOB_FINISHED:
                 jobFinish((Job) ev.getData());
                 break;
@@ -152,7 +160,7 @@ public class VM extends CWSSimEntity {
                 throw new UnknownWorkflowEventException("Unknown event: " + ev);
             }
         } else {
-            if (ev.getTag() == WorkflowEvent.VM_LAUNCH || ev.getTag() == WorkflowEvent.JOB_SUBMIT) {
+            if (ev.getTag() == WorkflowEvent.VM_LAUNCH) {
                 throw new IllegalStateException("Attempted to send launch or submit event to terminated VM:"
                         + this.getId());
             }
@@ -198,7 +206,13 @@ public class VM extends CWSSimEntity {
         getCloudsim().log(String.format("VM %d terminate request success", getId()));
     }
 
-    private void jobSubmit(Job job) {
+    /**
+     * Submits the given job to this VM and marks the VM as non-free.
+     */
+    public void jobSubmit(Job job) {
+        if (isTerminated) {
+            throw new IllegalStateException("Attempted to submit job to a terminated VM. Check for termination first.");
+        }
         job.setSubmitTime(getCloudsim().clock());
         job.setState(Job.State.IDLE);
         job.setVM(this);
@@ -241,7 +255,7 @@ public class VM extends CWSSimEntity {
                                         .getId(), actualRuntime));
 
         getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
-        
+
         // Mark that read has finished.
         readIntervals.get(job).stop();
         // Mark that computation has started.
@@ -267,7 +281,7 @@ public class VM extends CWSSimEntity {
 
         // Mark that write has finished.
         writeIntervals.get(job).stop();
-        
+
         // We may be able to start more jobs now
         startJobs();
     }
@@ -310,7 +324,7 @@ public class VM extends CWSSimEntity {
 
         getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
                 WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
-        
+
         // Mark that computation has finished
         computationIntervals.get(job).stop();
         // Mark that write has started.
@@ -402,7 +416,7 @@ public class VM extends CWSSimEntity {
     public void setTerminated(boolean b) {
         this.isTerminated = b;
     }
-    
+
     /**
      * Assumes one core VMs.
      */
@@ -413,7 +427,7 @@ public class VM extends CWSSimEntity {
         }
         return time;
     }
-    
+
     /**
      * Assumes one core VMs.
      */

@@ -1,10 +1,10 @@
 package cws.core;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -24,36 +24,27 @@ public class WorkflowEngine extends CWSSimEntity {
     public static int next_id = 0;
 
     /** The list of current {@link DAGJob}s. */
-    private LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
+    private final LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
 
-    private HashSet<JobListener> jobListeners = new HashSet<JobListener>();
+    private final HashSet<JobListener> jobListeners = new HashSet<JobListener>();
 
     /** The provisioner that allocates resources for this workflow engine */
-    private Provisioner provisioner;
+    private final Provisioner provisioner;
 
     /** The scheduler that matches jobs to resources for this workflow engine */
-    private Scheduler scheduler;
+    private final Scheduler scheduler;
 
-    /** The current VMs */
-    private LinkedList<VM> vms = new LinkedList<VM>();
-
-    /** The set of free VMs, i.e. the ones which are not executing any jobs (idle) */
-    protected Set<VM> freeVMs = new HashSet<VM>();
-
-    /** The set of busy VMs, i.e. the ones which execute jobs */
-    private Set<VM> busyVMs = new HashSet<VM>();
-
+    /** The currently running VMs */
+    private final LinkedList<VM> availableVms = new LinkedList<VM>();
+    
     /** The list of unmatched ready jobs */
-    private LinkedList<Job> queue = new LinkedList<Job>();
-
-    /** The value that is used by provisioner to estimate system load */
-    private int queueLength = 0;
+    private final LinkedList<Job> queue = new LinkedList<Job>();
 
     /** The simulation's deadline. */
-    private double deadline;
+    private final double deadline;
 
     /** The simulation's budget. */
-    private double budget;
+    private final double budget;
 
     private boolean provisioningRequestSend = false;
 
@@ -90,7 +81,7 @@ public class WorkflowEngine extends CWSSimEntity {
             break;
         case WorkflowEvent.PROVISIONING_REQUEST:
             if (provisioner != null)
-                if (vms.size() > 0 || dags.size() > 0)
+                if (availableVms.size() > 0 || dags.size() > 0)
                     provisioner.provisionResources(this);
             break;
         default:
@@ -100,7 +91,7 @@ public class WorkflowEngine extends CWSSimEntity {
 
     public double getCost() {
         double ret = cost;
-        for (VM vm : vms) {
+        for (VM vm : availableVms) {
             ret += vm.getCost();
         }
         return ret;
@@ -114,16 +105,13 @@ public class WorkflowEngine extends CWSSimEntity {
     }
 
     private void vmLaunched(VM vm) {
-        vms.add(vm);
-        freeVMs.add(vm);
+        availableVms.add(vm);
         scheduler.scheduleJobs(this);
     }
 
     private void vmTerminated(VM vm) {
         cost += vm.getCost();
-        vms.remove(vm);
-        freeVMs.remove(vm);
-        busyVMs.remove(vm);
+        availableVms.remove(vm);
     }
 
     private void dagSubmit(DAGJob dj) {
@@ -161,9 +149,6 @@ public class WorkflowEngine extends CWSSimEntity {
         for (JobListener jl : jobListeners) {
             jl.jobStarted(j);
         }
-        VM vm = j.getVM();
-        if (freeVMs.remove(vm))
-            busyVMs.add(vm);
     }
 
     private void jobFinished(Job job) {
@@ -195,7 +180,6 @@ public class WorkflowEngine extends CWSSimEntity {
             }
 
             getCloudsim().log(job.toString() + " finished on VM " + job.getVM().getId());
-
         } else if (job.getResult() == Job.Result.FAILURE) { // If the job failed
 
             // Log only if it was running job
@@ -210,6 +194,7 @@ public class WorkflowEngine extends CWSSimEntity {
             // Retry the job
             Job retry = new Job(dagJob, t, getId(), getCloudsim());
             retry.setRetry(true);
+
             jobReleased(retry);
 
         } else {
@@ -217,11 +202,6 @@ public class WorkflowEngine extends CWSSimEntity {
                     String.format("Job %d (task_id = %s, workflow_id = %s, retry = %s) exceeded deadline.",
                             job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry()));
         }
-
-        // add VM to free if contained in busy set
-        VM vm = job.getVM();
-        if (busyVMs.remove(vm))
-            freeVMs.add(vm);
 
         scheduler.scheduleJobs(this);
     }
@@ -234,28 +214,32 @@ public class WorkflowEngine extends CWSSimEntity {
         return budget;
     }
 
-    public int getQueueLength() {
-        return queueLength;
-    }
-
-    public void setQueueLength(int queueLength) {
-        this.queueLength = queueLength;
-    }
-
     public Queue<Job> getQueuedJobs() {
         return queue;
     }
 
     public List<VM> getAvailableVMs() {
-        return vms;
+        return availableVms;
     }
     
-    public Set<VM> getFreeVMs() {
-        return freeVMs;
+    public List<VM> getFreeVMs() {
+        List<VM> free = new ArrayList<VM>();
+        for (VM vm : availableVms) {
+            if (!vm.isTerminated() && vm.isFree()) {
+                free.add(vm);
+            }
+        }
+        return free;
     }
 
-    public Set<VM> getBusyVMs() {
-        return busyVMs;
+    public List<VM> getBusyVMs() {
+        List<VM> busy = new ArrayList<VM>();
+        for (VM vm : availableVms) {
+            if (!vm.isTerminated() && !vm.isFree()) {
+                busy.add(vm);
+            }
+        }
+        return busy;
     }
 
     public void addJobListener(JobListener l) {

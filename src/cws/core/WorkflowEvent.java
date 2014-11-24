@@ -61,9 +61,6 @@ public interface WorkflowEvent {
     // JOB EVENTS
     // ///////////////////////////////////////////////////////
 
-    /** Submit a new task */
-    public static final int JOB_SUBMIT = 16;
-
     /** Job begins execution on remote resource */
     public static final int JOB_STARTED = 17;
 

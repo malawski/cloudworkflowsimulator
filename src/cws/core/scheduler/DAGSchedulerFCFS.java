@@ -7,8 +7,6 @@ import java.util.Queue;
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
-import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.jobs.Job;
 
 /**
@@ -17,19 +15,10 @@ import cws.core.jobs.Job;
  * @author malawski
  */
 public class DAGSchedulerFCFS implements Scheduler {
-
-    private List<VM> vms;
-
-    private CloudSimWrapper cloudsim;
-
-    public DAGSchedulerFCFS(CloudSimWrapper cloudsim) {
-        this.cloudsim = cloudsim;
-    }
-
     @Override
     public void scheduleJobs(WorkflowEngine engine) {
         Queue<Job> jobs = engine.getQueuedJobs();
-        vms = engine.getAvailableVMs();
+        List<VM> vms = engine.getAvailableVMs();
 
         // if there is nothing to do, just return
         if (vms.isEmpty())
@@ -43,8 +32,7 @@ public class DAGSchedulerFCFS implements Scheduler {
             if (vm.getQueueLength() == 0) {
                 Job job = jobs.poll(); // retrieve and remove job from ready set
                 job.setVM(vm);
-                cloudsim.log(" Submitting job " + job.toString() + " to VM " + job.getVM().getId());
-                cloudsim.send(engine.getId(), vm.getId(), 0.0, WorkflowEvent.JOB_SUBMIT, job);
+                vm.jobSubmit(job);
             }
         }
     }
