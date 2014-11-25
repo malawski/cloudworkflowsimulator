@@ -83,6 +83,10 @@ public class VMType implements Cloneable {
         return getProvisioningDelay().sample() + getDeprovisioningDelay().sample();
     }
 
+    public double getDeprovisioningDelayEstimation() {
+        return getDeprovisioningDelay().sample();
+    }
+
     public VMType(double mips, int cores, double billingUnitPrice, double billingTimeInSeconds,
                   ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
         this.mips = mips;

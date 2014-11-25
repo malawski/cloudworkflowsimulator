@@ -77,7 +77,8 @@ public class Environment {
         return vmType.getProvisioningOverallDelayEstimation();
     }
 
+    @Deprecated
     public double getDeprovisioningDelayEstimation() {
-        return vmType.getDeprovisioningDelay().sample();
+        return vmType.getDeprovisioningDelayEstimation();
     }
 }
