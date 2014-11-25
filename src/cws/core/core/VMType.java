@@ -2,6 +2,8 @@ package cws.core.core;
 
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
+import cws.core.dag.Task;
+
 public class VMType implements Cloneable {
     /**
      * The processing power of this VM
@@ -67,8 +69,12 @@ public class VMType implements Cloneable {
         return cacheSize;
     }
 
+    public double getPredictedTaskRuntime(Task task) {
+        return task.getSize() / getMips();
+    }
+
     public VMType(double mips, int cores, double billingUnitPrice, double billingTimeInSeconds,
-            ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
+                  ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
         this.mips = mips;
         this.cores = cores;
         this.billingUnitPrice = billingUnitPrice;

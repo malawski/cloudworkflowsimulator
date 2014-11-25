@@ -24,11 +24,11 @@ public class Environment {
      * Returns task's predicted runtime. It is based on vmType and storage manager. <br>
      * Note that the estimation is trivial and may not be accurate during congestion and it doesn't include runtime
      * variance.
-     * 
+     *
      * @return task's predicted runtime as a double
      */
     public double getComputationPredictedRuntime(Task task) {
-        return task.getSize() / vmType.getMips();
+        return vmType.getPredictedTaskRuntime(task);
     }
 
     public double getComputationPredictedRuntime(DAG dag) {
