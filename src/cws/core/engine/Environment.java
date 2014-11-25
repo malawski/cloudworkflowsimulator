@@ -20,6 +20,11 @@ public class Environment {
         return vmType;
     }
 
+
+    public StorageManager getStorageManager() {
+        return storageManager;
+    }
+
     /**
      * Returns task's predicted runtime. It is based on vmType and storage manager. <br>
      * Note that the estimation is trivial and may not be accurate during congestion and it doesn't include runtime
@@ -38,7 +43,7 @@ public class Environment {
         }
         return sum;
     }
-    
+
     public double getTransfersPredictedRuntime(Task task) {
         return storageManager.getTransferTimeEstimation(task);
     }

@@ -388,7 +388,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
      * implementations.
      */
     protected CriticalPath newCriticalPath(TopologicalOrder order, HashMap<Task, Double> runtimes) {
-        return new CriticalPath(order, runtimes, getEnvironment());
+        return new CriticalPath(order, runtimes, getEnvironment().getVMType());
     }
 
     /**

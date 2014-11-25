@@ -17,7 +17,7 @@ public class DAGStats {
         HashMap<Task, Double> runTimes = computeMinimumCostOfRunningTheWorkflow(environment, order);
 
         // Make sure a plan is feasible given the deadline and available VMs
-        CriticalPath path = new CriticalPath(order, runTimes, environment);
+        CriticalPath path = new CriticalPath(order, runTimes, environment.getVMType());
         criticalPathLength = path.getCriticalPathLength();
     }
 
