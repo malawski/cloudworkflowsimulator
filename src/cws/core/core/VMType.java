@@ -79,6 +79,10 @@ public class VMType implements Cloneable {
         return Math.max(1, fullBillingUnits) * getPriceForBillingUnit();
     }
 
+    public double getProvisioningOverallDelayEstimation() {
+        return getProvisioningDelay().sample() + getDeprovisioningDelay().sample();
+    }
+
     public VMType(double mips, int cores, double billingUnitPrice, double billingTimeInSeconds,
                   ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
         this.mips = mips;

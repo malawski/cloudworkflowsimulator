@@ -72,8 +72,9 @@ public class Environment {
         return vmType.getBillingTimeInSeconds();
     }
 
+    @Deprecated
     public double getVMProvisioningOverallDelayEstimation() {
-        return vmType.getProvisioningDelay().sample() + vmType.getDeprovisioningDelay().sample();
+        return vmType.getProvisioningOverallDelayEstimation();
     }
 
     public double getDeprovisioningDelayEstimation() {
