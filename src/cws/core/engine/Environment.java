@@ -61,9 +61,7 @@ public class Environment {
     }
 
     public double getVMCostFor(double runtimeInSeconds) {
-        double billingUnits = runtimeInSeconds / getVMType().getBillingTimeInSeconds();
-        int fullBillingUnits = (int) Math.ceil(billingUnits);
-        return Math.max(1, fullBillingUnits) * vmType.getPriceForBillingUnit();
+        return getVMType().getVMCostFor(runtimeInSeconds);
     }
 
     public double getSingleVMPrice() {

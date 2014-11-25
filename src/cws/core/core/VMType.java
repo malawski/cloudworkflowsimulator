@@ -73,6 +73,12 @@ public class VMType implements Cloneable {
         return task.getSize() / getMips();
     }
 
+    public double getVMCostFor(double runtimeInSeconds) {
+        double billingUnits = runtimeInSeconds / getBillingTimeInSeconds();
+        int fullBillingUnits = (int) Math.ceil(billingUnits);
+        return Math.max(1, fullBillingUnits) * getPriceForBillingUnit();
+    }
+
     public VMType(double mips, int cores, double billingUnitPrice, double billingTimeInSeconds,
                   ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
         this.mips = mips;
