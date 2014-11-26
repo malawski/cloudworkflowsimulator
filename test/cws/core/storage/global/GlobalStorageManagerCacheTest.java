@@ -1,13 +1,13 @@
 package cws.core.storage.global;
 
-import java.util.ArrayList;
-
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+
+import com.google.common.collect.ImmutableList;
 
 import cws.core.VM;
 import cws.core.WorkflowEvent;
@@ -30,7 +30,7 @@ public class GlobalStorageManagerCacheTest {
     private VMCacheManager cacheManager;
     private GlobalStorageParams params;
     private GlobalStorageManager storageManager;
-    private ArrayList<DAGFile> files;
+    private ImmutableList<DAGFile> files;
     private int sz;
     private DAGFile df;
 
@@ -51,10 +51,9 @@ public class GlobalStorageManagerCacheTest {
         params.setWriteSpeed(321);
 
         storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
-        files = new ArrayList<DAGFile>();
         sz = 2442;
-        df = new DAGFile("abc.txt", sz);
-        files.add(df);
+        df = new DAGFile("abc.txt", sz, null);
+        files = ImmutableList.of(df);
     }
 
     @Test
@@ -67,7 +66,7 @@ public class GlobalStorageManagerCacheTest {
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         CloudSim.startSimulation();
 
-        Mockito.verify(cacheManager).getFileFromCache(df, job); // tried to get ...
+        Mockito.verify(cacheManager, Mockito.times(22)).getFileFromCache(df, job); // tried to get ...
         Mockito.verify(cacheManager).putFileToCache(df, job); // and then put
         Mockito.verifyNoMoreInteractions(cacheManager);
         Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
@@ -82,9 +81,10 @@ public class GlobalStorageManagerCacheTest {
         Mockito.when(task.getInputFiles()).thenReturn(files);
         StorageManagerTest.skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
-        Assert.assertEquals(0.0, CloudSim.startSimulation(), 0.0001);
+        Assert.assertEquals(0.01, CloudSim.startSimulation(), 0.01); // Cache latency.
 
-        Mockito.verify(cacheManager).getFileFromCache(df, job);
+        Mockito.verify(cacheManager, Mockito.times(3)).getFileFromCache(df, job);
+        Mockito.verify(cacheManager).putFileToCache(df, job);
         Mockito.verifyNoMoreInteractions(cacheManager);
         Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
                 Matchers.eq(WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED), Matchers.any());

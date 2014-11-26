@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
+import com.google.common.collect.ImmutableList;
+
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -110,7 +112,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         }
     }
 
-    private Job createSimpleJobMock(List<DAGFile> inputs, List<DAGFile> outputs) {
+    private Job createSimpleJobMock(ImmutableList<DAGFile> inputs, ImmutableList<DAGFile> outputs) {
         Task task = mock(Task.class);
 
         DAG dag = new DAG();
@@ -129,7 +131,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     }
 
     private Job createSimpleJobMock() {
-        return createSimpleJobMock(new ArrayList<DAGFile>(), new ArrayList<DAGFile>());
+        return createSimpleJobMock(ImmutableList.of(), ImmutableList.of());
     }
 
     private VM createVMMock() {

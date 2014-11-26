@@ -17,6 +17,8 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.google.common.collect.ImmutableList;
+
 import cws.core.Cloud;
 import cws.core.WorkflowEvent;
 import cws.core.dag.DAGFile;
@@ -48,10 +50,8 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
     @Test
     public void testGlobalStorageReadTransferTime() {
-        List<DAGFile> files = new ArrayList<DAGFile>();
         long sz = 2442;
-        files.add(new DAGFile("abc.txt", sz));
-        when(task.getInputFiles()).thenReturn(files);
+        when(task.getInputFiles()).thenReturn(ImmutableList.of(new DAGFile("abc.txt", sz, null)));
         skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         double time = CloudSim.startSimulation();
@@ -63,10 +63,8 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
     @Test
     public void testGlobalStorageWriteTransferTime() {
-        List<DAGFile> files = new ArrayList<DAGFile>();
         long sz = 2442;
-        files.add(new DAGFile("abc.txt", sz));
-        when(task.getOutputFiles()).thenReturn(files);
+        when(task.getOutputFiles()).thenReturn(ImmutableList.of(new DAGFile("abc.txt", sz, null)));
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
         double time = CloudSim.startSimulation();
@@ -78,10 +76,8 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
     @Test
     public void testGlobalStorageTwoFilesWriteTransferTime() {
-        List<DAGFile> files = new ArrayList<DAGFile>();
         long sz = 2442;
-        files.add(new DAGFile("abc.txt", sz));
-        files.add(new DAGFile("abc2.txt", sz));
+        ImmutableList<DAGFile> files = ImmutableList.of(new DAGFile("abc.txt", sz, null), new DAGFile("abc2.txt", sz, null));
         when(task.getOutputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
@@ -129,12 +125,10 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         when(job2.getVM()).thenReturn(vm);
         Task task2 = Mockito.mock(Task.class);
         when(job2.getTask()).thenReturn(task2);
-        List<DAGFile> files2 = new ArrayList<DAGFile>();
-        files2.add(new DAGFile("abc2.txt", size));
+        ImmutableList<DAGFile> files2 = ImmutableList.of(new DAGFile("abc2.txt", size, null));
         when(task2.getOutputFiles()).thenReturn(files2);
 
-        List<DAGFile> files = new ArrayList<DAGFile>();
-        files.add(new DAGFile("abc.txt", size));
+        ImmutableList<DAGFile> files = ImmutableList.of(new DAGFile("abc.txt", size, null));
         when(task.getOutputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_AFTER_TASK_COMPLETED, job);
@@ -150,8 +144,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
     public void testGlobalStorageComplexReadCongestion() {
         params.setNumReplicas(1000);
         long size = 2313244;
-        List<DAGFile> files = new ArrayList<DAGFile>();
-        files.add(new DAGFile("abc.txt", size));
+        ImmutableList<DAGFile> files = ImmutableList.of(new DAGFile("abc.txt", size, null));
         when(task.getInputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
@@ -171,14 +164,13 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         when(job2.getVM()).thenReturn(vm);
         Task task2 = Mockito.mock(Task.class);
         when(job2.getTask()).thenReturn(task2);
-        List<DAGFile> files2 = new ArrayList<DAGFile>();
+        ImmutableList.Builder<DAGFile> files2 = ImmutableList.builder();
         for (int i = 0; i < numSmaller; i++) {
-            files2.add(new DAGFile("abc.txt" + i, size / numSmaller));
+            files2.add(new DAGFile("abc.txt" + i, size / numSmaller, null));
         }
-        when(task2.getInputFiles()).thenReturn(files2);
+        when(task2.getInputFiles()).thenReturn(files2.build());
 
-        List<DAGFile> files = new ArrayList<DAGFile>();
-        files.add(new DAGFile("abc.txt", size));
+        ImmutableList<DAGFile> files = ImmutableList.of(new DAGFile("abc.txt", size, null));
         when(task.getInputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED, cloudsim);
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
@@ -196,8 +188,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         double terminateTime = 444;
         Cloud cloud = new Cloud(cloudsim);
 
-        List<DAGFile> files = new ArrayList<DAGFile>();
-        files.add(new DAGFile("abc.txt", size));
+        ImmutableList<DAGFile> files = ImmutableList.of(new DAGFile("abc.txt", size, null));
         when(task.getOutputFiles()).thenReturn(files);
         skipEvent(100, WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED, cloudsim);
         skipEvent(100, WorkflowEvent.VM_LAUNCH, cloudsim);
@@ -227,9 +218,9 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
 
     @Test
     public void testGlobalTimeInputEstimation() {
-        List<DAGFile> files = new ArrayList<DAGFile>();
         long sz = 22222;
-        files.add(new DAGFile("abc.txt", sz));
+        List<DAGFile> files = new ArrayList<DAGFile>();
+        files.add(new DAGFile("abc.txt", sz, null));
         Task t = new Task("xx", "xx", 222);
         t.addInputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);
@@ -240,7 +231,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
     public void testGlobalTimeOutputEstimation() {
         List<DAGFile> files = new ArrayList<DAGFile>();
         long sz = 22222;
-        files.add(new DAGFile("abc.txt", sz));
+        files.add(new DAGFile("abc.txt", sz, null));
         Task t = new Task("xx", "xx", 222);
         t.addOutputFiles(files);
         double time = storageManager.getTransferTimeEstimation(t);

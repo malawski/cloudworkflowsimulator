@@ -3,30 +3,32 @@ package cws.core.dag;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * @author Gideon Juve <juve@usc.edu>
  */
 public class Task {
     /** Globally uniqe task id */
-    private String id = null;
+    private final String id;
 
     /** Transformation string taken from some daxes. Not really important and used only for logging. */
-    private String transformation = null;
+    private final String transformation;
 
     /** Number of MIPS needed to compute this task */
-    private double size = 0.0;
+    private double size;
 
     /** Task's parents - the tasks that produce inputFiles */
-    private List<Task> parents = new ArrayList<Task>(2);
+    private final List<Task> parents = new ArrayList<Task>(2);
 
     /** Task's children - the tasks which this Task produce files for */
-    private List<Task> children = new ArrayList<Task>(5);
+    private final List<Task> children = new ArrayList<Task>(5);
 
     /** Task's input files */
-    private List<DAGFile> inputFiles = new ArrayList<DAGFile>();
+    private ImmutableList<DAGFile> inputFiles = ImmutableList.of();
 
     /** Task's output files */
-    private List<DAGFile> outputFiles = new ArrayList<DAGFile>();
+    private ImmutableList<DAGFile> outputFiles = ImmutableList.of();
 
     public Task(String id, String transformation, double size) {
         this.id = id;
@@ -87,19 +89,19 @@ public class Task {
         return children;
     }
 
-    public List<DAGFile> getInputFiles() {
+    public ImmutableList<DAGFile> getInputFiles() {
         return inputFiles;
     }
 
     public void addInputFiles(List<DAGFile> inputs) {
-        this.inputFiles.addAll(inputs);
+        this.inputFiles = ImmutableList.<DAGFile>builder().addAll(this.inputFiles).addAll(inputs).build();
     }
 
-    public List<DAGFile> getOutputFiles() {
+    public ImmutableList<DAGFile> getOutputFiles() {
         return outputFiles;
     }
 
     public void addOutputFiles(List<DAGFile> outputs) {
-        this.outputFiles.addAll(outputs);
+        this.outputFiles = ImmutableList.<DAGFile>builder().addAll(this.outputFiles).addAll(outputs).build();
     }
 }

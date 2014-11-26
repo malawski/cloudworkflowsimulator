@@ -42,15 +42,15 @@ public abstract class VMCacheManagerTest {
 
     @Test
     public void testFilesNotInCache() {
-        Assert.assertFalse(cm.getFileFromCache(new DAGFile("abc.txt", 100), job));
-        Assert.assertFalse(cm.getFileFromCache(new DAGFile("abc.txt", 100), job));
-        Assert.assertFalse(cm.getFileFromCache(new DAGFile("sadsadsaddsa", 100), job));
+        Assert.assertFalse(cm.getFileFromCache(new DAGFile("abc.txt", 100, null), job));
+        Assert.assertFalse(cm.getFileFromCache(new DAGFile("abc.txt", 100, null), job));
+        Assert.assertFalse(cm.getFileFromCache(new DAGFile("sadsadsaddsa", 100, null), job));
     }
 
     @Test
     public void testTooBigFile() {
         Mockito.when(vmType.getCacheSize()).thenReturn((long) 100);
-        DAGFile file = new DAGFile("abc.txt", 10000);
+        DAGFile file = new DAGFile("abc.txt", 10000, null);
         cm.putFileToCache(file, job);
         Assert.assertFalse(cm.getFileFromCache(file, job));
     }

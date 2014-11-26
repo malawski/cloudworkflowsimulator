@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
+import com.google.common.collect.ImmutableList;
+
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -98,7 +100,7 @@ public class EnsembleDynamicSchedulerUnitTest {
         }
     }
 
-    private Job createJobMock(List<DAGFile> inputs, List<DAGFile> outputs) {
+    private Job createJobMock(ImmutableList<DAGFile> inputs, ImmutableList<DAGFile> outputs) {
         Task task = mock(Task.class);
         Job job = new Job(new DAGJob(new DAG(), 2), task, -1, cloudsim);
 
@@ -111,7 +113,7 @@ public class EnsembleDynamicSchedulerUnitTest {
     }
 
     private Job createJobMock() {
-        return createJobMock(new ArrayList<DAGFile>(), new ArrayList<DAGFile>());
+        return createJobMock(ImmutableList.of(), ImmutableList.of());
     }
 
     private VM createVMMock() {

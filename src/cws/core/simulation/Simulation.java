@@ -54,7 +54,7 @@ public class Simulation {
     private static final String DEFAULT_SCALING_FACTOR = "1.0";
 
     /**
-     * Storage cache type. Allowed values: void, global.
+     * Storage cache type. Allowed values: void, fifo.
      */
     private static final String DEFAULT_STORAGE_CACHE = "void";
 
@@ -390,7 +390,7 @@ public class Simulation {
                     + "lastVMFinish,runtimeVariance,failureRate,minBudget,"
                     + "maxBudget,minDeadline,maxDeadline,"
                     + "timeSpentOnTransfers,timeSpentOnComputations,"
-                    + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
+                    + "storageManagerType,storageCacheType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
                     + "actualBytesRead,actualBytesTransferred,"
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
                     + "actualFilesRead,actualFilesTransferred");
@@ -440,7 +440,7 @@ public class Simulation {
                             algorithmStatistics.getTimeSpentOnComputations());
 
                     StorageManagerStatistics stats = environment.getStorageManagerStatistics();
-                    fileOut.printf("%s,%d,%d,%d,%d,%d,", storageManagerType, stats.getTotalBytesToRead(),
+                    fileOut.printf("%s,%s,%d,%d,%d,%d,%d,", storageManagerType, storageCacheType, stats.getTotalBytesToRead(),
                             stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
                             stats.getActualBytesRead(), stats.getActualBytesRead() + stats.getTotalBytesToWrite());
 

@@ -15,12 +15,13 @@ applications = ["MONTAGE", "GENOME", "CYBERSHAKE"]
 algorithms = ["DPDS", "WADPDS", "SA-WADPDS", "SPSS", "SA-SPSS"]
 input_dirs = {"CYBERSHAKE" => "CYBERSHAKE", "GENOME" => "GENOME",
     "LIGO" => "LIGO", "MONTAGE" => "MONTAGE", "SIPHT" => "SIPHT"}
-distributions = ["pareto_unsorted"]
+distributions = ["pareto_sorted"]
 num_replicas = [100]
 latencies = [0.5]
 storage_managers = ["void", "global"]
-read_speeds =  [31460000] # 30 MiB/s
-write_speeds = [31460000] # 30 MiB/s
+caches = ["void", "fifo"]
+read_speeds =  [20971520] # 20 MiB/s
+write_speeds = [20971520] # 20 MiB/s
 failure_rate = 0
 ensemble_size = 20
 variation = 0.0
@@ -82,6 +83,10 @@ OptionParser.new do |opts|
   opts.on("--gs-latencies x,y", Array, "Optional list latencies for storage manager, " +
       "defaults to #{latencies.join(',')}") do |val|
     latencies = val
+  end
+  opts.on("--caches x,y", Array, "Optional list of storage cache managers, " +
+      "defaults to #{caches.join(',')}") do |val|
+    caches = val
   end
   opts.on("--queue-name NAME", String, "Optional queue name, defaults to \"#{queue_name}\"") do |val|
     queue_name = val
@@ -154,34 +159,37 @@ for seed in seeds do
             for read_speed in read_speeds do
               for num_replica in num_replicas do
                 for latency in latencies do
-                  id = id + 1
-                  task_id = task_id + 1
-                  id_string = "%08d" % id
-                  args = "--application #{application} " +
-                    "--input-dir #{dag_dir}/#{input_dirs[application]}/ " +
-                  "--output-file #{run_dir}/#{name_prefix}-output-#{id_string}-#{application}-#{algorithm}-#{storage_manager}.dat " +
-                  "--distribution #{distribution} " +
-                    "--ensemble-size #{ensemble_size} " +
-                    "--algorithm #{algorithm} " +
-                    "--seed #{seed} " +
-                    "--failure-rate #{failure_rate} " +
-                    "--runtime-variance #{variation} " +
-                    "--storage-manager #{storage_manager} " +
-                    "--enable-logging #{cws_logs} " +
-                    "--vm-directory #{mydir}/../../vms " +
-                    "--global-storage-directory #{mydir}/../../gs "
-                  if storage_manager != 'void' then
-                    args = args + "--gs-read-speed #{read_speed} " +
-                      "--gs-write-speed #{write_speed} " +
-                      "--gs-latency #{latency} " +
-                      "--gs-replicas #{num_replica}"
-                    #elsif !void_manager_written then
-                    #  void_manager_written = true
-                    #else
-                    #  break
+                  for cache in caches do
+                    id = id + 1
+                    task_id = task_id + 1
+                    id_string = "%08d" % id
+                    args = "--application #{application} " +
+                      "--input-dir #{dag_dir}/#{input_dirs[application]}/ " +
+                    "--output-file #{run_dir}/#{name_prefix}-output-#{id_string}-#{application}-#{algorithm}-#{storage_manager}.dat " +
+                    "--distribution #{distribution} " +
+                      "--ensemble-size #{ensemble_size} " +
+                      "--algorithm #{algorithm} " +
+                      "--seed #{seed} " +
+                      "--failure-rate #{failure_rate} " +
+                      "--runtime-variance #{variation} " +
+                      "--storage-manager #{storage_manager} " +
+                      "--enable-logging #{cws_logs} " +
+                      "--vm-directory #{mydir}/../../vms " +
+                      "--global-storage-directory #{mydir}/../../gs "
+                    if storage_manager != 'void' then
+                      args = args + "--gs-read-speed #{read_speed} " +
+                        "--gs-write-speed #{write_speed} " +
+                        "--gs-latency #{latency} " +
+                        "--storage-cache #{cache} " +
+                        "--gs-replicas #{num_replica}"
+                      elsif !void_manager_written then
+                        void_manager_written = true
+                      else
+                        break
+                    end
+                    args = args + "\n"
+                    file.write args
                   end
-                  args = args + "\n"
-                  file.write args
                 end
               end
             end

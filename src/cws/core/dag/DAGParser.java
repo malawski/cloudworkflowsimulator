@@ -90,7 +90,7 @@ public class DAGParser {
                     ArrayList<DAGFile> inputs = new ArrayList<DAGFile>(rec.length - 2);
                     String task = rec[1];
                     for (int i = 2; i < rec.length; i++) {
-                        DAGFile file = new DAGFile(rec[i], dag.getFileSize(rec[i]));
+                        DAGFile file = new DAGFile(rec[i], dag.getFileSize(rec[i]), dag);
                         inputs.add(file);
                     }
                     dag.setInputs(task, inputs);
@@ -101,7 +101,7 @@ public class DAGParser {
                     ArrayList<DAGFile> outputs = new ArrayList<DAGFile>(rec.length - 2);
                     String task = rec[1];
                     for (int i = 2; i < rec.length; i++) {
-                        DAGFile file = new DAGFile(rec[i], dag.getFileSize(rec[i]));
+                        DAGFile file = new DAGFile(rec[i], dag.getFileSize(rec[i]), dag);
                         outputs.add(file);
                     }
                     dag.setOutputs(task, outputs);
@@ -214,7 +214,7 @@ public class DAGParser {
 
                         // Add the file to the dag
                         dag.addFile(fileName, size);
-                        DAGFile file = new DAGFile(fileName, size);
+                        DAGFile file = new DAGFile(fileName, size, dag);
 
                         // Determine if the file is an input or an output
                         if ("input".equalsIgnoreCase(link)) {
