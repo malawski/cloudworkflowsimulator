@@ -14,7 +14,7 @@ import cws.core.storage.StorageManager;
  */
 public class StorageAwareCriticalPath extends CriticalPath {
 
-    private StorageManager storageManager;
+    final private StorageManager storageManager;
 
     public StorageAwareCriticalPath(TopologicalOrder order, Map<Task, Double> runtimes,
                                     VMType vmType,  StorageManager storageManager) {
