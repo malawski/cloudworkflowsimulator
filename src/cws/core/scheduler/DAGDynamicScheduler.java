@@ -17,7 +17,7 @@ import cws.core.jobs.Job;
  * Job is submitted to VM only if VM is idle (no queuing in VMs).
  * @author malawski
  */
-public class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
+public abstract class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
     protected Environment environment;
 
     public DAGDynamicScheduler(CloudSimWrapper cloudsim, Environment environment) {
@@ -26,12 +26,7 @@ public class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
     }
 
     @Override
-    public void scheduleJobs(WorkflowEngine engine) {
-        // use the queued (released) jobs from the workflow engine
-        Queue<Job> jobs = engine.getQueuedJobs();
-
-        scheduleQueue(jobs, engine);
-    }
+    public abstract void scheduleJobs(WorkflowEngine engine);
 
     /**
      * Schedule all jobs from the queue to available free VMs.

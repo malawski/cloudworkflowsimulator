@@ -24,7 +24,7 @@ import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 
-public class DAGDynamicSchedulerUnitTest {
+public class EnsembleDynamicSchedulerUnitTest {
     DAGDynamicScheduler scheduler;
     WorkflowEngine engine;
     CloudSimWrapper cloudsim;
@@ -38,8 +38,9 @@ public class DAGDynamicSchedulerUnitTest {
         cloudsim = mock(CloudSimWrapper.class);
         environment = mock(Environment.class);
 
-        scheduler = new DAGDynamicScheduler(cloudsim, environment);
+        scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
         engine = mock(WorkflowEngine.class);
+        when(engine.getDeadline()).thenReturn(1.0);
 
         jobs = new LinkedList<Job>();
         freeVMs = new ArrayList<VM>();

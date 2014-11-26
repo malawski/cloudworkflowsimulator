@@ -1,6 +1,6 @@
 mips: 1
 cores: 1
-cacheSize: 100000000
+cacheSize: 106325606400 # 100 GiB
 
 billing:
     unitTime: 3600.0
