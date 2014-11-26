@@ -29,7 +29,7 @@ import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 
-public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener {
+public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Provisioner, Scheduler, VMListener, JobListener {
     /** Plan */
     private Plan plan = new Plan();
 
