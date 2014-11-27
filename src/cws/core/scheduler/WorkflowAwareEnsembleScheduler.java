@@ -28,28 +28,6 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
     private final Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
     private final Set<DAGJob> rejectedDAGs = new HashSet<DAGJob>();
 
-    @Override
-    public void scheduleJobs(WorkflowEngine engine) {
-
-        // check the deadline constraints (provisioner takes care about budget)
-        double deadline = engine.getDeadline();
-        double time = getCloudsim().clock();
-
-        // stop scheduling any new jobs if we are over deadline
-        if (time >= deadline) {
-            return;
-        }
-
-        Queue<Job> jobs = engine.getQueuedJobs();
-
-        // move all jobs to priority queue
-        prioritizedJobs.addAll(jobs);
-        jobs.clear();
-
-        // use prioritized list for scheduling
-        scheduleQueue(prioritizedJobs, engine);
-    }
-
     /**
      * Schedule all jobs from the queue to available free VMs.
      * Successfully scheduled jobs are removed from the queue.

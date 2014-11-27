@@ -16,28 +16,14 @@ import cws.core.jobs.Job;
  * @author malawski
  */
 public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
+    private final PriorityQueue<Job> prioritizedJobs = new PriorityQueue<Job>(64, new JobPriorityComparator());
 
     public EnsembleDynamicScheduler(CloudSimWrapper cloudsim, Environment environment) {
         super(cloudsim, environment);
     }
 
-    /**
-     * Compares jobs based on their priority
-     */
-    protected class JobComparator implements Comparator<Job> {
-
-        @Override
-        public int compare(Job j1, Job j2) {
-            return j1.getDAGJob().getPriority() - j2.getDAGJob().getPriority();
-        }
-
-    }
-
-    PriorityQueue<Job> prioritizedJobs = new PriorityQueue<Job>(64, new JobComparator());
-
     @Override
-    public void scheduleJobs(WorkflowEngine engine) {
-
+    public final void scheduleJobs(WorkflowEngine engine) {
         // check the deadline constraints (provisioner takes care about budget)
         double deadline = engine.getDeadline();
         double time = getCloudsim().clock();
@@ -58,5 +44,15 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
     private void moveAllJobsToPriorityQueue(Queue<Job> jobs) {
         prioritizedJobs.addAll(jobs);
         jobs.clear();
+    }
+
+    /**
+     * Compares jobs based on their priority
+     */
+    private static final class JobPriorityComparator implements Comparator<Job> {
+        @Override
+        public int compare(Job job1, Job job2) {
+            return Integer.compare(job1.getDAGJob().getPriority(), job2.getDAGJob().getPriority());
+        }
     }
 }

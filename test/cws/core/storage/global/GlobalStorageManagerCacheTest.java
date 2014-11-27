@@ -66,7 +66,7 @@ public class GlobalStorageManagerCacheTest {
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         CloudSim.startSimulation();
 
-        Mockito.verify(cacheManager, Mockito.times(22)).getFileFromCache(df, job); // tried to get ...
+        Mockito.verify(cacheManager, Mockito.atLeastOnce()).getFileFromCache(df, job); // tried to get ...
         Mockito.verify(cacheManager).putFileToCache(df, job); // and then put
         Mockito.verifyNoMoreInteractions(cacheManager);
         Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
@@ -83,7 +83,7 @@ public class GlobalStorageManagerCacheTest {
         CloudSim.send(-1, storageManager.getId(), 0, WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         Assert.assertEquals(0.01, CloudSim.startSimulation(), 0.01); // Cache latency.
 
-        Mockito.verify(cacheManager, Mockito.times(3)).getFileFromCache(df, job);
+        Mockito.verify(cacheManager, Mockito.atLeastOnce()).getFileFromCache(df, job);
         Mockito.verify(cacheManager).putFileToCache(df, job);
         Mockito.verifyNoMoreInteractions(cacheManager);
         Mockito.verify(cloudsim).send(Matchers.anyInt(), Matchers.eq(100), Matchers.anyDouble(),
