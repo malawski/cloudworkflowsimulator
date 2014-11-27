@@ -325,8 +325,8 @@ public class Simulation {
         for (String name : names) {
             DAG dag = DAGParser.parseDAG(new File(name));
             dag.setId(new Integer(workflow_id).toString());
-            System.out.println(String.format("Workflow %d, priority = %d, filename = %s", workflow_id, names.length
-                    - workflow_id, name));
+            System.out.format("Workflow %d, priority = %d, filename = %s%n",
+                    workflow_id, names.length - workflow_id, name);
             workflow_id++;
             dags.add(dag);
 
@@ -340,11 +340,11 @@ public class Simulation {
             DAGStats dagStats = new DAGStats(dag, environment.getVMType());
 
             minTime = Math.min(minTime, dagStats.getCriticalPathLength())
-                + environment.getVMProvisioningOverallDelayEstimation();
+                    + environment.getVMProvisioningOverallDelayEstimation();
             minCost = Math.min(minCost, dagStats.getMinCost());
 
             maxTime += dagStats.getCriticalPathLength() 
-                + environment.getVMProvisioningOverallDelayEstimation();
+                    + environment.getVMProvisioningOverallDelayEstimation();
             maxCost += dagStats.getMinCost();
         }
 
@@ -385,15 +385,15 @@ public class Simulation {
         try {
             fileOut = new PrintStream(new FileOutputStream(outputfile));
             fileOut.println("application,distribution,seed,dags,scale,budget,"
-                            + "deadline,algorithm,completed,exponential,linear,"
-                            + "planning,simulation,scorebits,cost,lastJobFinish,lastDagFinish,"
-                            + "lastVMFinish,runtimeVariance,failureRate,minBudget,"
-                            + "maxBudget,minDeadline,maxDeadline,"
-                            + "timeSpentOnTransfers,timeSpentOnComputations,"
-                            + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
-                            + "actualBytesRead,actualBytesTransferred,"
-                            + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
-                            + "actualFilesRead,actualFilesTransferred");
+                    + "deadline,algorithm,completed,exponential,linear,"
+                    + "planning,simulation,scorebits,cost,lastJobFinish,lastDagFinish,"
+                    + "lastVMFinish,runtimeVariance,failureRate,minBudget,"
+                    + "maxBudget,minDeadline,maxDeadline,"
+                    + "timeSpentOnTransfers,timeSpentOnComputations,"
+                    + "storageManagerType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
+                    + "actualBytesRead,actualBytesTransferred,"
+                    + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
+                    + "actualFilesRead,actualFilesTransferred");
 
             for (double budget = minBudget; budget <= maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
@@ -417,7 +417,7 @@ public class Simulation {
                     environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
-                                                          deadline, environment);
+                            deadline, environment);
 
                     algorithm.simulate();
 
@@ -428,25 +428,25 @@ public class Simulation {
                     fileOut.printf("%s,%s,%d,%d,", application, distribution, seed, ensembleSize);
                     fileOut.printf("%f,%f,%f,%s,", scalingFactor, budget, deadline, algorithm.getName());
                     fileOut.printf("%d,%.10f,%.10f,%f,", algorithmStatistics.getFinishedDags().size(),
-                                   algorithmStatistics.getExponentialScore(), algorithmStatistics.getLinearScore(),
-                                   planningTime);
+                            algorithmStatistics.getExponentialScore(), algorithmStatistics.getLinearScore(),
+                            planningTime);
                     fileOut.printf("%f,%s,%f,%f,%f,", simulationTime, algorithmStatistics.getScoreBitString(),
-                                   algorithmStatistics.getCost(), algorithmStatistics.getLastJobFinishTime(),
-                                   algorithmStatistics.getLastDagFinishTime());
+                            algorithmStatistics.getCost(), algorithmStatistics.getLastJobFinishTime(),
+                            algorithmStatistics.getLastDagFinishTime());
                     fileOut.printf("%f,%f,%f,%f,%f,%f,%f,", algorithmStatistics.getLastVMFinishTime(),
-                                   VMFactory.getRuntimeVariance(), VMFactory.getFailureRate(), minBudget, maxBudget,
-                                   minDeadline, maxDeadline);
+                            VMFactory.getRuntimeVariance(), VMFactory.getFailureRate(), minBudget, maxBudget,
+                            minDeadline, maxDeadline);
                     fileOut.printf("%f,%f,", algorithmStatistics.getTimeSpentOnTransfers(),
-                                   algorithmStatistics.getTimeSpentOnComputations());
+                            algorithmStatistics.getTimeSpentOnComputations());
 
                     StorageManagerStatistics stats = environment.getStorageManagerStatistics();
                     fileOut.printf("%s,%d,%d,%d,%d,%d,", storageManagerType, stats.getTotalBytesToRead(),
-                                   stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
-                                   stats.getActualBytesRead(), stats.getActualBytesRead() + stats.getTotalBytesToWrite());
+                            stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
+                            stats.getActualBytesRead(), stats.getActualBytesRead() + stats.getTotalBytesToWrite());
 
                     fileOut.printf("%d,%d,%d,%d,%d\n", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
-                                   stats.getTotalFilesToRead() + stats.getTotalFilesToWrite(), stats.getActualFilesRead(),
-                                   stats.getActualFilesRead() + stats.getTotalFilesToWrite());
+                            stats.getTotalFilesToRead() + stats.getTotalFilesToWrite(), stats.getActualFilesRead(),
+                            stats.getActualFilesRead() + stats.getTotalFilesToWrite());
                 }
             }
             System.out.println();
@@ -461,7 +461,7 @@ public class Simulation {
         for (int i = 0; i < dags.size(); i++) {
             DAG dag = dags.get(i);
             String workflowDescription = String.format("Workflow %s, priority = %d, filename = %s", dag.getId(),
-                                                       dags.size() - i, names[i]);
+                    dags.size() - i, names[i]);
             cloudsim.log(workflowDescription);
         }
     }
@@ -490,7 +490,7 @@ public class Simulation {
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
-                                        CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
+            CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
         AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim);
 
         if ("SPSS".equals(algorithmName)) {
@@ -516,7 +516,7 @@ public class Simulation {
      * @return Output stream for logs for current simulation.
      */
     private OutputStream getLogOutputStream(double budget, double deadline, File outputfile)
-        throws FileNotFoundException {
+            throws FileNotFoundException {
         String name = String.format("%s.b-%.2f-d-%.2f.log", outputfile.getAbsolutePath(), budget, deadline);
         return new FileOutputStream(new File(name));
     }

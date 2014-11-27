@@ -17,7 +17,7 @@ public class StorageAwareCriticalPath extends CriticalPath {
     final private StorageManager storageManager;
 
     public StorageAwareCriticalPath(TopologicalOrder order, Map<Task, Double> runtimes,
-                                    VMType vmType,  StorageManager storageManager) {
+            VMType vmType,  StorageManager storageManager) {
         super(order, runtimes, vmType);
 
         this.storageManager = storageManager;
@@ -27,6 +27,6 @@ public class StorageAwareCriticalPath extends CriticalPath {
     @Override
     protected double getPredictedTaskRuntime(Task task, VMType vmType) {
         return vmType.getPredictedTaskRuntime(task)
-            + this.storageManager.getTransferTimeEstimation(task);
+                + this.storageManager.getTransferTimeEstimation(task);
     }
 }
