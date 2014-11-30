@@ -1,5 +1,7 @@
 package cws.core.jobs;
 
+import com.google.common.base.Preconditions;
+
 import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGJob;
@@ -24,22 +26,22 @@ public class Job {
     }
 
     /** The ID of this job */
-    private int id;
+    private final int id;
 
     /** The VM where this job ran */
     private VM vm;
 
     /** The DAG that spawned this job */
-    private DAGJob dagJob;
+    private final DAGJob dagJob;
 
     /** The task that this job executes */
-    private Task task;
+    private final Task task;
 
     /** The owner of the job */
-    private int owner;
+    private final int owner;
 
     /** Time the job was released */
-    private double releaseTime;
+    private final double releaseTime;
 
     /** Submit time of the job */
     private double submitTime;
@@ -60,6 +62,8 @@ public class Job {
     private boolean isRetry = false;
 
     public Job(DAGJob dagJob, Task task, int owner, CloudSimWrapper cloudsim) {
+        Preconditions.checkNotNull(dagJob);
+        Preconditions.checkNotNull(task);
         this.id = next_id++;
         this.releaseTime = cloudsim.clock();
         this.state = State.QUEUED;
@@ -91,10 +95,6 @@ public class Job {
 
     public Task getTask() {
         return task;
-    }
-
-    public void setReleaseTime(double releaseTime) {
-        this.releaseTime = releaseTime;
     }
 
     public double getReleaseTime() {

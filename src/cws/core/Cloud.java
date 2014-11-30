@@ -3,6 +3,8 @@ package cws.core;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -17,9 +19,9 @@ import cws.core.exception.UnknownWorkflowEventException;
 public class Cloud extends CWSSimEntity {
 
     /** The set of currently active VMs */
-    private HashSet<VM> vms = new HashSet<VM>();
+    private final Set<VM> vms = new HashSet<VM>();
 
-    private HashSet<VMListener> vmListeners = new HashSet<VMListener>();
+    private final Set<VMListener> vmListeners = new HashSet<VMListener>();
 
     public Cloud(CloudSimWrapper cloudsim) {
         super("Cloud", cloudsim);
@@ -29,12 +31,8 @@ public class Cloud extends CWSSimEntity {
         vmListeners.add(l);
     }
 
-    public void removeVMListener(VMListener l) {
-        vmListeners.remove(l);
-    }
-    
-    public Set<VM> getAllVms() {
-        return vms;
+    public Set<VM> getAllVMs() {
+        return ImmutableSet.copyOf(vms);
     }
 
     @Override
@@ -57,14 +55,17 @@ public class Cloud extends CWSSimEntity {
         }
     }
 
-    private void launchVM(int owner, VM vm) {
+    /**
+     * Launches the given VM and adds it to acvite VMs pool.
+     */
+    public void launchVM(int owner, VM vm) {
         vm.setOwner(owner);
         vm.setCloud(getId());
         vm.setLaunchTime(getCloudsim().clock());
         vms.add(vm);
 
         // We launch the VM now...
-        getCloudsim().sendNow(this.getId(), vm.getId(), WorkflowEvent.VM_LAUNCH, null);
+        vm.launch();
 
         // But it isn't ready until after the delay
         getCloudsim().send(getId(), getId(), vm.getProvisioningDelay(), WorkflowEvent.VM_LAUNCHED, vm);
@@ -85,14 +86,16 @@ public class Cloud extends CWSSimEntity {
         getCloudsim().sendNow(this.getId(), vm.getOwner(), WorkflowEvent.VM_LAUNCHED, vm);
     }
 
-    private void terminateVM(VM vm) {
+    /**
+     * Terminates the given VM. It will still be charged for the deprovisioning delay.
+     */
+    public final void terminateVM(VM vm) {
         // Sanity check
         if (!vms.contains(vm)) {
             throw new RuntimeException("Unknown VM: " + vm.getId());
         }
-        vm.setTerminated(true);
         // We terminate the VM now...
-        getCloudsim().sendNow(this.getId(), vm.getId(), WorkflowEvent.VM_TERMINATE, null);
+        vm.terminate();
 
         // But it isn't gone until after the delay
         getCloudsim().send(getId(), getId(), vm.getDeprovisioningDelay(), WorkflowEvent.VM_TERMINATED, vm);
@@ -106,7 +109,7 @@ public class Cloud extends CWSSimEntity {
         for (VMListener l : vmListeners) {
             l.vmTerminated(vm);
         }
-        
+
         vm.setTerminateTime(getCloudsim().clock());
 
         // The owner finds out

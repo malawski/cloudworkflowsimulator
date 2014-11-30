@@ -1,10 +1,12 @@
 package cws.core;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -223,23 +225,23 @@ public class WorkflowEngine extends CWSSimEntity {
     }
     
     public List<VM> getFreeVMs() {
-        List<VM> free = new ArrayList<VM>();
+        Builder<VM> free = ImmutableList.<VM>builder();
         for (VM vm : availableVms) {
             if (!vm.isTerminated() && vm.isFree()) {
                 free.add(vm);
             }
         }
-        return free;
+        return free.build();
     }
 
     public List<VM> getBusyVMs() {
-        List<VM> busy = new ArrayList<VM>();
+        Builder<VM> busy = ImmutableList.<VM>builder();
         for (VM vm : availableVms) {
             if (!vm.isTerminated() && !vm.isFree()) {
                 busy.add(vm);
             }
         }
-        return busy;
+        return busy.build();
     }
 
     public void addJobListener(JobListener l) {

@@ -40,7 +40,7 @@ public class VMTest {
 
         @Override
         public void startEntity() {
-            sendNow(vm.getId(), WorkflowEvent.VM_LAUNCH);
+            vm.launch();
 
             // Submit all the jobs
             for (Job job : jobs) {
@@ -196,7 +196,7 @@ public class VMTest {
         Job job = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
-        vm.jobSubmit(job);
+        cloudsim.send(driver.getId(), vm.getId(), 0.15, WorkflowEvent.JOB_SUBMIT, job);
         cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
         cloudsim.startSimulation();
 
@@ -213,14 +213,13 @@ public class VMTest {
 
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(driver.getId(), vm.getId(), 0.200001, WorkflowEvent.VM_TERMINATE);
+        cloudsim.send(driver.getId(), vm.getId(), 0.3, WorkflowEvent.JOB_SUBMIT, job2);
         cloudsim.startSimulation();
-        vm.jobSubmit(job2);
     }
 
     @Test(expected = IllegalStateException.class)
     public void testLaunchVMTwice() {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-
         VM vm = VMFactory.createVM(vmType, cloudsim);
         VMDummyDriver driver = new VMDummyDriver(cloudsim);
 

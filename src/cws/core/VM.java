@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Preconditions;
+
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -139,13 +141,16 @@ public class VM extends CWSSimEntity {
 
     @Override
     public void processEvent(CWSSimEvent ev) {
-        if (!isTerminated || ev.getTag() == WorkflowEvent.VM_TERMINATE) {
+        if (!isTerminated) {
             switch (ev.getTag()) {
             case WorkflowEvent.VM_LAUNCH:
-                launchVM();
+                launch();
                 break;
             case WorkflowEvent.VM_TERMINATE:
-                terminateVM();
+                terminate();
+                break;
+            case WorkflowEvent.JOB_SUBMIT:
+                jobSubmit((Job) ev.getData());
                 break;
             case WorkflowEvent.JOB_FINISHED:
                 jobFinish((Job) ev.getData());
@@ -160,22 +165,27 @@ public class VM extends CWSSimEntity {
                 throw new UnknownWorkflowEventException("Unknown event: " + ev);
             }
         } else {
-            if (ev.getTag() == WorkflowEvent.VM_LAUNCH) {
+            if (ev.getTag() == WorkflowEvent.VM_LAUNCH || ev.getTag() == WorkflowEvent.JOB_SUBMIT) {
                 throw new IllegalStateException("Attempted to send launch or submit event to terminated VM:"
                         + this.getId());
             }
         }
     }
 
-    private void launchVM() {
-        if (this.isLaunched) {
-            throw new IllegalStateException("Attempted to launch already launched VM:" + this.getId());
-        }
-        this.isLaunched = true;
+    /**
+     * Launches this VM.
+     */
+    void launch() {
+        Preconditions.checkState(!isLaunched, "Attempted to launch already launched VM:" + this.getId());
+        isLaunched = true;
         getCloudsim().log(String.format("VM %d started", getId()));
     }
 
-    private void terminateVM() {
+    /**
+     * Terminates this VM. A VM cannot be terminated twice.
+     */
+    void terminate() {
+        Preconditions.checkState(!isTerminated, "Cannot terminate already terminated VM");
         getCloudsim().log("VM " + getId() + " is going to terminate");
         // Can no longer accept jobs
         isTerminated = true;
@@ -210,9 +220,9 @@ public class VM extends CWSSimEntity {
      * Submits the given job to this VM and marks the VM as non-free.
      */
     public void jobSubmit(Job job) {
-        if (isTerminated) {
-            throw new IllegalStateException("Attempted to submit job to a terminated VM. Check for termination first.");
-        }
+        Preconditions.checkState(!isTerminated,
+                "Attempted to submit job to a terminated VM. Check for termination first.");
+        Preconditions.checkState(isLaunched, "Attempted to submit job to a not launched VM.");
         job.setSubmitTime(getCloudsim().clock());
         job.setState(Job.State.IDLE);
         job.setVM(this);
@@ -411,10 +421,6 @@ public class VM extends CWSSimEntity {
 
     public double getDeprovisioningDelay() {
         return vmType.getDeprovisioningDelay().sample();
-    }
-
-    public void setTerminated(boolean b) {
-        this.isTerminated = b;
     }
 
     /**

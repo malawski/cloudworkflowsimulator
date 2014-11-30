@@ -41,6 +41,7 @@ public abstract class StorageManagerTest {
         job = Mockito.mock(Job.class);
         vm = Mockito.mock(VM.class);
         Mockito.when(vm.getId()).thenReturn(100);
+        Mockito.when(vm.getCloudsim()).thenReturn(cloudsim);
         job.setVM(vm);
         Mockito.when(job.getVM()).thenReturn(vm);
         task = Mockito.mock(Task.class);

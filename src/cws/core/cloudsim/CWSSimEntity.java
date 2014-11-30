@@ -3,12 +3,15 @@ package cws.core.cloudsim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 
+import com.google.common.base.Preconditions;
+
 public abstract class CWSSimEntity extends SimEntity {
 
-    private CloudSimWrapper cloudsim;
+    private final CloudSimWrapper cloudsim;
 
     public CWSSimEntity(String name, CloudSimWrapper cloudsim) {
         super(name);
+        Preconditions.checkNotNull(cloudsim);
         this.cloudsim = cloudsim;
     }
 

@@ -121,7 +121,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
                     if (toTerminate.add(vm))
                         added++;
                 }
-                Iterator<VM> allVmsIt = getCloud().getAllVms().iterator();
+                Iterator<VM> allVmsIt = getCloud().getAllVMs().iterator();
                 while (added < numToTerminate && allVmsIt.hasNext()) {
                     VM vm = allVmsIt.next();
                     if (!toTerminate.contains(vm)) {
@@ -131,14 +131,11 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
             }
 
             // start terminating vms
-            Set<VM> terminated = terminateInstances(engine, toTerminate);
-            // remove terminated vms from free and busy sets
-            engine.getFreeVMs().removeAll(terminated);
-            engine.getBusyVMs().removeAll(terminated);
+            terminateInstances(engine, toTerminate);
 
             // some instances may be still running so we want to be invoked again to stop them before they reach full
             // billing unit
-            if (getCloud().getAllVms().size() > 0)
+            if (getCloud().getAllVMs().size() > 0)
                 getCloudsim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL,
                         WorkflowEvent.PROVISIONING_REQUEST, null);
             // return without further provisioning
@@ -146,11 +143,11 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         }
 
         // compute utilization
-        if (getCloud().getAllVms().size() == 0) {
+        if (getCloud().getAllVMs().size() == 0) {
             // No machines - finish.
             return;
         }
-        double utilization = engine.getBusyVMs().size() / (getCloud().getAllVms().size());
+        double utilization = engine.getBusyVMs().size() / (getCloud().getAllVMs().size());
 
         if (!(utilization >= 0.0)) {
             getCloudsim().log(
@@ -172,12 +169,12 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
         // then: deploy new instance
         double provisioning_interval = PROVISIONER_INTERVAL;
         if (!finishing_phase && utilization > UPPER_THRESHOLD
-                && getCloud().getAllVms().size() < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
+                && getCloud().getAllVMs().size() < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
 
             VM vm = VMFactory.createVM(environment.getVMType(), getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());
-            getCloudsim().send(engine.getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+            getCloud().launchVM(engine.getId(), vm);
             provisioning_interval = 0;
         } else if (!finishing_phase && utilization < LOWER_THRESHOLD) {
             // select Vms to terminate
@@ -187,8 +184,8 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
             // make sure that if there is only one instance it should be terminated
             int numToTerminate = (int) Math.ceil(numVMsCompleting / 2.0);
             // Do not terminate too many machines. I.e. so that we will get over upper threshold.
-            while (getCloud().getAllVms().size() - numToTerminate != 0
-                    && (engine.getBusyVMs().size() / (getCloud().getAllVms().size() - numToTerminate)) > UPPER_THRESHOLD
+            while (getCloud().getAllVMs().size() - numToTerminate != 0
+                    && (engine.getBusyVMs().size() / (getCloud().getAllVMs().size() - numToTerminate)) > UPPER_THRESHOLD
                     && numToTerminate > 0) {
                 numToTerminate--;
             }
@@ -198,9 +195,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
                     toTerminate.add(vmIt.next());
                 }
 
-                Set<VM> terminated = terminateInstances(engine, toTerminate);
-                engine.getFreeVMs().removeAll(terminated);
-                engine.getBusyVMs().removeAll(terminated);
+                terminateInstances(engine, toTerminate);
                 provisioning_interval = 0;
             }
         }
@@ -220,16 +215,12 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner imp
      * @param vmSet
      * @return set of VMs that were terminated
      */
-    private Set<VM> terminateInstances(WorkflowEngine engine, Set<VM> vmSet) {
-        Set<VM> removed = new HashSet<VM>();
+    private void terminateInstances(WorkflowEngine engine, Set<VM> vmSet) {
         Iterator<VM> vmIt = vmSet.iterator();
-
         while (vmIt.hasNext()) {
             VM vm = vmIt.next();
             vmIt.remove();
-            removed.add(vm);
-            getCloudsim().send(engine.getId(), getCloud().getId(), 0.0, WorkflowEvent.VM_TERMINATE, vm);
+            getCloud().terminateVM(vm);
         }
-        return removed;
     }
 }

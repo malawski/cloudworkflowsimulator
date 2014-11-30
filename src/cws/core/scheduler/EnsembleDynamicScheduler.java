@@ -47,7 +47,7 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
     }
 
     /**
-     * Compares jobs based on their priority
+     * Compares jobs based on their priority.
      */
     private static final class JobPriorityComparator implements Comparator<Job> {
         @Override

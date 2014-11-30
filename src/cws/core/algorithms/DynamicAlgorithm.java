@@ -1,6 +1,5 @@
 package cws.core.algorithms;
 
-import java.util.HashSet;
 import java.util.List;
 
 import cws.core.Cloud;
@@ -9,7 +8,6 @@ import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.engine.Environment;
@@ -67,12 +65,10 @@ public class DynamicAlgorithm extends Algorithm {
     }
 
     private void launchInitialVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
-        HashSet<VM> vms = new HashSet<VM>();
         for (int i = 0; i < numEstimatedVMs; i++) {
             // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
             VM vm = VMFactory.createVM(getEnvironment().getVMType(), getCloudsim());
-            vms.add(vm);
-            getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+            cloud.launchVM(engine.getId(), vm);
         }
     }
 
