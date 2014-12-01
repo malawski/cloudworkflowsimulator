@@ -20,15 +20,20 @@ public class Environment {
         return vmType;
     }
 
+
+    public StorageManager getStorageManager() {
+        return storageManager;
+    }
+
     /**
      * Returns task's predicted runtime. It is based on vmType and storage manager. <br>
      * Note that the estimation is trivial and may not be accurate during congestion and it doesn't include runtime
      * variance.
-     * 
+     *
      * @return task's predicted runtime as a double
      */
     public double getComputationPredictedRuntime(Task task) {
-        return task.getSize() / vmType.getMips();
+        return vmType.getPredictedTaskRuntime(task);
     }
 
     public double getComputationPredictedRuntime(DAG dag) {
@@ -38,27 +43,13 @@ public class Environment {
         }
         return sum;
     }
-    
-    public double getTransfersPredictedRuntime(Task task) {
-        return storageManager.getTransferTimeEstimation(task);
-    }
-   
-    public double getTransfersPredictedRuntime(DAG dag) {
-        double sum = 0.0;
-        for (String taskName : dag.getTasks()) {
-            sum += getTransfersPredictedRuntime(dag.getTaskById(taskName));
-        }
-        return sum;
-    }
-    
+
     public StorageManagerStatistics getStorageManagerStatistics() {
         return storageManager.getStorageManagerStatistics();
     }
 
     public double getVMCostFor(double runtimeInSeconds) {
-        double billingUnits = runtimeInSeconds / getVMType().getBillingTimeInSeconds();
-        int fullBillingUnits = (int) Math.ceil(billingUnits);
-        return Math.max(1, fullBillingUnits) * vmType.getPriceForBillingUnit();
+        return getVMType().getVMCostFor(runtimeInSeconds);
     }
 
     public double getSingleVMPrice() {
@@ -70,10 +61,10 @@ public class Environment {
     }
 
     public double getVMProvisioningOverallDelayEstimation() {
-        return vmType.getProvisioningDelay().sample() + vmType.getDeprovisioningDelay().sample();
+        return vmType.getProvisioningOverallDelayEstimation();
     }
 
     public double getDeprovisioningDelayEstimation() {
-        return vmType.getDeprovisioningDelay().sample();
+        return vmType.getDeprovisioningDelayEstimation();
     }
 }

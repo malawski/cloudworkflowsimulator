@@ -34,7 +34,7 @@ public class VMTypeLoaderIntegrationTest {
 
         VMType vmType = loader.determineVMType(cmd);
 
-        assertEquals(1, vmType.getMips());
+        assertEquals(1.0, vmType.getMips());
         assertEquals(1, vmType.getCores());
         assertEquals(3600.0, vmType.getBillingTimeInSeconds());
         assertEquals(1.0, vmType.getPriceForBillingUnit());
@@ -46,7 +46,7 @@ public class VMTypeLoaderIntegrationTest {
 
         VMType vmType = loader.determineVMType(cmd);
 
-        assertEquals(10, vmType.getMips());
+        assertEquals(10.0, vmType.getMips());
         assertEquals(3, vmType.getCores());
         assertEquals(600.0, vmType.getBillingTimeInSeconds());
         assertEquals(3.5, vmType.getPriceForBillingUnit());
@@ -60,7 +60,7 @@ public class VMTypeLoaderIntegrationTest {
 
         VMType vmType = loader.determineVMType(cmd);
 
-        assertEquals(10, vmType.getMips());
+        assertEquals(10.0, vmType.getMips());
     }
 
     @Test(expected = IllegalCWSArgumentException.class)

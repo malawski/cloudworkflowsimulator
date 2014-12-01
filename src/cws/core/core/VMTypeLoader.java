@@ -93,7 +93,7 @@ public class VMTypeLoader {
         double unitPrice = ((Number) billingConfig.get(VM_BILLING_PRICE_CONFIG_ENTRY)).doubleValue();
         double unitTime = ((Number) billingConfig.get(VM_BILLING_TIME_CONFIG_ENTRY)).doubleValue();
 
-        int mips = ((Number) config.get(VM_MIPS_CONFIG_ENTRY)).intValue();
+        double mips = ((Number) config.get(VM_MIPS_CONFIG_ENTRY)).intValue();
         int cores = ((Number) config.get(VM_CORES_CONFIG_ENTRY)).intValue();
         long cacheSize = ((Number) config.get(VM_CACHE_SIZE_CONFIG_ENTRY)).longValue();
 
@@ -198,7 +198,7 @@ public class VMTypeLoader {
 
     void overrideConfigFromFileWithCliArgs(Map<String, Object> vmConfig, CommandLine args) {
         if (args.hasOption(VM_MIPS_OPTION_NAME)) {
-            Integer mips = Integer.parseInt(args.getOptionValue(VM_MIPS_OPTION_NAME));
+            Double mips = Double.parseDouble(args.getOptionValue(VM_MIPS_OPTION_NAME));
             vmConfig.put(VM_MIPS_CONFIG_ENTRY, mips);
         }
 

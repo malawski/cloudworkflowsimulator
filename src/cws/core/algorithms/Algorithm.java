@@ -8,12 +8,9 @@ import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
-import cws.core.engine.Environment;
 import cws.core.log.WorkflowLog;
 
 public abstract class Algorithm extends CWSSimEntity {
-    /** Environment of simulation (VMs, storage info) */
-    private final Environment environment;
 
     /** Provides statistics about this algorithm's run */
     protected AlgorithmStatistics algorithmStatistics;
@@ -40,13 +37,12 @@ public abstract class Algorithm extends CWSSimEntity {
     private List<DAG> dags;
 
     public Algorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics algorithmStatistics,
-            Environment environment, CloudSimWrapper cloudsim) {
+            CloudSimWrapper cloudsim) {
         super("Algorithm", cloudsim);
         this.budget = budget;
         this.deadline = deadline;
         this.dags = dags;
         this.algorithmStatistics = algorithmStatistics;
-        this.environment = environment;
     }
 
     /** Should run actual simulation */
@@ -124,10 +120,6 @@ public abstract class Algorithm extends CWSSimEntity {
 
     public final double getDeadline() {
         return deadline;
-    }
-
-    public final Environment getEnvironment() {
-        return environment;
     }
 
     @Override

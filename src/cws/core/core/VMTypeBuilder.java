@@ -16,7 +16,7 @@ public class VMTypeBuilder {
     }
 
     public interface MipsStep {
-        CoresStep mips(int mips);
+        CoresStep mips(double mips);
     }
 
     public interface CoresStep {
@@ -40,7 +40,7 @@ public class VMTypeBuilder {
     }
 
     static class Steps implements MipsStep, CoresStep, PriceStep, OptionalsStep {
-        private int mips;
+        private double mips;
         private int cores;
         private double price;
 
@@ -50,7 +50,7 @@ public class VMTypeBuilder {
         private long cacheSize = DEFAULT_CACHE_SIZE;
 
         @Override
-        public CoresStep mips(int mips) {
+        public CoresStep mips(double mips) {
             this.mips = mips;
             return this;
         }

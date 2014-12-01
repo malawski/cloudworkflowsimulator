@@ -34,7 +34,7 @@ public class CriticalPathTest {
     public void cptest() {
         DAG dag = DAGParser.parseDAG(new File("dags/cptest.dag"));
         TopologicalOrder order = new TopologicalOrder(dag);
-        CriticalPath cp = new CriticalPath(order, environment);
+        CriticalPath cp = new CriticalPath(order, environment.getVMType());
 
         Task A = dag.getTaskById("A");
         Task B = dag.getTaskById("B");
@@ -59,7 +59,7 @@ public class CriticalPathTest {
     public void test() {
         DAG dag = DAGParser.parseDAG(new File("dags/test.dag"));
         TopologicalOrder order = new TopologicalOrder(dag);
-        CriticalPath cp = new CriticalPath(order, environment);
+        CriticalPath cp = new CriticalPath(order, environment.getVMType());
         assertEquals(21, cp.getCriticalPathLength(), 0.00001);
     }
 
@@ -67,7 +67,7 @@ public class CriticalPathTest {
     public void cybershake30() {
         DAG dag = DAGParser.parseDAG(new File("dags/CyberShake_30.dag"));
         TopologicalOrder order = new TopologicalOrder(dag);
-        CriticalPath cp = new CriticalPath(order, environment);
+        CriticalPath cp = new CriticalPath(order, environment.getVMType());
         assertEquals(221.84, cp.getCriticalPathLength(), 0.00001);
     }
 }

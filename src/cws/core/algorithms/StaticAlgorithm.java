@@ -29,7 +29,7 @@ import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 
-public abstract class StaticAlgorithm extends Algorithm implements Provisioner, Scheduler, VMListener, JobListener {
+public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Provisioner, Scheduler, VMListener, JobListener {
     /** Plan */
     private Plan plan = new Plan();
 
@@ -388,7 +388,7 @@ public abstract class StaticAlgorithm extends Algorithm implements Provisioner, 
      * implementations.
      */
     protected CriticalPath newCriticalPath(TopologicalOrder order, HashMap<Task, Double> runtimes) {
-        return new CriticalPath(order, runtimes, getEnvironment());
+        return new CriticalPath(order, runtimes, getEnvironment().getVMType());
     }
 
     /**
