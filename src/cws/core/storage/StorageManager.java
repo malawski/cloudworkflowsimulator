@@ -8,6 +8,7 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAG;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.exception.UnknownWorkflowEventException;
@@ -31,10 +32,25 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
     }
 
     /**
-     * Estimates the sum of all transfers for the given job. Note that the estimations don't need to be 100% accurate.
+     * Estimates the sum of all transfers for the given job. Note that the
+     * estimations don't need to be 100% accurate.
      * @param task - the task to estimate transfers for
      */
     public abstract double getTransferTimeEstimation(Task task);
+
+    /**
+     * Estimates the sum of all transfers for the given DAG using
+     * getTransferTimeEstimation for Tasks. Note that the estimations don't
+     * need to be 100% accurate.
+     * @param DAG - the DAG to estimate transfers for
+     */
+    public double getTransferTimeEstimation(DAG dag) {
+        double sum = 0.0;
+        for (String taskName : dag.getTasks()) {
+            sum += getTransferTimeEstimation(dag.getTaskById(taskName));
+        }
+        return sum;
+    }
 
     /**
      * Called just before a VM starts a job. You should get here job's input files to the VM.

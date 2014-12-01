@@ -44,18 +44,6 @@ public class Environment {
         return sum;
     }
 
-    public double getTransfersPredictedRuntime(Task task) {
-        return storageManager.getTransferTimeEstimation(task);
-    }
-   
-    public double getTransfersPredictedRuntime(DAG dag) {
-        double sum = 0.0;
-        for (String taskName : dag.getTasks()) {
-            sum += getTransfersPredictedRuntime(dag.getTaskById(taskName));
-        }
-        return sum;
-    }
-    
     public StorageManagerStatistics getStorageManagerStatistics() {
         return storageManager.getStorageManagerStatistics();
     }

@@ -14,10 +14,12 @@ public class WorkflowAndStorageAwareEnsembleScheduler extends WorkflowAwareEnsem
     }
 
     protected double getPredictedRuntime(Task task) {
-        return environment.getComputationPredictedRuntime(task) + environment.getTransfersPredictedRuntime(task);
+        return environment.getComputationPredictedRuntime(task)
+                + environment.getStorageManager().getTransferTimeEstimation(task);
     }
 
     protected double getPredictedRuntime(DAG dag) {
-        return environment.getComputationPredictedRuntime(dag) + environment.getTransfersPredictedRuntime(dag);
+        return environment.getComputationPredictedRuntime(dag)
+                + environment.getStorageManager().getTransferTimeEstimation(dag);
     }
 }

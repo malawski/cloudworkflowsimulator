@@ -25,13 +25,13 @@ public class StorageAwareSPSS extends SPSS {
     @Override
     protected CriticalPath newCriticalPath(TopologicalOrder order, HashMap<Task, Double> runtimes) {
         return new StorageAwareCriticalPath(order, runtimes,
-                                            getEnvironment().getVMType(),
-                                            getEnvironment().getStorageManager());
+                getEnvironment().getVMType(),
+                getEnvironment().getStorageManager());
     }
 
     @Override
     protected double getPredictedTaskRuntime(Task task) {
         return getEnvironment().getComputationPredictedRuntime(task)
-            + getEnvironment().getTransfersPredictedRuntime(task);
+                + getEnvironment().getStorageManager().getTransferTimeEstimation(task);
     }
 }
