@@ -2,35 +2,36 @@ package cws.core.dag;
 
 import java.util.HashMap;
 
+import cws.core.core.VMType;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
-import cws.core.engine.Environment;
 
 public class DAGStats {
     private double minCost;
     private double criticalPathLength;
     private double totalRuntime;
 
-    public DAGStats(DAG dag, Environment environment) {
+    public DAGStats(DAG dag, VMType vmType) {
         TopologicalOrder order = new TopologicalOrder(dag);
 
-        HashMap<Task, Double> runTimes = computeMinimumCostOfRunningTheWorkflow(environment, order);
+        HashMap<Task, Double> runTimes = computeMinimumCostOfRunningTheWorkflow(order, vmType);
 
         // Make sure a plan is feasible given the deadline and available VMs
-        CriticalPath path = new CriticalPath(order, runTimes, environment);
+        CriticalPath path = new CriticalPath(order, runTimes, vmType);
         criticalPathLength = path.getCriticalPathLength();
     }
 
-    private HashMap<Task, Double> computeMinimumCostOfRunningTheWorkflow(Environment environment, TopologicalOrder order) {
+    private HashMap<Task, Double> computeMinimumCostOfRunningTheWorkflow
+        (TopologicalOrder order, VMType vmType) {
         totalRuntime = 0.0;
         HashMap<Task, Double> runTimes = new HashMap<Task, Double>();
         for (Task task : order) {
-            double runtime = environment.getComputationPredictedRuntime(task);
+            double runtime = vmType.getPredictedTaskRuntime(task);
             runTimes.put(task, runtime);
             totalRuntime += runtime;
         }
 
-        minCost = environment.getVMCostFor(totalRuntime);
+        minCost = vmType.getVMCostFor(totalRuntime);
         return runTimes;
     }
 

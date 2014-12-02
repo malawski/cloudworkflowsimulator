@@ -13,7 +13,7 @@ import cws.core.dag.DAG;
 import cws.core.engine.Environment;
 import cws.core.provisioner.CloudAwareProvisioner;
 
-public class DynamicAlgorithm extends Algorithm {
+public class DynamicAlgorithm extends HomogeneousAlgorithm {
     private Scheduler scheduler;
     private CloudAwareProvisioner provisioner;
 

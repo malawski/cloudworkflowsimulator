@@ -29,7 +29,7 @@ public class VMTypeLoaderTest {
 
     private void createValidConfig() {
         config = new HashMap<String, Object>();
-        config.put("mips", 1);
+        config.put("mips", 1.0);
         config.put("cores", 1);
         config.put("cacheSize", 1);
 
@@ -53,11 +53,11 @@ public class VMTypeLoaderTest {
 
     @Test
     public void shouldLoadMips() throws InvalidDistributionException {
-        config.put("mips", 1234);
+        config.put("mips", 1234.0);
 
         VMType vmType = vmLoader.loadVM(config);
 
-        Assert.assertEquals(1234, vmType.getMips());
+        Assert.assertEquals(1234.0, vmType.getMips());
     }
 
     @Test

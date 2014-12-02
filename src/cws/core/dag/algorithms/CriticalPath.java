@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cws.core.dag.Task;
-import cws.core.engine.Environment;
+import cws.core.core.VMType;
 
 /**
  * Compute longest path using topological order,
@@ -14,15 +14,16 @@ import cws.core.engine.Environment;
 public class CriticalPath {
     private final Map<Task, Double> earliestFinishTimes = new HashMap<Task, Double>();
 
-    public CriticalPath(TopologicalOrder order, Environment environment) {
-        this(order, null, environment);
+    public CriticalPath(TopologicalOrder order, VMType vmType) {
+        this(order, null, vmType);
     }
 
-    public CriticalPath(TopologicalOrder order, Map<Task, Double> runtimes, Environment environment) {
+    public CriticalPath(TopologicalOrder order, Map<Task, Double> runtimes,
+                        VMType vmType) {
         if (runtimes == null) {
             runtimes = new HashMap<Task, Double>();
             for (Task task : order) {
-                runtimes.put(task, getPredictedTaskRuntime(environment, task));
+                runtimes.put(task, getPredictedTaskRuntime(task, vmType));
             }
         }
 
@@ -45,8 +46,8 @@ public class CriticalPath {
      * Estimates and returns predicted task's runtime. May be overridden by subclasses to return estimations based on
      * different criteria.
      */
-    protected double getPredictedTaskRuntime(Environment environment, Task task) {
-        return environment.getComputationPredictedRuntime(task);
+    protected double getPredictedTaskRuntime(Task task, VMType vmType) {
+        return vmType.getPredictedTaskRuntime(task);
     }
 
     /**

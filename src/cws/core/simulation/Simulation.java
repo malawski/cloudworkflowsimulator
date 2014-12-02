@@ -325,8 +325,8 @@ public class Simulation {
         for (String name : names) {
             DAG dag = DAGParser.parseDAG(new File(name));
             dag.setId(new Integer(workflow_id).toString());
-            System.out.println(String.format("Workflow %d, priority = %d, filename = %s", workflow_id, names.length
-                    - workflow_id, name));
+            System.out.format("Workflow %d, priority = %d, filename = %s%n",
+                    workflow_id, names.length - workflow_id, name);
             workflow_id++;
             dags.add(dag);
 
@@ -337,14 +337,14 @@ public class Simulation {
                 }
             }
 
-            DAGStats dagStats = new DAGStats(dag, environment);
+            DAGStats dagStats = new DAGStats(dag, environment.getVMType());
 
             minTime = Math.min(minTime, dagStats.getCriticalPathLength())
-                + environment.getVMProvisioningOverallDelayEstimation();
+                    + environment.getVMProvisioningOverallDelayEstimation();
             minCost = Math.min(minCost, dagStats.getMinCost());
 
             maxTime += dagStats.getCriticalPathLength() 
-                + environment.getVMProvisioningOverallDelayEstimation();
+                    + environment.getVMProvisioningOverallDelayEstimation();
             maxCost += dagStats.getMinCost();
         }
 
@@ -467,7 +467,7 @@ public class Simulation {
     }
 
     private void logVMType(VMType vmType) {
-        System.out.printf("VM mips = %d\n", vmType.getMips());
+        System.out.printf("VM mips = %f\n", vmType.getMips());
         System.out.printf("VM cores = %d\n", vmType.getCores());
         System.out.printf("VM price = %f\n", vmType.getPriceForBillingUnit());
         System.out.printf("VM unit = %f\n", vmType.getBillingTimeInSeconds());
