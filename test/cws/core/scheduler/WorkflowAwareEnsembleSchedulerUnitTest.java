@@ -131,7 +131,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     }
 
     private Job createSimpleJobMock() {
-        return createSimpleJobMock(ImmutableList.of(), ImmutableList.of());
+        return createSimpleJobMock(ImmutableList.<DAGFile>of(), ImmutableList.<DAGFile>of());
     }
 
     private VM createVMMock() {

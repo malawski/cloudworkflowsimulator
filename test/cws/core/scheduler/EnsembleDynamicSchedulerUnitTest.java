@@ -113,7 +113,7 @@ public class EnsembleDynamicSchedulerUnitTest {
     }
 
     private Job createJobMock() {
-        return createJobMock(ImmutableList.of(), ImmutableList.of());
+        return createJobMock(ImmutableList.<DAGFile>of(), ImmutableList.<DAGFile>of());
     }
 
     private VM createVMMock() {
