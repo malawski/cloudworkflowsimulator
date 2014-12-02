@@ -1,16 +1,10 @@
 package cws.core.algorithms;
 
-import cws.core.engine.Environment;
-
 import java.util.List;
 
-import cws.core.Cloud;
-import cws.core.EnsembleManager;
-import cws.core.WorkflowEngine;
-import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
-import cws.core.log.WorkflowLog;
+import cws.core.engine.Environment;
 
 /**
  * A base class for scheduling/planning algorithms when all VMs are
