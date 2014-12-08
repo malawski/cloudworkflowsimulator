@@ -153,11 +153,23 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         }
         return cost / environment.getBillingTimeInSeconds();
     }
-    
+
+    /**
+     * Returns projected runtime of the given task, based on some assumptions (e.g. whether file transfers are ignored
+     * or not).
+     * 
+     * Should be overridden in pair with the DAG predicting method.
+     */
     protected double getPredictedRuntime(Task task) {
         return environment.getComputationPredictedRuntime(task);
     }
-    
+
+    /**
+     * Returns projected runtime of the given DAG, based on some assumptions (e.g. whether file transfers are ignored
+     * or not).
+     * 
+     * Should be overridden in pair with the DAG predicting method.
+     */
     protected double getPredictedRuntime(DAG dag) {
         return environment.getComputationPredictedRuntime(dag);
     }
