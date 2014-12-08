@@ -35,15 +35,11 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
 
         Queue<Job> jobs = engine.getQueuedJobs();
 
-        moveAllJobsToPriorityQueue(jobs);
-
-        // use prioritized list for scheduling
-        scheduleQueue(prioritizedJobs, engine);
-    }
-
-    private void moveAllJobsToPriorityQueue(Queue<Job> jobs) {
         prioritizedJobs.addAll(jobs);
         jobs.clear();
+        
+        // use prioritized list for scheduling
+        scheduleQueue(prioritizedJobs, engine);
     }
 
     /**

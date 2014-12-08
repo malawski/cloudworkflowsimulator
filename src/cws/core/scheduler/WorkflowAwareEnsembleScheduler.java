@@ -42,7 +42,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
             Job job = jobs.poll();
 
             if (isJobDagAdmitted(job, engine)) {
-                scheduleJob(job, freeVMs, engine);
+                VM vm = engine.getFreeVMs().get(0);
+                vm.jobSubmit(job);
             }
         }
     }
