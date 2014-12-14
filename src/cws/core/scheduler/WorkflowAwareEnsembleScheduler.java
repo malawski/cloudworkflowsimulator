@@ -1,8 +1,12 @@
 package cws.core.scheduler;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+
+import com.sun.istack.internal.Nullable;
 
 import cws.core.VM;
 import cws.core.WorkflowEngine;
@@ -36,19 +40,18 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
      */
     @Override
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-        Set<VM> freeVMs = new HashSet<VM>(engine.getFreeVMs());
-
+        List<VM> freeVMs = new ArrayList<VM>(engine.getFreeVMs());
         while (!jobs.isEmpty() && !freeVMs.isEmpty()) {
             Job job = jobs.poll();
 
             if (isJobDagAdmitted(job, engine)) {
-                VM vm = engine.getFreeVMs().get(0);
+                VM vm = freeVMs.remove(freeVMs.size() - 1);
                 vm.jobSubmit(job);
             }
         }
     }
 
-    private boolean isJobDagAdmitted(Job job, WorkflowEngine engine) {
+    protected final boolean isJobDagAdmitted(Job job, WorkflowEngine engine) {
         DAGJob dj = job.getDAGJob();
 
         if (jobHasBeenAlreadyAdmitted(dj)) {
@@ -149,7 +152,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
             if (!admittedDJ.isComplete(task)) {
-                cost += getPredictedRuntime(task) * environment.getSingleVMPrice();
+                cost += getPredictedRuntime(task, null) * environment.getSingleVMPrice();
             }
         }
         return cost / environment.getBillingTimeInSeconds();
@@ -161,7 +164,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
      * 
      * Should be overridden in pair with the DAG predicting method.
      */
-    protected double getPredictedRuntime(Task task) {
+    protected double getPredictedRuntime(Task task, @Nullable VM vm) {
         return environment.getComputationPredictedRuntime(task);
     }
 

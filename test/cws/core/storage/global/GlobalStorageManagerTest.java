@@ -20,6 +20,7 @@ import org.mockito.stubbing.Answer;
 import com.google.common.collect.ImmutableList;
 
 import cws.core.Cloud;
+import cws.core.VM;
 import cws.core.WorkflowEvent;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
@@ -37,8 +38,8 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
     @Before
     public void setUpGlobalStorageManagerTest() {
         cacheManager = mock(VMCacheManager.class);
-        doNothing().when(cacheManager).putFileToCache(Matchers.any(DAGFile.class), Matchers.any(Job.class));
-        when(cacheManager.getFileFromCache(Matchers.any(DAGFile.class), Matchers.any(Job.class))).thenReturn(false);
+        doNothing().when(cacheManager).putFileToCache(Matchers.any(DAGFile.class), Matchers.any(VM.class));
+        when(cacheManager.getFileFromCache(Matchers.any(DAGFile.class), Matchers.any(VM.class))).thenReturn(false);
         params = new GlobalStorageParams();
         params.setReadSpeed(123);
         params.setWriteSpeed(321);

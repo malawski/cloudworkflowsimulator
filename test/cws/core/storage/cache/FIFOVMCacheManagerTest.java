@@ -21,8 +21,8 @@ public class FIFOVMCacheManagerTest extends VMCacheManagerTest {
     public void shouldCacheOneFile() {
         Mockito.when(vmType.getCacheSize()).thenReturn((long) 100);
         DAGFile df = new DAGFile("xxxxxx", 100, null);
-        cm.putFileToCache(df, job);
-        Assert.assertTrue(cm.getFileFromCache(df, job));
+        cm.putFileToCache(df, job.getVM());
+        Assert.assertTrue(cm.getFileFromCache(df, job.getVM()));
     }
 
     @Test
@@ -35,14 +35,14 @@ public class FIFOVMCacheManagerTest extends VMCacheManagerTest {
         for (int i = 0; i < ndags; i++) {
             DAGFile df = new DAGFile("xxxxxx" + i, sz, null);
             dfs[i] = df;
-            cm.putFileToCache(df, job);
+            cm.putFileToCache(df, job.getVM());
         }
         int numberOfLeftFiles = cs / sz;
         for (int i = 0; i < ndags; i++) {
             if (i >= ndags - numberOfLeftFiles) {
-                Assert.assertTrue(cm.getFileFromCache(dfs[i], job));
+                Assert.assertTrue(cm.getFileFromCache(dfs[i], job.getVM()));
             } else {
-                Assert.assertFalse(cm.getFileFromCache(dfs[i], job));
+                Assert.assertFalse(cm.getFileFromCache(dfs[i], job.getVM()));
             }
         }
     }
@@ -51,10 +51,10 @@ public class FIFOVMCacheManagerTest extends VMCacheManagerTest {
     public void shouldNotAddAndEvictOnTooBigFile() {
         Mockito.when(vmType.getCacheSize()).thenReturn((long) 100);
         DAGFile df = new DAGFile("xxxxxx", 20, null);
-        cm.putFileToCache(df, job);
+        cm.putFileToCache(df, job.getVM());
         DAGFile dfBig = new DAGFile("xxxxxx222", 101, null);
-        cm.putFileToCache(dfBig, job);
-        Assert.assertTrue(cm.getFileFromCache(df, job));
-        Assert.assertFalse(cm.getFileFromCache(dfBig, job));
+        cm.putFileToCache(dfBig, job.getVM());
+        Assert.assertTrue(cm.getFileFromCache(df, job.getVM()));
+        Assert.assertFalse(cm.getFileFromCache(dfBig, job.getVM()));
     }
 }

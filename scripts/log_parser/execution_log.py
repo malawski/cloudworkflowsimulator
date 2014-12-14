@@ -21,7 +21,8 @@ class ExecutionLog(object):
         self.settings = None
 
     def add_event(self, type, event):
-        self.events[type].append(event)
+        if not (type == EventType.TASK and event.started is None):
+          self.events[type].append(event)
 
     def add_workflow(self, workflow):
         self.workflows.append(workflow)

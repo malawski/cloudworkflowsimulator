@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.istack.internal.Nullable;
+
+import cws.core.VM;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -150,7 +153,7 @@ public class GlobalStorageManager extends StorageManager {
         } else {
             startFileWriteForJob(write.getJob());
         }
-        cacheManager.putFileToCache(write.getFile(), write.getJob());
+        cacheManager.putFileToCache(write.getFile(), write.getJob().getVM());
         congestedParams.removeWrites(1);
         updateSpeedCongestion();
     }
@@ -164,11 +167,9 @@ public class GlobalStorageManager extends StorageManager {
         } else {
             startFileReadForJob(read.getJob());
         }
-        cacheManager.putFileToCache(read.getFile(), read.getJob());
+        cacheManager.putFileToCache(read.getFile(), read.getJob().getVM());
         congestedParams.removeReads(1);
         updateSpeedCongestion();
-        statistics.addActualBytesRead(read.getBytesTransferred());
-        statistics.addActualFilesRead(1);
     }
 
     /**
@@ -250,8 +251,12 @@ public class GlobalStorageManager extends StorageManager {
     /** Called on GLOBAL_STORAGE_READ_PROGRESS event */
     private void onReadProgress(GlobalStorageTransfer read) {
         // Finish file transfer if it is in the cache, is finished, of the VM is terminated.
-        if (cacheManager.getFileFromCache(read.getFile(), read.getJob()) || read.isCompleted()
+        if (cacheManager.getFileFromCache(read.getFile(), read.getJob().getVM()) || read.isCompleted()
                 || read.getJob().getVM().isTerminated()) {
+            if (cacheManager.getFileFromCache(read.getFile(), read.getJob().getVM())) {
+                statistics.addBytesReadFromCache(read.getFile().getSize());
+                statistics.addFilesReadFromCache(1);
+            }
             getCloudsim().sendNow(getId(), getId(), WorkflowEvent.GLOBAL_STORAGE_READ_FINISHED, read);
         } else {
             progressTransfer(read, WorkflowEvent.GLOBAL_STORAGE_READ_PROGRESS, congestedParams.getReadSpeed());
@@ -288,11 +293,13 @@ public class GlobalStorageManager extends StorageManager {
      * @see StorageManager#getTransferTimeEstimation(Task)
      */
     @Override
-    public double getTransferTimeEstimation(Task task) {
+    public double getTransferTimeEstimation(Task task, @Nullable VM vm) {
         double time = 0.0;
         for (DAGFile file : task.getInputFiles()) {
-            time += file.getSize() / params.getReadSpeed();
-            time += params.getLatency();
+            if (!cacheManager.getFileFromCache(file, vm)) {
+                time += file.getSize() / params.getReadSpeed();
+                time += params.getLatency();
+            }
         }
         for (DAGFile file : task.getOutputFiles()) {
             time += file.getSize() / params.getWriteSpeed();

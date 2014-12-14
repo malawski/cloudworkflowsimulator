@@ -12,9 +12,12 @@ import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
+import cws.core.engine.Environment;
 import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
+import cws.core.storage.StorageManager;
+import cws.core.storage.cache.VMCacheManager;
 
 /**
  * A VM is a virtual machine that executes Jobs.
@@ -56,10 +59,10 @@ public class VM extends CWSSimEntity {
     private int idleCores;
 
     /** Queue of jobs submitted to this VM */
-    private LinkedList<Job> jobs;
+    private final LinkedList<Job> jobs;
 
     /** Set of jobs currently running */
-    private Set<Job> runningJobs;
+    private final Set<Job> runningJobs;
 
     /** Time that the VM was launched */
     private double launchTime;
@@ -235,12 +238,6 @@ public class VM extends CWSSimEntity {
     }
 
     private void allInputsTrasferred(Job job) {
-        if (runningJobs.contains(job)) {
-            throw new IllegalStateException("Job already running: " + job);
-        }
-        // add it to the running set
-        runningJobs.add(job);
-
         // Compute the duration of the job on this VM
         double size = job.getTask().getSize();
         double predictedRuntime = size / vmType.getMips();
@@ -320,6 +317,11 @@ public class VM extends CWSSimEntity {
 
         // Mark that read has started.
         readIntervals.put(job, new Interval());
+        if (runningJobs.contains(job)) {
+            throw new IllegalStateException("Job already running: " + job);
+        }
+        // add it to the running set
+        runningJobs.add(job);
     }
 
     private void jobFinish(Job job) {
@@ -481,5 +483,31 @@ public class VM extends CWSSimEntity {
             }
             return duration;
         }
+    }
+
+    /**
+     * Returns the time from now when this VM is predicted to finish all scheduled jobs. This executes in the context
+     * of {@link Environment}, {@link StorageManager} and {@link VMCacheManager}.
+     */
+    public double getPredictedReleaseTime(StorageManager sm, Environment env, VMCacheManager cacheManager) {
+        double total = 0;
+        if (!runningJobs.isEmpty()) {
+            Preconditions.checkState(runningJobs.size() == 1, "This implementation assumes single core VMs.");
+            Job job = runningJobs.iterator().next();
+            double runningTime = getCloudsim().clock() - job.getStartTime();
+            double expectedTime = sm.getTransferTimeEstimation(job.getTask(), this)
+                    + env.getComputationPredictedRuntime(job.getTask());
+            double remaining = expectedTime - runningTime;
+            total += remaining;
+        }
+
+        for (Job job : jobs) {
+            double expectedTime = sm.getTransferTimeEstimation(job.getTask(), this)
+                    + env.getComputationPredictedRuntime(job.getTask());
+            total += expectedTime;
+        }
+
+        // If predicted time is < 0 then return zero not to be better than free VMs.
+        return total > 0 ? total : 0;
     }
 }

@@ -1,5 +1,6 @@
 package cws.core.storage.cache;
 
+import cws.core.VM;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGFile;
@@ -26,15 +27,15 @@ public abstract class VMCacheManager extends CWSSimEntity {
      * decide what to do.<br>
      * Check interface contracts for this method's contracts.
      * @param file - the file to put in the cache.
-     * @param job - the file's job.
+     * @param vm - the VM to put file to cache.
      */
-    public abstract void putFileToCache(DAGFile file, Job job);
+    public abstract void putFileToCache(DAGFile file, VM vm);
 
     /**
      * Check interface contracts for this method's contracts.
      * @param file - the file to put in the cache.
-     * @param job - the file's job.
+     * @param vm - the VM to get file from cache.
      * @return true if the file is in the cache, false otherwise.
      */
-    public abstract boolean getFileFromCache(DAGFile file, Job job);
+    public abstract boolean getFileFromCache(DAGFile file, VM vm);
 }

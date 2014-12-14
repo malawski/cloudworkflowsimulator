@@ -3,7 +3,10 @@ package cws.core.storage;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 
+import com.sun.istack.internal.Nullable;
+
 import cws.core.jobs.Job;
+import cws.core.VM;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -36,7 +39,16 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
      * estimations don't need to be 100% accurate.
      * @param task - the task to estimate transfers for
      */
-    public abstract double getTransferTimeEstimation(Task task);
+    public final double getTransferTimeEstimation(Task task) {
+        return getTransferTimeEstimation(task, null);
+    }
+
+    /**
+     * Estimates the sum of all transfers for the given job on the given VM. Note that the
+     * estimations don't need to be 100% accurate.
+     * @param task - the task to estimate transfers for
+     */
+    public abstract double getTransferTimeEstimation(Task task, @Nullable VM vm);
 
     /**
      * Estimates the sum of all transfers for the given DAG using
@@ -44,7 +56,7 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
      * need to be 100% accurate.
      * @param DAG - the DAG to estimate transfers for
      */
-    public double getTransferTimeEstimation(DAG dag) {
+    public final double getTransferTimeEstimation(DAG dag) {
         double sum = 0.0;
         for (String taskName : dag.getTasks()) {
             sum += getTransferTimeEstimation(dag.getTaskById(taskName));

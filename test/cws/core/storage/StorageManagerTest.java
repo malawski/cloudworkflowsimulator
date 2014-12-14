@@ -135,9 +135,9 @@ public abstract class StorageManagerTest {
         Assert.assertEquals(2, storageManager.getStorageManagerStatistics().getTotalFilesToWrite());
 
         Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getTotalBytesToRead());
-        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getActualBytesRead());
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getBytesReadFromCache());
         Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getTotalFilesToRead());
-        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getActualFilesRead());
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getFilesReadFromCache());
     }
 
     @Test
@@ -149,9 +149,9 @@ public abstract class StorageManagerTest {
         CloudSim.send(-1, storageManager.getId(), random.nextDouble(), WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
         CloudSim.startSimulation();
         Assert.assertEquals(555, storageManager.getStorageManagerStatistics().getTotalBytesToRead());
-        Assert.assertEquals(555, storageManager.getStorageManagerStatistics().getActualBytesRead());
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getBytesReadFromCache());
         Assert.assertEquals(2, storageManager.getStorageManagerStatistics().getTotalFilesToRead());
-        Assert.assertEquals(2, storageManager.getStorageManagerStatistics().getActualFilesRead());
+        Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getFilesReadFromCache());
 
         Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getTotalBytesToWrite());
         Assert.assertEquals(0, storageManager.getStorageManagerStatistics().getTotalFilesToWrite());

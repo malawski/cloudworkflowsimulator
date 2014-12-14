@@ -1,5 +1,8 @@
 package cws.core.scheduler;
 
+import com.sun.istack.internal.Nullable;
+
+import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
@@ -13,11 +16,13 @@ public class WorkflowAndStorageAwareEnsembleScheduler extends WorkflowAwareEnsem
         super(cloudsim, environment);
     }
 
-    protected double getPredictedRuntime(Task task) {
+    @Override
+    protected double getPredictedRuntime(Task task, @Nullable VM vm) {
         return environment.getComputationPredictedRuntime(task)
-                + environment.getStorageManager().getTransferTimeEstimation(task);
+                + environment.getStorageManager().getTransferTimeEstimation(task, vm);
     }
 
+    @Override
     protected double getPredictedRuntime(DAG dag) {
         return environment.getComputationPredictedRuntime(dag)
                 + environment.getStorageManager().getTransferTimeEstimation(dag);

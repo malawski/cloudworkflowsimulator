@@ -221,7 +221,13 @@ public class WorkflowEngine extends CWSSimEntity {
     }
 
     public List<VM> getAvailableVMs() {
-        return availableVms;
+        Builder<VM> available = ImmutableList.<VM>builder();
+        for (VM vm : availableVms) {
+            if (!vm.isTerminated()) {
+                available.add(vm);
+            }
+        }
+        return available.build();
     }
     
     public List<VM> getFreeVMs() {

@@ -9,14 +9,14 @@ public class StorageManagerStatistics {
     private long totalBytesToRead;
     /** Total bytes requested to write */
     private long totalBytesToWrite;
-    /** Actual bytes read (may be lower than totalFilesToRead beacause of cache) */
-    private long actualBytesRead;
+    /** The number of bytes read from cache. */
+    private long bytesReadFromCache;
     /** Total number of files requested to read */
     private int totalFilesToRead;
     /** Total number of files requested to write */
     private int totalFilesToWrite;
-    /** Actual number of files read (may be lower than totalFilesToRead beacause of cache) */
-    private int actualFilesRead;
+    /** The number of files read from cache. */
+    private int filesReadFromCache;
 
     public long getTotalBytesToRead() {
         return totalBytesToRead;
@@ -34,12 +34,12 @@ public class StorageManagerStatistics {
         this.totalBytesToWrite += num;
     }
 
-    public long getActualBytesRead() {
-        return actualBytesRead;
+    public long getBytesReadFromCache() {
+        return bytesReadFromCache;
     }
 
-    public void addActualBytesRead(long num) {
-        this.actualBytesRead += num;
+    public void addBytesReadFromCache(long num) {
+        this.bytesReadFromCache += num;
     }
 
     public int getTotalFilesToRead() {
@@ -58,11 +58,11 @@ public class StorageManagerStatistics {
         this.totalFilesToWrite += totalFilesToWrite;
     }
 
-    public int getActualFilesRead() {
-        return actualFilesRead;
+    public int getFilesReadFromCache() {
+        return filesReadFromCache;
     }
 
-    public void addActualFilesRead(int actualFilesRead) {
-        this.actualFilesRead += actualFilesRead;
+    public void addFilesReadFromCache(int filesRead) {
+        this.filesReadFromCache += filesRead;
     }
 }

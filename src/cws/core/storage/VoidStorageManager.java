@@ -1,5 +1,6 @@
 package cws.core.storage;
 
+import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
@@ -20,10 +21,8 @@ public class VoidStorageManager extends StorageManager {
     @Override
     public void onBeforeTaskStart(Job job) {
         for (DAGFile file : job.getTask().getInputFiles()) {
-            statistics.addActualBytesRead(file.getSize());
             logInstantTransfer(job, file, "read");
         }
-        statistics.addActualFilesRead(job.getTask().getInputFiles().size());
         notifyThatBeforeTransfersCompleted(job);
     }
 
@@ -37,7 +36,7 @@ public class VoidStorageManager extends StorageManager {
     }
 
     @Override
-    public double getTransferTimeEstimation(Task task) {
+    public double getTransferTimeEstimation(Task task, VM vm) {
         return 0.0; // instant transfer
     }
 

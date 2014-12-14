@@ -1,8 +1,8 @@
 package cws.core.storage.cache;
 
+import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGFile;
-import cws.core.jobs.Job;
 
 /**
  * A VMCacheManager that does nothing - it always says that there is no file in the cache. <br>
@@ -16,12 +16,12 @@ public class VoidCacheManager extends VMCacheManager {
     }
 
     @Override
-    public void putFileToCache(DAGFile file, Job job) {
+    public void putFileToCache(DAGFile file, VM vm) {
         // Do nothing
     }
 
     @Override
-    public boolean getFileFromCache(DAGFile file, Job job) {
+    public boolean getFileFromCache(DAGFile file, VM vm) {
         // There's no file in the cache, so let's return false.
         return false;
     }

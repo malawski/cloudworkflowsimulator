@@ -9,7 +9,6 @@ import java.util.Set;
 import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGFile;
-import cws.core.jobs.Job;
 
 /**
  * Cache manager which uses FIFO cache strategy for all files. Duplicate files are not added to the per-VM cache.
@@ -63,20 +62,20 @@ public class FIFOCacheManager extends VMCacheManager {
     }
 
     @Override
-    public void putFileToCache(DAGFile file, Job job) {
-        if (getFileFromCache(file, job)) {
+    public void putFileToCache(DAGFile file, VM vm) {
+        if (getFileFromCache(file, vm)) {
             // Do not re-add files to cache.
             return;
         }
-        if (cache.get(job.getVM()) == null) {
-            cache.put(job.getVM(), new VMCache(job.getVM()));
+        if (cache.get(vm) == null) {
+            cache.put(vm, new VMCache(vm));
         }
-        cache.get(job.getVM()).putFileToCache(file);
+        cache.get(vm).putFileToCache(file);
     }
 
     @Override
-    public boolean getFileFromCache(DAGFile file, Job job) {
-        VMCache vmCache = cache.get(job.getVM());
+    public boolean getFileFromCache(DAGFile file, VM vm) {
+        VMCache vmCache = cache.get(vm);
         if (vmCache != null) {
             return vmCache.getFileFromCache(file);
         }

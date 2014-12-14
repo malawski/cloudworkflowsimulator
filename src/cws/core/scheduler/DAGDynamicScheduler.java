@@ -1,5 +1,7 @@
 package cws.core.scheduler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
 import cws.core.Scheduler;
@@ -15,7 +17,7 @@ import cws.core.jobs.Job;
  * Job is submitted to VM only if VM is idle (no queuing in VMs).
  * @author malawski
  */
-public abstract class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
+abstract class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
     protected final Environment environment;
 
     public DAGDynamicScheduler(CloudSimWrapper cloudsim, Environment environment) {
@@ -33,9 +35,10 @@ public abstract class DAGDynamicScheduler extends CWSSimEntity implements Schedu
      * @param engine
      */
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-        while (!engine.getFreeVMs().isEmpty() && !jobs.isEmpty()) {
+        List<VM> freeVMs = new ArrayList<VM>(engine.getFreeVMs());
+        while (!jobs.isEmpty() && !freeVMs.isEmpty()) {
             Job job = jobs.poll();
-            VM vm = engine.getFreeVMs().get(0);
+            VM vm = freeVMs.remove(freeVMs.size() - 1);
             vm.jobSubmit(job);
         }
     }

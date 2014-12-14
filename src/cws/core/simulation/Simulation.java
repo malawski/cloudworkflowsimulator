@@ -22,6 +22,7 @@ import org.cloudbus.cloudsim.Log;
 import cws.core.VMFactory;
 import cws.core.algorithms.Algorithm;
 import cws.core.algorithms.AlgorithmStatistics;
+import cws.core.algorithms.CacheAwareStorageAwareWADPDS;
 import cws.core.algorithms.DPDS;
 import cws.core.algorithms.SPSS;
 import cws.core.algorithms.StorageAwareSPSS;
@@ -343,8 +344,7 @@ public class Simulation {
                     + environment.getVMProvisioningOverallDelayEstimation();
             minCost = Math.min(minCost, dagStats.getMinCost());
 
-            maxTime += dagStats.getCriticalPathLength() 
-                    + environment.getVMProvisioningOverallDelayEstimation();
+            maxTime += dagStats.getCriticalPathLength() + environment.getVMProvisioningOverallDelayEstimation();
             maxCost += dagStats.getMinCost();
         }
 
@@ -390,10 +390,11 @@ public class Simulation {
                     + "lastVMFinish,runtimeVariance,failureRate,minBudget,"
                     + "maxBudget,minDeadline,maxDeadline,"
                     + "timeSpentOnTransfers,timeSpentOnComputations,"
-                    + "storageManagerType,storageCacheType,totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
-                    + "actualBytesRead,actualBytesTransferred,"
+                    + "storageManagerType,storageCacheType,"
+                    + "totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
+                    + "bytesReadFromCache,"
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
-                    + "actualFilesRead,actualFilesTransferred");
+                    + "filesReadFromCache,cacheBytesHitRatio");
 
             for (double budget = minBudget; budget <= maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
@@ -440,13 +441,19 @@ public class Simulation {
                             algorithmStatistics.getTimeSpentOnComputations());
 
                     StorageManagerStatistics stats = environment.getStorageManagerStatistics();
-                    fileOut.printf("%s,%s,%d,%d,%d,%d,%d,", storageManagerType, storageCacheType, stats.getTotalBytesToRead(),
-                            stats.getTotalBytesToWrite(), stats.getTotalBytesToRead() + stats.getTotalBytesToWrite(),
-                            stats.getActualBytesRead(), stats.getActualBytesRead() + stats.getTotalBytesToWrite());
+                    fileOut.printf("%s,%s,%d,%d,%d,%d,", storageManagerType, storageCacheType,
+                            stats.getTotalBytesToRead(), stats.getTotalBytesToWrite(), stats.getTotalBytesToRead()
+                                    + stats.getTotalBytesToWrite(), stats.getBytesReadFromCache());
 
-                    fileOut.printf("%d,%d,%d,%d,%d\n", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
-                            stats.getTotalFilesToRead() + stats.getTotalFilesToWrite(), stats.getActualFilesRead(),
-                            stats.getActualFilesRead() + stats.getTotalFilesToWrite());
+                    String cacheBytesHitRatio = "";
+                    if (stats.getTotalBytesToRead() + stats.getTotalBytesToWrite() > 0) {
+                        double cacheHitRatio = (double) stats.getBytesReadFromCache()
+                                / ((double) (stats.getTotalBytesToRead() + stats.getTotalBytesToWrite()));
+                        cacheBytesHitRatio = cacheHitRatio + "";
+                    }
+                    fileOut.printf("%d,%d,%d,%d,%s\n", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
+                            stats.getTotalFilesToRead() + stats.getTotalFilesToWrite(), stats.getFilesReadFromCache(),
+                            cacheBytesHitRatio);
                 }
             }
             System.out.println();
@@ -503,6 +510,9 @@ public class Simulation {
             return new StorageAwareSPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
         } else if ("SA-WADPDS".equals(algorithmName)) {
             return new StorageAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
+        } else if ("CA-SA-WADPDS".equals(algorithmName)) {
+            return new CacheAwareStorageAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics,
+                    environment, cloudsim);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }
