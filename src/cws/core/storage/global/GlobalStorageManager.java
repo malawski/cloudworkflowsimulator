@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.istack.internal.Nullable;
-
 import cws.core.VM;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEvent;
@@ -293,7 +291,7 @@ public class GlobalStorageManager extends StorageManager {
      * @see StorageManager#getTransferTimeEstimation(Task)
      */
     @Override
-    public double getTransferTimeEstimation(Task task, @Nullable VM vm) {
+    public double getTransferTimeEstimation(Task task, VM vm) {
         double time = 0.0;
         for (DAGFile file : task.getInputFiles()) {
             if (!cacheManager.getFileFromCache(file, vm)) {

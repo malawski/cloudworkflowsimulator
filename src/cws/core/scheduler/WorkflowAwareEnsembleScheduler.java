@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import com.sun.istack.internal.Nullable;
-
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -164,7 +162,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
      * 
      * Should be overridden in pair with the DAG predicting method.
      */
-    protected double getPredictedRuntime(Task task, @Nullable VM vm) {
+    protected double getPredictedRuntime(Task task, VM vm) {
         return environment.getComputationPredictedRuntime(task);
     }
 
