@@ -103,7 +103,7 @@ public class EnsembleDynamicSchedulerTest {
         cloudsim.startSimulation();
 
         assertEquals(vms.size(), engine.getAvailableVMs().size());
-        assertEquals(0, engine.getQueuedJobs().size());
+        assertEquals(0, engine.getAndClearReleasedJobs().size());
 
         jobLog.printJobs();
     }
@@ -130,7 +130,7 @@ public class EnsembleDynamicSchedulerTest {
         cloudsim.startSimulation();
 
         assertEquals(vms.size(), engine.getAvailableVMs().size());
-        assertEquals(0, engine.getQueuedJobs().size());
+        assertEquals(0, engine.getAndClearReleasedJobs().size());
 
         jobLog.printJobs();
     }
@@ -159,7 +159,7 @@ public class EnsembleDynamicSchedulerTest {
         cloudsim.startSimulation();
 
         assertEquals(vms.size(), engine.getAvailableVMs().size());
-        assertEquals(0, engine.getQueuedJobs().size());
+        assertEquals(0, engine.getAndClearReleasedJobs().size());
 
         jobLog.printJobs();
     }

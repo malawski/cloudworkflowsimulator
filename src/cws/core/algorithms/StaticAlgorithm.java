@@ -225,7 +225,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
     @Override
     public void scheduleJobs(WorkflowEngine engine) {
         // Just clear any jobs that were queued
-        engine.getQueuedJobs().clear();
+        engine.getAndClearReleasedJobs().clear();
     }
 
     @Override

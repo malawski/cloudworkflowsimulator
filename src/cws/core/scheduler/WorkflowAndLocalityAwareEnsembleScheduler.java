@@ -15,14 +15,19 @@ import cws.core.storage.cache.VMCacheManager;
  * {@link WorkflowAwareEnsembleScheduler} implementation that is also aware of the underlying storage and schedules jobs
  * to minimize file transfers.
  */
-public class WorkflowLocalityAndStorageAwareEnsembleScheduler extends WorkflowAndStorageAwareEnsembleScheduler {
+public class WorkflowAndLocalityAwareEnsembleScheduler extends EnsembleDynamicScheduler {
     private final VMCacheManager cacheManager;
     private final StorageManager storageManager;
+    private final RuntimePredictioner runtimePredictioner;
+    private final WorkflowAdmissioner workflowAdmissioner;
 
-    public WorkflowLocalityAndStorageAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment) {
+    public WorkflowAndLocalityAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment,
+            RuntimePredictioner runtimePredictioner, WorkflowAdmissioner workflowAdmissioner) {
         super(cloudsim, environment);
         this.cacheManager = (VMCacheManager) cloudsim.getEntityByName("VMCacheManager");
         this.storageManager = (StorageManager) cloudsim.getEntityByName("StorageManager");
+        this.runtimePredictioner = runtimePredictioner;
+        this.workflowAdmissioner = workflowAdmissioner;
     }
 
     /**
@@ -32,12 +37,12 @@ public class WorkflowLocalityAndStorageAwareEnsembleScheduler extends WorkflowAn
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
         while (!jobs.isEmpty() && !engine.getFreeVMs().isEmpty()) {
             Job job = jobs.poll();
-            if (isJobDagAdmitted(job, engine)) {
+            if (workflowAdmissioner.isJobDagAdmitted(job, engine)) {
                 List<VM> freeVms = engine.getFreeVMs();
                 VM bestVM = freeVms.get(0);
-                double bestFinishTime = getPredictedRuntime(job.getTask(), bestVM);
+                double bestFinishTime = runtimePredictioner.getPredictedRuntime(job.getTask(), bestVM);
                 for (VM vm : freeVms) {
-                    double estimatedJobFinish = getPredictedRuntime(job.getTask(), vm);
+                    double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm);
                     if (estimatedJobFinish <= bestFinishTime) {
                         bestVM = vm;
                         bestFinishTime = estimatedJobFinish;
@@ -47,7 +52,7 @@ public class WorkflowLocalityAndStorageAwareEnsembleScheduler extends WorkflowAn
                 for (VM vm : allVms) {
                     if (!vm.isFree()) {
                         double t = vm.getPredictedReleaseTime(storageManager, environment, cacheManager);
-                        double estimatedJobFinish = getPredictedRuntime(job.getTask(), vm) + t;
+                        double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm) + t;
                         if (estimatedJobFinish < bestFinishTime) {
                             bestVM = vm;
                             bestFinishTime = estimatedJobFinish;

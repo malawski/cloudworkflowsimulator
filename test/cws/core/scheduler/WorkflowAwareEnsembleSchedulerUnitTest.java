@@ -7,12 +7,12 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
+import org.mockito.Mockito;
 
 import com.google.common.collect.ImmutableList;
 
@@ -34,7 +34,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     CloudSimWrapper cloudsim;
     Environment environment;
 
-    Queue<Job> jobs;
+    List<Job> jobs;
     List<VM> freeVMs;
 
     @Before
@@ -48,7 +48,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         when(environment.getSingleVMPrice()).thenReturn(1.0);
         when(environment.getBillingTimeInSeconds()).thenReturn(3600.0);
 
-        scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment);
+        scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment, new RuntimeWorkflowAdmissioner(cloudsim,
+                new ComputationOnlyRuntimePredictioner(environment), environment));
 
         engine = mock(WorkflowEngine.class);
         when(engine.getDeadline()).thenReturn(10.0);
@@ -57,7 +58,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         jobs = new LinkedList<Job>();
         freeVMs = new ArrayList<VM>();
 
-        when(engine.getQueuedJobs()).thenReturn(jobs);
+        when(engine.getAndClearReleasedJobs()).thenReturn(jobs);
         when(engine.getFreeVMs()).thenReturn(freeVMs);
     }
 
@@ -66,7 +67,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         freeVMs.add(createVMMock());
         // empty queues
 
-        Queue<Job> expected = jobs;
+        List<Job> expected = jobs;
 
         scheduler.scheduleJobs(engine);
         assertTrue(expected.equals(jobs));
@@ -76,15 +77,14 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     public void shouldScheduleFirstJobIfOneVMAvailable() {
         Job job = createSimpleJobMock();
         jobs.add(job);
-        freeVMs.add(createVMMock());
-
-        Queue<Job> expected = new LinkedList<Job>();
+        VM vm = createVMMock();
+        freeVMs.add(vm);
 
         when(environment.getComputationPredictedRuntime(job.getDAGJob().getDAG())).thenReturn(10.0);
 
         scheduler.scheduleJobs(engine);
 
-        assertTrue(expected.equals(jobs));
+        Mockito.verify(vm, Mockito.times(1)).jobSubmit(job);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         // empty VMs
         jobs.add(createSimpleJobMock());
 
-        Queue<Job> expected = jobs;
+        List<Job> expected = jobs;
 
         scheduler.scheduleJobs(engine);
         assertTrue(expected.equals(jobs));

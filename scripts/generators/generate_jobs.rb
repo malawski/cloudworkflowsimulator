@@ -12,7 +12,7 @@ out_dir = nil
 # Parameters with default values. They can be overriden.
 name_prefix = "generated"
 applications = ["MONTAGE", "GENOME", "CYBERSHAKE"]
-algorithms = ["DPDS", "WADPDS", "SA-WADPDS", "SPSS", "SA-SPSS"]
+algorithms = ["DPDS", "WADPDS", "SA-WADPDS", "L-SA-WADPDS", "L-DPDS", "SPSS", "SA-SPSS"]
 input_dirs = {"CYBERSHAKE" => "CYBERSHAKE", "GENOME" => "GENOME",
     "LIGO" => "LIGO", "MONTAGE" => "MONTAGE", "SIPHT" => "SIPHT"}
 distributions = ["pareto_sorted"]

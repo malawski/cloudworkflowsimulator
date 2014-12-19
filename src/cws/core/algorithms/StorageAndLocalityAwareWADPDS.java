@@ -6,7 +6,9 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.engine.Environment;
 import cws.core.provisioner.SimpleUtilizationBasedProvisioner;
-import cws.core.scheduler.WorkflowLocalityAndStorageAwareEnsembleScheduler;
+import cws.core.scheduler.ComputationAndTransfersRuntimePredictioner;
+import cws.core.scheduler.RuntimeWorkflowAdmissioner;
+import cws.core.scheduler.WorkflowAndLocalityAwareEnsembleScheduler;
 
 /**
  * Storage and file locality aware version of WADPDS algorithm.
@@ -15,10 +17,12 @@ import cws.core.scheduler.WorkflowLocalityAndStorageAwareEnsembleScheduler;
  * 
  * File locality means that the scheduler tries to minimize the number of file transfers between tasks.
  */
-public class CacheAwareStorageAwareWADPDS extends DynamicAlgorithm {
-    public CacheAwareStorageAwareWADPDS(double budget, double deadline, List<DAG> dags, double maxScaling,
+public class StorageAndLocalityAwareWADPDS extends DynamicAlgorithm {
+    public StorageAndLocalityAwareWADPDS(double budget, double deadline, List<DAG> dags, double maxScaling,
             AlgorithmStatistics ensembleStatistics, Environment environment, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, new WorkflowLocalityAndStorageAwareEnsembleScheduler(cloudsim, environment),
+        super(budget, deadline, dags, new WorkflowAndLocalityAwareEnsembleScheduler(cloudsim, environment,
+                new ComputationAndTransfersRuntimePredictioner(environment), new RuntimeWorkflowAdmissioner(cloudsim,
+                        new ComputationAndTransfersRuntimePredictioner(environment), environment)),
                 new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim), ensembleStatistics, environment, cloudsim);
     }
 }

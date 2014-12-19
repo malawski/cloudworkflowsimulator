@@ -1,8 +1,8 @@
 package cws.core.scheduler;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Queue;
 
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -33,10 +33,8 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
             return;
         }
 
-        Queue<Job> jobs = engine.getQueuedJobs();
-
+        List<Job> jobs = engine.getAndClearReleasedJobs();
         prioritizedJobs.addAll(jobs);
-        jobs.clear();
         
         // use prioritized list for scheduling
         scheduleQueue(prioritizedJobs, engine);

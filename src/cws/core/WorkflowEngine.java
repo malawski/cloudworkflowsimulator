@@ -1,9 +1,8 @@
 package cws.core;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -26,7 +25,7 @@ public class WorkflowEngine extends CWSSimEntity {
     public static int next_id = 0;
 
     /** The list of current {@link DAGJob}s. */
-    private final LinkedList<DAGJob> dags = new LinkedList<DAGJob>();
+    private final List<DAGJob> dags = new ArrayList<DAGJob>();
 
     private final HashSet<JobListener> jobListeners = new HashSet<JobListener>();
 
@@ -37,10 +36,10 @@ public class WorkflowEngine extends CWSSimEntity {
     private final Scheduler scheduler;
 
     /** The currently running VMs */
-    private final LinkedList<VM> availableVms = new LinkedList<VM>();
+    private final List<VM> availableVms = new ArrayList<VM>();
     
     /** The list of unmatched ready jobs */
-    private final LinkedList<Job> queue = new LinkedList<Job>();
+    private List<Job> releasedJobs = new ArrayList<Job>();
 
     /** The simulation's deadline. */
     private final double deadline;
@@ -138,7 +137,7 @@ public class WorkflowEngine extends CWSSimEntity {
     }
 
     private void jobReleased(Job j) {
-        queue.add(j);
+        releasedJobs.add(j);
 
         // Notify listeners that job was released
         for (JobListener jl : jobListeners) {
@@ -216,8 +215,10 @@ public class WorkflowEngine extends CWSSimEntity {
         return budget;
     }
 
-    public Queue<Job> getQueuedJobs() {
-        return queue;
+    public List<Job> getAndClearReleasedJobs() {
+        List<Job> jobs = releasedJobs;
+        releasedJobs = new ArrayList<Job>();
+        return ImmutableList.copyOf(jobs);
     }
 
     public List<VM> getAvailableVMs() {

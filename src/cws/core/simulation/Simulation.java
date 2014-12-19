@@ -22,7 +22,8 @@ import org.cloudbus.cloudsim.Log;
 import cws.core.VMFactory;
 import cws.core.algorithms.Algorithm;
 import cws.core.algorithms.AlgorithmStatistics;
-import cws.core.algorithms.CacheAwareStorageAwareWADPDS;
+import cws.core.algorithms.LocalityAwareDPDS;
+import cws.core.algorithms.StorageAndLocalityAwareWADPDS;
 import cws.core.algorithms.DPDS;
 import cws.core.algorithms.SPSS;
 import cws.core.algorithms.StorageAwareSPSS;
@@ -504,14 +505,16 @@ public class Simulation {
             return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
         } else if ("DPDS".equals(algorithmName)) {
             return new DPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
+        } else if ("L-DPDS".equals(algorithmName)) {
+            return new LocalityAwareDPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
         } else if ("WADPDS".equals(algorithmName)) {
             return new WADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
         } else if ("SA-SPSS".equals(algorithmName)) {
             return new StorageAwareSPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
         } else if ("SA-WADPDS".equals(algorithmName)) {
             return new StorageAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
-        } else if ("CA-SA-WADPDS".equals(algorithmName)) {
-            return new CacheAwareStorageAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics,
+        } else if ("L-SA-WADPDS".equals(algorithmName)) {
+            return new StorageAndLocalityAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics,
                     environment, cloudsim);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);

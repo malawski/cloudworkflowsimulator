@@ -7,12 +7,12 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
+import org.mockito.Mockito;
 
 import com.google.common.collect.ImmutableList;
 
@@ -30,7 +30,7 @@ public class EnsembleDynamicSchedulerUnitTest {
     DAGDynamicScheduler scheduler;
     WorkflowEngine engine;
     CloudSimWrapper cloudsim;
-    Queue<Job> jobs;
+    List<Job> jobs;
     List<VM> freeVMs;
     private Environment environment;
 
@@ -47,7 +47,7 @@ public class EnsembleDynamicSchedulerUnitTest {
         jobs = new LinkedList<Job>();
         freeVMs = new ArrayList<VM>();
 
-        when(engine.getQueuedJobs()).thenReturn(jobs);
+        when(engine.getAndClearReleasedJobs()).thenReturn(jobs);
         when(engine.getFreeVMs()).thenReturn(freeVMs);
     }
 
@@ -56,7 +56,7 @@ public class EnsembleDynamicSchedulerUnitTest {
         freeVMs.add(createVMMock());
         // empty queues
 
-        Queue<Job> expected = jobs;
+        List<Job> expected = jobs;
 
         scheduler.scheduleJobs(engine);
         assertTrue(expected.equals(jobs));
@@ -66,13 +66,12 @@ public class EnsembleDynamicSchedulerUnitTest {
     public void shouldScheduleFirstJobIfOneVMAvailable() {
         Job job = createJobMock();
         jobs.add(job);
-        freeVMs.add(createVMMock());
-
-        Queue<Job> expected = new LinkedList<Job>();
+        VM vm = createVMMock();
+        freeVMs.add(vm);
 
         scheduler.scheduleJobs(engine);
 
-        assertTrue(expected.equals(jobs));
+        Mockito.verify(vm, Mockito.times(1)).jobSubmit(job);
     }
 
     @Test
@@ -80,7 +79,7 @@ public class EnsembleDynamicSchedulerUnitTest {
         // empty VMs
         jobs.add(createJobMock());
 
-        Queue<Job> expected = jobs;
+        List<Job> expected = jobs;
 
         scheduler.scheduleJobs(engine);
         assertTrue(expected.equals(jobs));
