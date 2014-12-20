@@ -1,11 +1,8 @@
 package cws.core.scheduler;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 
 import cws.core.Scheduler;
-import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -34,12 +31,5 @@ abstract class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
      * @param jobs
      * @param engine
      */
-    protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-        List<VM> freeVMs = new ArrayList<VM>(engine.getFreeVMs());
-        while (!jobs.isEmpty() && !freeVMs.isEmpty()) {
-            Job job = jobs.poll();
-            VM vm = freeVMs.remove(freeVMs.size() - 1);
-            vm.jobSubmit(job);
-        }
-    }
+    protected abstract void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine);
 }
