@@ -43,7 +43,6 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
         scheduleQueue(prioritizedJobs, engine);
     }
 
-    @Override
     protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
         List<VM> freeVMs = new ArrayList<VM>(engine.getFreeVMs());
         while (!jobs.isEmpty() && !freeVMs.isEmpty()) {

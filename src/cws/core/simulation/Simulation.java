@@ -288,9 +288,9 @@ public class Simulation {
         } else {
             throw new IllegalCWSArgumentException("Wrong storage-cache:" + storageCacheType);
         }
-
+        GlobalStorageParams globalStorageParams = null;
         if (storageManagerType.equals("global")) {
-            GlobalStorageParams globalStorageParams = globalStorageParamsLoader.determineGlobalStorageParams(args);
+             globalStorageParams = globalStorageParamsLoader.determineGlobalStorageParams(args);
             logGlobalStorageParams(globalStorageParams);
             simulationParams.setStorageParams(globalStorageParams);
             simulationParams.setStorageType(StorageType.GLOBAL);
@@ -395,7 +395,8 @@ public class Simulation {
                     + "totalBytesToRead,totalBytesToWrite,totalBytesToTransfer,"
                     + "bytesReadFromCache,"
                     + "totalFilesToRead,totalFilesToWrite,totalFilesToTransfer,"
-                    + "filesReadFromCache,cacheBytesHitRatio");
+                    + "filesReadFromCache,cacheBytesHitRatio,"
+                    + "readSpeed,writeSpeed,cacheSize,latency,numReplicas");
 
             for (double budget = minBudget; budget <= maxBudget + (budgetStep / 2.0); budget += budgetStep) {
                 System.out.println();
@@ -452,9 +453,17 @@ public class Simulation {
                                 / ((double) (stats.getTotalBytesToRead() + stats.getTotalBytesToWrite()));
                         cacheBytesHitRatio = cacheHitRatio + "";
                     }
-                    fileOut.printf("%d,%d,%d,%d,%s\n", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
+                    fileOut.printf("%d,%d,%d,%d,%s,", stats.getTotalFilesToRead(), stats.getTotalFilesToWrite(),
                             stats.getTotalFilesToRead() + stats.getTotalFilesToWrite(), stats.getFilesReadFromCache(),
                             cacheBytesHitRatio);
+
+                    if (globalStorageParams != null) {
+                        fileOut.printf("%f,%f,%d,%f,%d\n", globalStorageParams.getReadSpeed(),
+                                globalStorageParams.getWriteSpeed(), vmType.getCacheSize(),
+                                globalStorageParams.getLatency(), globalStorageParams.getNumReplicas());
+                    } else {
+                        fileOut.printf(",,,,\n");
+                    }
                 }
             }
             System.out.println();

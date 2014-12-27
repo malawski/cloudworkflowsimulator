@@ -1,7 +1,10 @@
 package cws.core.scheduler;
 
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import cws.core.VM;
 import cws.core.WorkflowEngine;
@@ -15,7 +18,7 @@ import cws.core.storage.cache.VMCacheManager;
  * {@link WorkflowAwareEnsembleScheduler} implementation that is also aware of the underlying storage and schedules jobs
  * to minimize file transfers.
  */
-public class WorkflowAndLocalityAwareEnsembleScheduler extends EnsembleDynamicScheduler {
+public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicScheduler {
     private final VMCacheManager cacheManager;
     private final StorageManager storageManager;
     private final RuntimePredictioner runtimePredictioner;
@@ -33,18 +36,30 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends EnsembleDynamicSc
     /**
      * Schedules jobs while minimizing the number of file transfers between them.
      */
-    @Override
-    protected void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine) {
-        while (!jobs.isEmpty() && !engine.getFreeVMs().isEmpty()) {
-            Job job = jobs.poll();
-            if (workflowAdmissioner.isJobDagAdmitted(job, engine)) {
-                List<VM> freeVms = engine.getFreeVMs();
-                VM bestVM = freeVms.get(0);
-                double bestFinishTime = runtimePredictioner.getPredictedRuntime(job.getTask(), bestVM);
+    protected boolean scheduleJobsWithTheSamePriority(List<Job> jobs, WorkflowEngine engine) {
+        while (!jobs.isEmpty()) {
+            List<VM> freeVms = engine.getFreeVMs();
+            if (freeVms.isEmpty()) {
+                return false;
+            }
+
+            Iterator<Job> it = jobs.iterator();
+            while (it.hasNext()) {
+                if (!workflowAdmissioner.isJobDagAdmitted(it.next(), engine)) {
+                    it.remove();
+                }
+            }
+
+            Job bestJob = null;
+            VM bestVM2 = null;
+            Double bestSpeedup = null;
+            for (Job job : jobs) {
+                VM bestLocalVM = freeVms.get(0);
+                double bestFinishTime = runtimePredictioner.getPredictedRuntime(job.getTask(), bestLocalVM);
                 for (VM vm : freeVms) {
                     double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm);
                     if (estimatedJobFinish <= bestFinishTime) {
-                        bestVM = vm;
+                        bestLocalVM = vm;
                         bestFinishTime = estimatedJobFinish;
                     }
                 }
@@ -54,12 +69,58 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends EnsembleDynamicSc
                         double t = vm.getPredictedReleaseTime(storageManager, environment, cacheManager);
                         double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm) + t;
                         if (estimatedJobFinish < bestFinishTime) {
-                            bestVM = vm;
+                            bestLocalVM = vm;
                             bestFinishTime = estimatedJobFinish;
                         }
                     }
                 }
-                bestVM.jobSubmit(job);
+                double speedup = runtimePredictioner.getPredictedRuntime(job.getTask(), null) - bestFinishTime;
+                if (bestSpeedup == null || speedup > bestSpeedup) {
+                    bestSpeedup = speedup;
+                    bestJob = job;
+                    bestVM2 = bestLocalVM;
+                }
+            }
+            if (bestVM2 != null) {
+                bestVM2.jobSubmit(bestJob);
+            }
+            jobs.remove(bestJob);
+        }
+        return true;
+    }
+
+    private final TreeMap<Integer, List<Job>> releasedJobs = new TreeMap<Integer, List<Job>>();
+
+    @Override
+    public void scheduleJobs(WorkflowEngine engine) {
+        // check the deadline constraints (provisioner takes care about budget)
+        double deadline = engine.getDeadline();
+        double time = getCloudsim().clock();
+
+        // stop scheduling any new jobs if we are over deadline
+        if (time >= deadline) {
+            return;
+        }
+
+        List<Job> jobs = engine.getAndClearReleasedJobs();
+        for (Job job : jobs) {
+            Integer key = job.getDAGJob().getPriority();
+            if (!releasedJobs.containsKey(key)) {
+                releasedJobs.put(key, new LinkedList<Job>());
+            }
+            releasedJobs.get(key).add(job);
+        }
+
+        for (List<Job> jobsAtPriority : releasedJobs.values()) {
+            if (!scheduleJobsWithTheSamePriority(jobsAtPriority, engine)) {
+                break;
+            }
+        }
+
+        Iterator<Entry<Integer, List<Job>>> it = releasedJobs.entrySet().iterator();
+        while (it.hasNext()) {
+            if (it.next().getValue().isEmpty()) {
+                it.remove();
             }
         }
     }

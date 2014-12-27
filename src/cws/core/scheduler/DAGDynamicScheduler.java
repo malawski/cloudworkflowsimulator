@@ -1,13 +1,10 @@
 package cws.core.scheduler;
 
-import java.util.Queue;
-
 import cws.core.Scheduler;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.engine.Environment;
-import cws.core.jobs.Job;
 
 /**
  * This scheduler submits jobs to VMs on FCFS basis.
@@ -24,12 +21,4 @@ abstract class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
 
     @Override
     public abstract void scheduleJobs(WorkflowEngine engine);
-
-    /**
-     * Schedule all jobs from the queue to available free VMs.
-     * Successfully scheduled jobs are removed from the queue.
-     * @param jobs
-     * @param engine
-     */
-    protected abstract void scheduleQueue(Queue<Job> jobs, WorkflowEngine engine);
 }
