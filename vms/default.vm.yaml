@@ -1,6 +1,6 @@
 mips: 1
 cores: 1
-cacheSize: 106325606400 # 100 GiB
+cacheSize: 53687091200 # 50 GiB
 
 billing:
     unitTime: 3600.0
@@ -8,9 +8,9 @@ billing:
 
 provisioningDelay:
     distribution: constant
-    value: 60.0
+    value: 120.0
 
 deprovisioningDelay:
     distribution: constant
-    value: 30.0
+    value: 60.0
 

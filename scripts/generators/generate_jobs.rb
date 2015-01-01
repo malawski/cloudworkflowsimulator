@@ -11,7 +11,7 @@ out_dir = nil
 
 # Parameters with default values. They can be overriden.
 name_prefix = "generated"
-applications = ["MONTAGE", "GENOME", "CYBERSHAKE"]
+applications = ["MONTAGE", "GENOME", "CYBERSHAKE", "LIGO", "SIPHT"]
 algorithms = ["DPDS", "WADPDS", "SA-WADPDS", "L-SA-WADPDS", "L-DPDS", "SPSS", "SA-SPSS"]
 input_dirs = {"CYBERSHAKE" => "CYBERSHAKE", "GENOME" => "GENOME",
     "LIGO" => "LIGO", "MONTAGE" => "MONTAGE", "SIPHT" => "SIPHT"}
@@ -23,10 +23,11 @@ caches = ["void", "fifo"]
 read_speeds =  [20971520] # 20 MiB/s
 write_speeds = [20971520] # 20 MiB/s
 failure_rate = 0
-ensemble_size = 20
-variation = 0.0
+ensemble_size = 50
+variation = 0.05
 seeds = [Time.now().sec]
-queue_name = "l_short"
+nseeds = nil
+queue_name = "plgrid"
 qsub_params = ""
 local = false
 run = false
@@ -63,6 +64,9 @@ OptionParser.new do |opts|
   end
   opts.on("--seeds x,y", Array, "Optional list of seeds, defaults to #{seeds.join(',')}") do |val|
     seeds = val
+  end
+  opts.on("--nseeds x", Integer, "Optional number of seeds. Overrides seeds list if set") do |val|
+    nseeds = val
   end
   opts.on("--storage-managers x,y", Array, "Optional list of storage managers, " +
       "defaults to #{storage_managers.join(',')}") do |val|
@@ -135,6 +139,14 @@ id = 0
 if clear then
   cmd = "cd #{out_dir} && rm -r *"  
   `#{cmd}`
+end
+
+if nseeds != nil then
+  seeds = []
+  rnd = Random.new(Time.now().usec)
+  for i in (1..nseeds) do
+    seeds += [rnd.rand(100000)]
+  end
 end
 
 for seed in seeds do
