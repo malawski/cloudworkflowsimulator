@@ -11,7 +11,13 @@ import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 
-public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner {
+
+public class SimpleUtilizationBasedProvisioner extends HomogeneousCloudAwareProvisioner {
+
+    protected static final double PROVISIONER_INTERVAL = 10.0;
+
+    // maximum autoscaling factor over initial number of provisioned VMs
+    protected double maxScaling;
 
     // above this utilization threshold we start provisioning additional VMs
     private static final double UPPER_THRESHOLD = 0.90;
@@ -20,7 +26,8 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner {
     private int initialNumVMs = 0;
 
     public SimpleUtilizationBasedProvisioner(double maxScaling, CloudSimWrapper cloudsim) {
-        super(maxScaling, cloudsim);
+        super(cloudsim);
+        this.maxScaling = maxScaling;
     }
 
     @Override
@@ -169,7 +176,7 @@ public class SimpleUtilizationBasedProvisioner extends CloudAwareProvisioner {
         // then: deploy new instance
         double provisioning_interval = PROVISIONER_INTERVAL;
         if (!finishing_phase && utilization > UPPER_THRESHOLD
-                && engine.getAvailableVMs().size() < getMaxScaling() * initialNumVMs && budget - cost >= vmPrice) {
+                && engine.getAvailableVMs().size() < maxScaling * initialNumVMs && budget - cost >= vmPrice) {
 
             VM vm = VMFactory.createVM(environment.getVMType(), getCloudsim());
 
