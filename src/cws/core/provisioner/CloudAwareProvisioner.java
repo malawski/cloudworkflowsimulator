@@ -2,6 +2,7 @@ package cws.core.provisioner;
 
 import cws.core.Cloud;
 import cws.core.Provisioner;
+import cws.core.VM;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.engine.Environment;
@@ -36,12 +37,16 @@ public abstract class CloudAwareProvisioner extends CWSSimEntity implements Prov
     public double getMaxScaling() {
         return maxScaling;
     }
-    
+
     public void setCloud(Cloud cloud) {
         this.cloud = cloud;
     }
 
-    public Cloud getCloud() {
-        return cloud;
+    public void launchVM(int id, VM vm) {
+        cloud.launchVM(id, vm);
+    }
+
+    public void terminateVM(VM vm) {
+        cloud.terminateVM(vm);
     }
 }
