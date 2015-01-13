@@ -338,6 +338,9 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
     }
 
     private void prepareEnvironment() {
+        // TODO(david) this stuff is a nightmare, needs pulling out into a
+        // builder class or something.
+
         Cloud cloud = new Cloud(getCloudsim());
 
         this.provisioner = new NullProvisioner(getCloudsim());

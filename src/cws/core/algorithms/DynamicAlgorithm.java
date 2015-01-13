@@ -33,12 +33,14 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
     }
 
     private void prepareEnvironment() {
+        // TODO(david) this stuff is a nightmare, needs pulling out into a
+        // builder class or something.
+
         provisioner.setEnvironment(getEnvironment());
 
-        setCloud(new Cloud(getCloudsim()));
-        provisioner.setCloud(getCloud());
-
         setWorkflowEngine(new WorkflowEngine(provisioner, scheduler, getBudget(), getDeadline(), getCloudsim()));
+
+        setCloud(new Cloud(getCloudsim()));
 
         setEnsembleManager(new EnsembleManager(getAllDags(), getWorkflowEngine(), getCloudsim()));
 

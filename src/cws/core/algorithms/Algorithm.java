@@ -25,9 +25,6 @@ public abstract class Algorithm extends CWSSimEntity {
     /** Provisioner to decide when to provision/deprovision VMs */
     protected Provisioner provisioner;
 
-    /** Cloud to provision VMs from */
-    private Cloud cloud;
-
     /** WorkflowLog instance. Logs some interesting data to a file. */
     WorkflowLog workflowLog = new WorkflowLog(getCloudsim());
 
@@ -68,12 +65,17 @@ public abstract class Algorithm extends CWSSimEntity {
     }
 
     public final void setCloud(Cloud cloud) {
-        this.cloud = cloud;
-        this.cloud.addVMListener(algorithmStatistics);
-        this.cloud.addVMListener(workflowLog);
+        cloud.addVMListener(algorithmStatistics);
+        cloud.addVMListener(workflowLog);
 
         if (this.engine != null) {
-            this.cloud.addVMListener(this.engine);
+            cloud.addVMListener(this.engine);
+        }
+
+        if (this.provisioner != null) {
+            provisioner.setCloud(cloud);
+        } else {
+            throw new RuntimeException("Need the provisioner to be set before setting the cloud.");
         }
     }
 
@@ -84,8 +86,9 @@ public abstract class Algorithm extends CWSSimEntity {
 
         this.provisioner = workflowEngine.getProvisioner();
 
+        Cloud cloud = provisioner.getCloud();
         if (cloud != null) {
-            this.cloud.addVMListener(this.engine);
+            cloud.addVMListener(this.engine);
         }
     }
 
@@ -117,10 +120,6 @@ public abstract class Algorithm extends CWSSimEntity {
 
     public final Provisioner getProvisioner() {
         return provisioner;
-    }
-
-    public final Cloud getCloud() {
-        return cloud;
     }
 
     public final AlgorithmStatistics getAlgorithmStatistics() {
