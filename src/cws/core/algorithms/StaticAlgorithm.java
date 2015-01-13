@@ -343,10 +343,10 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
 
         Cloud cloud = new Cloud(getCloudsim());
 
-        this.provisioner = new NullProvisioner(getCloudsim());
-        this.provisioner.setCloud(cloud);
+        Provisioner provisioner = new NullProvisioner(getCloudsim());
+        provisioner.setCloud(cloud);
 
-        WorkflowEngine engine = new WorkflowEngine(this.provisioner, this,
+        WorkflowEngine engine = new WorkflowEngine(provisioner, this,
                 getBudget(), getDeadline(), getCloudsim());
         EnsembleManager manager = new EnsembleManager(engine, getCloudsim());
 
