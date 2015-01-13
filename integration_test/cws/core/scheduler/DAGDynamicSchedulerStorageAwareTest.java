@@ -115,6 +115,6 @@ public class DAGDynamicSchedulerStorageAwareTest {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
         VM vm = VMFactory.createVM(vmType, cloudsim);
-        cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+        provisioner.launchVM(engine.getId(), vm);
     }
 }
