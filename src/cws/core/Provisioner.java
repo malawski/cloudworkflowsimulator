@@ -1,10 +1,36 @@
 package cws.core;
 
-/**
- * An interface for resource provisioners used by the WorkflowEngine.
- * 
- * @author Gideon Juve <juve@usc.edu>
+import cws.core.Cloud;
+import cws.core.VM;
+import cws.core.cloudsim.CWSSimEntity;
+import cws.core.cloudsim.CloudSimWrapper;
+
+/**  An interface for resource provisioners used by the WorkflowEngine.
  */
-public interface Provisioner {
-    public void provisionResources(WorkflowEngine engine);
+public abstract class Provisioner extends CWSSimEntity {
+
+    private Cloud cloud;
+
+    public Provisioner(CloudSimWrapper cloudsim) {
+        super("Provisioner", cloudsim);
+    }
+
+    public void setCloud(Cloud cloud) {
+        this.cloud = cloud;
+    }
+
+    public void launchVM(int id, VM vm) {
+        cloud.launchVM(id, vm);
+    }
+
+    public void launchVMAtTime(int id, VM vm, double launchTime) {
+        cloud.launchVMAtTime(id, vm, launchTime);
+    }
+
+    public void terminateVM(VM vm) {
+        cloud.terminateVM(vm);
+    }
+
+
+    public abstract void provisionResources(WorkflowEngine engine);
 }

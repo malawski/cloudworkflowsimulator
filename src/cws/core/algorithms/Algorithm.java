@@ -6,7 +6,6 @@ import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.WorkflowEngine;
 import cws.core.Provisioner;
-import cws.core.provisioner.CloudAwareProvisioner;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
@@ -24,7 +23,7 @@ public abstract class Algorithm extends CWSSimEntity {
     private EnsembleManager manager;
 
     /** Provisioner to decide when to provision/deprovision VMs */
-    protected CloudAwareProvisioner provisioner;
+    protected Provisioner provisioner;
 
     /** Cloud to provision VMs from */
     private Cloud cloud;
@@ -108,7 +107,7 @@ public abstract class Algorithm extends CWSSimEntity {
         return engine;
     }
 
-    public final CloudAwareProvisioner getProvisioner() {
+    public final Provisioner getProvisioner() {
         return provisioner;
     }
 

@@ -15,7 +15,6 @@ import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 import cws.core.jobs.JobListener;
-import cws.core.provisioner.CloudAwareProvisioner;
 
 /**
  * The workflow engine is an entity that executes workflows by scheduling their
@@ -32,7 +31,7 @@ public class WorkflowEngine extends CWSSimEntity {
     private final HashSet<JobListener> jobListeners = new HashSet<JobListener>();
 
     /** The provisioner that allocates resources for this workflow engine */
-    private final CloudAwareProvisioner provisioner;
+    private final Provisioner provisioner;
 
     /** The scheduler that matches jobs to resources for this workflow engine */
     private final Scheduler scheduler;
@@ -51,7 +50,7 @@ public class WorkflowEngine extends CWSSimEntity {
 
     private boolean provisioningRequestSend = false;
 
-    public WorkflowEngine(CloudAwareProvisioner provisioner, Scheduler scheduler, double budget, double deadline,
+    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, double budget, double deadline,
             CloudSimWrapper cloudsim) {
         super("WorkflowEngine" + (next_id++), cloudsim);
         this.provisioner = provisioner;
@@ -221,7 +220,7 @@ public class WorkflowEngine extends CWSSimEntity {
         return queue;
     }
 
-    public CloudAwareProvisioner getProvisioner() {
+    public Provisioner getProvisioner() {
         return provisioner;
     }
 

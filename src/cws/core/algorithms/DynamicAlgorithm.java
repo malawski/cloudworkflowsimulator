@@ -12,14 +12,14 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.engine.Environment;
-import cws.core.provisioner.HomogeneousCloudAwareProvisioner;
+import cws.core.provisioner.HomogeneousProvisioner;
 
 public class DynamicAlgorithm extends HomogeneousAlgorithm {
     private Scheduler scheduler;
-    private HomogeneousCloudAwareProvisioner provisioner;
+    private HomogeneousProvisioner provisioner;
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, Scheduler scheduler,
-            HomogeneousCloudAwareProvisioner provisioner, AlgorithmStatistics ensembleStatistics, Environment environment,
+            HomogeneousProvisioner provisioner, AlgorithmStatistics ensembleStatistics, Environment environment,
             CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
         this.provisioner = provisioner;

@@ -1,5 +1,6 @@
 package cws.core.provisioner;
 
+import cws.core.Provisioner;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.engine.Environment;
 
@@ -7,11 +8,11 @@ import cws.core.engine.Environment;
  * StorageManager is in use (and so an Environment class can provide all
  * the information needed).
  */
-public abstract class HomogeneousCloudAwareProvisioner extends CloudAwareProvisioner {
+public abstract class HomogeneousProvisioner extends Provisioner {
 
     protected Environment environment;
 
-    public HomogeneousCloudAwareProvisioner (CloudSimWrapper cloudsim) {
+    public HomogeneousProvisioner (CloudSimWrapper cloudsim) {
         super(cloudsim);
     }
 

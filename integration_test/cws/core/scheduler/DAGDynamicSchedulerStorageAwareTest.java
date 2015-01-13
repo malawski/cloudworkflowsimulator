@@ -26,13 +26,12 @@ import cws.core.storage.cache.FIFOCacheManager;
 import cws.core.storage.cache.VMCacheManager;
 import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
-import cws.core.provisioner.CloudAwareProvisioner;
 
 
 public class DAGDynamicSchedulerStorageAwareTest {
     private VMType vmType;
     private CloudSimWrapper cloudsim;
-    private CloudAwareProvisioner provisioner;
+    private Provisioner provisioner;
     private DAGDynamicScheduler scheduler;
     private WorkflowEngine engine;
     private Cloud cloud;

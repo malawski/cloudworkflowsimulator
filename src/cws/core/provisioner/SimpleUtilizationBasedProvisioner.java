@@ -12,7 +12,7 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 
 
-public class SimpleUtilizationBasedProvisioner extends HomogeneousCloudAwareProvisioner {
+public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
 
     protected static final double PROVISIONER_INTERVAL = 10.0;
 

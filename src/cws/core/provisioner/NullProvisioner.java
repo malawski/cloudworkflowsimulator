@@ -1,5 +1,6 @@
 package cws.core.provisioner;
 
+import cws.core.Provisioner;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 
@@ -8,7 +9,7 @@ import cws.core.cloudsim.CloudSimWrapper;
  * Mainly for use with StaticAlgorithm: provides the algorithm with the
  * ability to create VMs but does not create any itself.
  */
-public class NullProvisioner extends CloudAwareProvisioner  {
+public class NullProvisioner extends Provisioner  {
 
     public NullProvisioner(CloudSimWrapper cloudsim) {
         super(cloudsim);
