@@ -59,6 +59,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
         engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
         cloud = new Cloud(cloudsim);
         provisioner.setCloud(cloud);
+        cloud.addVMListener(engine);
 
         jobLog = new WorkflowLog(cloudsim);
         engine.addJobListener(jobLog);
@@ -115,6 +116,6 @@ public class DAGDynamicSchedulerStorageAwareTest {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
         VM vm = VMFactory.createVM(vmType, cloudsim);
-        provisioner.launchVM(engine.getId(), vm);
+        provisioner.launchVM(vm);
     }
 }

@@ -46,7 +46,7 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
 
         printEstimations(estimatedNumVMs);
 
-        launchInitialVMs(getCloud(), getWorkflowEngine(), estimatedNumVMs);
+        launchInitialVMs(estimatedNumVMs);
     }
 
     private int estimateVMsNumber() {
@@ -65,11 +65,11 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
         return getEnvironment().getSingleVMPrice() <= getBudget();
     }
 
-    private void launchInitialVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
+    private void launchInitialVMs(int numEstimatedVMs) {
         for (int i = 0; i < numEstimatedVMs; i++) {
             // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
             VM vm = VMFactory.createVM(getEnvironment().getVMType(), getCloudsim());
-            getProvisioner().launchVM(getWorkflowEngine().getId(), vm);
+            getProvisioner().launchVM(vm);
         }
     }
 

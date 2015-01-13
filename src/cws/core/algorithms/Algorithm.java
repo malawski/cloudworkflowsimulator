@@ -71,6 +71,10 @@ public abstract class Algorithm extends CWSSimEntity {
         this.cloud = cloud;
         this.cloud.addVMListener(algorithmStatistics);
         this.cloud.addVMListener(workflowLog);
+
+        if (this.engine != null) {
+            this.cloud.addVMListener(this.engine);
+        }
     }
 
     public final void setWorkflowEngine(WorkflowEngine workflowEngine) {
@@ -79,6 +83,10 @@ public abstract class Algorithm extends CWSSimEntity {
         this.engine.addJobListener(workflowLog);
 
         this.provisioner = workflowEngine.getProvisioner();
+
+        if (cloud != null) {
+            this.cloud.addVMListener(this.engine);
+        }
     }
 
     public final void setEnsembleManager(EnsembleManager ensembleManager) {

@@ -100,8 +100,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
             }
 
             // Launch the VM at its appointed time
-            getProvisioner().launchVMAtTime(getWorkflowEngine().getId(),
-                    vm, r.getStart());
+            getProvisioner().launchVMAtTime(vm, r.getStart());
 
         }
 
@@ -165,13 +164,13 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
 
         /*
          * The excess time share for each level is:
-         * 
+         *
          * // tasksInLevel \ / runtimeInLevel \\
          * frac = || alpha * ------------ | + | (1-alpha) * -------------- ||
          * \\ totalTasks / \ totalRuntime //
-         * 
+         *
          * share = frac * (deadline - critical_path)
-         * 
+         *
          * In other words, each level gets a fraction of the spare time that is
          * proportional to the combination of the number of tasks it has as well
          * as the total runtime of those tasks.
@@ -192,7 +191,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
 
         /*
          * The deadline of a task t is:
-         * 
+         *
          * t.deadline = max[p in t.parents](p.deadline) + t.runtime + shares[t.level]
          */
         HashMap<Task, Double> deadlines = new HashMap<Task, Double>();

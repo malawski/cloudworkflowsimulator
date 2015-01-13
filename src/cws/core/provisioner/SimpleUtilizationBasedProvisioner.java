@@ -181,7 +181,7 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
             VM vm = VMFactory.createVM(environment.getVMType(), getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());
-            launchVM(engine.getId(), vm);
+            launchVM(vm);
             provisioning_interval = 0;
         } else if (!finishing_phase && utilization < LOWER_THRESHOLD) {
             // select Vms to terminate

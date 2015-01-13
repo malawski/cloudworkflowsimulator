@@ -20,7 +20,7 @@ import cws.core.jobs.JobListener;
  *
  * @author Gideon Juve <juve@usc.edu>
  */
-public class WorkflowEngine extends CWSSimEntity {
+public class WorkflowEngine extends CWSSimEntity implements VMListener {
     public static int next_id = 0;
 
     /** The list of current {@link DAGJob}s. */
@@ -57,12 +57,6 @@ public class WorkflowEngine extends CWSSimEntity {
     @Override
     public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
-        case WorkflowEvent.VM_LAUNCHED:
-            vmLaunched((VM) ev.getData());
-            break;
-        case WorkflowEvent.VM_TERMINATED:
-            vmTerminated((VM) ev.getData());
-            break;
         case WorkflowEvent.DAG_SUBMIT:
             dagSubmit((DAGJob) ev.getData());
             if (!this.provisioningRequestSend) {
@@ -101,11 +95,13 @@ public class WorkflowEngine extends CWSSimEntity {
         getCloudsim().log("Total cost: " + getCost() + ", time: " + getCloudsim().clock());
     }
 
-    private void vmLaunched(VM vm) {
+    @Override
+    public void vmLaunched(VM vm) {
         scheduler.scheduleJobs(this);
     }
 
-    private void vmTerminated(VM vm) {
+    @Override
+    public void vmTerminated(VM vm) {
         cost += vm.getCost();
     }
 

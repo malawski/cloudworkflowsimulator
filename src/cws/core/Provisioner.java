@@ -23,12 +23,12 @@ public abstract class Provisioner extends CWSSimEntity {
         return cloud;
     }
 
-    public void launchVM(int id, VM vm) {
-        cloud.launchVM(id, vm);
+    public void launchVM(VM vm) {
+        cloud.launchVM(getId(), vm);
     }
 
-    public void launchVMAtTime(int id, VM vm, double launchTime) {
-        cloud.launchVMAtTime(id, vm, launchTime);
+    public void launchVMAtTime(VM vm, double launchTime) {
+        cloud.launchVMAtTime(getId(), vm, launchTime);
     }
 
     public void terminateVM(VM vm) {
