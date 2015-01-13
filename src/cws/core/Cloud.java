@@ -2,8 +2,11 @@ package cws.core;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import com.google.common.collect.ImmutableSet;
+
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -13,7 +16,7 @@ import cws.core.exception.UnknownWorkflowEventException;
 /**
  * A Cloud is an entity that handles the provisioning and deprovisioning
  * of VM resources.
- * 
+ *
  * @author Gideon Juve <juve@usc.edu>
  */
 public class Cloud extends CWSSimEntity {
@@ -33,6 +36,26 @@ public class Cloud extends CWSSimEntity {
 
     public Set<VM> getAllVMs() {
         return ImmutableSet.copyOf(vms);
+    }
+
+    public List<VM> getFreeVMs() {
+        Builder<VM> free = ImmutableList.<VM>builder();
+        for (VM vm : vms) {
+            if (!vm.isTerminated() && vm.isFree()) {
+                free.add(vm);
+            }
+        }
+        return free.build();
+    }
+
+    public List<VM> getBusyVMs() {
+        Builder<VM> busy = ImmutableList.<VM>builder();
+        for (VM vm : vms) {
+            if (!vm.isTerminated() && !vm.isFree()) {
+                busy.add(vm);
+            }
+        }
+        return busy.build();
     }
 
     @Override

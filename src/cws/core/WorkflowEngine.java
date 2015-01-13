@@ -2,11 +2,9 @@ package cws.core;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -35,9 +33,6 @@ public class WorkflowEngine extends CWSSimEntity {
 
     /** The scheduler that matches jobs to resources for this workflow engine */
     private final Scheduler scheduler;
-
-    /** The currently running VMs */
-    private final LinkedList<VM> availableVms = new LinkedList<VM>();
 
     /** The list of unmatched ready jobs */
     private final LinkedList<Job> queue = new LinkedList<Job>();
@@ -83,7 +78,7 @@ public class WorkflowEngine extends CWSSimEntity {
             break;
         case WorkflowEvent.PROVISIONING_REQUEST:
             if (provisioner != null)
-                if (availableVms.size() > 0 || dags.size() > 0)
+                if (getAvailableVMs().size() > 0 || dags.size() > 0)
                     provisioner.provisionResources(this);
             break;
         default:
@@ -93,7 +88,7 @@ public class WorkflowEngine extends CWSSimEntity {
 
     public double getCost() {
         double ret = cost;
-        for (VM vm : availableVms) {
+        for (VM vm : getAvailableVMs()) {
             ret += vm.getCost();
         }
         return ret;
@@ -107,13 +102,11 @@ public class WorkflowEngine extends CWSSimEntity {
     }
 
     private void vmLaunched(VM vm) {
-        availableVms.add(vm);
         scheduler.scheduleJobs(this);
     }
 
     private void vmTerminated(VM vm) {
         cost += vm.getCost();
-        availableVms.remove(vm);
     }
 
     private void dagSubmit(DAGJob dj) {
@@ -225,33 +218,15 @@ public class WorkflowEngine extends CWSSimEntity {
     }
 
     public List<VM> getAvailableVMs() {
-        Builder<VM> available = ImmutableList.<VM>builder();
-        for (VM vm : availableVms) {
-            if (!vm.isTerminated()) {
-                available.add(vm);
-            }
-        }
-        return available.build();
+        return new ArrayList<>(provisioner.getCloud().getAllVMs());
     }
-    
+
     public List<VM> getFreeVMs() {
-        Builder<VM> free = ImmutableList.<VM>builder();
-        for (VM vm : availableVms) {
-            if (!vm.isTerminated() && vm.isFree()) {
-                free.add(vm);
-            }
-        }
-        return free.build();
+        return provisioner.getCloud().getFreeVMs();
     }
 
     public List<VM> getBusyVMs() {
-        Builder<VM> busy = ImmutableList.<VM>builder();
-        for (VM vm : availableVms) {
-            if (!vm.isTerminated() && !vm.isFree()) {
-                busy.add(vm);
-            }
-        }
-        return busy.build();
+        return provisioner.getCloud().getBusyVMs();
     }
 
     public void addJobListener(JobListener l) {

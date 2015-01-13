@@ -13,6 +13,7 @@ import org.junit.Test;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
+import cws.core.provisioner.NullProvisioner;
 import cws.core.VM;
 import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
@@ -49,10 +50,11 @@ public class DAGDynamicSchedulerTest {
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         environment = new Environment(vmType, storageManager);
 
-        provisioner = null;
+        provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
         engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
         cloud = new Cloud(cloudsim);
+        provisioner.setCloud(cloud);
 
         jobLog = new WorkflowLog(cloudsim);
         engine.addJobListener(jobLog);

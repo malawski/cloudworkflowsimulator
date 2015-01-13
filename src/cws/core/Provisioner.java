@@ -19,6 +19,10 @@ public abstract class Provisioner extends CWSSimEntity {
         this.cloud = cloud;
     }
 
+    public Cloud getCloud() {
+        return cloud;
+    }
+
     public void launchVM(int id, VM vm) {
         cloud.launchVM(id, vm);
     }

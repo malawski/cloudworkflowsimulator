@@ -10,6 +10,7 @@ import org.junit.Test;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
+import cws.core.provisioner.NullProvisioner;
 import cws.core.VM;
 import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
@@ -53,10 +54,11 @@ public class DAGDynamicSchedulerStorageAwareTest {
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         environment = new Environment(vmType, storageManager);
 
-        provisioner = null;
+        provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
         engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
         cloud = new Cloud(cloudsim);
+        provisioner.setCloud(cloud);
 
         jobLog = new WorkflowLog(cloudsim);
         engine.addJobListener(jobLog);
@@ -66,7 +68,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
     public void shouldTakeIntoConsiderationTransferMakespans() {
         /**
          * input DAG:
-         * 
+         *
          * .....| in.txt 100B = 50s read
          * .....|
          * ...ID000 2s
@@ -76,7 +78,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
          * ...ID001 40s
          * .....|
          * .....| out.txt 200B = 200s write
-         * 
+         *
          */
 
         launchVM();
@@ -85,7 +87,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
 
         /**
          * expected:
-         * 
+         *
          * ... 50.0 Read in.txt
          * .... 2.0 Run job ID000
          * . 1000.0 Write mid.txt
