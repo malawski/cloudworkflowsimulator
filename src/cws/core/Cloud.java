@@ -71,6 +71,19 @@ public class Cloud extends CWSSimEntity {
         getCloudsim().send(getId(), getId(), vm.getProvisioningDelay(), WorkflowEvent.VM_LAUNCHED, vm);
     }
 
+    /** Launches the given VM at some time in the future.
+     */
+    public void launchVMAtTime(int id, VM vm, double launchTime) {
+        final double now = getCloudsim().clock();
+        if(launchTime < now) {
+            throw new IllegalArgumentException("Cannot launch a VM in the past.");
+        }
+
+        // Send message to ourself to launch the VM when it is needed.
+        final double delay = launchTime - now;
+        getCloudsim().send(id, getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
+    }
+
     private void vmLaunched(VM vm) {
         // Sanity check
         if (!vms.contains(vm)) {

@@ -15,11 +15,12 @@ import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.jobs.Job;
 import cws.core.jobs.JobListener;
+import cws.core.provisioner.CloudAwareProvisioner;
 
 /**
  * The workflow engine is an entity that executes workflows by scheduling their
  * tasks on VMs.
- * 
+ *
  * @author Gideon Juve <juve@usc.edu>
  */
 public class WorkflowEngine extends CWSSimEntity {
@@ -31,14 +32,14 @@ public class WorkflowEngine extends CWSSimEntity {
     private final HashSet<JobListener> jobListeners = new HashSet<JobListener>();
 
     /** The provisioner that allocates resources for this workflow engine */
-    private final Provisioner provisioner;
+    private final CloudAwareProvisioner provisioner;
 
     /** The scheduler that matches jobs to resources for this workflow engine */
     private final Scheduler scheduler;
 
     /** The currently running VMs */
     private final LinkedList<VM> availableVms = new LinkedList<VM>();
-    
+
     /** The list of unmatched ready jobs */
     private final LinkedList<Job> queue = new LinkedList<Job>();
 
@@ -50,7 +51,7 @@ public class WorkflowEngine extends CWSSimEntity {
 
     private boolean provisioningRequestSend = false;
 
-    public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, double budget, double deadline,
+    public WorkflowEngine(CloudAwareProvisioner provisioner, Scheduler scheduler, double budget, double deadline,
             CloudSimWrapper cloudsim) {
         super("WorkflowEngine" + (next_id++), cloudsim);
         this.provisioner = provisioner;
@@ -218,6 +219,10 @@ public class WorkflowEngine extends CWSSimEntity {
 
     public Queue<Job> getQueuedJobs() {
         return queue;
+    }
+
+    public CloudAwareProvisioner getProvisioner() {
+        return provisioner;
     }
 
     public List<VM> getAvailableVMs() {

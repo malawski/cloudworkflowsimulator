@@ -28,10 +28,11 @@ import cws.core.log.WorkflowLog;
 import cws.core.provisioner.ConstantDistribution;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
+import cws.core.provisioner.CloudAwareProvisioner;
 
 public class DAGDynamicSchedulerTest {
     private CloudSimWrapper cloudsim;
-    private Provisioner provisioner;
+    private CloudAwareProvisioner provisioner;
     private DAGDynamicScheduler scheduler;
     private WorkflowEngine engine;
     private Cloud cloud;

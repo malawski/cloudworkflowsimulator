@@ -11,6 +11,8 @@ import java.util.TreeMap;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
+import cws.core.provisioner.NullProvisioner;
+
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.VMFactory;
@@ -29,7 +31,7 @@ import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 
-public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Provisioner, Scheduler, VMListener, JobListener {
+public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Scheduler, VMListener, JobListener {
     /** Plan */
     private Plan plan = new Plan();
 
@@ -98,7 +100,8 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
             }
 
             // Launch the VM at its appointed time
-            launchVM(vm, r.getStart());
+            getProvisioner().launchVMAtTime(getWorkflowEngine().getId(),
+                    vm, r.getStart());
 
         }
 
@@ -218,11 +221,6 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
     }
 
     @Override
-    public void provisionResources(WorkflowEngine engine) {
-        // Do nothing
-    }
-
-    @Override
     public void scheduleJobs(WorkflowEngine engine) {
         // Just clear any jobs that were queued
         engine.getQueuedJobs().clear();
@@ -294,7 +292,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
         Task task = vmqueue.peek();
         if (task == null) {
             // No more tasks
-            getCloud().terminateVM(vm);
+            getProvisioner().terminateVM(vm);
         } else {
             // If job for task is ready
             if (readyJobs.containsKey(task)) {
@@ -303,12 +301,6 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
                 submitJob(vm, next);
             }
         }
-    }
-
-    private void launchVM(VM vm, double start) {
-        double now = getCloudsim().clock();
-        double delay = start - now;
-        getCloudsim().send(getWorkflowEngine().getId(), getCloud().getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
     }
 
     private void submitJob(VM vm, Job job) {
@@ -348,7 +340,12 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
 
     private void prepareEnvironment() {
         Cloud cloud = new Cloud(getCloudsim());
-        WorkflowEngine engine = new WorkflowEngine(this, this, getBudget(), getDeadline(), getCloudsim());
+
+        this.provisioner = new NullProvisioner(getCloudsim());
+        this.provisioner.setCloud(cloud);
+
+        WorkflowEngine engine = new WorkflowEngine(this.provisioner, this,
+                getBudget(), getDeadline(), getCloudsim());
         EnsembleManager manager = new EnsembleManager(engine, getCloudsim());
 
         setCloud(cloud);

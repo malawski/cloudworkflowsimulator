@@ -5,6 +5,8 @@ import java.util.List;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.WorkflowEngine;
+import cws.core.Provisioner;
+import cws.core.provisioner.CloudAwareProvisioner;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
@@ -20,6 +22,9 @@ public abstract class Algorithm extends CWSSimEntity {
 
     /** Ensemble manager that submits DAGs */
     private EnsembleManager manager;
+
+    /** Provisioner to decide when to provision/deprovision VMs */
+    protected CloudAwareProvisioner provisioner;
 
     /** Cloud to provision VMs from */
     private Cloud cloud;
@@ -74,6 +79,7 @@ public abstract class Algorithm extends CWSSimEntity {
         this.engine.addJobListener(algorithmStatistics);
         this.engine.addJobListener(workflowLog);
 
+        this.provisioner = workflowEngine.getProvisioner();
     }
 
     public final void setEnsembleManager(EnsembleManager ensembleManager) {
@@ -100,6 +106,10 @@ public abstract class Algorithm extends CWSSimEntity {
 
     public final WorkflowEngine getWorkflowEngine() {
         return engine;
+    }
+
+    public final CloudAwareProvisioner getProvisioner() {
+        return provisioner;
     }
 
     public final Cloud getCloud() {
