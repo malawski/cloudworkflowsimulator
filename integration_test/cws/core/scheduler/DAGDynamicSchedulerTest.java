@@ -61,25 +61,6 @@ public class DAGDynamicSchedulerTest {
         engine.addJobListener(jobLog);
     }
 
-    //??ds this is part of provisioner really?
-    @Test
-    public void testScheduleVMS() {
-        HashSet<VM> vms = new HashSet<VM>();
-        for (int i = 0; i < 10; i++) {
-            VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0)
-                    .provisioningTime(new ConstantDistribution(0.0)).deprovisioningTime(new ConstantDistribution(0.0))
-                    .build();
-
-            VM vm = VMFactory.createVM(vmType, cloudsim);
-            vms.add(vm);
-            provisioner.launchVMAtTime(vm, 0.1);
-        }
-
-        cloudsim.startSimulation();
-
-        assertEquals(vms.size(), engine.getAvailableVMs().size());
-    }
-
     @Test
     public void testScheduleDag() {
         HashSet<VM> vms = new HashSet<VM>();
