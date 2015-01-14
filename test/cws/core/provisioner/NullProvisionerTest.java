@@ -62,7 +62,7 @@ public class NullProvisionerTest {
 
         cloudsim.startSimulation();
 
-        assertThat("All VMs are allocated", cloud.getAllVMs().size(), is(nVMs));
+        assertThat("All VMs are available", cloud.getAvailableVMs().size(), is(nVMs));
     }
 
     @Test
@@ -78,16 +78,65 @@ public class NullProvisionerTest {
                     .build();
 
         final int nVMs = 10;
+        final double startTime = 0.1;
+
         for (int i = 0; i < nVMs; i++) {
             VM vm = VMFactory.createVM(vmType, cloudsim);
-            provisioner.launchVMAtTime(vm, 0.1);
+            provisioner.launchVMAtTime(vm, startTime);
         }
+
+        assertThat("VMs are not yet available",
+                cloud.getAvailableVMs().size(), is(0));
+
 
         cloudsim.startSimulation();
 
-        assertThat("All VMs are allocated", cloud.getAllVMs().size(), is(nVMs));
+        // Check that time has passed
+        assert(cloudsim.clock() > startTime);
 
-        assertThat("VM is allocated at the correct time",
-                cloud.getAllVMs().iterator().next().getLaunchTime(), is(0.1));
+        assertThat("All VMs are now available",
+                cloud.getAvailableVMs().size(), is(nVMs));
+
+        assertThat("VM was launched at the correct time",
+                cloud.getAvailableVMs().iterator().next().getLaunchTime(),
+                is(startTime));
     }
+
+    @Test
+    public void testScheduleVMsWithProvisioningDelay() {
+        Provisioner provisioner = new NullProvisioner(cloudsim);
+        Cloud cloud = new Cloud(cloudsim);
+        provisioner.setCloud(cloud);
+
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1)
+                .price(1.0)
+                .provisioningTime(new ConstantDistribution(1.0)) // non-zero
+                .deprovisioningTime(new ConstantDistribution(0.0))
+                .build();
+        VM vm = VMFactory.createVM(vmType, cloudsim);
+        provisioner.launchVM(vm);
+
+
+        assertThat("VM is not yet available",
+                cloud.getAvailableVMs().size(), is(0));
+
+        cloudsim.startSimulation();
+
+        // Check that time has passed
+        assert(cloudsim.clock() > 1.0);
+
+        assertThat("VM is now available",
+                cloud.getAvailableVMs().size(), is(1));
+
+        assertThat("VM was launched at time 0",
+                cloud.getAvailableVMs().iterator().next().getLaunchTime(),
+                is(0.0));
+
+
+        // It would be good if we could insert tests to run at time 0.9 and
+        // 1.1, to check that the VM is provisioned correctly. At the
+        // moment we are only testing that the VM is provisioned sometime
+        // between 0 and infinity!
+    }
+
 }
