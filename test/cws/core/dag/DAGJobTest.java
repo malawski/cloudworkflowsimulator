@@ -1,4 +1,4 @@
-package cws.core.jobs;
+package cws.core.dag;
 
 import static org.junit.Assert.*;
 
