@@ -12,17 +12,21 @@ import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.engine.Environment;
-import cws.core.provisioner.CloudAwareProvisioner;
+import cws.core.provisioner.HomogeneousProvisioner;
 
 public class DynamicAlgorithm extends HomogeneousAlgorithm {
     private Scheduler scheduler;
-    private CloudAwareProvisioner provisioner;
+
+    // Storage for the provisioner until it can be passed to the
+    // WorkflowEngine in prepareEnvironment. TODO(david) find a way to
+    // remove this.
+    private HomogeneousProvisioner tempProvisionerStorage;
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, Scheduler scheduler,
-            CloudAwareProvisioner provisioner, AlgorithmStatistics ensembleStatistics, Environment environment,
+            HomogeneousProvisioner provisioner, AlgorithmStatistics ensembleStatistics, Environment environment,
             CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
-        this.provisioner = provisioner;
+        this.tempProvisionerStorage = provisioner;
         this.scheduler = scheduler;
     }
 
@@ -33,12 +37,22 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
     }
 
     private void prepareEnvironment() {
-        provisioner.setEnvironment(getEnvironment());
+        // TODO(david) this stuff is a nightmare, needs pulling out into a
+        // builder class or something.
 
-        setCloud(new Cloud(getCloudsim()));
-        provisioner.setCloud(getCloud());
+        Cloud cloud = new Cloud(getCloudsim());
 
-        setWorkflowEngine(new WorkflowEngine(provisioner, scheduler, getBudget(), getDeadline(), getCloudsim()));
+        this.tempProvisionerStorage.setEnvironment(getEnvironment());
+        this.tempProvisionerStorage.setCloud(cloud);
+
+        setWorkflowEngine(new WorkflowEngine(tempProvisionerStorage, scheduler, getBudget(), getDeadline(), getCloudsim()));
+
+        // WorkflowEngine "owns" the provisioner now, so don't use this
+        // reference (otherwise we risk it becoming outdated if the
+        // provisioner is changed).
+        this.tempProvisionerStorage = null;
+
+        setCloud(cloud);
 
         setEnsembleManager(new EnsembleManager(getAllDags(), getWorkflowEngine(), getCloudsim()));
 
@@ -46,7 +60,7 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
 
         printEstimations(estimatedNumVMs);
 
-        launchInitialVMs(getCloud(), getWorkflowEngine(), estimatedNumVMs);
+        launchInitialVMs(estimatedNumVMs);
     }
 
     private int estimateVMsNumber() {
@@ -65,11 +79,11 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
         return getEnvironment().getSingleVMPrice() <= getBudget();
     }
 
-    private void launchInitialVMs(Cloud cloud, WorkflowEngine engine, int numEstimatedVMs) {
+    private void launchInitialVMs(int numEstimatedVMs) {
         for (int i = 0; i < numEstimatedVMs; i++) {
             // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
             VM vm = VMFactory.createVM(getEnvironment().getVMType(), getCloudsim());
-            getCloudsim().send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+            getProvisioner().launchVM(vm);
         }
     }
 

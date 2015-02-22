@@ -13,6 +13,7 @@ import org.junit.Test;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
+import cws.core.provisioner.NullProvisioner;
 import cws.core.VM;
 import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
@@ -49,15 +50,18 @@ public class EnsembleDynamicSchedulerTest {
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         environment = new Environment(vmType, storageManager);
 
-        provisioner = null;
+        provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
         engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
         cloud = new Cloud(cloudsim);
+        provisioner.setCloud(cloud);
+        cloud.addVMListener(engine);
 
         jobLog = new WorkflowLog(cloudsim);
         engine.addJobListener(jobLog);
     }
 
+    //??ds this is part of provisioner really
     @Test
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();
@@ -68,7 +72,7 @@ public class EnsembleDynamicSchedulerTest {
 
             VM vm = VMFactory.createVM(vmType, cloudsim);
             vms.add(vm);
-            cloudsim.send(engine.getId(), cloud.getId(), 0.1, WorkflowEvent.VM_LAUNCH, vm);
+            provisioner.launchVMAtTime(vm, 0.1);
         }
 
         cloudsim.startSimulation();
@@ -85,7 +89,7 @@ public class EnsembleDynamicSchedulerTest {
 
             VM vm = VMFactory.createVM(vmType, cloudsim);
             vms.add(vm);
-            cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+            provisioner.launchVM(vm);
         }
 
         DAG dag = new DAG();
@@ -116,7 +120,7 @@ public class EnsembleDynamicSchedulerTest {
 
             VM vm = VMFactory.createVM(vmType, cloudsim);
             vms.add(vm);
-            cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+            provisioner.launchVM(vm);
         }
 
         DAG dag = DAGParser.parseDAG(new File("dags/CyberShake_100.dag"));
@@ -143,7 +147,7 @@ public class EnsembleDynamicSchedulerTest {
             VM vm = VMFactory.createVM(vmType, cloudsim);
 
             vms.add(vm);
-            cloudsim.send(engine.getId(), cloud.getId(), 0.0, WorkflowEvent.VM_LAUNCH, vm);
+            provisioner.launchVM(vm);
         }
 
         List<DAG> dags = new ArrayList<DAG>();
