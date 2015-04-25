@@ -8,7 +8,6 @@ import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
-import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.engine.Environment;

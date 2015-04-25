@@ -1,10 +1,9 @@
 package cws.core;
 
 import java.util.HashSet;
-import java.util.Set;
-import com.google.common.collect.ImmutableSet;
-
 import java.util.List;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
