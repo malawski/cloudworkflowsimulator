@@ -11,6 +11,8 @@ import java.util.TreeMap;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.Provisioner;
+import cws.core.provisioner.NullProvisioner;
+
 import cws.core.Scheduler;
 import cws.core.VM;
 import cws.core.VMFactory;
@@ -29,7 +31,7 @@ import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
 
-public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Provisioner, Scheduler, VMListener, JobListener {
+public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Scheduler, VMListener, JobListener {
     /** Plan */
     private Plan plan = new Plan();
 
@@ -98,7 +100,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
             }
 
             // Launch the VM at its appointed time
-            launchVM(vm, r.getStart());
+            getProvisioner().launchVMAtTime(vm, r.getStart());
 
         }
 
@@ -162,13 +164,13 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
 
         /*
          * The excess time share for each level is:
-         * 
+         *
          * // tasksInLevel \ / runtimeInLevel \\
          * frac = || alpha * ------------ | + | (1-alpha) * -------------- ||
          * \\ totalTasks / \ totalRuntime //
-         * 
+         *
          * share = frac * (deadline - critical_path)
-         * 
+         *
          * In other words, each level gets a fraction of the spare time that is
          * proportional to the combination of the number of tasks it has as well
          * as the total runtime of those tasks.
@@ -189,7 +191,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
 
         /*
          * The deadline of a task t is:
-         * 
+         *
          * t.deadline = max[p in t.parents](p.deadline) + t.runtime + shares[t.level]
          */
         HashMap<Task, Double> deadlines = new HashMap<Task, Double>();
@@ -215,11 +217,6 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
         dagJob.setPriority(priority);
         getCloudsim().send(getEnsembleManager().getId(), getWorkflowEngine().getId(), 0.0, WorkflowEvent.DAG_SUBMIT,
                 dagJob);
-    }
-
-    @Override
-    public void provisionResources(WorkflowEngine engine) {
-        // Do nothing
     }
 
     @Override
@@ -294,7 +291,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
         Task task = vmqueue.peek();
         if (task == null) {
             // No more tasks
-            getCloud().terminateVM(vm);
+            getProvisioner().terminateVM(vm);
         } else {
             // If job for task is ready
             if (readyJobs.containsKey(task)) {
@@ -303,12 +300,6 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
                 submitJob(vm, next);
             }
         }
-    }
-
-    private void launchVM(VM vm, double start) {
-        double now = getCloudsim().clock();
-        double delay = start - now;
-        getCloudsim().send(getWorkflowEngine().getId(), getCloud().getId(), delay, WorkflowEvent.VM_LAUNCH, vm);
     }
 
     private void submitJob(VM vm, Job job) {
@@ -347,8 +338,16 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Pr
     }
 
     private void prepareEnvironment() {
+        // TODO(david) this stuff is a nightmare, needs pulling out into a
+        // builder class or something.
+
         Cloud cloud = new Cloud(getCloudsim());
-        WorkflowEngine engine = new WorkflowEngine(this, this, getBudget(), getDeadline(), getCloudsim());
+
+        Provisioner provisioner = new NullProvisioner(getCloudsim());
+        provisioner.setCloud(cloud);
+
+        WorkflowEngine engine = new WorkflowEngine(provisioner, this,
+                getBudget(), getDeadline(), getCloudsim());
         EnsembleManager manager = new EnsembleManager(engine, getCloudsim());
 
         setCloud(cloud);

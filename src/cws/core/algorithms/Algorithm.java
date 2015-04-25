@@ -5,6 +5,7 @@ import java.util.List;
 import cws.core.Cloud;
 import cws.core.EnsembleManager;
 import cws.core.WorkflowEngine;
+import cws.core.Provisioner;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
@@ -20,9 +21,6 @@ public abstract class Algorithm extends CWSSimEntity {
 
     /** Ensemble manager that submits DAGs */
     private EnsembleManager manager;
-
-    /** Cloud to provision VMs from */
-    private Cloud cloud;
 
     /** WorkflowLog instance. Logs some interesting data to a file. */
     WorkflowLog workflowLog = new WorkflowLog(getCloudsim());
@@ -64,9 +62,12 @@ public abstract class Algorithm extends CWSSimEntity {
     }
 
     public final void setCloud(Cloud cloud) {
-        this.cloud = cloud;
-        this.cloud.addVMListener(algorithmStatistics);
-        this.cloud.addVMListener(workflowLog);
+        cloud.addVMListener(algorithmStatistics);
+        cloud.addVMListener(workflowLog);
+
+        if (this.engine != null) {
+            cloud.addVMListener(this.engine);
+        }
     }
 
     public final void setWorkflowEngine(WorkflowEngine workflowEngine) {
@@ -74,6 +75,10 @@ public abstract class Algorithm extends CWSSimEntity {
         this.engine.addJobListener(algorithmStatistics);
         this.engine.addJobListener(workflowLog);
 
+        Cloud cloud = getProvisioner().getCloud();
+        if (cloud != null) {
+            cloud.addVMListener(this.engine);
+        }
     }
 
     public final void setEnsembleManager(EnsembleManager ensembleManager) {
@@ -102,8 +107,8 @@ public abstract class Algorithm extends CWSSimEntity {
         return engine;
     }
 
-    public final Cloud getCloud() {
-        return cloud;
+    public final Provisioner getProvisioner() {
+        return getWorkflowEngine().getProvisioner();
     }
 
     public final AlgorithmStatistics getAlgorithmStatistics() {

@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -18,10 +17,10 @@ import cws.core.jobs.JobListener;
 /**
  * The workflow engine is an entity that executes workflows by scheduling their
  * tasks on VMs.
- * 
+ *
  * @author Gideon Juve <juve@usc.edu>
  */
-public class WorkflowEngine extends CWSSimEntity {
+public class WorkflowEngine extends CWSSimEntity implements VMListener {
     public static int next_id = 0;
 
     /** The list of current {@link DAGJob}s. */
@@ -35,9 +34,6 @@ public class WorkflowEngine extends CWSSimEntity {
     /** The scheduler that matches jobs to resources for this workflow engine */
     private final Scheduler scheduler;
 
-    /** The currently running VMs */
-    private final List<VM> availableVms = new ArrayList<VM>();
-    
     /** The list of unmatched ready jobs */
     private List<Job> releasedJobs = new ArrayList<Job>();
 
@@ -61,12 +57,6 @@ public class WorkflowEngine extends CWSSimEntity {
     @Override
     public void processEvent(CWSSimEvent ev) {
         switch (ev.getTag()) {
-        case WorkflowEvent.VM_LAUNCHED:
-            vmLaunched((VM) ev.getData());
-            break;
-        case WorkflowEvent.VM_TERMINATED:
-            vmTerminated((VM) ev.getData());
-            break;
         case WorkflowEvent.DAG_SUBMIT:
             dagSubmit((DAGJob) ev.getData());
             if (!this.provisioningRequestSend) {
@@ -82,7 +72,7 @@ public class WorkflowEngine extends CWSSimEntity {
             break;
         case WorkflowEvent.PROVISIONING_REQUEST:
             if (provisioner != null)
-                if (availableVms.size() > 0 || dags.size() > 0)
+                if (getAvailableVMs().size() > 0 || dags.size() > 0)
                     provisioner.provisionResources(this);
             break;
         default:
@@ -92,7 +82,7 @@ public class WorkflowEngine extends CWSSimEntity {
 
     public double getCost() {
         double ret = cost;
-        for (VM vm : availableVms) {
+        for (VM vm : getAvailableVMs()) {
             ret += vm.getCost();
         }
         return ret;
@@ -105,14 +95,14 @@ public class WorkflowEngine extends CWSSimEntity {
         getCloudsim().log("Total cost: " + getCost() + ", time: " + getCloudsim().clock());
     }
 
-    private void vmLaunched(VM vm) {
-        availableVms.add(vm);
+    @Override
+    public void vmLaunched(VM vm) {
         scheduler.scheduleJobs(this);
     }
 
-    private void vmTerminated(VM vm) {
+    @Override
+    public void vmTerminated(VM vm) {
         cost += vm.getCost();
-        availableVms.remove(vm);
     }
 
     private void dagSubmit(DAGJob dj) {
@@ -221,34 +211,20 @@ public class WorkflowEngine extends CWSSimEntity {
         return ImmutableList.copyOf(jobs);
     }
 
-    public List<VM> getAvailableVMs() {
-        Builder<VM> available = ImmutableList.<VM>builder();
-        for (VM vm : availableVms) {
-            if (!vm.isTerminated()) {
-                available.add(vm);
-            }
-        }
-        return available.build();
+    public Provisioner getProvisioner() {
+        return provisioner;
     }
-    
+
+    public List<VM> getAvailableVMs() {
+        return new ArrayList<>(provisioner.getCloud().getAvailableVMs());
+    }
+
     public List<VM> getFreeVMs() {
-        Builder<VM> free = ImmutableList.<VM>builder();
-        for (VM vm : availableVms) {
-            if (!vm.isTerminated() && vm.isFree()) {
-                free.add(vm);
-            }
-        }
-        return free.build();
+        return provisioner.getCloud().getFreeVMs();
     }
 
     public List<VM> getBusyVMs() {
-        Builder<VM> busy = ImmutableList.<VM>builder();
-        for (VM vm : availableVms) {
-            if (!vm.isTerminated() && !vm.isFree()) {
-                busy.add(vm);
-            }
-        }
-        return busy.build();
+        return provisioner.getCloud().getBusyVMs();
     }
 
     public void addJobListener(JobListener l) {
