@@ -188,6 +188,15 @@
     <fail message="You must run this target with -Dinputfile=name-of-output-log-file"/>
   </target>
 
+  <!-- python -m validation.experiment_validator preprocessed.log -->
+
+  <target name="validate-test-result" depends="ensure-input-log-file" description="validates preprocessed test results">
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.experiment_validator ../${inputfile}"/>
+    </exec>
+  </target>
+
 
   <!-- Run all tests -->
   <target name="test" depends="test-java,test-python" description="build and run all tests" />
