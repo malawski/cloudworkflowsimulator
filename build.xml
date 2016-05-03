@@ -162,6 +162,17 @@
     </exec>
   </target>
 
+  <target name="run-sim-locally"  depends="compile, ensure-input-dir" description="runs simulation locally on GENOME workflows">
+    <exec executable="/bin/sh">
+      <arg value="-c"/>
+      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application GENOME --input-dir ${indir} --output-file simulation-out.csv --distribution pareto_unsorted --algorithm SPSS --storage-manager void --ensemble-size 20&quot;"/>
+    </exec>
+  </target>
+
+  <target name="ensure-input-dir" unless="indir">
+    <fail message="You must run this target with -Dindir=input-directory-of-dags"/>
+  </target>
+
 
   <!-- Run all tests -->
   <target name="test" depends="test-java,test-python" description="build and run all tests" />
