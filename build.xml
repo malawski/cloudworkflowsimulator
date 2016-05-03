@@ -162,7 +162,7 @@
     </exec>
   </target>
 
-  <target name="run-sim-locally"  depends="compile, ensure-input-dir" description="runs simulation locally on GENOME workflows">
+  <target name="run-sim-locally-defaults" depends="compile, ensure-input-dir" description="runs simulation locally on GENOME workflows">
     <exec executable="/bin/sh">
       <arg value="-c"/>
       <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application GENOME --input-dir ${indir} --output-file simulation-out.csv --distribution pareto_unsorted --algorithm SPSS --storage-manager void --ensemble-size 20&quot;"/>
@@ -171,6 +171,21 @@
 
   <target name="ensure-input-dir" unless="indir">
     <fail message="You must run this target with -Dindir=input-directory-of-dags"/>
+  </target>
+
+  <target name="preprocess-test-results" depends="ensure-input-log-file, ensure-output-log-file" description="preprocesses test results">
+    <exec executable="/usr/bin/python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="log_parser.parse_experiment_log ../${inputfile} ../${outputfile}"/>
+    </exec>
+  </target>
+
+  <target name="ensure-input-log-file" unless="inputfile">
+    <fail message="You must run this target with -Dinputfile=name-of-log-file-to-preprocess"/>
+  </target>
+
+  <target name="ensure-output-log-file" unless="outputfile">
+    <fail message="You must run this target with -Dinputfile=name-of-output-log-file"/>
   </target>
 
 
