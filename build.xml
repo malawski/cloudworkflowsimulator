@@ -1,6 +1,6 @@
 <project name="CloudWorkflowSimulator" default="dist" basedir=".">
   <description>
-    Example build file for Hello project
+    Build ile for cloud-workflow-simulator. For some of the targets user must have required executor in PATH environment variable.
   </description>
 
   <!-- Set properties and paths
@@ -162,28 +162,6 @@
     </exec>
   </target>
 
-  <target name="run-sim-locally-defaults" depends="compile, ensure-input-dir" description="runs simulation locally on GENOME workflows">
-    <exec executable="/bin/sh">
-      <arg value="-c"/>
-      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application GENOME --input-dir ${indir} --output-file simulation-out.csv --distribution pareto_unsorted --algorithm SPSS --storage-manager void --ensemble-size 20&quot;"/>
-    </exec>
-  </target>
-
-  <target name="preprocess-test-results" depends="ensure-input-log-file, ensure-output-log-file" description="preprocesses test results">
-    <exec executable="/usr/bin/python" dir="${script.dir}">
-      <arg line="-m"/>
-      <arg line="log_parser.parse_experiment_log ../${inputfile} ../${outputfile}"/>
-    </exec>
-  </target>
-
-  <target name="validate-test-result" depends="ensure-input-log-file" description="validates preprocessed test results">
-    <exec executable="/usr/bin/python" dir="${script.dir}">
-      <arg line="-m"/>
-      <arg line="validation.experiment_validator ../${inputfile}"/>
-    </exec>
-  </target>
-
-
   <!-- Run all tests -->
   <target name="test" depends="test-java,test-python" description="build and run all tests" />
 
@@ -209,12 +187,40 @@
     <fail message="You must run this target with -Dttr=TestName"/>
   </target>
 
+  <!-- Simulator related targets to make it easier for user -->
+  <target name="run-sim-locally-defaults" depends="compile, ensure-input-dir" description="runs simulation locally on GENOME workflows">
+    <exec executable="sh">
+      <arg value="-c"/>
+      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application GENOME --input-dir ${indir} --output-file simulation-out.csv --distribution pareto_unsorted --algorithm SPSS --storage-manager void --ensemble-size 20&quot;"/>
+    </exec>
+  </target>
+
+  <target name="preprocess-test-results" depends="ensure-input-file, ensure-output-file" description="preprocesses test results">
+    <exec executable="python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="log_parser.parse_experiment_log ../${inputfile} ../${outputfile}"/>
+    </exec>
+  </target>
+
+  <target name="validate-test-result" depends="ensure-input-file" description="validates preprocessed test results">
+    <exec executable="python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.experiment_validator ../${inputfile}"/>
+    </exec>
+  </target>
+
+  <target name="visualize-test-result" depends="ensure-input-file, ensure-output-file" description="visualizes preprocessed test results">
+    <exec executable="ruby" dir="${script.dir}/visualisation">
+      <arg line="plot_gantt.rb results ../../${inputfile} ../../${outputfile}"/>
+    </exec>
+  </target>
+
   <!-- Make sure some tasks are passed proper arguments. -->
-  <target name="ensure-input-log-file" unless="inputfile">
+  <target name="ensure-input-file" unless="inputfile">
     <fail message="You must run this target with -Dinputfile=name-of-log-file-to-preprocess"/>
   </target>
 
-  <target name="ensure-output-log-file" unless="outputfile">
+  <target name="ensure-output-file" unless="outputfile">
     <fail message="You must run this target with -Dinputfile=name-of-output-log-file"/>
   </target>
 
