@@ -188,44 +188,94 @@
   </target>
 
   <!-- Simulator related targets to make it easier for user -->
-  <target name="run-sim-locally-defaults" depends="compile, ensure-input-dir" description="runs simulation locally on GENOME workflows">
+  <target name="run-sim-locally-defaults"
+          depends="compile, ensure-input-dir"
+          description="runs simulation locally on GENOME workflows with default params">
     <exec executable="sh">
       <arg value="-c"/>
       <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application GENOME --input-dir ${indir} --output-file simulation-out.csv --distribution pareto_unsorted --algorithm SPSS --storage-manager void --ensemble-size 20&quot;"/>
     </exec>
   </target>
 
-  <target name="preprocess-test-results" depends="ensure-input-file, ensure-output-file" description="preprocesses test results">
-    <exec executable="python" dir="${script.dir}">
-      <arg line="-m"/>
-      <arg line="log_parser.parse_experiment_log ../${inputfile} ../${outputfile}"/>
+  <target name="run-sim-locally"
+          depends="compile, ensure-input-dir, ensure-application-type, ensure-distribution-type, ensure-algo, ensure-ensemble-size"
+          description="runs simulation locally">
+    <exec executable="sh">
+      <arg value="-c"/>
+      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application ${app} --input-dir ${indir} --output-file simulation-out.csv --distribution ${distr} --algorithm ${algo} --storage-manager void --ensemble-size ${ensemblesize}&quot;"/>
     </exec>
   </target>
 
-  <target name="validate-test-result" depends="ensure-input-file" description="validates preprocessed test results">
+  <target name="preprocess-test-results"
+          depends="ensure-raw-log-file, ensure-preprocessed-log-file"
+          description="preprocesses test results">
     <exec executable="python" dir="${script.dir}">
       <arg line="-m"/>
-      <arg line="validation.experiment_validator ../${inputfile}"/>
+      <arg line="log_parser.parse_experiment_log ../${rawlog} ../${preprocessedlog}"/>
     </exec>
   </target>
 
-  <target name="visualize-test-result" depends="ensure-input-file, ensure-output-file" description="visualizes preprocessed test results">
+  <target name="validate-test-result"
+          depends="ensure-preprocessed-log-file"
+          description="validates preprocessed test results">
+    <exec executable="python" dir="${script.dir}">
+      <arg line="-m"/>
+      <arg line="validation.experiment_validator ../${preprocessedlog}"/>
+    </exec>
+  </target>
+
+  <target name="visualize-scheduling-process-defaults"
+          depends="ensure-preprocessed-log-file, ensure-graph-file"
+          description="visualizes scheduling process of simulation">
     <exec executable="ruby" dir="${script.dir}/visualisation">
-      <arg line="plot_gantt.rb results ../../${inputfile} ../../${outputfile}"/>
+      <arg line="plot_gantt.rb results ../../${preprocessedlog} ../../${graph}"/>
     </exec>
+  </target>
+
+  <target name="visualize-storage-demand-defaults"
+          depends="ensure-preprocessed-log-file, ensure-graph-file"
+          description="visualizes storage demand of simulation">
+    <exec executable="ruby" dir="${script.dir}/visualisation">
+      <arg line="plot_storage.rb number ../../${preprocessedlog} ../../${graph}"/>
+    </exec>
+  </target>
+
+  <target name="preprocess-validate-visualize-scheduling-process-and-storage-demand"
+          depends="preprocess-test-results, validate-test-result, visualize-scheduling-process-defaults, visualize-storage-demand-defaults"
+          description="runs preprocessing, validating and visualizing.">
   </target>
 
   <!-- Make sure some tasks are passed proper arguments. -->
-  <target name="ensure-input-file" unless="inputfile">
-    <fail message="You must run this target with -Dinputfile=name-of-log-file-to-preprocess"/>
+  <target name="ensure-raw-log-file" unless="rawlog">
+    <fail message="You must run this target with -Drawlog=name-of-log-file-to-preprocess"/>
   </target>
 
-  <target name="ensure-output-file" unless="outputfile">
-    <fail message="You must run this target with -Dinputfile=name-of-output-log-file"/>
+  <target name="ensure-preprocessed-log-file" unless="preprocessedlog">
+    <fail message="You must run this target with -Dpreprocessedlog=name-of-preprocessed-log-file"/>
   </target>
 
   <target name="ensure-input-dir" unless="indir">
     <fail message="You must run this target with -Dindir=input-directory-of-dags"/>
+  </target>
+
+  <target name="ensure-graph-file" unless="graph">
+    <fail message="You must run this target with -Dgraph=output-graph-file"/>
+  </target>
+
+  <target name="ensure-application-type" unless="app">
+    <fail message="You must run this target with -Dapp=[GENOME/CYBERSHAKE/LIGO/MONTAGE/SIPHT]"/>
+  </target>
+
+  <target name="ensure-distribution-type" unless="distr">
+    <fail message="You must run this target with -Ddistr=[pareto_unsorted/..?]"/>
+  </target>
+
+  <target name="ensure-algo" unless="algo">
+    <fail message="You must run this target with -Dalgo=[SPSS/DPDS/WADPDS]"/>
+  </target>
+
+  <target name="ensure-ensemble-size" unless="ensemblesize">
+    <fail message="You must run this target with -Densemblesize=number-in-range-of-0-to-30"/>
   </target>
 
   <target name="clean"
