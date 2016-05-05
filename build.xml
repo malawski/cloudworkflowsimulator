@@ -198,11 +198,11 @@
   </target>
 
   <target name="run-sim-locally"
-          depends="compile, ensure-input-dir, ensure-application-type, ensure-distribution-type, ensure-algo, ensure-ensemble-size"
+          depends="compile, ensure-input-dir, ensure-application-type, ensure-distribution-type, ensure-algo, ensure-ensemble-size, ensure-storage-manager-type"
           description="runs simulation locally">
     <exec executable="sh">
       <arg value="-c"/>
-      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application ${app} --input-dir ${indir} --output-file simulation-out.csv --distribution ${distr} --algorithm ${algo} --storage-manager void --ensemble-size ${ensemblesize}&quot;"/>
+      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application ${app} --input-dir ${indir} --output-file simulation-out.csv --distribution ${distr} --algorithm ${algo} --storage-manager ${storagemng} --ensemble-size ${ensemblesize}&quot;"/>
     </exec>
   </target>
 
@@ -276,6 +276,10 @@
 
   <target name="ensure-ensemble-size" unless="ensemblesize">
     <fail message="You must run this target with -Densemblesize=number-in-range-of-0-to-30"/>
+  </target>
+
+  <target name="ensure-storage-manager-type" unless="storagemng">
+    <fail message="You must run this target with -Dstoragemng=[void/fifo]"/>
   </target>
 
   <target name="clean"
