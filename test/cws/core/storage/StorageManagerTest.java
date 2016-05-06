@@ -1,8 +1,15 @@
 package cws.core.storage;
 
-import java.util.Random;
-
+import cws.core.VM;
+import cws.core.WorkflowEvent;
+import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.dag.DAGFile;
+import cws.core.dag.Task;
+import cws.core.exception.UnknownWorkflowEventException;
+import cws.core.jobs.Job;
 import junit.framework.Assert;
+
+import java.util.Random;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
@@ -11,14 +18,6 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.google.common.collect.ImmutableList;
-
-import cws.core.VM;
-import cws.core.WorkflowEvent;
-import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.dag.DAGFile;
-import cws.core.dag.Task;
-import cws.core.exception.UnknownWorkflowEventException;
-import cws.core.jobs.Job;
 
 /**
  * Tests {@link StorageManager}. An abstract class - should be subclassed and field {@link #storageManager} should be
@@ -109,7 +108,7 @@ public abstract class StorageManagerTest {
     @Test
     public void testTimeEstimationForEmptyTask() {
         Task t = new Task("xx", "xx", 222);
-        Assert.assertEquals(0.0, storageManager.getTransferTimeEstimation(t), 0.0);
+        Assert.assertEquals(0.0, storageManager.getTotalTransferTimeEstimation(t), 0.0);
     }
 
     @Test
@@ -119,7 +118,7 @@ public abstract class StorageManagerTest {
         Task t = new Task("xx", "xx", 222);
         t.addInputFiles(files);
         t.addOutputFiles(files);
-        double time = storageManager.getTransferTimeEstimation(t);
+        double time = storageManager.getTotalTransferTimeEstimation(t);
         Assert.assertTrue(time >= 0.0); // just very simple assert, nothing more we can assume
     }
 

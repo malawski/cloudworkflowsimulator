@@ -1,9 +1,5 @@
 package cws.core.storage;
 
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
-
-import cws.core.jobs.Job;
 import cws.core.VM;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEntity;
@@ -13,10 +9,14 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGFile;
 import cws.core.dag.Task;
 import cws.core.exception.UnknownWorkflowEventException;
+import cws.core.jobs.Job;
+
+import org.cloudbus.cloudsim.core.SimEntity;
+import org.cloudbus.cloudsim.core.SimEvent;
 
 /**
  * Abstract class for all storage managers. It should be subclassed and implemented.
- * 
+ *
  * The basic idea behind every StorageManager is that receives STORAGE_BEFORE_TASK_START and
  * STORAGE_AFTER_TASK_COMPLETED events with a Job specified. After that it transfers all the files and eventually sends
  * back STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED and STORAGE_ALL_AFTER_TRANSFERS_COMPLETED events.
@@ -37,8 +37,26 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
      * estimations don't need to be 100% accurate.
      * @param task - the task to estimate transfers for
      */
-    public final double getTransferTimeEstimation(Task task) {
-        return getTransferTimeEstimation(task, null);
+    public final double getTotalTransferTimeEstimation(Task task) {
+        return getTotalTransferTimeEstimation(task, null);
+    }
+
+    /**
+     * Estimates the sum of all input files transfers for the given job. Note that the
+     * estimations don't need to be 100% accurate.
+     * @param task - the task to estimate transfers for
+     */
+    public final double getInputTransferTimeEstimation(Task task) {
+        return getInputTransferTimeEstimation(task, null);
+    }
+
+    /**
+     * Estimates the sum of all output files transfers for the given job. Note that the
+     * estimations don't need to be 100% accurate.
+     * @param task - the task to estimate transfers for
+     */
+    public final double getOutputTransferTimeEstimation(Task task) {
+        return getTotalTransferTimeEstimation(task, null);
     }
 
     /**
@@ -46,18 +64,34 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
      * estimations don't need to be 100% accurate.
      * @param task - the task to estimate transfers for
      */
-    public abstract double getTransferTimeEstimation(Task task, VM vm);
+    public final double getTotalTransferTimeEstimation(final Task task, final VM vm) {
+        return getInputTransferTimeEstimation(task, vm) + getOutputTransferTimeEstimation(task, vm);
+    }
+
+    /**
+     * Estimates the sum of all input files transfers for the given job on the given VM. Note that the
+     * estimations don't need to be 100% accurate.
+     * @param task - the task to estimate transfers for
+     */
+    public abstract double getInputTransferTimeEstimation(Task task, VM vm);
+
+    /**
+     * Estimates the sum of all output files transfers for the given job on the given VM. Note that the
+     * estimations don't need to be 100% accurate.
+     * @param task - the task to estimate transfers for
+     */
+    public abstract double getOutputTransferTimeEstimation(Task task, VM vm);
 
     /**
      * Estimates the sum of all transfers for the given DAG using
      * getTransferTimeEstimation for Tasks. Note that the estimations don't
      * need to be 100% accurate.
-     * @param DAG - the DAG to estimate transfers for
+     * @param dag - the DAG to estimate transfers for
      */
-    public final double getTransferTimeEstimation(DAG dag) {
+    public final double getTotalTransferTimeEstimation(DAG dag) {
         double sum = 0.0;
         for (String taskName : dag.getTasks()) {
-            sum += getTransferTimeEstimation(dag.getTaskById(taskName));
+            sum += getTotalTransferTimeEstimation(dag.getTaskById(taskName));
         }
         return sum;
     }
@@ -109,7 +143,7 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
 
     /**
      * Notifies parent VM that all input transfers have completed and thus the job can be started.
-     * 
+     *
      * @param job - the job for which all input transfers have completed
      */
     protected void notifyThatBeforeTransfersCompleted(Job job) {
@@ -118,7 +152,7 @@ public abstract class StorageManager extends CWSSimEntity implements WorkflowEve
 
     /**
      * Notifies parent VM that all output transfers have completed and thus the job can be finished.
-     * 
+     *
      * @param job - the job for which all output transfers have completed
      */
     protected void notifyThatAfterTransfersCompleted(Job job) {

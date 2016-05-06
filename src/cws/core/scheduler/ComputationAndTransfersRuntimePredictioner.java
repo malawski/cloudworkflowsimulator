@@ -18,12 +18,12 @@ public final class ComputationAndTransfersRuntimePredictioner implements Runtime
     @Override
     public double getPredictedRuntime(Task task, VM vm) {
         return environment.getComputationPredictedRuntime(task)
-                + environment.getStorageManager().getTransferTimeEstimation(task, vm);
+                + environment.getStorageManager().getTotalTransferTimeEstimation(task, vm);
     }
 
     @Override
     public double getPredictedRuntime(DAG dag) {
         return environment.getComputationPredictedRuntime(dag)
-                + environment.getStorageManager().getTransferTimeEstimation(dag);
+                + environment.getStorageManager().getTotalTransferTimeEstimation(dag);
     }
 }

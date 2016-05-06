@@ -1,10 +1,10 @@
 package cws.core.dag.algorithms;
 
-import java.util.Map;
-
-import cws.core.dag.Task;
 import cws.core.core.VMType;
+import cws.core.dag.Task;
 import cws.core.storage.StorageManager;
+
+import java.util.Map;
 
 
 /**
@@ -27,6 +27,6 @@ public class StorageAwareCriticalPath extends CriticalPath {
     @Override
     protected double getPredictedTaskRuntime(Task task, VMType vmType) {
         return vmType.getPredictedTaskRuntime(task)
-                + this.storageManager.getTransferTimeEstimation(task);
+                + this.storageManager.getTotalTransferTimeEstimation(task);
     }
 }

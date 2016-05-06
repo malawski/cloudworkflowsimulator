@@ -6,6 +6,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import cws.core.Cloud;
+import cws.core.VM;
+import cws.core.WorkflowEvent;
+import cws.core.dag.DAGFile;
+import cws.core.dag.Task;
+import cws.core.jobs.Job;
+import cws.core.storage.StorageManagerTest;
+import cws.core.storage.cache.VMCacheManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,15 +27,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.ImmutableList;
-
-import cws.core.Cloud;
-import cws.core.VM;
-import cws.core.WorkflowEvent;
-import cws.core.dag.DAGFile;
-import cws.core.dag.Task;
-import cws.core.jobs.Job;
-import cws.core.storage.StorageManagerTest;
-import cws.core.storage.cache.VMCacheManager;
 
 /**
  * Tests {@link GlobalStorageManager} with "always empty" mocked cache.
@@ -224,7 +224,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         files.add(new DAGFile("abc.txt", sz, null));
         Task t = new Task("xx", "xx", 222);
         t.addInputFiles(files);
-        double time = storageManager.getTransferTimeEstimation(t);
+        double time = storageManager.getTotalTransferTimeEstimation(t);
         assertEquals(sz / params.getReadSpeed() + params.getLatency(), time, 0.00001);
     }
 
@@ -235,7 +235,7 @@ public class GlobalStorageManagerTest extends StorageManagerTest {
         files.add(new DAGFile("abc.txt", sz, null));
         Task t = new Task("xx", "xx", 222);
         t.addOutputFiles(files);
-        double time = storageManager.getTransferTimeEstimation(t);
+        double time = storageManager.getTotalTransferTimeEstimation(t);
         assertEquals(sz / params.getWriteSpeed() + params.getLatency(), time, 0.00001);
     }
 }
