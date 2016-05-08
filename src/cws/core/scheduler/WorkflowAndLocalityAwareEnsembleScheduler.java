@@ -1,11 +1,5 @@
 package cws.core.scheduler;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -13,6 +7,12 @@ import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 import cws.core.storage.cache.VMCacheManager;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * {@link WorkflowAwareEnsembleScheduler} implementation that is also aware of the underlying storage and schedules jobs
@@ -65,7 +65,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
                 }
                 List<VM> allVms = engine.getAvailableVMs();
                 for (VM vm : allVms) {
-                    if (!vm.isFree()) {
+                    if (!vm.isTerminated() && !vm.isFree()) {
                         double t = vm.getPredictedReleaseTime(storageManager, environment, cacheManager);
                         double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm) + t;
                         if (estimatedJobFinish < bestFinishTime) {
