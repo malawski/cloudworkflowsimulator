@@ -246,7 +246,7 @@ public class Simulation {
         int nbudgets = Integer.parseInt(args.getOptionValue("n-budgets", DEFAULT_N_BUDGETS));
         int ndeadlines = Integer.parseInt(args.getOptionValue("n-deadlines", DEFAULT_N_DEADLINES));
         double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
-        double alpha = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_ALPHA));
+        double alpha = Double.parseDouble(args.getOptionValue("alpha", DEFAULT_ALPHA));
 
         VMType vmType = vmTypeLoader.determineVMType(args);
         logVMType(vmType);
