@@ -494,8 +494,7 @@ public class VM extends CWSSimEntity {
      */
     public double getPredictedReleaseTime(StorageManager sm, Environment env, VMCacheManager cacheManager) {
         final List<Double> taskRuntimes = new ArrayList<>();
-        if (!this.runningJobs.isEmpty()) {
-            final Job job = this.runningJobs.iterator().next();
+        for (final Job job : this.runningJobs) {
             taskRuntimes.add(getPredictedRemainingRuntime(job, sm, env));
         }
         for (final Job job : this.jobs) {
