@@ -319,9 +319,11 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
         readyJobs.remove(task);
 
         // Submit the job to the VM
-        idleVms.remove(vm);
         job.setVM(vm);
         vm.jobSubmit(job);
+        if(!vm.isFree()){
+            idleVms.remove(vm);
+        }
     }
 
     @Override
