@@ -1,30 +1,5 @@
 package cws.core.simulation;
 
-import cws.core.VMFactory;
-import cws.core.algorithms.Algorithm;
-import cws.core.algorithms.AlgorithmStatistics;
-import cws.core.algorithms.DPDS;
-import cws.core.algorithms.LocalityAwareDPDS;
-import cws.core.algorithms.SPSS;
-import cws.core.algorithms.StorageAndLocalityAwareWADPDS;
-import cws.core.algorithms.StorageAwareSPSS;
-import cws.core.algorithms.StorageAwareWADPDS;
-import cws.core.algorithms.WADPDS;
-import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.config.GlobalStorageParamsLoader;
-import cws.core.core.VMType;
-import cws.core.core.VMTypeLoader;
-import cws.core.dag.DAG;
-import cws.core.dag.DAGListGenerator;
-import cws.core.dag.DAGParser;
-import cws.core.dag.DAGStats;
-import cws.core.dag.Task;
-import cws.core.engine.Environment;
-import cws.core.engine.EnvironmentFactory;
-import cws.core.exception.IllegalCWSArgumentException;
-import cws.core.storage.StorageManagerStatistics;
-import cws.core.storage.global.GlobalStorageParams;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -43,6 +18,31 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
+
+import cws.core.VMFactory;
+import cws.core.algorithms.Algorithm;
+import cws.core.algorithms.AlgorithmStatistics;
+import cws.core.algorithms.LocalityAwareDPDS;
+import cws.core.algorithms.StorageAndLocalityAwareWADPDS;
+import cws.core.algorithms.DPDS;
+import cws.core.algorithms.SPSS;
+import cws.core.algorithms.StorageAwareSPSS;
+import cws.core.algorithms.StorageAwareWADPDS;
+import cws.core.algorithms.WADPDS;
+import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.config.GlobalStorageParamsLoader;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeLoader;
+import cws.core.dag.DAG;
+import cws.core.dag.DAGListGenerator;
+import cws.core.dag.DAGParser;
+import cws.core.dag.DAGStats;
+import cws.core.dag.Task;
+import cws.core.engine.Environment;
+import cws.core.engine.EnvironmentFactory;
+import cws.core.exception.IllegalCWSArgumentException;
+import cws.core.storage.StorageManagerStatistics;
+import cws.core.storage.global.GlobalStorageParams;
 
 public class Simulation {
     /**
