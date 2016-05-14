@@ -163,7 +163,7 @@ public class VM extends CWSSimEntity {
                 jobFinish((Job) ev.getData());
                 break;
             case WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED:
-                allInputsTrasferred((Job) ev.getData());
+                allInputsTransferred((Job) ev.getData());
                 break;
             case WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED:
                 allOutputsTransferred((Job) ev.getData());
@@ -241,7 +241,7 @@ public class VM extends CWSSimEntity {
         startJobs();
     }
 
-    private void allInputsTrasferred(Job job) {
+    private void allInputsTransferred(Job job) {
         // Compute the duration of the job on this VM
         double size = job.getTask().getSize();
         double predictedRuntime = size / vmType.getMips();
