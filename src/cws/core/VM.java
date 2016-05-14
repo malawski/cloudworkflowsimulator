@@ -522,7 +522,7 @@ public class VM extends CWSSimEntity {
         }
     }
 
-    // Given list of scheduled tasks' runtimes calculates when at least one core of this vm will be idle
+    // Given list of scheduled tasks' runtimes calculates when at least one core of this vm will become idle
     private double calculatePredictedReleaseTime(final List<Double> taskRuntimes) {
         if (taskRuntimes.size() < this.vmType.getCores()) {
             return 0.0;
