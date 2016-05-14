@@ -51,13 +51,13 @@ PATTERNS = [
         type=TransferLog,
         set_values={'started': None, 'vm': None, 'direction': None, 'job_id': None, 'file_id': None}),
     log_parser.Pattern(
-        regex=r'\((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) started',
+        regex=r'\((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) with (?P<cores>\d+) cores started',
         type=VMLog,
         set_values={'finished': None}),
     log_parser.Pattern(
         regex=r'\((?P<finished>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) terminated',
         type=VMLog,
-        set_values={'started': None}),
+        set_values={'started': None, 'cores': None}),
     log_parser.Pattern(
         regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (?P<filename>.*)',
         type=Workflow,
@@ -74,8 +74,6 @@ PATTERNS = [
         regex=r'\((?P<time>\d+.\d+)\)\s+GS state has changed: readers = (?P<readers_number>\d+), writers = (?P<writers_number>\d+), read_speed = (?P<read_speed>\d+.\d+), write_speed = (?P<write_speed>\d+.\d+)',
         type=StorageState,
         set_values={}),
-
-
 ]
 
 
