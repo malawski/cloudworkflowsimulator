@@ -239,7 +239,7 @@ public class VMTest {
         vm.launch();
         vm.jobSubmit(job);
         final StorageManager sm = mock(StorageManager.class);
-        when(sm.getTransferTimeEstimation(job.getTask(), vm)).thenReturn(1.0);
+        when(sm.getTotalTransferTimeEstimation(job.getTask(), vm)).thenReturn(1.0);
         final Environment env = mock(Environment.class);
         when(env.getComputationPredictedRuntime(job.getTask())).thenReturn(2.0);
         assertEquals(0.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
@@ -258,8 +258,8 @@ public class VMTest {
         vm.jobSubmit(job1);
         vm.jobSubmit(job2);
         final StorageManager sm = mock(StorageManager.class);
-        when(sm.getTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
-        when(sm.getTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
+        when(sm.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
+        when(sm.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
         final Environment env = mock(Environment.class);
         when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
         when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
@@ -279,8 +279,8 @@ public class VMTest {
         vm.jobSubmit(job1);
         vm.jobSubmit(job2);
         final StorageManager sm = mock(StorageManager.class);
-        when(sm.getTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
-        when(sm.getTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
+        when(sm.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
+        when(sm.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
         final Environment env = mock(Environment.class);
         when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
         when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
@@ -292,34 +292,29 @@ public class VMTest {
         final VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(2).price(1.0).build();
         final VM vm = VMFactory.createVM(vmType, this.cloudsim);
         final VMDummyDriver driver = new VMDummyDriver(this.cloudsim);
-        final Job job1 = new Job(
-                new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), this.cloudsim);
-        final Job job2 = new Job(
-                new DAGJob(new DAG(), 1), new Task("task_id2", "transformation", 1000), driver.getId(), this.cloudsim);
-        final Job job3 = new Job(
-                new DAGJob(new DAG(), 1), new Task("task_id3", "transformation", 1000), driver.getId(), this.cloudsim);
-        final Job job4 = new Job(
-                new DAGJob(new DAG(), 1), new Task("task_id4", "transformation", 1000), driver.getId(), this.cloudsim);
-        final Job job5 = new Job(
-                new DAGJob(new DAG(), 1), new Task("task_id5", "transformation", 1000), driver.getId(), this.cloudsim);
+        final Job[] jobs = {
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(),
+                        this.cloudsim),
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id2", "transformation", 1000), driver.getId(),
+                        this.cloudsim),
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id3", "transformation", 1000), driver.getId(),
+                        this.cloudsim),
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id4", "transformation", 1000), driver.getId(),
+                        this.cloudsim),
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id5", "transformation", 1000), driver.getId(),
+                        this.cloudsim) };
         vm.launch();
-        vm.jobSubmit(job1);
-        vm.jobSubmit(job2);
-        vm.jobSubmit(job3);
-        vm.jobSubmit(job4);
-        vm.jobSubmit(job5);
+        for(final Job job : jobs){
+            vm.jobSubmit(job);
+        }
+        final double[] transferTimes = {1.0, 0.0, 1.0, 0.0, 2.0};
+        final double[] computationTimes = {1.0, 2.0, 2.0, 1.0, 2.0};
         final StorageManager sm = mock(StorageManager.class);
-        when(sm.getTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
-        when(sm.getTransferTimeEstimation(job2.getTask(), vm)).thenReturn(0.0);
-        when(sm.getTransferTimeEstimation(job3.getTask(), vm)).thenReturn(1.0);
-        when(sm.getTransferTimeEstimation(job4.getTask(), vm)).thenReturn(0.0);
-        when(sm.getTransferTimeEstimation(job5.getTask(), vm)).thenReturn(2.0);
         final Environment env = mock(Environment.class);
-        when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(1.0);
-        when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(2.0);
-        when(env.getComputationPredictedRuntime(job3.getTask())).thenReturn(2.0);
-        when(env.getComputationPredictedRuntime(job4.getTask())).thenReturn(1.0);
-        when(env.getComputationPredictedRuntime(job5.getTask())).thenReturn(2.0);
+        for(int i = 0; i < 5; i++) {
+            when(sm.getTotalTransferTimeEstimation(jobs[i].getTask(), vm)).thenReturn(transferTimes[i]);
+            when(env.getComputationPredictedRuntime(jobs[i].getTask())).thenReturn(computationTimes[i]);
+        }
         assertEquals(5.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
     }
 }
