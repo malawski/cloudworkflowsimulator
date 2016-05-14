@@ -451,7 +451,8 @@ public class VM extends CWSSimEntity {
     }
 
     /**
-     * Represents interval of time in seconds spanning from start time to end time (or VM termination time if not set).
+     * Represents interval of time in seconds spanning from start time to end time (or VM termination time if not set)
+     * or from start time to current CloudSim time if not finished yet.
      */
     private final class Interval {
         private final double startTime = getCloudsim().clock();
@@ -461,22 +462,22 @@ public class VM extends CWSSimEntity {
          * Stops the interval at current simulation time.
          */
         public void stop() {
-            endTime = getCloudsim().clock();
+            this.endTime = getCloudsim().clock();
         }
 
         /**
          * Returns the duration in seconds of this interval.
          */
         public double getDuration() {
-            double duration;
-            if (endTime == null) {
-                if (isTerminated) {
-                    duration = terminateTime - startTime;
+            final double duration;
+            if (this.endTime == null) {
+                if (VM.this.isTerminated) {
+                    duration = VM.this.terminateTime - this.startTime;
                 } else {
-                    throw new IllegalStateException("VM not terminated, but should be");
+                    duration = getCloudsim().clock() - this.startTime;
                 }
             } else {
-                duration = endTime - startTime;
+                duration = this.endTime - this.startTime;
             }
             if (duration < 0) {
                 throw new IllegalStateException("Duration is < 0, but shouldn't be");
