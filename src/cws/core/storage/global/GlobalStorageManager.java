@@ -1,10 +1,5 @@
 package cws.core.storage.global;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import cws.core.VM;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CWSSimEvent;
@@ -14,6 +9,11 @@ import cws.core.dag.Task;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 import cws.core.storage.cache.VMCacheManager;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Manager which stores files on a global storage. This should loosely resemble Amazon's S3 storage.<br>
@@ -112,7 +112,7 @@ public class GlobalStorageManager extends StorageManager {
 
     /**
      * Starts transfers for the given job.
-     * @param files - the files to start transfers for.
+     * @param filesRemaining - the files to start transfers for.
      * @param job - the job that starts the transfers.
      * @param transfers - the map with active transfers this transfer belongs to (e.g. writes or reads).
      * @param progressEvent - the event that will be sent upon transfer start.
@@ -285,23 +285,35 @@ public class GlobalStorageManager extends StorageManager {
     }
 
     /**
-     * Trivial transfer estimation based o read and write speeds. This seems good enough, but we might change the
+     * Trivial transfer estimation based on read speed. This seems good enough, but we might change the
      * implementation in the future
      * 
-     * @see StorageManager#getTransferTimeEstimation(Task)
+     * @see StorageManager#getTotalTransferTimeEstimation(Task)
      */
     @Override
-    public double getTransferTimeEstimation(Task task, VM vm) {
+    public double getInputTransferTimeEstimation(final Task task, final VM vm) {
         double time = 0.0;
-        for (DAGFile file : task.getInputFiles()) {
-            if (!cacheManager.getFileFromCache(file, vm)) {
-                time += file.getSize() / params.getReadSpeed();
-                time += params.getLatency();
+        for (final DAGFile file : task.getInputFiles()) {
+            if (!this.cacheManager.getFileFromCache(file, vm)) {
+                time += file.getSize() / this.params.getReadSpeed();
+                time += this.params.getLatency();
             }
         }
-        for (DAGFile file : task.getOutputFiles()) {
-            time += file.getSize() / params.getWriteSpeed();
-            time += params.getLatency();
+        return time;
+    }
+
+    /**
+     * Trivial transfer estimation based on write speed. This seems good enough, but we might change the
+     * implementation in the future
+     *
+     * @see StorageManager#getTotalTransferTimeEstimation(Task)
+     */
+    @Override
+    public double getOutputTransferTimeEstimation(final Task task, final VM vm) {
+        double time = 0.0;
+        for (final DAGFile file : task.getOutputFiles()) {
+            time += file.getSize() / this.params.getWriteSpeed();
+            time += this.params.getLatency();
         }
         return time;
     }

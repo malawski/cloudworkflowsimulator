@@ -1,8 +1,5 @@
 package cws.core.algorithms;
 
-import java.util.HashMap;
-import java.util.List;
-
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
@@ -10,6 +7,9 @@ import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.StorageAwareCriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
 import cws.core.engine.Environment;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Storage aware version of the SPSS algorithm.
@@ -32,6 +32,6 @@ public class StorageAwareSPSS extends SPSS {
     @Override
     protected double getPredictedTaskRuntime(Task task) {
         return getEnvironment().getComputationPredictedRuntime(task)
-                + getEnvironment().getStorageManager().getTransferTimeEstimation(task);
+                + getEnvironment().getStorageManager().getTotalTransferTimeEstimation(task);
     }
 }

@@ -36,7 +36,12 @@ public class VoidStorageManager extends StorageManager {
     }
 
     @Override
-    public double getTransferTimeEstimation(Task task, VM vm) {
+    public double getInputTransferTimeEstimation(final Task task, final VM vm) {
+        return 0.0; // instant transfer
+    }
+
+    @Override
+    public double getOutputTransferTimeEstimation(final Task task, final VM vm) {
         return 0.0; // instant transfer
     }
 

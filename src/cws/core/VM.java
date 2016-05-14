@@ -1,13 +1,5 @@
 package cws.core;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-
-import com.google.common.base.Preconditions;
-
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -19,27 +11,35 @@ import cws.core.jobs.RuntimeDistribution;
 import cws.core.storage.StorageManager;
 import cws.core.storage.cache.VMCacheManager;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.base.Preconditions;
+
 /**
  * A VM is a virtual machine that executes Jobs.
- * 
+ *
  * It has a number of cores, and each core has a certain power measured
  * in MIPS (millions of instructions per second).
- * 
+ *
  * It has an input Port that is used to transfer data to the VM, and an output
  * Port that is used to transfer data from the VM. Both ports have the same
  * bandwidth.
- * 
+ *
  * Jobs can be queued and are executed in FIFO order. The scheduling is
  * space shared.
- * 
+ *
  * It has a price per billing unit. The cost of a VM is computed by multiplying the
  * runtime in billing units by the billing unit price. The runtime is rounded up to the
  * nearest billing unit for this calculation.
- * 
+ *
  * Each VM has a provisioning delay between when it is launched and when it
  * is ready, and a deprovisioning delay between when it is terminated and
  * when the provider stops charging for it.
- * 
+ *
  * @author Gideon Juve <juve@usc.edu>
  */
 public class VM extends CWSSimEntity {
@@ -451,7 +451,8 @@ public class VM extends CWSSimEntity {
     }
 
     /**
-     * Represents interval of time in seconds spanning from start time to end time (or VM termination time if not set).
+     * Represents interval of time in seconds spanning from start time to end time (or VM termination time if not set)
+     * or from start time to current CloudSim time if not finished yet.
      */
     private final class Interval {
         private final double startTime = getCloudsim().clock();
@@ -461,22 +462,22 @@ public class VM extends CWSSimEntity {
          * Stops the interval at current simulation time.
          */
         public void stop() {
-            endTime = getCloudsim().clock();
+            this.endTime = getCloudsim().clock();
         }
 
         /**
          * Returns the duration in seconds of this interval.
          */
         public double getDuration() {
-            double duration;
-            if (endTime == null) {
-                if (isTerminated) {
-                    duration = terminateTime - startTime;
+            final double duration;
+            if (this.endTime == null) {
+                if (VM.this.isTerminated) {
+                    duration = VM.this.terminateTime - this.startTime;
                 } else {
-                    throw new IllegalStateException("VM not terminated, but should be");
+                    duration = getCloudsim().clock() - this.startTime;
                 }
             } else {
-                duration = endTime - startTime;
+                duration = this.endTime - this.startTime;
             }
             if (duration < 0) {
                 throw new IllegalStateException("Duration is < 0, but shouldn't be");
@@ -491,23 +492,34 @@ public class VM extends CWSSimEntity {
      */
     public double getPredictedReleaseTime(StorageManager sm, Environment env, VMCacheManager cacheManager) {
         double total = 0;
-        if (!runningJobs.isEmpty()) {
-            Preconditions.checkState(runningJobs.size() == 1, "This implementation assumes single core VMs.");
-            Job job = runningJobs.iterator().next();
-            double runningTime = getCloudsim().clock() - job.getStartTime();
-            double expectedTime = sm.getTransferTimeEstimation(job.getTask(), this)
-                    + env.getComputationPredictedRuntime(job.getTask());
-            double remaining = expectedTime - runningTime;
-            total += remaining;
+        if (!this.runningJobs.isEmpty()) {
+            Preconditions.checkState(this.runningJobs.size() == 1, "This implementation assumes single core VMs.");
+            final Job job = this.runningJobs.iterator().next();
+            total += getPredictedRemainingRuntime(job, sm, env);
         }
 
-        for (Job job : jobs) {
-            double expectedTime = sm.getTransferTimeEstimation(job.getTask(), this)
-                    + env.getComputationPredictedRuntime(job.getTask());
-            total += expectedTime;
+        for (final Job job : this.jobs) {
+            total += getPredictedRemainingRuntime(job, sm, env);
         }
 
         // If predicted time is < 0 then return zero not to be better than free VMs.
         return total > 0 ? total : 0;
+    }
+
+    private double getPredictedRemainingRuntime(final Job job, final StorageManager sm, final Environment env){
+        if(this.writeIntervals.containsKey(job)){ // job is in output files transfer phase
+            return sm.getOutputTransferTimeEstimation(job.getTask(), this) - this.writeIntervals.get(job).getDuration();
+        } else if (this.computationIntervals.containsKey(job)) { // job is in computation phase
+            return sm.getOutputTransferTimeEstimation(job.getTask(), this)
+                    + env.getComputationPredictedRuntime(job.getTask())
+                    - this.computationIntervals.get(job).getDuration();
+        } else if (this.readIntervals.containsKey(job)){ // job is in input files transfer phase
+            return sm.getTotalTransferTimeEstimation(job.getTask(), this)
+                    - this.readIntervals.get(job).getDuration()
+                    + env.getComputationPredictedRuntime(job.getTask());
+        } else { // job is waiting in queue
+            return sm.getTotalTransferTimeEstimation(job.getTask(), this)
+                    + env.getComputationPredictedRuntime(job.getTask());
+        }
     }
 }
