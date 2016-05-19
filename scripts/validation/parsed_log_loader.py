@@ -27,7 +27,7 @@ def read_log(file_content):
     for i in xrange(0, vm_number):
         vm_info = lines[current_line].split()
 
-        vm = VMLog(id=vm_info[0], started=float_or_none(vm_info[1]), finished=float_or_none(vm_info[2]))
+        vm = VMLog(id=vm_info[0], started=float_or_none(vm_info[1]), finished=float_or_none(vm_info[2]), cores=vm_info[3])
         vms[vm.id] = vm
 
         current_line += 1

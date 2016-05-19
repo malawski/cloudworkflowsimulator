@@ -3,7 +3,7 @@ import StringIO
 
 TaskLog = namedtuple('TaskLog', 'id workflow task_id vm started finished result')
 TransferLog = namedtuple('TransferLog', 'id vm started finished direction job_id file_id')
-VMLog = namedtuple('VMLog', 'id started finished')
+VMLog = namedtuple('VMLog', 'id started finished cores')
 Workflow = namedtuple('Workflow', 'id priority filename')
 StorageState = namedtuple('StorageState', 'time readers_number writers_number read_speed write_speed')
 
@@ -39,7 +39,7 @@ class ExecutionLog(object):
 
         output.write('{}\n'.format(len(self.events[EventType.VM])))
         for vm_event in self.events[EventType.VM]:
-            output.write('{} {} {}\n'.format(vm_event.id, vm_event.started, vm_event.finished))
+            output.write('{} {} {} {}\n'.format(vm_event.id, vm_event.started, vm_event.finished, vm_event.cores))
 
         output.write('{}\n'.format(len(self.workflows)))
         for workflow in self.workflows:

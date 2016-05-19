@@ -10,6 +10,7 @@ from itertools import groupby
 from operator import attrgetter
 from log_parser.execution_log import EventType
 from validation.common import ValidationResult
+from collections import defaultdict
 
 JOB_ENDS, TRANSFER_ENDS, TRANSFER_STARTS, JOB_STARTS = range(4)
 
@@ -28,26 +29,30 @@ def generate_events_sequentially(jobs, transfers):
     return sorted(events)
 
 
-def get_intersections(started_jobs, current_event):
-    return [(current_event, started_job) for started_job in started_jobs]
+def get_intersections(started_jobs, current_event, vms):
+    intersections = defaultdict(list)
+    if len(started_jobs[current_event.vm]) + 1 > int(vms[current_event.vm].cores):
+        intersections[current_event.vm] = started_jobs[current_event.vm]
+        intersections[current_event.vm].append(current_event)
+    return intersections
 
 
-def get_intersecting_events(jobs, transfers):
-    intersecting_jobs = []
-    intersecting_transfers = []
+def get_intersecting_events(jobs, transfers, vms):
+    intersecting_jobs = defaultdict(list)
+    intersecting_transfers = defaultdict(list)
 
-    started_jobs = set()
+    started_jobs = defaultdict(list)
     for (_, event_type, event) in generate_events_sequentially(jobs, transfers):
         if event_type == JOB_STARTS:
-            intersections = get_intersections(started_jobs, event)
-            intersecting_jobs.extend(intersections)
-            started_jobs.add(event)
+            intersections = get_intersections(started_jobs, event, vms)
+            intersecting_jobs.update(intersections)
+            started_jobs[event.vm].append(event)
         elif event_type == JOB_ENDS:
-            if event in started_jobs:
-                started_jobs.remove(event)
+            if event in started_jobs[event.vm]:
+                started_jobs[event.vm].remove(event)
         elif event_type == TRANSFER_STARTS:
-            intersections = get_intersections(started_jobs, event)
-            intersecting_transfers.extend(intersections)
+            intersections = get_intersections(started_jobs, event, vms)
+            intersecting_transfers.update(intersections)
         else:
             pass
 
@@ -112,16 +117,16 @@ def validate(jobs, transfers, vms):
                       for transfer in out_of_lifecycle_transfers]
         errors.extend(job_errors)
 
-        intersecting_jobs, intersecting_transfers = get_intersecting_events(vm_jobs, vm_transfers)
+        intersecting_jobs, intersecting_transfers = get_intersecting_events(vm_jobs, vm_transfers, vms)
 
-        vm_errors = ['Job {} was executed in the same time as job {} on the same VM'.format(job1.id, job2.id)
-                     for (job1, job2) in intersecting_jobs]
+
+        vm_errors = ['More jobs than VM {} has cores were executed on it in the same time.'.format(vm_key)
+                     for vm_key in intersecting_jobs]
 
         errors.extend(vm_errors)
 
-        vm_errors = ['Transfer {} was executed in the same time as job {} on the same VM'.format(
-            transfer.id, job.id) for (transfer, job) in intersecting_transfers]
-
+        vm_errors = ['More transfers were executed than VM {} has cores'.format(vm_key)
+                     for vm_key in intersecting_transfers]
         errors.extend(vm_errors)
 
     return ValidationResult(errors)

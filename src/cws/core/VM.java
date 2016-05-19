@@ -181,7 +181,7 @@ public class VM extends CWSSimEntity {
     void launch() {
         Preconditions.checkState(!isLaunched, "Attempted to launch already launched VM:" + this.getId());
         isLaunched = true;
-        getCloudsim().log(String.format("VM %d started", getId()));
+        getCloudsim().log(String.format("VM %d with %d cores started", getId(), this.vmType.getCores()));
     }
 
     /**
