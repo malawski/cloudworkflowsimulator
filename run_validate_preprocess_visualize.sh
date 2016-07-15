@@ -61,4 +61,4 @@ done
 
 #visualising score for every budget
 echo "Rendering graphs with exp. score and normalized deadline"
-ruby $VISUALISATION_RUBY_SCRIPT $LOGFILE
+ruby $VISUALISATION_RUBY_SCRIPT $LOGFILE $BUDGETS

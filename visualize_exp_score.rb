@@ -1,39 +1,15 @@
 require 'gnuplot'
 require 'roo'
 
-$combinations_amount
-
 SIM_CSV = ARGV[0]
+N_BUDGETS = ARGV[1].to_i
+
 SIM_OUT_CSV = Roo::CSV.new(SIM_CSV)
 
 MIN_DEADLINE_ROW = 2
 DEADLINE_COL = 7
 BUDGETS_COLUMN_NO = 6
 EXP_SCORE_COL_NO = 10
-EXPONENTIAL_SCORE_COLUMN = SIM_OUT_CSV.column(EXP_SCORE_COL_NO)
-
-def extract_max_deadline_value
-  min_deadline = extract_min_deadline_value
-  all_deadlines = SIM_OUT_CSV.column(DEADLINE_COL)
-  tmp_row_index = 1
-
-  all_deadlines.drop(2).each do |deadline_val|
-    if deadline_val == min_deadline
-      $combinations_amount = tmp_row_index
-      return SIM_OUT_CSV.cell(tmp_row_index+1, DEADLINE_COL)
-    else
-      tmp_row_index += 1
-    end
-  end
-end
-
-def extract_min_deadline_value
-  SIM_OUT_CSV.cell(MIN_DEADLINE_ROW, DEADLINE_COL)
-end
-
-def normalize(min, max, current)
-  (current.to_f - min.to_f) / (max.to_f - min.to_f)
-end
 
 def extract_available_budgets(budgets_column)
   budgets = []
@@ -49,6 +25,28 @@ end
 
 def extract_available_deadlines
   SIM_OUT_CSV.column(DEADLINE_COL).drop(1).uniq
+end
+
+def extract_max_deadline_value
+  deadlines = extract_available_deadlines
+  max_deadline = 0
+
+  deadlines.each do |deadline|
+    current = deadline.to_f
+    if current > max_deadline
+      max_deadline = current
+    end
+  end
+
+  max_deadline
+end
+
+def extract_min_deadline_value
+  SIM_OUT_CSV.cell(MIN_DEADLINE_ROW, DEADLINE_COL)
+end
+
+def normalize(min, max, current)
+  (current.to_f - min.to_f) / (max.to_f - min.to_f)
 end
 
 MIN_DEADLINE = extract_min_deadline_value
@@ -70,8 +68,8 @@ normalized_deadlines = normalize_deadlines(extract_available_deadlines)
 budgets.each_index do |i|
   budget = budgets[i]
   scores_for_budget = []
-  first_exp_score_row = i*$combinations_amount+1
-  last_exp_score_row = first_exp_score_row + $combinations_amount - 1
+  first_exp_score_row = i*N_BUDGETS+1
+  last_exp_score_row = first_exp_score_row + N_BUDGETS - 1
 
   (first_exp_score_row...last_exp_score_row).each do |exp_row|
     scores_for_budget.push(SIM_OUT_CSV.cell(exp_row+1, EXP_SCORE_COL_NO).to_f)
