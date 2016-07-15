@@ -11,10 +11,14 @@ import cws.core.jobs.RuntimeDistribution;
 import cws.core.storage.StorageManager;
 import cws.core.storage.cache.VMCacheManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import com.google.common.base.Preconditions;
@@ -106,14 +110,14 @@ public class VM extends CWSSimEntity {
     }
 
     /**
-     * Returns true when this VM is not executing any job.
+     * Returns true when this VM has at least one idle core.
      */
     public boolean isFree() {
-        if (isTerminated) {
+        if (this.isTerminated) {
             throw new IllegalStateException(
                     "Attempted to determine whether terminated VM is free. Check for termination first.");
         }
-        return idleCores == 1;
+        return this.idleCores > 0;
     }
 
     /**
@@ -159,7 +163,7 @@ public class VM extends CWSSimEntity {
                 jobFinish((Job) ev.getData());
                 break;
             case WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED:
-                allInputsTrasferred((Job) ev.getData());
+                allInputsTransferred((Job) ev.getData());
                 break;
             case WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED:
                 allOutputsTransferred((Job) ev.getData());
@@ -220,7 +224,7 @@ public class VM extends CWSSimEntity {
     }
 
     /**
-     * Submits the given job to this VM and marks the VM as non-free.
+     * Submits the given job to this VM and decreases number of idle cores.
      */
     public void jobSubmit(Job job) {
         Preconditions.checkState(!isTerminated,
@@ -233,11 +237,11 @@ public class VM extends CWSSimEntity {
         // Queue the job
         jobs.add(job);
 
-        // This shouldn't do anything if the VM is busy
+        // This shouldn't do anything if the VM has no idle cores
         startJobs();
     }
 
-    private void allInputsTrasferred(Job job) {
+    private void allInputsTransferred(Job job) {
         // Compute the duration of the job on this VM
         double size = job.getTask().getSize();
         double predictedRuntime = size / vmType.getMips();
@@ -293,13 +297,11 @@ public class VM extends CWSSimEntity {
         startJobs();
     }
 
-    private void jobStart(Job job) {
+    private void jobStart(final Job job) {
         if (job.getState() != Job.State.IDLE) {
             throw new IllegalStateException("Attempted to start non-idle job:" + job.getID());
-        } else if (idleCores != 1) {
-            // NOTE(bryk): Here we assume that VMs always have only one core. It should be changed once we enable more
-            // cores in VMs.
-            throw new IllegalStateException("Number of idle cores is not 1, actual number:" + idleCores);
+        } else if (this.idleCores < 1) {
+            throw new IllegalStateException("There are no idle cores in this VM.");
         }
         getCloudsim().log("Starting " + job.toString() + " on VM " + job.getVM().getId());
         // The job is now running
@@ -313,15 +315,15 @@ public class VM extends CWSSimEntity {
                 WorkflowEvent.STORAGE_BEFORE_TASK_START, job);
 
         // One core is now busy running the job
-        idleCores--;
+        this.idleCores--;
 
         // Mark that read has started.
-        readIntervals.put(job, new Interval());
-        if (runningJobs.contains(job)) {
+        this.readIntervals.put(job, new Interval());
+        if (this.runningJobs.contains(job)) {
             throw new IllegalStateException("Job already running: " + job);
         }
         // add it to the running set
-        runningJobs.add(job);
+        this.runningJobs.add(job);
     }
 
     private void jobFinish(Job job) {
@@ -426,7 +428,7 @@ public class VM extends CWSSimEntity {
     }
 
     /**
-     * Assumes one core VMs.
+     * Assumes one core per one job.
      */
     public double getTimeSpentOnComputations() {
         double time = 0;
@@ -437,7 +439,7 @@ public class VM extends CWSSimEntity {
     }
 
     /**
-     * Assumes one core VMs.
+     * Assumes one core per one job.
      */
     public double getTimeSpentOnTransfers() {
         double time = 0;
@@ -487,23 +489,20 @@ public class VM extends CWSSimEntity {
     }
 
     /**
-     * Returns the time from now when this VM is predicted to finish all scheduled jobs. This executes in the context
+     * Returns the time from now when this VM is predicted to have at least one idle core. This executes in the context
      * of {@link Environment}, {@link StorageManager} and {@link VMCacheManager}.
      */
     public double getPredictedReleaseTime(StorageManager sm, Environment env, VMCacheManager cacheManager) {
-        double total = 0;
-        if (!this.runningJobs.isEmpty()) {
-            Preconditions.checkState(this.runningJobs.size() == 1, "This implementation assumes single core VMs.");
-            final Job job = this.runningJobs.iterator().next();
-            total += getPredictedRemainingRuntime(job, sm, env);
+        final List<Double> taskRuntimes = new ArrayList<>();
+        for (final Job job : this.runningJobs) {
+            taskRuntimes.add(getPredictedRemainingRuntime(job, sm, env));
         }
-
         for (final Job job : this.jobs) {
-            total += getPredictedRemainingRuntime(job, sm, env);
+            taskRuntimes.add(getPredictedRemainingRuntime(job, sm, env));
         }
-
+        final Double predictedReleaseTime = calculatePredictedReleaseTime(taskRuntimes);
         // If predicted time is < 0 then return zero not to be better than free VMs.
-        return total > 0 ? total : 0;
+        return predictedReleaseTime > 0 ? predictedReleaseTime : 0;
     }
 
     private double getPredictedRemainingRuntime(final Job job, final StorageManager sm, final Environment env){
@@ -521,5 +520,21 @@ public class VM extends CWSSimEntity {
             return sm.getTotalTransferTimeEstimation(job.getTask(), this)
                     + env.getComputationPredictedRuntime(job.getTask());
         }
+    }
+
+    // Given list of scheduled tasks' runtimes calculates when at least one core of this vm will become idle
+    private double calculatePredictedReleaseTime(final List<Double> taskRuntimes) {
+        if (taskRuntimes.size() < this.vmType.getCores()) {
+            return 0.0;
+        }
+        final PriorityQueue<Double> queue = new PriorityQueue<>();
+        final Iterator<Double> iterator = taskRuntimes.iterator();
+        for (int i = 0; i < this.vmType.getCores(); i++) {
+            queue.add(iterator.next());
+        }
+        while (iterator.hasNext()) {
+            queue.add(queue.poll() + iterator.next());
+        }
+        return queue.poll();
     }
 }

@@ -1,10 +1,8 @@
 package cws.core;
 
 import static org.junit.Assert.assertEquals;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
@@ -14,11 +12,18 @@ import cws.core.core.VMTypeBuilder;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
 
+import org.junit.Before;
+import org.junit.Test;
+
 public class VMTest {
+
+    private static final double DELTA = 0.01;
+
     private CloudSimWrapper cloudsim;
     @SuppressWarnings("unused")
     private StorageManager storageManager;
@@ -121,11 +126,7 @@ public class VMTest {
         assertEquals(20.0, j2.getFinishTime(), 0.0);
     }
 
-    /**
-     * We cancel support of multicore VMs. Once it is reintrucuded, then we should unignore this.
-     */
     @Test
-    @Ignore
     public void testMultiCoreVM() {
         VMType vmType = VMTypeBuilder.newBuilder().mips(100).cores(2).price(0.40).build();
         VM vm = VMFactory.createVM(vmType, cloudsim);
@@ -226,5 +227,94 @@ public class VMTest {
         cloudsim.send(driver.getId(), vm.getId(), 0.1, WorkflowEvent.VM_LAUNCH);
         cloudsim.send(driver.getId(), vm.getId(), 0.2, WorkflowEvent.VM_LAUNCH);
         cloudsim.startSimulation();
+    }
+
+    @Test
+    public void testPredictReleaseTimeWhenNumberOfTasksInQueueIsLessThanNumberOfCores() throws Exception {
+        final VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(4).price(1.0).build();
+        final VM vm = VMFactory.createVM(vmType, this.cloudsim);
+        final VMDummyDriver driver = new VMDummyDriver(this.cloudsim);
+        final Job job = new Job(
+                new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), this.cloudsim);
+        vm.launch();
+        vm.jobSubmit(job);
+        final StorageManager sm = mock(StorageManager.class);
+        when(sm.getTotalTransferTimeEstimation(job.getTask(), vm)).thenReturn(1.0);
+        final Environment env = mock(Environment.class);
+        when(env.getComputationPredictedRuntime(job.getTask())).thenReturn(2.0);
+        assertEquals(0.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+    }
+
+    @Test
+    public void testPredictReleaseTimeOfSingleCoreVm() throws Exception {
+        final VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+        final VM vm = VMFactory.createVM(vmType, this.cloudsim);
+        final VMDummyDriver driver = new VMDummyDriver(this.cloudsim);
+        final Job job1 = new Job(
+                new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), this.cloudsim);
+        final Job job2 = new Job(
+                new DAGJob(new DAG(), 1), new Task("task_id2", "transformation", 1000), driver.getId(), this.cloudsim);
+        vm.launch();
+        vm.jobSubmit(job1);
+        vm.jobSubmit(job2);
+        final StorageManager sm = mock(StorageManager.class);
+        when(sm.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
+        when(sm.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
+        final Environment env = mock(Environment.class);
+        when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
+        when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
+        assertEquals(8.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+    }
+
+    @Test
+    public void testPredictReleaseTimeWhenNumberOfTasksEqualsNumberOfCores() throws Exception {
+        final VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(2).price(1.0).build();
+        final VM vm = VMFactory.createVM(vmType, this.cloudsim);
+        final VMDummyDriver driver = new VMDummyDriver(this.cloudsim);
+        final Job job1 = new Job(
+                new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), this.cloudsim);
+        final Job job2 = new Job(
+                new DAGJob(new DAG(), 1), new Task("task_id2", "transformation", 1000), driver.getId(), this.cloudsim);
+        vm.launch();
+        vm.jobSubmit(job1);
+        vm.jobSubmit(job2);
+        final StorageManager sm = mock(StorageManager.class);
+        when(sm.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
+        when(sm.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
+        final Environment env = mock(Environment.class);
+        when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
+        when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
+        assertEquals(3.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+    }
+
+    @Test
+    public void testPredictReleaseTimeOfMultiCoreVm() throws Exception {
+        final VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(2).price(1.0).build();
+        final VM vm = VMFactory.createVM(vmType, this.cloudsim);
+        final VMDummyDriver driver = new VMDummyDriver(this.cloudsim);
+        final Job[] jobs = {
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(),
+                        this.cloudsim),
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id2", "transformation", 1000), driver.getId(),
+                        this.cloudsim),
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id3", "transformation", 1000), driver.getId(),
+                        this.cloudsim),
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id4", "transformation", 1000), driver.getId(),
+                        this.cloudsim),
+                new Job(new DAGJob(new DAG(), 1), new Task("task_id5", "transformation", 1000), driver.getId(),
+                        this.cloudsim) };
+        vm.launch();
+        for(final Job job : jobs){
+            vm.jobSubmit(job);
+        }
+        final double[] transferTimes = {1.0, 0.0, 1.0, 0.0, 2.0};
+        final double[] computationTimes = {1.0, 2.0, 2.0, 1.0, 2.0};
+        final StorageManager sm = mock(StorageManager.class);
+        final Environment env = mock(Environment.class);
+        for(int i = 0; i < 5; i++) {
+            when(sm.getTotalTransferTimeEstimation(jobs[i].getTask(), vm)).thenReturn(transferTimes[i]);
+            when(env.getComputationPredictedRuntime(jobs[i].getTask())).thenReturn(computationTimes[i]);
+        }
+        assertEquals(5.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
     }
 }
