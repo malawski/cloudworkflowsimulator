@@ -193,7 +193,7 @@
           description="runs simulation locally on GENOME workflows with default params">
     <exec executable="sh">
       <arg value="-c"/>
-      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application GENOME --input-dir ${indir} --output-file simulation-out.csv --distribution pareto_unsorted --algorithm SPSS --storage-manager void --ensemble-size 20&quot;"/>
+      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application GENOME --input-dir ${indir} --output-file ${out} --distribution pareto_unsorted --algorithm SPSS --storage-manager void --ensemble-size 20&quot;"/>
     </exec>
   </target>
 
@@ -202,7 +202,7 @@
           description="runs simulation locally">
     <exec executable="sh">
       <arg value="-c"/>
-      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application ${app} --input-dir ${indir} --output-file simulation-out.csv --distribution ${distr} --algorithm ${algo} --storage-manager ${storagemng} --ensemble-size ${ensemblesize} --scaling-factor ${scalingfactor} --seed ${seed} --storage-cache ${storagecache} --enable-logging ${enablelog} --log-to-stdout ${stdoutlog} --n-budgets ${budgets} --n-deadlines ${deadlines}&quot;"/>
+      <arg value="${script.dir}/runners/run_simulation_locally.sh &quot;--application ${app} --input-dir ${indir} --output-file ${out} --distribution ${distr} --algorithm ${algo} --storage-manager ${storagemng} --ensemble-size ${ensemblesize} --scaling-factor ${scalingfactor} --seed ${seed} --storage-cache ${storagecache} --enable-logging ${enablelog} --log-to-stdout ${stdoutlog} --n-budgets ${budgets} --n-deadlines ${deadlines}&quot;"/>
     </exec>
   </target>
 
