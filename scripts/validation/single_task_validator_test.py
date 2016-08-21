@@ -23,6 +23,7 @@ IRRELEVANT_TRANSFER_ATTRIBUTES = {
 
 IRRELEVANT_VM_ATTRIBUTES = {
     'id': 'some_id',
+    'cores': 1
 }
 
 

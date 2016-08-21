@@ -13,8 +13,8 @@ def create_transfer(started, finished, vm):
         id='123', job_id='before_1', direction='UPLOAD', file_id='transferred.txt')
 
 
-def create_vm(started, finished, id):
-    return VMLog(started=started, finished=finished, id=id)
+def create_vm(started, finished, id, cores):
+    return VMLog(started=started, finished=finished, id=id, cores=cores)
 
 
 class SimulationValidatorTest(unittest.TestCase):
@@ -23,7 +23,7 @@ class SimulationValidatorTest(unittest.TestCase):
             create_job(started=0.0, finished=10.0, vm=1),
             create_job(started=11.0, finished=13.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=13.0, id=1)]
+            create_vm(started=0.0, finished=13.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -35,7 +35,7 @@ class SimulationValidatorTest(unittest.TestCase):
             create_job(started=0.0, finished=10.0, vm=1),
             create_job(started=10.0, finished=13.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=13.0, id=1)]
+            create_vm(started=0.0, finished=13.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -47,7 +47,7 @@ class SimulationValidatorTest(unittest.TestCase):
             create_job(started=0.0, finished=12.0, vm=1),
             create_job(started=11.0, finished=13.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=13.0, id=1)]
+            create_vm(started=0.0, finished=13.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -59,8 +59,8 @@ class SimulationValidatorTest(unittest.TestCase):
             create_job(started=0.0, finished=12.0, vm=1),
             create_job(started=11.0, finished=13.0, vm=2)]
         vms = [
-            create_vm(started=0.0, finished=13.0, id=1),
-            create_vm(started=11.0, finished=13.0, id=2)]
+            create_vm(started=0.0, finished=13.0, id=1, cores=1),
+            create_vm(started=11.0, finished=13.0, id=2, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -72,7 +72,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=6.0, finished=12.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=12.0, id=1)]
+            create_vm(started=0.0, finished=12.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
@@ -84,7 +84,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=5.0, finished=12.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=12.0, id=1)]
+            create_vm(started=0.0, finished=12.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
@@ -97,7 +97,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=5.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=12.0, id=1)]
+            create_vm(started=0.0, finished=12.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
@@ -109,7 +109,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=3.0, finished=9.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=9.0, id=1)]
+            create_vm(started=0.0, finished=9.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
@@ -121,8 +121,8 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=3.0, finished=9.0, vm=2)]
         vms = [
-            create_vm(started=0.0, finished=10.0, id=1),
-            create_vm(started=0.0, finished=10.0, id=2)]
+            create_vm(started=0.0, finished=10.0, id=1, cores=1),
+            create_vm(started=0.0, finished=10.0, id=2, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
@@ -132,7 +132,7 @@ class SimulationValidatorTest(unittest.TestCase):
         jobs = [
             create_job(started=3.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=5.0, id=1)]
+            create_vm(started=0.0, finished=5.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -151,7 +151,7 @@ class SimulationValidatorTest(unittest.TestCase):
         jobs = [
             create_job(started=3.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=4.0, id=1)]
+            create_vm(started=0.0, finished=4.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -161,7 +161,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=3.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=5.0, id=1)]
+            create_vm(started=0.0, finished=5.0, id=1, cores=1)]
 
         result = simulation_validator.validate([], transfers, vms)
 
@@ -180,7 +180,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=3.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=4.0, id=1)]
+            create_vm(started=0.0, finished=4.0, id=1, cores=1)]
 
         result = simulation_validator.validate([], transfers, vms)
 
