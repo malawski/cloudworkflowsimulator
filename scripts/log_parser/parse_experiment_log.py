@@ -51,9 +51,13 @@ PATTERNS = [
         type=TransferLog,
         set_values={'started': None, 'vm': None, 'direction': None, 'job_id': None, 'file_id': None}),
     log_parser.Pattern(
-        regex=r'\((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) with (?P<cores>\d+) cores started',
+        regex=r'\((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) with (?P<cores>\w+) cores started',
         type=VMLog,
         set_values={'finished': None}),
+    log_parser.Pattern(
+        regex=r'\AVM (?P<id>(\w|\.)+) with (?P<cores>\w+) cores started',
+        type=VMLog,
+        set_values={'started': 0, 'finished': None}),
     log_parser.Pattern(
         regex=r'\((?P<finished>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) terminated',
         type=VMLog,
