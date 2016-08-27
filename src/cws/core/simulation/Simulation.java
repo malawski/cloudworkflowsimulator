@@ -44,7 +44,12 @@ import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
 
+import static com.google.common.math.DoubleMath.fuzzyEquals;
+
 public class Simulation {
+
+    private static final double EPSILON = 0.0001;
+
     /**
      * The number of workflows an ensemble is comprised of.
      */
@@ -360,7 +365,7 @@ public class Simulation {
             minBudget = Double.valueOf(args.getOptionValue("budget"));
             maxBudget = minBudget;
         }
-        if (budgetStep == 0) {
+        if (fuzzyEquals(budgetStep, 0.0, EPSILON)) {
             budgetStep = 1;
         }
 
@@ -375,7 +380,7 @@ public class Simulation {
             minDeadline = Double.valueOf(args.getOptionValue("deadline"));
             maxDeadline = minDeadline;
         }
-        if (deadlineStep == 0) {
+        if (fuzzyEquals(deadlineStep, 0.0, EPSILON)) {
             deadlineStep = 1;
         }
 
