@@ -13,8 +13,8 @@ def create_transfer(started, finished, vm):
         id='123', job_id='before_1', direction='UPLOAD', file_id='transferred.txt')
 
 
-def create_vm(started, finished, id):
-    return VMLog(started=started, finished=finished, id=id)
+def create_vm(started, finished, id, cores):
+    return VMLog(started=started, finished=finished, id=id, cores=cores)
 
 
 class SimulationValidatorTest(unittest.TestCase):
@@ -23,7 +23,7 @@ class SimulationValidatorTest(unittest.TestCase):
             create_job(started=0.0, finished=10.0, vm=1),
             create_job(started=11.0, finished=13.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=13.0, id=1)]
+            create_vm(started=0.0, finished=13.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -35,32 +35,43 @@ class SimulationValidatorTest(unittest.TestCase):
             create_job(started=0.0, finished=10.0, vm=1),
             create_job(started=10.0, finished=13.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=13.0, id=1)]
+            create_vm(started=0.0, finished=13.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
         self.assertTrue(result.is_valid)
         self.assertEqual([], result.errors)
 
-    def test_should_fail_if_jobs_intersects_on_the_same_vm(self):
+    def test_should_fail_if_jobs_intersects_on_the_same_single_core_vm(self):
         jobs = [
             create_job(started=0.0, finished=12.0, vm=1),
             create_job(started=11.0, finished=13.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=13.0, id=1)]
+            create_vm(started=0.0, finished=13.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
         self.assertFalse(result.is_valid)
         self.assertLessEqual(1, len(result.errors))
 
+    def test_should_pass_if_jobs_intersect_on_the_same_dual_core_vm(self):
+        jobs = [
+            create_job(started=0.0, finished=12.0, vm=1),
+            create_job(started=11.0, finished=13.0, vm=1)]
+        vms = [
+            create_vm(started=0.0, finished=13.0, id=1, cores=2)]
+
+        result = simulation_validator.validate(jobs, jobs, vms)
+
+        self.assertTrue(result.is_valid)
+
     def test_should_pass_if_intersecting_jobs_are_on_different_vms(self):
         jobs = [
             create_job(started=0.0, finished=12.0, vm=1),
             create_job(started=11.0, finished=13.0, vm=2)]
         vms = [
-            create_vm(started=0.0, finished=13.0, id=1),
-            create_vm(started=11.0, finished=13.0, id=2)]
+            create_vm(started=0.0, finished=13.0, id=1, cores=1),
+            create_vm(started=11.0, finished=13.0, id=2, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -72,7 +83,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=6.0, finished=12.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=12.0, id=1)]
+            create_vm(started=0.0, finished=12.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
@@ -84,7 +95,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=5.0, finished=12.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=12.0, id=1)]
+            create_vm(started=0.0, finished=12.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
@@ -97,23 +108,46 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=5.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=12.0, id=1)]
+            create_vm(started=0.0, finished=12.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
         self.assertTrue(result.is_valid)
 
-    def test_should_fail_if_transfer_intersects_computation_on_the_same_vm(self):
+    def test_should_fail_if_transfer_intersects_computation_on_the_same_single_core_vm(self):
         jobs = [
             create_job(started=0.0, finished=5.0, vm=1)]
         transfers = [
             create_transfer(started=3.0, finished=9.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=9.0, id=1)]
+            create_vm(started=0.0, finished=9.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
         self.assertFalse(result.is_valid)
+
+    def test_should_pass_if_transfer_intersects_computation_on_the_same_dual_core_vm(self):
+        jobs = [
+            create_job(started=0.0, finished=5.0, vm=1)]
+        transfers = [
+            create_transfer(started=3.0, finished=9.0, vm=1)]
+        vms = [
+            create_vm(started=0.0, finished=9.0, id=1, cores=2)]
+
+        result = simulation_validator.validate(jobs, transfers, vms)
+
+        self.assertTrue(result.is_valid)
+
+    def test_should_pass_if_transfers_intersect_on_the_same_dual_core_vm(self):
+        transfers = [
+            create_transfer(started=3.0, finished=9.0, vm=1),
+            create_transfer(started=5.0, finished=7.0, vm=1)]
+        vms = [
+            create_vm(started=0.0, finished=9.0, id=1, cores=2)]
+
+        result = simulation_validator.validate([], transfers, vms)
+
+        self.assertTrue(result.is_valid)
 
     def test_should_pass_if_transfer_intersects_computation_on_different_vms(self):
         jobs = [
@@ -121,8 +155,8 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=3.0, finished=9.0, vm=2)]
         vms = [
-            create_vm(started=0.0, finished=10.0, id=1),
-            create_vm(started=0.0, finished=10.0, id=2)]
+            create_vm(started=0.0, finished=10.0, id=1, cores=1),
+            create_vm(started=0.0, finished=10.0, id=2, cores=1)]
 
         result = simulation_validator.validate(jobs, transfers, vms)
 
@@ -132,7 +166,7 @@ class SimulationValidatorTest(unittest.TestCase):
         jobs = [
             create_job(started=3.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=5.0, id=1)]
+            create_vm(started=0.0, finished=5.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -151,7 +185,7 @@ class SimulationValidatorTest(unittest.TestCase):
         jobs = [
             create_job(started=3.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=4.0, id=1)]
+            create_vm(started=0.0, finished=4.0, id=1, cores=1)]
 
         result = simulation_validator.validate(jobs, [], vms)
 
@@ -161,7 +195,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=3.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=5.0, id=1)]
+            create_vm(started=0.0, finished=5.0, id=1, cores=1)]
 
         result = simulation_validator.validate([], transfers, vms)
 
@@ -180,7 +214,7 @@ class SimulationValidatorTest(unittest.TestCase):
         transfers = [
             create_transfer(started=3.0, finished=5.0, vm=1)]
         vms = [
-            create_vm(started=0.0, finished=4.0, id=1)]
+            create_vm(started=0.0, finished=4.0, id=1, cores=1)]
 
         result = simulation_validator.validate([], transfers, vms)
 
