@@ -59,7 +59,7 @@ public class Cloud extends CWSSimEntity {
     public List<VM> getBusyVMs() {
         Builder<VM> busy = ImmutableList.<VM>builder();
         for (VM vm : availableVMs) {
-            if (!vm.isTerminated() && !vm.isFree()) {
+            if (!vm.isTerminated() && !vm.isIdle()) {
                 busy.add(vm);
             }
         }

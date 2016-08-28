@@ -121,6 +121,17 @@ public class VM extends CWSSimEntity {
     }
 
     /**
+     * Returns true when all of its core are idle.
+     */
+    public boolean isIdle() {
+        if (this.isTerminated) {
+            throw new IllegalStateException(
+                    "Attempted to determine whether terminated VM is idle. Check for termination first.");
+        }
+        return this.idleCores == this.vmType.getCores();
+    }
+
+    /**
      * Runtime of the VM in seconds. If the VM has not been launched, then
      * the result is 0. If the VM is not terminated, then we use the current
      * simulation time as the termination time. After the VM is terminated

@@ -153,7 +153,7 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
             // No machines - finish.
             return;
         }
-        double utilization = engine.getBusyVMs().size() / (engine.getAvailableVMs().size());
+        double utilization = ((double) engine.getBusyVMs().size()) / (engine.getAvailableVMs().size());
 
         if (!(utilization >= 0.0)) {
             getCloudsim().log(
