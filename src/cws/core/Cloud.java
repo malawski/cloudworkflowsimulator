@@ -20,12 +20,14 @@ import cws.core.exception.UnknownWorkflowEventException;
  */
 public class Cloud extends CWSSimEntity {
 
-    /** The set of VMs which are available for use (does not include VMs that are being launched).
-     *  This is the collection that was previously returned by getAllVMs().
+    /**
+     * The set of VMs which are available for use (does not include VMs that are being launched).
+     * This is the collection that was previously returned by getAllVMs().
      */
     private final Set<VM> availableVMs = new HashSet<VM>();
 
-    /** The set of VMs that are currently being launched.
+    /**
+     * The set of VMs that are currently being launched.
      */
     private final Set<VM> launchingVMs = new HashSet<VM>();
 
@@ -48,7 +50,7 @@ public class Cloud extends CWSSimEntity {
     }
 
     public List<VM> getFreeVMs() {
-        Builder<VM> free = ImmutableList.<VM>builder();
+        Builder<VM> free = ImmutableList.<VM> builder();
         for (VM vm : availableVMs) {
             if (!vm.isTerminated() && vm.isFree()) {
                 free.add(vm);
@@ -58,7 +60,7 @@ public class Cloud extends CWSSimEntity {
     }
 
     public List<VM> getBusyVMs() {
-        Builder<VM> busy = ImmutableList.<VM>builder();
+        Builder<VM> busy = ImmutableList.<VM> builder();
         for (VM vm : availableVMs) {
             if (!vm.isTerminated() && !vm.isIdle()) {
                 busy.add(vm);
@@ -103,11 +105,12 @@ public class Cloud extends CWSSimEntity {
         getCloudsim().send(getId(), getId(), vm.getProvisioningDelay(), WorkflowEvent.VM_LAUNCHED, vm);
     }
 
-    /** Launches the given VM at some time in the future.
+    /**
+     * Launches the given VM at some time in the future.
      */
     public void launchVMAtTime(int id, VM vm, double launchTime) {
         final double now = getCloudsim().clock();
-        if(launchTime < now) {
+        if (launchTime < now) {
             throw new IllegalArgumentException("Cannot launch a VM in the past.");
         }
 

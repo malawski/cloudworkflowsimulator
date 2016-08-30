@@ -175,11 +175,10 @@ public class WorkflowEngine extends CWSSimEntity implements VMListener {
 
             // Log only if it was running job
             if (job.getStartTime() > 0.0) {
-                getCloudsim().log(
-                        String.format(
-                                "Job %d (task_id = %s, workflow_id = %s, retry = %s) failed on VM %s. Resubmitting...",
-                                job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(),
-                                job.getVM().getId()));
+                getCloudsim().log(String.format(
+                        "Job %d (task_id = %s, workflow_id = %s, retry = %s) failed on VM %s. Resubmitting...",
+                        job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(),
+                        job.getVM().getId()));
             }
 
             // Retry the job
@@ -189,9 +188,8 @@ public class WorkflowEngine extends CWSSimEntity implements VMListener {
             jobReleased(retry);
 
         } else {
-            getCloudsim().log(
-                    String.format("Job %d (task_id = %s, workflow_id = %s, retry = %s) exceeded deadline.",
-                            job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry()));
+            getCloudsim().log(String.format("Job %d (task_id = %s, workflow_id = %s, retry = %s) exceeded deadline.",
+                    job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry()));
         }
 
         scheduler.scheduleJobs(this);
