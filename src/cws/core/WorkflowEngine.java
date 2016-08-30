@@ -219,6 +219,10 @@ public class WorkflowEngine extends CWSSimEntity implements VMListener {
         return new ArrayList<>(provisioner.getCloud().getAvailableVMs());
     }
 
+    public List<VM> getLaunchingVMs() {
+        return new ArrayList<>(provisioner.getCloud().getLaunchingVMs());
+    }
+
     public List<VM> getFreeVMs() {
         return provisioner.getCloud().getFreeVMs();
     }
