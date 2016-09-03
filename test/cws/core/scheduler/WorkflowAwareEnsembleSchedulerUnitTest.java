@@ -131,13 +131,14 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     }
 
     private Job createSimpleJobMock() {
-        return createSimpleJobMock(ImmutableList.<DAGFile>of(), ImmutableList.<DAGFile>of());
+        return createSimpleJobMock(ImmutableList.<DAGFile> of(), ImmutableList.<DAGFile> of());
     }
 
     private VM createVMMock() {
         VM vm = mock(VM.class);
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         when(vm.getVmType()).thenReturn(vmType);
+        when(environment.getVMType()).thenReturn(vmType);
         return vm;
     }
 }
