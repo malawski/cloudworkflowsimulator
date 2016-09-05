@@ -20,17 +20,16 @@ import cws.core.exception.UnknownWorkflowEventException;
  */
 public class Cloud extends CWSSimEntity {
 
-    /** The set of VMs which are available for use (this is different to
-     * _vmsForSanityCheck because it does not include VMs which are waiting
-     * to be launched). This is the collection that was previously returned
-     * by getAllVMs().
+    /**
+     * The set of VMs which are available for use (does not include VMs that are being launched).
+     * This is the collection that was previously returned by getAllVMs().
      */
     private final Set<VM> availableVMs = new HashSet<VM>();
 
-    /** The set of currently active VMs, used for internal sanity checks
-     * only. */
-    private final Set<VM> _vmsForSanityCheck = new HashSet<VM>();
-
+    /**
+     * The set of VMs that are currently being launched.
+     */
+    private final Set<VM> launchingVMs = new HashSet<VM>();
 
     private final Set<VMListener> vmListeners = new HashSet<VMListener>();
 
@@ -46,8 +45,12 @@ public class Cloud extends CWSSimEntity {
         return ImmutableList.copyOf(availableVMs);
     }
 
+    public List<VM> getLaunchingVMs() {
+        return ImmutableList.copyOf(this.launchingVMs);
+    }
+
     public List<VM> getFreeVMs() {
-        Builder<VM> free = ImmutableList.<VM>builder();
+        Builder<VM> free = ImmutableList.<VM> builder();
         for (VM vm : availableVMs) {
             if (!vm.isTerminated() && vm.isFree()) {
                 free.add(vm);
@@ -57,7 +60,7 @@ public class Cloud extends CWSSimEntity {
     }
 
     public List<VM> getBusyVMs() {
-        Builder<VM> busy = ImmutableList.<VM>builder();
+        Builder<VM> busy = ImmutableList.<VM> builder();
         for (VM vm : availableVMs) {
             if (!vm.isTerminated() && !vm.isIdle()) {
                 busy.add(vm);
@@ -87,13 +90,13 @@ public class Cloud extends CWSSimEntity {
     }
 
     /**
-     * Launches the given VM and adds it to acvite VMs pool.
+     * Launches the given VM and adds it to launching VMs pool.
      */
     public void launchVM(int owner, VM vm) {
         vm.setOwner(owner);
         vm.setCloud(getId());
         vm.setLaunchTime(getCloudsim().clock());
-        _vmsForSanityCheck.add(vm);
+        launchingVMs.add(vm);
 
         // We launch the VM now...
         vm.launch();
@@ -102,11 +105,12 @@ public class Cloud extends CWSSimEntity {
         getCloudsim().send(getId(), getId(), vm.getProvisioningDelay(), WorkflowEvent.VM_LAUNCHED, vm);
     }
 
-    /** Launches the given VM at some time in the future.
+    /**
+     * Launches the given VM at some time in the future.
      */
     public void launchVMAtTime(int id, VM vm, double launchTime) {
         final double now = getCloudsim().clock();
-        if(launchTime < now) {
+        if (launchTime < now) {
             throw new IllegalArgumentException("Cannot launch a VM in the past.");
         }
 
@@ -116,9 +120,9 @@ public class Cloud extends CWSSimEntity {
     }
 
     private void vmLaunched(VM vm) {
-        // Sanity check
-        if (!_vmsForSanityCheck.contains(vm)) {
-            throw new RuntimeException("Unknown VM");
+        // Remove from launching VMs
+        if (!launchingVMs.remove(vm)) {
+            throw new RuntimeException("Received launched event for an unknown VM: " + vm.getId());
         }
 
         // VM is now available
@@ -138,15 +142,14 @@ public class Cloud extends CWSSimEntity {
      */
     public final void terminateVM(VM vm) {
         // Sanity check
-        if (!_vmsForSanityCheck.contains(vm)) {
-            throw new RuntimeException("Unknown VM: " + vm.getId());
+        if (!availableVMs.contains(vm) && !launchingVMs.contains(vm)) {
+            throw new RuntimeException("Attempting to terminate an unknown VM: " + vm.getId());
         }
         // We terminate the VM now...
         vm.terminate();
 
         // But it isn't gone until after the delay
         getCloudsim().send(getId(), getId(), vm.getDeprovisioningDelay(), WorkflowEvent.VM_TERMINATED, vm);
-        _vmsForSanityCheck.remove(vm);
     }
 
     private void vmTerminated(VM vm) {
