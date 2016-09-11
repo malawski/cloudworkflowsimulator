@@ -133,7 +133,7 @@ public class Environment {
     }
 
     /**
-     * Calculates time needed to transfer both input and output files of all tasks of a given DAQ
+     * Calculates time needed to transfer both input and output files of all tasks of a given DAG
      * Transfer time estimation depends on cloud's {@link StorageManager}
      * @return time as double
      */
