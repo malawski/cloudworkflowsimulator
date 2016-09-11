@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -16,9 +19,6 @@ import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class VMTest {
 
@@ -242,7 +242,7 @@ public class VMTest {
         when(sm.getTotalTransferTimeEstimation(job.getTask(), vm)).thenReturn(1.0);
         final Environment env = mock(Environment.class);
         when(env.getComputationPredictedRuntime(job.getTask())).thenReturn(2.0);
-        assertEquals(0.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+        assertEquals(0.0, vm.getPredictedReleaseTime(sm, env), DELTA);
     }
 
     @Test
@@ -263,7 +263,7 @@ public class VMTest {
         final Environment env = mock(Environment.class);
         when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
         when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
-        assertEquals(8.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+        assertEquals(8.0, vm.getPredictedReleaseTime(sm, env), DELTA);
     }
 
     @Test
@@ -284,7 +284,7 @@ public class VMTest {
         final Environment env = mock(Environment.class);
         when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
         when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
-        assertEquals(3.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+        assertEquals(3.0, vm.getPredictedReleaseTime(sm, env), DELTA);
     }
 
     @Test
@@ -315,6 +315,6 @@ public class VMTest {
             when(sm.getTotalTransferTimeEstimation(jobs[i].getTask(), vm)).thenReturn(transferTimes[i]);
             when(env.getComputationPredictedRuntime(jobs[i].getTask())).thenReturn(computationTimes[i]);
         }
-        assertEquals(5.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+        assertEquals(5.0, vm.getPredictedReleaseTime(sm, env), DELTA);
     }
 }
