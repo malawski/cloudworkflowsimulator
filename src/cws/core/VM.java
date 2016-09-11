@@ -495,7 +495,7 @@ public class VM extends CWSSimEntity {
      * of {@link Environment} and {@link StorageManager}}.
      */
     public double getPredictedReleaseTime(StorageManager sm, Environment env) {
-        final List<Double> taskRuntimes = new ArrayList<>();
+        final List<Double> taskRuntimes = new ArrayList<Double>();
         for (final Job job : this.runningJobs) {
             taskRuntimes.add(getPredictedRemainingRuntime(job, sm, env));
         }
@@ -528,7 +528,7 @@ public class VM extends CWSSimEntity {
         if (taskRuntimes.size() < this.vmType.getCores()) {
             return 0.0;
         }
-        final PriorityQueue<Double> queue = new PriorityQueue<>();
+        final PriorityQueue<Double> queue = new PriorityQueue<Double>();
         final Iterator<Double> iterator = taskRuntimes.iterator();
         for (int i = 0; i < this.vmType.getCores(); i++) {
             queue.add(iterator.next());
