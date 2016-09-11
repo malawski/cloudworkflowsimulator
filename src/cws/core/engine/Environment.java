@@ -1,5 +1,6 @@
 package cws.core.engine;
 
+import cws.core.VM;
 import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
@@ -18,11 +19,6 @@ public class Environment {
     // FIXME(mequrel): temporary encapsulation breakage for static algorithm, dynamic algorithm and provisioners
     public VMType getVMType() {
         return vmType;
-    }
-
-
-    public StorageManager getStorageManager() {
-        return storageManager;
     }
 
     /**
@@ -66,5 +62,25 @@ public class Environment {
 
     public double getDeprovisioningDelayEstimation() {
         return vmType.getDeprovisioningDelayEstimation();
+    }
+
+    public double getTotalTransferTimeEstimation(Task task) {
+        return this.storageManager.getTotalTransferTimeEstimation(task);
+    }
+
+    public double getTotalTransferTimeEstimation(final Task task, final VM vm) {
+        return this.storageManager.getTotalTransferTimeEstimation(task, vm);
+    }
+
+    public double getInputTransferTimeEstimation(Task task, VM vm) {
+        return this.storageManager.getInputTransferTimeEstimation(task, vm);
+    }
+
+    public double getOutputTransferTimeEstimation(Task task, VM vm) {
+        return this.storageManager.getOutputTransferTimeEstimation(task, vm);
+    }
+
+    public double getTotalTransferTimeEstimation(DAG dag) {
+        return this.storageManager.getTotalTransferTimeEstimation(dag);
     }
 }

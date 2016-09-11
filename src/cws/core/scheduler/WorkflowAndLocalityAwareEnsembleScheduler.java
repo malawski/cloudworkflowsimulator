@@ -11,21 +11,18 @@ import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
-import cws.core.storage.StorageManager;
 
 /**
  * {@link WorkflowAwareEnsembleScheduler} implementation that is also aware of the underlying storage and schedules jobs
  * to minimize file transfers.
  */
 public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicScheduler {
-    private final StorageManager storageManager;
     private final RuntimePredictioner runtimePredictioner;
     private final WorkflowAdmissioner workflowAdmissioner;
 
     public WorkflowAndLocalityAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment,
             RuntimePredictioner runtimePredictioner, WorkflowAdmissioner workflowAdmissioner) {
         super(cloudsim, environment);
-        this.storageManager = (StorageManager) cloudsim.getEntityByName("StorageManager");
         this.runtimePredictioner = runtimePredictioner;
         this.workflowAdmissioner = workflowAdmissioner;
     }
@@ -63,7 +60,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
                 List<VM> allVms = engine.getAvailableVMs();
                 for (VM vm : allVms) {
                     if (!vm.isTerminated() && !vm.isFree()) {
-                        double t = vm.getPredictedReleaseTime(storageManager, environment);
+                        double t = vm.getPredictedReleaseTime(environment);
                         double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm) + t;
                         if (estimatedJobFinish < bestFinishTime) {
                             bestLocalVM = vm;

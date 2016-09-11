@@ -12,7 +12,6 @@ import cws.core.engine.Environment;
 import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
-import cws.core.storage.StorageManager;
 
 /**
  * A VM is a virtual machine that executes Jobs.
@@ -492,33 +491,34 @@ public class VM extends CWSSimEntity {
 
     /**
      * Returns the time from now when this VM is predicted to have at least one idle core. This executes in the context
-     * of {@link Environment} and {@link StorageManager}}.
+     * of {@link Environment}}.
      */
-    public double getPredictedReleaseTime(StorageManager sm, Environment env) {
+    public double getPredictedReleaseTime(Environment env) {
         final List<Double> taskRuntimes = new ArrayList<Double>();
         for (final Job job : this.runningJobs) {
-            taskRuntimes.add(getPredictedRemainingRuntime(job, sm, env));
+            taskRuntimes.add(getPredictedRemainingRuntime(job, env));
         }
         for (final Job job : this.jobs) {
-            taskRuntimes.add(getPredictedRemainingRuntime(job, sm, env));
+            taskRuntimes.add(getPredictedRemainingRuntime(job, env));
         }
         final Double predictedReleaseTime = calculatePredictedReleaseTime(taskRuntimes);
         // If predicted time is < 0 then return zero not to be better than free VMs.
         return predictedReleaseTime > 0 ? predictedReleaseTime : 0;
     }
 
-    private double getPredictedRemainingRuntime(final Job job, final StorageManager sm, final Environment env) {
+    private double getPredictedRemainingRuntime(final Job job, final Environment env) {
         if (this.writeIntervals.containsKey(job)) { // job is in output files transfer phase
-            return sm.getOutputTransferTimeEstimation(job.getTask(), this) - this.writeIntervals.get(job).getDuration();
+            return env.getOutputTransferTimeEstimation(job.getTask(), this)
+                    - this.writeIntervals.get(job).getDuration();
         } else if (this.computationIntervals.containsKey(job)) { // job is in computation phase
-            return sm.getOutputTransferTimeEstimation(job.getTask(), this)
+            return env.getOutputTransferTimeEstimation(job.getTask(), this)
                     + env.getComputationPredictedRuntime(job.getTask())
                     - this.computationIntervals.get(job).getDuration();
         } else if (this.readIntervals.containsKey(job)) { // job is in input files transfer phase
-            return sm.getTotalTransferTimeEstimation(job.getTask(), this) - this.readIntervals.get(job).getDuration()
+            return env.getTotalTransferTimeEstimation(job.getTask(), this) - this.readIntervals.get(job).getDuration()
                     + env.getComputationPredictedRuntime(job.getTask());
         } else { // job is waiting in queue
-            return sm.getTotalTransferTimeEstimation(job.getTask(), this)
+            return env.getTotalTransferTimeEstimation(job.getTask(), this)
                     + env.getComputationPredictedRuntime(job.getTask());
         }
     }
