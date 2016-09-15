@@ -1,34 +1,28 @@
 package cws.core.scheduler;
 
-import cws.core.VM;
-import cws.core.WorkflowEngine;
-import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.engine.Environment;
-import cws.core.jobs.Job;
-import cws.core.storage.StorageManager;
-import cws.core.storage.cache.VMCacheManager;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import cws.core.VM;
+import cws.core.WorkflowEngine;
+import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.engine.Environment;
+import cws.core.jobs.Job;
+
 /**
  * {@link WorkflowAwareEnsembleScheduler} implementation that is also aware of the underlying storage and schedules jobs
  * to minimize file transfers.
  */
 public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicScheduler {
-    private final VMCacheManager cacheManager;
-    private final StorageManager storageManager;
     private final RuntimePredictioner runtimePredictioner;
     private final WorkflowAdmissioner workflowAdmissioner;
 
     public WorkflowAndLocalityAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment,
             RuntimePredictioner runtimePredictioner, WorkflowAdmissioner workflowAdmissioner) {
         super(cloudsim, environment);
-        this.cacheManager = (VMCacheManager) cloudsim.getEntityByName("VMCacheManager");
-        this.storageManager = (StorageManager) cloudsim.getEntityByName("StorageManager");
         this.runtimePredictioner = runtimePredictioner;
         this.workflowAdmissioner = workflowAdmissioner;
     }
@@ -66,7 +60,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
                 List<VM> allVms = engine.getAvailableVMs();
                 for (VM vm : allVms) {
                     if (!vm.isTerminated() && !vm.isFree()) {
-                        double t = vm.getPredictedReleaseTime(storageManager, environment, cacheManager);
+                        double t = vm.getPredictedReleaseTime(environment);
                         double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm) + t;
                         if (estimatedJobFinish < bestFinishTime) {
                             bestLocalVM = vm;

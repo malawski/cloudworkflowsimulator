@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -16,9 +19,6 @@ import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class VMTest {
 
@@ -238,11 +238,10 @@ public class VMTest {
                 new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), this.cloudsim);
         vm.launch();
         vm.jobSubmit(job);
-        final StorageManager sm = mock(StorageManager.class);
-        when(sm.getTotalTransferTimeEstimation(job.getTask(), vm)).thenReturn(1.0);
         final Environment env = mock(Environment.class);
+        when(env.getTotalTransferTimeEstimation(job.getTask(), vm)).thenReturn(1.0);
         when(env.getComputationPredictedRuntime(job.getTask())).thenReturn(2.0);
-        assertEquals(0.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+        assertEquals(0.0, vm.getPredictedReleaseTime(env), DELTA);
     }
 
     @Test
@@ -257,13 +256,12 @@ public class VMTest {
         vm.launch();
         vm.jobSubmit(job1);
         vm.jobSubmit(job2);
-        final StorageManager sm = mock(StorageManager.class);
-        when(sm.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
-        when(sm.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
         final Environment env = mock(Environment.class);
+        when(env.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
+        when(env.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
         when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
         when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
-        assertEquals(8.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+        assertEquals(8.0, vm.getPredictedReleaseTime(env), DELTA);
     }
 
     @Test
@@ -278,13 +276,12 @@ public class VMTest {
         vm.launch();
         vm.jobSubmit(job1);
         vm.jobSubmit(job2);
-        final StorageManager sm = mock(StorageManager.class);
-        when(sm.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
-        when(sm.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
         final Environment env = mock(Environment.class);
+        when(env.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
+        when(env.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
         when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
         when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
-        assertEquals(3.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+        assertEquals(3.0, vm.getPredictedReleaseTime(env), DELTA);
     }
 
     @Test
@@ -309,12 +306,11 @@ public class VMTest {
         }
         final double[] transferTimes = {1.0, 0.0, 1.0, 0.0, 2.0};
         final double[] computationTimes = {1.0, 2.0, 2.0, 1.0, 2.0};
-        final StorageManager sm = mock(StorageManager.class);
         final Environment env = mock(Environment.class);
         for(int i = 0; i < 5; i++) {
-            when(sm.getTotalTransferTimeEstimation(jobs[i].getTask(), vm)).thenReturn(transferTimes[i]);
+            when(env.getTotalTransferTimeEstimation(jobs[i].getTask(), vm)).thenReturn(transferTimes[i]);
             when(env.getComputationPredictedRuntime(jobs[i].getTask())).thenReturn(computationTimes[i]);
         }
-        assertEquals(5.0, vm.getPredictedReleaseTime(sm, env, null), DELTA);
+        assertEquals(5.0, vm.getPredictedReleaseTime(env), DELTA);
     }
 }

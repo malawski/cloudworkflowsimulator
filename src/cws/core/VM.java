@@ -1,5 +1,9 @@
 package cws.core;
 
+import java.util.*;
+
+import com.google.common.base.Preconditions;
+
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
@@ -8,20 +12,6 @@ import cws.core.engine.Environment;
 import cws.core.exception.UnknownWorkflowEventException;
 import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
-import cws.core.storage.StorageManager;
-import cws.core.storage.cache.VMCacheManager;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
-
-import com.google.common.base.Preconditions;
 
 /**
  * A VM is a virtual machine that executes Jobs.
@@ -184,8 +174,8 @@ public class VM extends CWSSimEntity {
             }
         } else {
             if (ev.getTag() == WorkflowEvent.VM_LAUNCH || ev.getTag() == WorkflowEvent.JOB_SUBMIT) {
-                throw new IllegalStateException("Attempted to send launch or submit event to terminated VM:"
-                        + this.getId());
+                throw new IllegalStateException(
+                        "Attempted to send launch or submit event to terminated VM:" + this.getId());
             }
         }
     }
@@ -270,11 +260,10 @@ public class VM extends CWSSimEntity {
             job.setResult(Job.Result.SUCCESS);
         }
 
-        getCloudsim()
-                .log(String
-                        .format("Starting computational part of job %s (task_id = %s, workflow = %s) on VM %s. Will finish in %f",
-                                job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.getVM()
-                                        .getId(), actualRuntime));
+        getCloudsim().log(String.format(
+                "Starting computational part of job %s (task_id = %s, workflow = %s) on VM %s. Will finish in %f",
+                job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.getVM().getId(),
+                actualRuntime));
 
         getCloudsim().send(getId(), getId(), actualRuntime, WorkflowEvent.JOB_FINISHED, job);
 
@@ -342,9 +331,10 @@ public class VM extends CWSSimEntity {
             throw new RuntimeException("Non-running job finished:" + job.getID());
         }
 
-        String msg = String.format("Computational part of job %s "
-                + "(task_id = %s, workflow = %s, retry = %s) on VM %s finished", job.getID(), job.getTask().getId(),
-                job.getDAGJob().getDAG().getId(), job.isRetry(), job.getVM().getId());
+        String msg = String.format(
+                "Computational part of job %s " + "(task_id = %s, workflow = %s, retry = %s) on VM %s finished",
+                job.getID(), job.getTask().getId(), job.getDAGJob().getDAG().getId(), job.isRetry(),
+                job.getVM().getId());
         getCloudsim().log(msg);
 
         getCloudsim().send(getId(), getCloudsim().getEntityId("StorageManager"), 0.0,
@@ -501,34 +491,34 @@ public class VM extends CWSSimEntity {
 
     /**
      * Returns the time from now when this VM is predicted to have at least one idle core. This executes in the context
-     * of {@link Environment}, {@link StorageManager} and {@link VMCacheManager}.
+     * of {@link Environment}}.
      */
-    public double getPredictedReleaseTime(StorageManager sm, Environment env, VMCacheManager cacheManager) {
-        final List<Double> taskRuntimes = new ArrayList<>();
+    public double getPredictedReleaseTime(Environment env) {
+        final List<Double> taskRuntimes = new ArrayList<Double>();
         for (final Job job : this.runningJobs) {
-            taskRuntimes.add(getPredictedRemainingRuntime(job, sm, env));
+            taskRuntimes.add(getPredictedRemainingRuntime(job, env));
         }
         for (final Job job : this.jobs) {
-            taskRuntimes.add(getPredictedRemainingRuntime(job, sm, env));
+            taskRuntimes.add(getPredictedRemainingRuntime(job, env));
         }
         final Double predictedReleaseTime = calculatePredictedReleaseTime(taskRuntimes);
         // If predicted time is < 0 then return zero not to be better than free VMs.
         return predictedReleaseTime > 0 ? predictedReleaseTime : 0;
     }
 
-    private double getPredictedRemainingRuntime(final Job job, final StorageManager sm, final Environment env){
-        if(this.writeIntervals.containsKey(job)){ // job is in output files transfer phase
-            return sm.getOutputTransferTimeEstimation(job.getTask(), this) - this.writeIntervals.get(job).getDuration();
+    private double getPredictedRemainingRuntime(final Job job, final Environment env) {
+        if (this.writeIntervals.containsKey(job)) { // job is in output files transfer phase
+            return env.getOutputTransferTimeEstimation(job.getTask(), this)
+                    - this.writeIntervals.get(job).getDuration();
         } else if (this.computationIntervals.containsKey(job)) { // job is in computation phase
-            return sm.getOutputTransferTimeEstimation(job.getTask(), this)
+            return env.getOutputTransferTimeEstimation(job.getTask(), this)
                     + env.getComputationPredictedRuntime(job.getTask())
                     - this.computationIntervals.get(job).getDuration();
-        } else if (this.readIntervals.containsKey(job)){ // job is in input files transfer phase
-            return sm.getTotalTransferTimeEstimation(job.getTask(), this)
-                    - this.readIntervals.get(job).getDuration()
+        } else if (this.readIntervals.containsKey(job)) { // job is in input files transfer phase
+            return env.getTotalTransferTimeEstimation(job.getTask(), this) - this.readIntervals.get(job).getDuration()
                     + env.getComputationPredictedRuntime(job.getTask());
         } else { // job is waiting in queue
-            return sm.getTotalTransferTimeEstimation(job.getTask(), this)
+            return env.getTotalTransferTimeEstimation(job.getTask(), this)
                     + env.getComputationPredictedRuntime(job.getTask());
         }
     }
@@ -538,7 +528,7 @@ public class VM extends CWSSimEntity {
         if (taskRuntimes.size() < this.vmType.getCores()) {
             return 0.0;
         }
-        final PriorityQueue<Double> queue = new PriorityQueue<>();
+        final PriorityQueue<Double> queue = new PriorityQueue<Double>();
         final Iterator<Double> iterator = taskRuntimes.iterator();
         for (int i = 0; i < this.vmType.getCores(); i++) {
             queue.add(iterator.next());
