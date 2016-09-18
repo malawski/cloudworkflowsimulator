@@ -1,5 +1,7 @@
 #!/bin/bash
 
+trap "exit" INT
+
 #script parameters
 PREPROCCESSED_LOGS_DIR="preprocessed_logs"
 VISUALISATION_DIR="visualised_results"
@@ -8,9 +10,9 @@ VISUALISATION_RUBY_SCRIPT=visualize_exp_score.rb
 #simulation parameters
 APPLICATION=GENOME
 INDIR=SyntheticWorkflows/$APPLICATION
-ALGORITHM=SPSS
-DEADLINES=10
-BUDGETS=10
+ALGORITHM=DPDS
+DEADLINES=3
+BUDGETS=3
 DISTR=pareto_unsorted
 STORAGE_MNG=void
 ENSEMBLE_SIZE=10
