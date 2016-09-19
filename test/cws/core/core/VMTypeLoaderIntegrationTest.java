@@ -2,15 +2,15 @@ package cws.core.core;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.cli.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import cws.core.exception.IllegalCWSArgumentException;
+import cws.core.provisioner.ConstantDistribution;
 
 public class VMTypeLoaderIntegrationTest {
 
@@ -32,25 +32,34 @@ public class VMTypeLoaderIntegrationTest {
     public void shouldLoadDefaultVM() throws ParseException {
         CommandLine cmd = parseArgs(new String[] {});
 
-        VMType vmType = loader.determineVMType(cmd);
+        final Set<VMType> expected = new HashSet<VMType>();
+        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).billingTimeInSeconds(3600)
+                .cacheSize(53687091200L).provisioningTime(new ConstantDistribution(120))
+                .deprovisioningTime(new ConstantDistribution(60)).build());
+        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(2).price(2.0).billingTimeInSeconds(3600)
+                .cacheSize(53687091200L).provisioningTime(new ConstantDistribution(120))
+                .deprovisioningTime(new ConstantDistribution(60)).build());
 
-        assertEquals(1.0, vmType.getMips());
-        assertEquals(1, vmType.getCores());
-        assertEquals(3600.0, vmType.getBillingTimeInSeconds());
-        assertEquals(1.0, vmType.getPriceForBillingUnit());
+        final Set<VMType> actual = loader.determineVMTypes(cmd);
+
+        assertEquals(expected, actual);
     }
 
     @Test
     public void shouldLoadCustomVM() throws ParseException {
         CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "../test/test.vm.yaml" });
 
-        VMType vmType = loader.determineVMType(cmd);
+        final Set<VMType> expected = new HashSet<VMType>();
+        expected.add(VMTypeBuilder.newBuilder().mips(10).cores(3).price(3.5).billingTimeInSeconds(600).cacheSize(12345)
+                .provisioningTime(new ConstantDistribution(0)).deprovisioningTime(new ConstantDistribution(10))
+                .build());
+        expected.add(VMTypeBuilder.newBuilder().mips(20).cores(6).price(7.0).billingTimeInSeconds(300).cacheSize(6789)
+                .provisioningTime(new ConstantDistribution(0)).deprovisioningTime(new ConstantDistribution(10))
+                .build());
 
-        assertEquals(10.0, vmType.getMips());
-        assertEquals(3, vmType.getCores());
-        assertEquals(600.0, vmType.getBillingTimeInSeconds());
-        assertEquals(3.5, vmType.getPriceForBillingUnit());
-        assertEquals(12345L, vmType.getCacheSize());
+        final Set<VMType> actual = loader.determineVMTypes(cmd);
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -58,23 +67,32 @@ public class VMTypeLoaderIntegrationTest {
         CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_CONFIGS_DIRECTORY_OPTION_NAME, "test",
                 "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "test.vm.yaml" });
 
-        VMType vmType = loader.determineVMType(cmd);
+        final Set<VMType> expected = new HashSet<VMType>();
+        expected.add(VMTypeBuilder.newBuilder().mips(10).cores(3).price(3.5).billingTimeInSeconds(600).cacheSize(12345)
+                .provisioningTime(new ConstantDistribution(0)).deprovisioningTime(new ConstantDistribution(10))
+                .build());
+        expected.add(VMTypeBuilder.newBuilder().mips(20).cores(6).price(7.0).billingTimeInSeconds(300).cacheSize(6789)
+                .provisioningTime(new ConstantDistribution(0)).deprovisioningTime(new ConstantDistribution(10))
+                .build());
 
-        assertEquals(10.0, vmType.getMips());
+        final Set<VMType> actual = loader.determineVMTypes(cmd);
+
+        assertEquals(expected, actual);
     }
 
     @Test(expected = IllegalCWSArgumentException.class)
     public void shouldFailWhenFilePathIsInvalid() throws ParseException {
         CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "nosuchfile.vm.yaml" });
 
-        loader.determineVMType(cmd);
+        loader.determineVMTypes(cmd);
     }
 
     @Test(expected = IllegalCWSArgumentException.class)
     public void shouldFailWhenConfigIsInvalid() throws ParseException {
-        CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "../test/invalid.vm.yaml" });
+        CommandLine cmd = parseArgs(
+                new String[] { "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "../test/invalid.vm.yaml" });
 
-        loader.determineVMType(cmd);
+        loader.determineVMTypes(cmd);
     }
 
 }

@@ -1,50 +1,28 @@
 package cws.core.simulation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import static com.google.common.math.DoubleMath.fuzzyEquals;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
 import cws.core.VMFactory;
-import cws.core.algorithms.Algorithm;
-import cws.core.algorithms.AlgorithmStatistics;
-import cws.core.algorithms.LocalityAwareDPDS;
-import cws.core.algorithms.StorageAndLocalityAwareWADPDS;
-import cws.core.algorithms.DPDS;
-import cws.core.algorithms.SPSS;
-import cws.core.algorithms.StorageAwareSPSS;
-import cws.core.algorithms.StorageAwareWADPDS;
-import cws.core.algorithms.WADPDS;
+import cws.core.algorithms.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.config.GlobalStorageParamsLoader;
 import cws.core.core.VMType;
 import cws.core.core.VMTypeLoader;
-import cws.core.dag.DAG;
-import cws.core.dag.DAGListGenerator;
-import cws.core.dag.DAGParser;
-import cws.core.dag.DAGStats;
-import cws.core.dag.Task;
+import cws.core.dag.*;
 import cws.core.engine.Environment;
 import cws.core.engine.EnvironmentFactory;
 import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
-
-import static com.google.common.math.DoubleMath.fuzzyEquals;
 
 public class Simulation {
 
@@ -253,7 +231,7 @@ public class Simulation {
         double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
         double alpha = Double.parseDouble(args.getOptionValue("alpha", DEFAULT_ALPHA));
 
-        VMType vmType = vmTypeLoader.determineVMType(args);
+        VMType vmType = vmTypeLoader.determineVMTypes(args).iterator().next();
         logVMType(vmType);
 
         VMFactory.readCliOptions(args, seed);

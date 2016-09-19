@@ -2,6 +2,8 @@ package cws.core.core;
 
 import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 
+import com.google.common.base.Objects;
+
 import cws.core.dag.Task;
 
 public class VMType implements Cloneable {
@@ -88,7 +90,7 @@ public class VMType implements Cloneable {
     }
 
     public VMType(double mips, int cores, double billingUnitPrice, double billingTimeInSeconds,
-                  ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
+            ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
         this.mips = mips;
         this.cores = cores;
         this.billingUnitPrice = billingUnitPrice;
@@ -96,5 +98,25 @@ public class VMType implements Cloneable {
         this.provisioningDelay = provisioningTime;
         this.deprovisioningDelay = deprovisioningTime;
         this.cacheSize = cacheSize;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        final VMType vmType = (VMType) o;
+        return Double.compare(vmType.mips, mips) == 0 && cores == vmType.cores
+                && Double.compare(vmType.billingUnitPrice, billingUnitPrice) == 0
+                && Double.compare(vmType.billingTimeInSeconds, billingTimeInSeconds) == 0
+                && cacheSize == vmType.cacheSize && Objects.equal(provisioningDelay, vmType.provisioningDelay)
+                && Objects.equal(deprovisioningDelay, vmType.deprovisioningDelay);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mips, cores, billingUnitPrice, billingTimeInSeconds, provisioningDelay,
+                deprovisioningDelay, cacheSize);
     }
 }
