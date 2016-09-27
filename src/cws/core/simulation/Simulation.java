@@ -229,7 +229,8 @@ public class Simulation {
         double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
         double alpha = Double.parseDouble(args.getOptionValue("alpha", DEFAULT_ALPHA));
 
-        VMType vmType = vmTypeLoader.determineVMTypes(args).iterator().next();
+        Set<VMType> vmTypes = vmTypeLoader.determineVMTypes(args);
+        VMType vmType = vmTypes.iterator().next();
         logVMType(vmType);
 
         VMFactory.readCliOptions(args, seed);
@@ -299,8 +300,6 @@ public class Simulation {
         System.out.printf("maxScaling = %f\n", maxScaling);
 
         List<DAG> dags = new ArrayList<DAG>();
-        Set<VMType> vmTypes = new HashSet<VMType>();
-        vmTypes.add(vmType);
         Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
