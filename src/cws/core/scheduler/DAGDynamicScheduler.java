@@ -1,9 +1,12 @@
 package cws.core.scheduler;
 
 import cws.core.Scheduler;
+import cws.core.VM;
+import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.engine.Environment;
 
 /**
@@ -21,4 +24,13 @@ abstract class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
 
     @Override
     public abstract void scheduleJobs(WorkflowEngine engine);
+
+
+    /**
+     * Dumb for now, TODO implement correctly
+     */
+    protected VM selectBestVM() {
+        VMType vmType = environment.getVmTypes().iterator().next();
+        return VMFactory.createVM(vmType, getCloudsim());
+    }
 }

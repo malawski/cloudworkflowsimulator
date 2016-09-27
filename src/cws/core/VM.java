@@ -512,14 +512,14 @@ public class VM extends CWSSimEntity {
                     - this.writeIntervals.get(job).getDuration();
         } else if (this.computationIntervals.containsKey(job)) { // job is in computation phase
             return env.getOutputTransferTimeEstimation(job.getTask(), this)
-                    + env.getComputationPredictedRuntime(job.getTask())
+                    + env.getComputationPredictedRuntimeForSingleTask(this.vmType, job.getTask())
                     - this.computationIntervals.get(job).getDuration();
         } else if (this.readIntervals.containsKey(job)) { // job is in input files transfer phase
             return env.getTotalTransferTimeEstimation(job.getTask(), this) - this.readIntervals.get(job).getDuration()
-                    + env.getComputationPredictedRuntime(job.getTask());
+                    + env.getComputationPredictedRuntimeForSingleTask(this.vmType, job.getTask());
         } else { // job is waiting in queue
             return env.getTotalTransferTimeEstimation(job.getTask(), this)
-                    + env.getComputationPredictedRuntime(job.getTask());
+                    + env.getComputationPredictedRuntimeForSingleTask(this.vmType, job.getTask());
         }
     }
 

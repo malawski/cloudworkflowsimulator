@@ -22,5 +22,5 @@ public interface RuntimePredictioner {
      * 
      * Should be overridden in pair with the DAG predicting method.
      */
-    double getPredictedRuntime(DAG dag);
+    double getPredictedRuntime(DAG dag, VM vm);
 }

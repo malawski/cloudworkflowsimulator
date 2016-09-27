@@ -39,7 +39,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
 
             Iterator<Job> it = jobs.iterator();
             while (it.hasNext()) {
-                if (!workflowAdmissioner.isJobDagAdmitted(it.next(), engine)) {
+                if (!workflowAdmissioner.isJobDagAdmitted(it.next(), engine, selectBestVM())) {
                     it.remove();
                 }
             }

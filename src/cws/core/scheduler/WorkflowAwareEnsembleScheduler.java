@@ -38,7 +38,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         while (!jobs.isEmpty() && !freeVMs.isEmpty()) {
             Job job = jobs.poll();
 
-            if (workflowAdmissioner.isJobDagAdmitted(job, engine)) {
+            if (workflowAdmissioner.isJobDagAdmitted(job, engine, selectBestVM())) {
                 VM vm = freeVMs.remove(freeVMs.size() - 1);
                 vm.jobSubmit(job);
             }
