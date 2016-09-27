@@ -2,6 +2,8 @@ package cws.core.simulation;
 
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -44,7 +46,7 @@ public class SimulationTest {
 
     private void mockLoadersValidReturnTypes(CommandLine args) {
         VMType vmType = VMTypeBuilder.newBuilder().mips(1.0).cores(1).price(12.0).build();
-        when(vmTypeLoader.determineVMType(args)).thenReturn(vmType);
+        when(vmTypeLoader.determineVMTypes(args)).thenReturn(Collections.singleton(vmType));
 
         GlobalStorageParams globalStorageParams = new GlobalStorageParams();
         when(globalStorageParamsLoader.determineGlobalStorageParams(args)).thenReturn(globalStorageParams);
@@ -65,7 +67,7 @@ public class SimulationTest {
         CommandLine args = validArgs.addOption("storage-manager", "global").build();
 
         mockLoadersValidReturnTypes(args);
-        when(vmTypeLoader.determineVMType(args)).thenThrow(new IllegalCWSArgumentException("invalid VMType"));
+        when(vmTypeLoader.determineVMTypes(args)).thenThrow(new IllegalCWSArgumentException("invalid VMType"));
 
         simulation.runTest(args);
     }
