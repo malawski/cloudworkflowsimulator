@@ -3,9 +3,7 @@ package cws.core.scheduler;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +45,7 @@ public class EnsembleDynamicSchedulerTest {
 
         storageManager = new VoidStorageManager(cloudsim);
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        environment = new Environment(vmType, storageManager);
+        environment = new Environment(Collections.singleton(vmType), storageManager);
 
         provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);

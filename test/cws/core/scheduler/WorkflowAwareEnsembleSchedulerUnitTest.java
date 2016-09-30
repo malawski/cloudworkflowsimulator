@@ -1,10 +1,12 @@
 package cws.core.scheduler;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -45,8 +47,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
         environment = mock(Environment.class);
 
-        when(environment.getSingleVMPrice()).thenReturn(1.0);
-        when(environment.getBillingTimeInSeconds()).thenReturn(3600.0);
+        when(environment.getVMTypePrice(any(VMType.class))).thenReturn(1.0);
+        when(environment.getBillingTimeInSeconds(any(VMType.class))).thenReturn(3600.0);
 
         scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment, new RuntimeWorkflowAdmissioner(cloudsim,
                 new ComputationOnlyRuntimePredictioner(environment), environment));
@@ -80,7 +82,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         VM vm = createVMMock();
         freeVMs.add(vm);
 
-        when(environment.getComputationPredictedRuntime(job.getDAGJob().getDAG())).thenReturn(10.0);
+        when(environment.getComputationPredictedRuntimeForDAG(vm.getVmType(), job.getDAGJob().getDAG())).thenReturn(10.0);
 
         scheduler.scheduleJobs(engine);
 
@@ -138,7 +140,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         VM vm = mock(VM.class);
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         when(vm.getVmType()).thenReturn(vmType);
-        when(environment.getVMType()).thenReturn(vmType);
+        when(environment.getVmTypes()).thenReturn(Collections.singleton(vmType));
         return vm;
     }
 }

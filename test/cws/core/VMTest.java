@@ -56,16 +56,16 @@ public class VMTest {
         @Override
         public void processEvent(CWSSimEvent ev) {
             switch (ev.getTag()) {
-            case WorkflowEvent.JOB_STARTED: {
-                Job j = (Job) ev.getData();
-                assertEquals(Job.State.RUNNING, j.getState());
-                break;
-            }
-            case WorkflowEvent.JOB_FINISHED: {
-                Job j = (Job) ev.getData();
-                assertEquals(Job.State.TERMINATED, j.getState());
-                break;
-            }
+                case WorkflowEvent.JOB_STARTED: {
+                    Job j = (Job) ev.getData();
+                    assertEquals(Job.State.RUNNING, j.getState());
+                    break;
+                }
+                case WorkflowEvent.JOB_FINISHED: {
+                    Job j = (Job) ev.getData();
+                    assertEquals(Job.State.TERMINATED, j.getState());
+                    break;
+                }
             }
         }
     }
@@ -92,7 +92,7 @@ public class VMTest {
 
         Job j = new Job(new DAGJob(new DAG(), 1), new Task("task_id", "transformation", 1000), driver.getId(), cloudsim);
 
-        driver.setJobs(new Job[] { j });
+        driver.setJobs(new Job[]{j});
 
         cloudsim.startSimulation();
 
@@ -111,7 +111,7 @@ public class VMTest {
         Job j1 = new Job(new DAGJob(new DAG(), 1), new Task("task_id", "transformation", 1000), driver.getId(), cloudsim);
         Job j2 = new Job(new DAGJob(new DAG(), 1), new Task("task_id2", "transformation", 1000), driver.getId(), cloudsim);
 
-        driver.setJobs(new Job[] { j1, j2 });
+        driver.setJobs(new Job[]{j1, j2});
 
         cloudsim.startSimulation();
 
@@ -135,7 +135,7 @@ public class VMTest {
         Job j1 = new Job(new DAGJob(new DAG(), 1), new Task("task_id1", "transformation", 1000), driver.getId(), cloudsim);
         Job j2 = new Job(new DAGJob(new DAG(), 1), new Task("task_id2", "transformation", 1000), driver.getId(), cloudsim);
 
-        driver.setJobs(new Job[] { j1, j2 });
+        driver.setJobs(new Job[]{j1, j2});
 
         cloudsim.startSimulation();
 
@@ -240,7 +240,7 @@ public class VMTest {
         vm.jobSubmit(job);
         final Environment env = mock(Environment.class);
         when(env.getTotalTransferTimeEstimation(job.getTask(), vm)).thenReturn(1.0);
-        when(env.getComputationPredictedRuntime(job.getTask())).thenReturn(2.0);
+        when(env.getComputationPredictedRuntimeForSingleTask(vmType, job.getTask())).thenReturn(2.0);
         assertEquals(0.0, vm.getPredictedReleaseTime(env), DELTA);
     }
 
@@ -259,8 +259,8 @@ public class VMTest {
         final Environment env = mock(Environment.class);
         when(env.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
         when(env.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
-        when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
-        when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
+        when(env.getComputationPredictedRuntimeForSingleTask(vmType, job1.getTask())).thenReturn(2.0);
+        when(env.getComputationPredictedRuntimeForSingleTask(vmType, job2.getTask())).thenReturn(3.0);
         assertEquals(8.0, vm.getPredictedReleaseTime(env), DELTA);
     }
 
@@ -279,8 +279,8 @@ public class VMTest {
         final Environment env = mock(Environment.class);
         when(env.getTotalTransferTimeEstimation(job1.getTask(), vm)).thenReturn(1.0);
         when(env.getTotalTransferTimeEstimation(job2.getTask(), vm)).thenReturn(2.0);
-        when(env.getComputationPredictedRuntime(job1.getTask())).thenReturn(2.0);
-        when(env.getComputationPredictedRuntime(job2.getTask())).thenReturn(3.0);
+        when(env.getComputationPredictedRuntimeForSingleTask(vmType, job1.getTask())).thenReturn(2.0);
+        when(env.getComputationPredictedRuntimeForSingleTask(vmType, job2.getTask())).thenReturn(3.0);
         assertEquals(3.0, vm.getPredictedReleaseTime(env), DELTA);
     }
 
@@ -299,17 +299,17 @@ public class VMTest {
                 new Job(new DAGJob(new DAG(), 1), new Task("task_id4", "transformation", 1000), driver.getId(),
                         this.cloudsim),
                 new Job(new DAGJob(new DAG(), 1), new Task("task_id5", "transformation", 1000), driver.getId(),
-                        this.cloudsim) };
+                        this.cloudsim)};
         vm.launch();
-        for(final Job job : jobs){
+        for (final Job job : jobs) {
             vm.jobSubmit(job);
         }
         final double[] transferTimes = {1.0, 0.0, 1.0, 0.0, 2.0};
         final double[] computationTimes = {1.0, 2.0, 2.0, 1.0, 2.0};
         final Environment env = mock(Environment.class);
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             when(env.getTotalTransferTimeEstimation(jobs[i].getTask(), vm)).thenReturn(transferTimes[i]);
-            when(env.getComputationPredictedRuntime(jobs[i].getTask())).thenReturn(computationTimes[i]);
+            when(env.getComputationPredictedRuntimeForSingleTask(vmType, jobs[i].getTask())).thenReturn(computationTimes[i]);
         }
         assertEquals(5.0, vm.getPredictedReleaseTime(env), DELTA);
     }

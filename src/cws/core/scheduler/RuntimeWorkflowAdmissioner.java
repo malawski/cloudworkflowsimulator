@@ -30,7 +30,7 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
     }
 
     @Override
-    public final boolean isJobDagAdmitted(Job job, WorkflowEngine engine) {
+    public final boolean isJobDagAdmitted(Job job, WorkflowEngine engine, VM vm) {
         DAGJob dj = job.getDAGJob();
 
         if (jobHasBeenAlreadyAdmitted(dj)) {
@@ -38,7 +38,7 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
         } else if (jobHasBeenAlreadyRejected(dj)) {
             return false;
         } else {
-            boolean isAdmittable = isJobAdmittable(dj, engine);
+            boolean isAdmittable = isJobAdmittable(dj, engine, vm);
             rememberAdmitionOrRejection(dj, isAdmittable);
             return isAdmittable;
         }
@@ -62,9 +62,9 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
     }
 
     // decide what to do with the job from a new dag
-    private boolean isJobAdmittable(DAGJob dj, WorkflowEngine engine) {
-        double costEstimate = estimateCost(dj);
-        double budgetRemaining = estimateBudgetRemaining(engine);
+    private boolean isJobAdmittable(DAGJob dj, WorkflowEngine engine, VM vm) {
+        double costEstimate = estimateCost(dj, vm);
+        double budgetRemaining = estimateBudgetRemaining(engine, vm);
         getCloudsim().log(" Cost estimate: " + costEstimate + " Budget remaining: " + budgetRemaining);
         return costEstimate < budgetRemaining; // TODO(bryk): Add critical path here.
     }
@@ -72,15 +72,15 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
     /**
      * Estimate cost of this workflow
      */
-    private double estimateCost(DAGJob dj) {
-        double runtimeSum = runtimePredictioner.getPredictedRuntime(dj.getDAG());
-        return costForRuntimeSum(runtimeSum);
+    private double estimateCost(DAGJob dj, VM vm) {
+        double runtimeSum = runtimePredictioner.getPredictedRuntime(dj.getDAG(), vm);
+        return costForRuntimeSum(runtimeSum, vm);
     }
 
     /**
      * Estimate budget remaining, including unused $ and running VMs
      */
-    private double estimateBudgetRemaining(WorkflowEngine engine) {
+    private double estimateBudgetRemaining(WorkflowEngine engine, VM bestVM) {
         // remaining budget for starting new vms
         double rn = engine.getBudget() - engine.getCost();
         if (rn < 0)
@@ -95,7 +95,7 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
 
         for (VM vm : vms) {
             rc += vm.getCost()
-                    - vm.getRuntime() * vm.getVmType().getPriceForBillingUnit() / environment.getBillingTimeInSeconds();
+                    - vm.getRuntime() * vm.getVmType().getPriceForBillingUnit() / environment.getBillingTimeInSeconds(vm.getVmType());
         }
 
         // compute remaining runtime of admitted workflows
@@ -103,7 +103,7 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
 
         for (DAGJob admittedDJ : admittedDAGs) {
             if (!admittedDJ.isFinished()) {
-                ra += computeRemainingCost(admittedDJ, engine);
+                ra += computeRemainingCost(admittedDJ, bestVM);
             }
         }
 
@@ -120,10 +120,9 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
      * Estimate remaining cost = total remaining time of incomplete tasks * price
      * 
      * @param admittedDJ
-     * @param engine
      * @return
      */
-    private double computeRemainingCost(DAGJob admittedDJ, WorkflowEngine engine) {
+    private double computeRemainingCost(DAGJob admittedDJ, VM vm) {
         double runtimeSum = 0.0;
         DAG dag = admittedDJ.getDAG();
         for (String taskName : dag.getTasks()) {
@@ -132,13 +131,13 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
                 runtimeSum += runtimePredictioner.getPredictedRuntime(task, null);
             }
         }
-        return costForRuntimeSum(runtimeSum);
+        return costForRuntimeSum(runtimeSum, vm);
     }
 
-    private double costForRuntimeSum(final double runtime) {
-        final double vmPrice = environment.getSingleVMPrice();
-        final double billingTimeInSeconds = environment.getBillingTimeInSeconds();
-        final int cores = environment.getVMType().getCores();
+    private double costForRuntimeSum(final double runtime, VM vm) {
+        final double vmPrice = environment.getVMTypePrice(vm.getVmType());
+        final double billingTimeInSeconds = environment.getBillingTimeInSeconds(vm.getVmType());
+        final int cores = vm.getVmType().getCores();
         return (runtime * vmPrice) / (billingTimeInSeconds * cores);
     }
 }

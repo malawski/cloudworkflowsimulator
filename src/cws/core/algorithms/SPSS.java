@@ -127,9 +127,9 @@ public class SPSS extends StaticAlgorithm {
 
                     // Option 2: Leave a big gap
                     biggap: {
-                        int runtimeUnits = (int) Math.ceil(runtime / getEnvironment().getBillingTimeInSeconds());
+                        int runtimeUnits = (int) Math.ceil(runtime / getEnvironment().getBillingTimeInSeconds(getVmType()));
 
-                        double ast = r.getStart() - (runtimeUnits * getEnvironment().getBillingTimeInSeconds());
+                        double ast = r.getStart() - (runtimeUnits * getEnvironment().getBillingTimeInSeconds(getVmType()));
                         if (ast < earliestStart) {
                             ast = earliestStart;
                         }
@@ -149,7 +149,7 @@ public class SPSS extends StaticAlgorithm {
 
                     // Option 3: Use some slack time (medium gap)
                     slack: {
-                        double slack = (r.getFullBillingUnits() * getEnvironment().getBillingTimeInSeconds())
+                        double slack = (r.getFullBillingUnits() * getEnvironment().getBillingTimeInSeconds(getVmType()))
                                 - (r.getEnd() - r.getStart());
 
                         double ast = r.getStart() - slack;

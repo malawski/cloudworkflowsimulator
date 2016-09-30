@@ -9,6 +9,7 @@ import cws.core.VM;
 import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.engine.Environment;
 import cws.core.provisioner.HomogeneousProvisioner;
@@ -67,21 +68,23 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
             return 0;
         }
 
-        return (int) Math.ceil(getMaxSpendingSpeedWeCanAfford() / getEnvironment().getSingleVMPrice());
+        //TODO vmType should be selected somehow, important!!
+        VMType vmType = getEnvironment().getVmTypes().iterator().next();
+        return (int) Math.ceil(getMaxSpendingSpeedWeCanAfford() / getEnvironment().getVMTypePrice(vmType));
     }
 
     private double getMaxSpendingSpeedWeCanAfford() {
-        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getBillingTimeInSeconds()));
+        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getBillingTimeInSeconds(getVmType())));
     }
 
     private boolean canAffordAtLeastOneVM() {
-        return getEnvironment().getSingleVMPrice() <= getBudget();
+        return getEnvironment().getVMTypePrice(getVmType()) <= getBudget();
     }
 
     private void launchInitialVMs(int numEstimatedVMs) {
         for (int i = 0; i < numEstimatedVMs; i++) {
             // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
-            VM vm = VMFactory.createVM(getEnvironment().getVMType(), getCloudsim());
+            VM vm = VMFactory.createVM(getVmType(), getCloudsim());
             getProvisioner().launchVM(vm);
         }
     }

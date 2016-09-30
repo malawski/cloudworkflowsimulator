@@ -17,11 +17,11 @@ public final class ComputationOnlyRuntimePredictioner implements RuntimePredicti
 
     @Override
     public double getPredictedRuntime(Task task, VM vm) {
-        return environment.getComputationPredictedRuntime(task);
+        return environment.getComputationPredictedRuntimeForSingleTask(vm.getVmType(), task);
     }
 
     @Override
-    public double getPredictedRuntime(DAG dag) {
-        return environment.getComputationPredictedRuntime(dag);
+    public double getPredictedRuntime(DAG dag, VM vm) {
+        return environment.getComputationPredictedRuntimeForDAG(vm.getVmType(), dag);
     }
 }

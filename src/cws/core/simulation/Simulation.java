@@ -3,9 +3,7 @@ package cws.core.simulation;
 import static com.google.common.math.DoubleMath.fuzzyEquals;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
@@ -231,8 +229,11 @@ public class Simulation {
         double maxScaling = Double.parseDouble(args.getOptionValue("max-scaling", DEFAULT_MAX_SCALING));
         double alpha = Double.parseDouble(args.getOptionValue("alpha", DEFAULT_ALPHA));
 
-        VMType vmType = vmTypeLoader.determineVMTypes(args).iterator().next();
-        logVMType(vmType);
+        Set<VMType> vmTypes = vmTypeLoader.determineVMTypes(args);
+        VMType vmType = vmTypes.iterator().next();
+        for(VMType v : vmTypes) {
+            logVMType(v);
+        }
 
         VMFactory.readCliOptions(args, seed);
 
@@ -301,7 +302,7 @@ public class Simulation {
         System.out.printf("maxScaling = %f\n", maxScaling);
 
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -322,13 +323,15 @@ public class Simulation {
                 }
             }
 
-            DAGStats dagStats = new DAGStats(dag, environment.getVMType());
+            //TODO vmType should be selected somehow, important!!
+            VMType vmTypeForDagStats = environment.getVmTypes().iterator().next();
+            DAGStats dagStats = new DAGStats(dag, vmTypeForDagStats);
 
             minTime = Math.min(minTime, dagStats.getCriticalPathLength())
-                    + environment.getVMProvisioningOverallDelayEstimation();
+                    + environment.getVMProvisioningOverallDelayEstimation(vmTypeForDagStats);
             minCost = Math.min(minCost, dagStats.getMinCost());
 
-            maxTime += dagStats.getCriticalPathLength() + environment.getVMProvisioningOverallDelayEstimation();
+            maxTime += dagStats.getCriticalPathLength() + environment.getVMProvisioningOverallDelayEstimation(vmTypeForDagStats);
             maxCost += dagStats.getMinCost();
         }
 
@@ -400,7 +403,7 @@ public class Simulation {
                     cloudsim.log("deadline = " + deadline);
                     logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmType);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
                             deadline, environment);

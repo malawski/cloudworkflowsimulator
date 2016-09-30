@@ -7,8 +7,11 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 import cws.core.VM;
+import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
+import cws.core.core.VMTypeBuilder;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 

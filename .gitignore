@@ -36,3 +36,6 @@ dags_local
 test_results/
 junit*.properties
 junitvmwatcher*.properties
+
+test_bin
+testSimulationTest

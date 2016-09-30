@@ -2,6 +2,7 @@ package cws.core.scheduler;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -51,7 +52,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
         VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
         storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        environment = new Environment(vmType, storageManager);
+        environment = new Environment(Collections.singleton(vmType), storageManager);
 
         provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);

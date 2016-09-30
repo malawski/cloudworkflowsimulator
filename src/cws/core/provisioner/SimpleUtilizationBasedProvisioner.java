@@ -50,7 +50,7 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         double cost = engine.getCost();
 
         // assuming all VMs are homogeneous
-        double vmPrice = environment.getSingleVMPrice();
+        double vmPrice = environment.getVMTypePrice(getVmType());
 
         // running vms are free + busy
         Set<VM> runningVMs = new HashSet<VM>(engine.getFreeVMs());
@@ -66,13 +66,13 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
             double vmRuntime = vm.getRuntime();
 
             // full billing units (rounded up)
-            double vmBillingUnits = Math.ceil(vmRuntime / environment.getBillingTimeInSeconds());
+            double vmBillingUnits = Math.ceil(vmRuntime / environment.getBillingTimeInSeconds(getVmType()));
 
             // seconds till next full unit
-            double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds() - vmRuntime;
+            double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds(getVmType()) - vmRuntime;
 
             // we add delay estimate to include also the deprovisioning time
-            if (secondsRemaining <= environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL) {
+            if (secondsRemaining <= environment.getDeprovisioningDelayEstimation(getVmType()) + PROVISIONER_INTERVAL) {
                 completingVMs.add(vm);
             }
         }
@@ -81,14 +81,14 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
 
         // if we are close to the budget
         if (budget - cost < vmPrice * numVMsCompleting
-                || time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline) {
+                || time + environment.getDeprovisioningDelayEstimation(getVmType()) + PROVISIONER_INTERVAL >= deadline) {
 
             // compute number of vms to terminate
             // it is the number that would overrun the budget if not terminated
             int numToTerminate = numVMsRunning - (int) Math.floor(((budget - cost) / vmPrice));
 
             // even if we have some budget left we should terminate all the instances past the deadline.
-            if (time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline)
+            if (time + environment.getDeprovisioningDelayEstimation(getVmType()) + PROVISIONER_INTERVAL >= deadline)
                 numToTerminate = numVMsRunning;
 
             if (numToTerminate > numVMsRunning) {
@@ -170,7 +170,7 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
 
         // if we are close to constraints we should not provision new vms
         boolean finishing_phase = budget - cost <= vmPrice * numVMsRunning
-                || time + environment.getDeprovisioningDelayEstimation() + PROVISIONER_INTERVAL >= deadline;
+                || time + environment.getDeprovisioningDelayEstimation(getVmType()) + PROVISIONER_INTERVAL >= deadline;
 
         // if:
         // we are not in finishing phase,
@@ -182,7 +182,7 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         if (!finishing_phase && utilization > UPPER_THRESHOLD
                 && engine.getAvailableVMs().size() < maxScaling * initialNumVMs && budget - cost >= vmPrice) {
 
-            VM vm = VMFactory.createVM(environment.getVMType(), getCloudsim());
+            VM vm = VMFactory.createVM(getVmType(), getCloudsim());
 
             getCloudsim().log("Starting VM: " + vm.getId());
             launchVM(vm);

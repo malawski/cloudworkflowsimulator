@@ -1,5 +1,6 @@
 package cws.core.engine;
 
+import com.google.common.base.Preconditions;
 import cws.core.VM;
 import cws.core.core.VMType;
 import cws.core.dag.DAG;
@@ -7,24 +8,28 @@ import cws.core.dag.Task;
 import cws.core.storage.StorageManager;
 import cws.core.storage.StorageManagerStatistics;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Class which represents the cloud's environment. Consists of supported VMTypes (currently only one)
  * and StorageManager which handles file transfers within the cloud.
  */
 public class Environment {
-    private final VMType vmType;
+    private final Set<VMType> vmTypes;
     private final StorageManager storageManager;
 
-    public Environment(VMType vmType, StorageManager storageManager) {
-        this.vmType = vmType;
+    public Environment(Set<VMType> vmTypes, StorageManager storageManager) {
+        Preconditions.checkArgument(!vmTypes.isEmpty(), "Expected vmTypes set not to be empty.");
+        this.vmTypes = vmTypes;
         this.storageManager = storageManager;
     }
 
     /**
      * Returns VMTypes supported by this cloud (currently only one type)
      */
-    public VMType getVMType() {
-        return vmType;
+    public Set<VMType> getVmTypes() {
+        return new HashSet<VMType>(this.vmTypes);
     }
 
     /**
@@ -34,7 +39,7 @@ public class Environment {
      *
      * @return task's predicted runtime as a double
      */
-    public double getComputationPredictedRuntime(Task task) {
+    public double getComputationPredictedRuntimeForSingleTask(VMType vmType, Task task) {
         return vmType.getPredictedTaskRuntime(task);
     }
 
@@ -46,10 +51,10 @@ public class Environment {
      *
      * @return dag's predicted runtime as a double
      */
-    public double getComputationPredictedRuntime(DAG dag) {
+    public double getComputationPredictedRuntimeForDAG(VMType vmType, DAG dag) {
         double sum = 0.0;
         for (String taskName : dag.getTasks()) {
-            sum += getComputationPredictedRuntime(dag.getTaskById(taskName));
+            sum += getComputationPredictedRuntimeForSingleTask(vmType, dag.getTaskById(taskName));
         }
         return sum;
     }
@@ -60,45 +65,45 @@ public class Environment {
 
     /**
      * Calculates cost or running a VM for given number of seconds
+     *
      * @return cost as double
      */
-    public double getVMCostFor(double runtimeInSeconds) {
-        return getVMType().getVMCostFor(runtimeInSeconds);
+    public double getVMCostFor(VMType vmType, double runtimeInSeconds) {
+        return vmType.getVMCostFor(runtimeInSeconds);
     }
 
     /**
      * To be removed when heterogeneous cloud is introduced
      */
-    @Deprecated
-    public double getSingleVMPrice() {
+    public double getVMTypePrice(VMType vmType) {
         return vmType.getPriceForBillingUnit();
     }
 
     /**
      * To be removed when new pricing models are introduced
      */
-    @Deprecated
-    public double getBillingTimeInSeconds() {
+    public double getBillingTimeInSeconds(VMType vmType) {
         return vmType.getBillingTimeInSeconds();
     }
 
     /**
      * Returns estimated provisioning delay of a VM.
      */
-    public double getVMProvisioningOverallDelayEstimation() {
+    public double getVMProvisioningOverallDelayEstimation(VMType vmType) {
         return vmType.getProvisioningOverallDelayEstimation();
     }
 
     /**
      * Returns estimated deprovisioning delay of a VM.
      */
-    public double getDeprovisioningDelayEstimation() {
+    public double getDeprovisioningDelayEstimation(VMType vmType) {
         return vmType.getDeprovisioningDelayEstimation();
     }
 
     /**
      * Calculates time needed to transfer both input and output files of a given task.
      * Transfer time estimation depends on cloud's {@link StorageManager}
+     *
      * @return time as double
      */
     public double getTotalTransferTimeEstimation(Task task) {
@@ -108,6 +113,7 @@ public class Environment {
     /**
      * Calculates time needed to transfer both input and output files of a given task to and from given VM.
      * Transfer time estimation depends on cloud's {@link StorageManager} and files currently stored in the VM.
+     *
      * @return time as double
      */
     public double getTotalTransferTimeEstimation(final Task task, final VM vm) {
@@ -117,6 +123,7 @@ public class Environment {
     /**
      * Calculates time needed to transfer input files of a given task to given VM.
      * Transfer time estimation depends on cloud's {@link StorageManager} and files currently stored in the VM.
+     *
      * @return time as double
      */
     public double getInputTransferTimeEstimation(Task task, VM vm) {
@@ -126,6 +133,7 @@ public class Environment {
     /**
      * Calculates time needed to transfer output files of a given task from given VM.
      * Transfer time estimation depends on cloud's {@link StorageManager}.
+     *
      * @return time as double
      */
     public double getOutputTransferTimeEstimation(Task task, VM vm) {
@@ -135,9 +143,14 @@ public class Environment {
     /**
      * Calculates time needed to transfer both input and output files of all tasks of a given DAG
      * Transfer time estimation depends on cloud's {@link StorageManager}
+     *
      * @return time as double
      */
     public double getTotalTransferTimeEstimation(DAG dag) {
         return this.storageManager.getTotalTransferTimeEstimation(dag);
+    }
+
+    public boolean isHomogeneous() {
+        return this.vmTypes.size() == 1;
     }
 }

@@ -6,6 +6,8 @@ import cws.core.simulation.StorageSimulationParams;
 import cws.core.storage.StorageManager;
 import cws.core.storage.StorageManagerFactory;
 
+import java.util.Set;
+
 /**
  * A factory which creates {@link Environment} instances.
  */
@@ -16,12 +18,11 @@ public class EnvironmentFactory {
      * 
      * @param cloudsim Initialized {@link CloudSimWrapper} instance.
      * @param simulationParams Params for {@link StorageManagerFactory}.
-     * @param isStorageAware Whether the environment should be storage-aware.
      * @return Newly created {@link Environment} instance.
      */
     public static Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams,
-            VMType vmType) {
+            Set<VMType> vmTypes) {
         StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
-        return new Environment(vmType, storageManager);
+        return new Environment(vmTypes, storageManager);
     }
 }
