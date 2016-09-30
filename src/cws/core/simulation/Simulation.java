@@ -231,7 +231,9 @@ public class Simulation {
 
         Set<VMType> vmTypes = vmTypeLoader.determineVMTypes(args);
         VMType vmType = vmTypes.iterator().next();
-        logVMType(vmType);
+        for(VMType v : vmTypes) {
+            logVMType(v);
+        }
 
         VMFactory.readCliOptions(args, seed);
 
@@ -321,6 +323,7 @@ public class Simulation {
                 }
             }
 
+            //TODO vmType should be selected somehow, important!!
             VMType vmTypeForDagStats = environment.getVmTypes().iterator().next();
             DAGStats dagStats = new DAGStats(dag, vmTypeForDagStats);
 
