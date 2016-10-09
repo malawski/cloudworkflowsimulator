@@ -23,9 +23,10 @@ ENABLE_LOGGING=true
 LOG_TO_STDOUT=false
 RUNS=1
 LOGFILE=sim_out_log.csv
+VM_TYPE_SELECTION=viable
 
 #simulation
-ant run-sim-locally -Dalgo=$ALGORITHM -Dapp=$APPLICATION -Dindir=$INDIR -Dout=$LOGFILE -Ddistr=$DISTR -Dstoragemng=$STORAGE_MNG -Densemblesize=$ENSEMBLE_SIZE -Dscalingfactor=$SCALING_FACTOR -Dseed=$SEED -Dstoragecache=$STORAGE_CACHE -Denablelog=$ENABLE_LOGGING -Dstdoutlog=$LOG_TO_STDOUT -Dbudgets=$BUDGETS -Ddeadlines=$DEADLINES
+ant run-sim-locally -Dalgo=$ALGORITHM -Dapp=$APPLICATION -Dindir=$INDIR -Dout=$LOGFILE -Ddistr=$DISTR -Dstoragemng=$STORAGE_MNG -Densemblesize=$ENSEMBLE_SIZE -Dscalingfactor=$SCALING_FACTOR -Dseed=$SEED -Dstoragecache=$STORAGE_CACHE -Denablelog=$ENABLE_LOGGING -Dstdoutlog=$LOG_TO_STDOUT -Dbudgets=$BUDGETS -Ddeadlines=$DEADLINES -Dvmtypeselection=$VM_TYPE_SELECTION
 
 #preprocessing logs
 mkdir -p $PREPROCCESSED_LOGS_DIR
