@@ -25,12 +25,7 @@ abstract class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
     @Override
     public abstract void scheduleJobs(WorkflowEngine engine);
 
-
-    /**
-     * Dumb for now, TODO implement correctly
-     */
     protected VM selectBestVM() {
-        VMType vmType = environment.getVmTypes().iterator().next();
-        return VMFactory.createVM(vmType, getCloudsim());
+        return VMFactory.createVM(environment.getRepresentativeVMType(), getCloudsim());
     }
 }

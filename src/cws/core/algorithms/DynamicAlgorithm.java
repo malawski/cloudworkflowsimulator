@@ -68,8 +68,7 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
             return 0;
         }
 
-        //TODO vmType should be selected somehow, important!!
-        VMType vmType = getEnvironment().getVmTypes().iterator().next();
+        VMType vmType = getEnvironment().getRepresentativeVMType();
         return (int) Math.ceil(getMaxSpendingSpeedWeCanAfford() / getEnvironment().getVMTypePrice(vmType));
     }
 

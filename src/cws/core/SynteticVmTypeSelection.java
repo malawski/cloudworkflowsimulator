@@ -11,4 +11,9 @@ public class SynteticVmTypeSelection implements VmTypeSelectionStrategy {
         Preconditions.checkArgument(!vmTypes.isEmpty());
         return vmTypes.iterator().next();
     }
+
+    @Override
+    public String toString() {
+        return "SynteticVmTypeSelection";
+    }
 }

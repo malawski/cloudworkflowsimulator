@@ -23,7 +23,7 @@ public abstract class HomogeneousProvisioner extends Provisioner {
     public void setEnvironment(Environment environment) {
         Preconditions.checkArgument(environment.isHomogeneous(), "Expected environment to be homogeneous.");
         this.environment = environment;
-        this.vmType = this.environment.getVmTypes().iterator().next();
+        this.vmType = this.environment.getRepresentativeVMType();
     }
 
     public VMType getVmType() {

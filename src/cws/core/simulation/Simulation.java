@@ -5,11 +5,11 @@ import static com.google.common.math.DoubleMath.fuzzyEquals;
 import java.io.*;
 import java.util.*;
 
+import cws.core.*;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
 
-import cws.core.VMFactory;
 import cws.core.algorithms.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.config.GlobalStorageParamsLoader;
@@ -71,6 +71,8 @@ public class Simulation {
      * Should CloudSim logging be directed to STDOUT by default?
      */
     private static final String DEFAULT_LOG_TO_STDOUT = "false";
+
+    private static final VmTypeSelectionStrategy DEFAULT_VMTYPE_SELECTION_STRATEGY = new FastestVmTypeSelection();
 
     /**
      * Loads VMType from file and/or from CLI args
@@ -176,6 +178,11 @@ public class Simulation {
         alpha.setArgName("FLOAT");
         options.addOption(alpha);
 
+        Option vmTypeSelection = new Option("vmsel", "vm-type-selection", true, "Describes how simulator should select " +
+                "representative vmType along whole set, defaults to " + DEFAULT_VMTYPE_SELECTION_STRATEGY);
+        vmTypeSelection.setArgName("VMTYPE_SELECTION");
+        options.addOption(vmTypeSelection);
+
         VMFactory.buildCliOptions(options);
 
         VMTypeLoader.buildCliOptions(options);
@@ -216,6 +223,7 @@ public class Simulation {
         File outputfile = new File(args.getOptionValue("output-file"));
         String distribution = args.getOptionValue("distribution");
         String storageManagerType = args.getOptionValue("storage-manager");
+        String vmTypeSelection = args.getOptionValue("vm-type-selection");
 
         // Arguments with defaults
         int ensembleSize = Integer.parseInt(args.getOptionValue("ensemble-size", DEFAULT_ENSEMBLE_SIZE));
@@ -231,7 +239,7 @@ public class Simulation {
 
         Set<VMType> vmTypes = vmTypeLoader.determineVMTypes(args);
         VMType vmType = vmTypes.iterator().next();
-        for(VMType v : vmTypes) {
+        for (VMType v : vmTypes) {
             logVMType(v);
         }
 
@@ -274,7 +282,7 @@ public class Simulation {
         }
         GlobalStorageParams globalStorageParams = null;
         if (storageManagerType.equals("global")) {
-             globalStorageParams = globalStorageParamsLoader.determineGlobalStorageParams(args);
+            globalStorageParams = globalStorageParamsLoader.determineGlobalStorageParams(args);
             logGlobalStorageParams(globalStorageParams);
             simulationParams.setStorageParams(globalStorageParams);
             simulationParams.setStorageType(StorageType.GLOBAL);
@@ -282,6 +290,15 @@ public class Simulation {
             simulationParams.setStorageType(StorageType.VOID);
         } else {
             throw new IllegalCWSArgumentException("Wrong storage-manager:" + storageCacheType);
+        }
+
+        VmTypeSelectionStrategy vmTypeSelectionStrategy = DEFAULT_VMTYPE_SELECTION_STRATEGY;
+        if("fastest".equals(vmTypeSelection)) {
+            vmTypeSelectionStrategy = new FastestVmTypeSelection();
+        } else if("viable".equals(vmTypeSelection)) {
+            vmTypeSelectionStrategy = new ViableVmTypeSelection();
+        } else if("syntetic".equals(vmTypeSelection)) {
+            vmTypeSelectionStrategy = new SynteticVmTypeSelection();
         }
 
         // Echo the simulation parameters
@@ -300,9 +317,10 @@ public class Simulation {
         System.out.printf("ndeadlines = %d\n", ndeadlines);
         System.out.printf("alpha = %f\n", alpha);
         System.out.printf("maxScaling = %f\n", maxScaling);
+        System.out.printf("vm-type-selection = %s\n", vmTypeSelectionStrategy.toString());
 
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes, vmTypeSelectionStrategy);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -323,15 +341,14 @@ public class Simulation {
                 }
             }
 
-            //TODO vmType should be selected somehow, important!!
-            VMType vmTypeForDagStats = environment.getVmTypes().iterator().next();
-            DAGStats dagStats = new DAGStats(dag, vmTypeForDagStats);
+            VMType representativeVmType = environment.getRepresentativeVMType();
+            DAGStats dagStats = new DAGStats(dag, representativeVmType);
 
             minTime = Math.min(minTime, dagStats.getCriticalPathLength())
-                    + environment.getVMProvisioningOverallDelayEstimation(vmTypeForDagStats);
+                    + environment.getVMProvisioningOverallDelayEstimation(representativeVmType);
             minCost = Math.min(minCost, dagStats.getMinCost());
 
-            maxTime += dagStats.getCriticalPathLength() + environment.getVMProvisioningOverallDelayEstimation(vmTypeForDagStats);
+            maxTime += dagStats.getCriticalPathLength() + environment.getVMProvisioningOverallDelayEstimation(representativeVmType);
             maxCost += dagStats.getMinCost();
         }
 
@@ -403,7 +420,7 @@ public class Simulation {
                     cloudsim.log("deadline = " + deadline);
                     logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes, vmTypeSelectionStrategy);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
                             deadline, environment);
@@ -489,11 +506,12 @@ public class Simulation {
 
     /**
      * Crates algorithm instance from the given input params.
+     *
      * @param environment
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
-            CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
+                                        CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
         AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim);
 
         if ("SPSS".equals(algorithmName)) {
@@ -518,8 +536,9 @@ public class Simulation {
 
     /**
      * Returns output stream for logs for current simulation.
-     * @param budget The simulation's budget.
-     * @param deadline The simulation's deadline.
+     *
+     * @param budget     The simulation's budget.
+     * @param deadline   The simulation's deadline.
      * @param outputfile The simulation's main output file.
      * @return Output stream for logs for current simulation.
      */

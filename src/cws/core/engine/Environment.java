@@ -2,6 +2,7 @@ package cws.core.engine;
 
 import com.google.common.base.Preconditions;
 import cws.core.VM;
+import cws.core.VmTypeSelectionStrategy;
 import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
@@ -18,11 +19,13 @@ import java.util.Set;
 public class Environment {
     private final Set<VMType> vmTypes;
     private final StorageManager storageManager;
+    private final VmTypeSelectionStrategy vmTypeSelectionStrategy;
 
-    public Environment(Set<VMType> vmTypes, StorageManager storageManager) {
+    public Environment(Set<VMType> vmTypes, StorageManager storageManager, VmTypeSelectionStrategy vmTypeSelectionStrategy) {
         Preconditions.checkArgument(!vmTypes.isEmpty(), "Expected vmTypes set not to be empty.");
         this.vmTypes = vmTypes;
         this.storageManager = storageManager;
+        this.vmTypeSelectionStrategy = vmTypeSelectionStrategy;
     }
 
     /**
@@ -30,6 +33,13 @@ public class Environment {
      */
     public Set<VMType> getVmTypes() {
         return new HashSet<VMType>(this.vmTypes);
+    }
+
+    /**
+     * Returns selected VMType based on environments strategy
+     */
+    public VMType getRepresentativeVMType() {
+        return vmTypeSelectionStrategy.selectVmType(this.vmTypes);
     }
 
     /**

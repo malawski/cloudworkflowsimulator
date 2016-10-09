@@ -17,4 +17,9 @@ public class FastestVmTypeSelection implements VmTypeSelectionStrategy {
         }
         return fastestYet;
     }
+
+    @Override
+    public String toString() {
+        return "FastestVmTypeSelection";
+    }
 }

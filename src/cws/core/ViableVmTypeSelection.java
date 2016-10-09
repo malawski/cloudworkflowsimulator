@@ -17,4 +17,9 @@ public class ViableVmTypeSelection implements VmTypeSelectionStrategy {
         }
         return mostViableVmTypeYet;
     }
+
+    @Override
+    public String toString() {
+        return "ViableVmTypeSelection";
+    }
 }

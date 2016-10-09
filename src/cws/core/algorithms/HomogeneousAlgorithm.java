@@ -23,7 +23,7 @@ public abstract class HomogeneousAlgorithm extends Algorithm  {
                                  Environment environment, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, algorithmStatistics, cloudsim);
         Preconditions.checkArgument(environment.isHomogeneous(), "Expected environment to be homogeneous.");
-        this.vmType = environment.getVmTypes().iterator().next();
+        this.vmType = environment.getRepresentativeVMType();
         this.environment = environment;
     }
 
