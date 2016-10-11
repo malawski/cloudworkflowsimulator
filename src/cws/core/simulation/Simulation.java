@@ -13,6 +13,8 @@ import cws.core.vmtypeselection.FastestVmTypeSelection;
 import cws.core.vmtypeselection.SyntheticVmTypeSelection;
 import cws.core.vmtypeselection.ViableVmTypeSelection;
 import cws.core.vmtypeselection.VmTypeSelectionStrategy;
+import cws.core.pricing.PricingConfigLoader;
+import cws.core.pricing.PricingManager;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
@@ -195,6 +197,7 @@ public class Simulation {
         VMTypeLoader.buildCliOptions(options);
         GlobalStorageParamsLoader.buildCliOptions(options);
 
+        PricingConfigLoader.buildCliOptions(options);
         return options;
     }
 
@@ -308,6 +311,8 @@ public class Simulation {
             vmTypeSelectionStrategy = new SyntheticVmTypeSelection();
         }
 
+        PricingManager pricingManager = new PricingManager();
+        pricingManager.loadPricingModel(args);
         // Echo the simulation parameters
         System.out.printf("application = %s\n", application);
         System.out.printf("inputdir = %s\n", inputdir);
@@ -325,6 +330,7 @@ public class Simulation {
         System.out.printf("alpha = %f\n", alpha);
         System.out.printf("maxScaling = %f\n", maxScaling);
         System.out.printf("vm-type-selection = %s\n", vmTypeSelectionStrategy.toString());
+        System.out.println(pricingManager);
 
         List<DAG> dags = new ArrayList<DAG>();
         Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
@@ -519,8 +525,12 @@ public class Simulation {
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
+<<<<<<< HEAD
                                         CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline,
                                         Environment environment, VMType vmType) {
+=======
+                                        CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
+>>>>>>> PricingModelFactory for loaded config
         AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim);
         HomogeneousProvisioner provisioner = new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim, environment);
         RuntimePredictioner predictioner;
