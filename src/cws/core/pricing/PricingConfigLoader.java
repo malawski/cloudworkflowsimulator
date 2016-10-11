@@ -17,22 +17,23 @@ import java.util.Map;
  */
 public class PricingConfigLoader {
 
-    private static final String MODEL_ENTRY = "model";
-    private static final String FIRST_BILLING_TIME_ENTRY = "firstBillingTimeInSeconds";
-    private static final String BILLING_TIME_ENTRY = "billingTimeInSeconds";
+    public static final String MODEL_ENTRY = "model";
+    public static final String FIRST_BILLING_TIME_ENTRY = "firstBillingTimeInSeconds";
+    public static final String BILLING_TIME_ENTRY = "billingTimeInSeconds";
 
-    private static final String DEFAULT_PRICING_CONFIG_FILE_NAME = "default.pricing.yaml";
-    private static final String DEFAULT_PRICING_CONFIG_FILE_DIRECTORY = "pricing/";
+    public static final String DEFAULT_PRICING_CONFIG_FILE_NAME = "default.pricing.yaml";
+    public static final String DEFAULT_PRICING_CONFIG_FILE_DIRECTORY = "pricing/";
 
-    private static final String PRICING_CONFIG_FILE_SHORT_OPTION_NAME = "pr";
-    private static final String PRICING_CONFIG_FILE_OPTION_NAME = "pricing";
-    private static final String PRICING_CONFIG_DIRECTORY_SHORT_OPTION_NAME = "prd";
-    private static final String PRICING_CONFIG_DIRECTORY_OPTION_NAME = "pricing-directory";
-    private static final String MODEL_SHORT_OPTION_NAME = "md";
-    private static final String BILLING_TIME_SHORT_OPTION_NAME = "blt";
-    private static final String BILLING_TIME_OPTION_NAME = "billing-time-in-seconds";
-    private static final String FIRST_BILLING_TIME_SHORT_OPTION_NAME = "fblt";
-    private static final String FIRST_BILLING_TIME_OPTION_NAME = "first-billing-time-in-seconds";
+    public static final String PRICING_MODEL_SHORT_OPTION_NAME = "prm";
+    public static final String PRICING_MODEL_OPTION_NAME = "pricing-model";
+    public static final String PRICING_CONFIG_FILE_SHORT_OPTION_NAME = "pr";
+    public static final String PRICING_CONFIG_FILE_OPTION_NAME = "pricing-file";
+    public static final String PRICING_CONFIG_DIRECTORY_SHORT_OPTION_NAME = "prd";
+    public static final String PRICING_CONFIG_DIRECTORY_OPTION_NAME = "pricing-directory";
+    public static final String BILLING_TIME_SHORT_OPTION_NAME = "blt";
+    public static final String BILLING_TIME_OPTION_NAME = "billing-time-in-seconds";
+    public static final String FIRST_BILLING_TIME_SHORT_OPTION_NAME = "fblt";
+    public static final String FIRST_BILLING_TIME_OPTION_NAME = "first-billing-time-in-seconds";
 
     private static final boolean HAS_ARG = true;
 
@@ -50,7 +51,7 @@ public class PricingConfigLoader {
         pricingFilenameDirectory.setArgName("DIRPATH");
         options.addOption(pricingFilenameDirectory);
 
-        Option model = new Option(MODEL_SHORT_OPTION_NAME, MODEL_ENTRY, HAS_ARG,
+        Option model = new Option(PRICING_MODEL_SHORT_OPTION_NAME, PRICING_MODEL_OPTION_NAME, HAS_ARG,
                 "Overrides pricing model type");
         model.setArgName("MODEL");
         options.addOption(model);
@@ -84,7 +85,7 @@ public class PricingConfigLoader {
     @SuppressWarnings("unchecked")
     private Map<String, Object> loadConfigFromFile(CommandLine args) throws FileNotFoundException {
         String pricingConfigFilename = args.getOptionValue(PRICING_CONFIG_FILE_OPTION_NAME, DEFAULT_PRICING_CONFIG_FILE_NAME);
-        String pricingConfigDirectory = args.getOptionValue(PRICING_CONFIG_DIRECTORY_OPTION_NAME, DEFAULT_PRICING_CONFIG_FILE_NAME);
+        String pricingConfigDirectory = args.getOptionValue(PRICING_CONFIG_DIRECTORY_OPTION_NAME, DEFAULT_PRICING_CONFIG_FILE_DIRECTORY);
 
         InputStream input = new FileInputStream(new File(pricingConfigDirectory, pricingConfigFilename));
         Yaml yaml = new Yaml();
@@ -98,8 +99,8 @@ public class PricingConfigLoader {
     }
 
     private void overridePricingModel(Map<String, Object> pricingConfig, CommandLine args) {
-        if (args.hasOption(MODEL_ENTRY)) {
-            pricingConfig.put(MODEL_ENTRY, args.getOptionValue(MODEL_ENTRY));
+        if (args.hasOption(PRICING_MODEL_OPTION_NAME)) {
+            pricingConfig.put(MODEL_ENTRY, args.getOptionValue(PRICING_MODEL_OPTION_NAME));
         }
     }
 
