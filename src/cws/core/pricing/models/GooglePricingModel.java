@@ -46,4 +46,14 @@ public class GooglePricingModel extends PricingModel {
     public double getAllVMsCost(List<VM> vms) {
         return 0;
     }
+
+    @Override
+    public double getRuntimeBasedOnBillingTime(double runtime) {
+        return 0;
+    }
+
+    @Override
+    public double getFullRuntime(double start, double end) {
+        return 0;
+    }
 }

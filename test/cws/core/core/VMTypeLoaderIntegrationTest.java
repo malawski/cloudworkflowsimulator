@@ -33,10 +33,10 @@ public class VMTypeLoaderIntegrationTest {
         CommandLine cmd = parseArgs(new String[] {});
 
         final Set<VMType> expected = new HashSet<VMType>();
-        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).billingTimeInSeconds(3600)
+        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0)
                 .cacheSize(53687091200L).provisioningTime(new ConstantDistribution(120))
                 .deprovisioningTime(new ConstantDistribution(60)).build());
-        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(2).price(2.0).billingTimeInSeconds(3600)
+        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(2).price(2.0)
                 .cacheSize(53687091200L).provisioningTime(new ConstantDistribution(120))
                 .deprovisioningTime(new ConstantDistribution(60)).build());
 
@@ -50,10 +50,10 @@ public class VMTypeLoaderIntegrationTest {
         CommandLine cmd = parseArgs(new String[] { "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "../test/test.vm.yaml" });
 
         final Set<VMType> expected = new HashSet<VMType>();
-        expected.add(VMTypeBuilder.newBuilder().mips(10).cores(3).price(3.5).billingTimeInSeconds(600).cacheSize(12345)
+        expected.add(VMTypeBuilder.newBuilder().mips(10).cores(3).price(3.5).cacheSize(12345)
                 .provisioningTime(new ConstantDistribution(0)).deprovisioningTime(new ConstantDistribution(10))
                 .build());
-        expected.add(VMTypeBuilder.newBuilder().mips(20).cores(6).price(7.0).billingTimeInSeconds(300).cacheSize(6789)
+        expected.add(VMTypeBuilder.newBuilder().mips(20).cores(6).price(7.0).cacheSize(6789)
                 .provisioningTime(new ConstantDistribution(0)).deprovisioningTime(new ConstantDistribution(10))
                 .build());
 
@@ -68,10 +68,10 @@ public class VMTypeLoaderIntegrationTest {
                 "--" + VMTypeLoader.VM_TYPE_OPTION_NAME, "test.vm.yaml" });
 
         final Set<VMType> expected = new HashSet<VMType>();
-        expected.add(VMTypeBuilder.newBuilder().mips(10).cores(3).price(3.5).billingTimeInSeconds(600).cacheSize(12345)
+        expected.add(VMTypeBuilder.newBuilder().mips(10).cores(3).price(3.5).cacheSize(12345)
                 .provisioningTime(new ConstantDistribution(0)).deprovisioningTime(new ConstantDistribution(10))
                 .build());
-        expected.add(VMTypeBuilder.newBuilder().mips(20).cores(6).price(7.0).billingTimeInSeconds(300).cacheSize(6789)
+        expected.add(VMTypeBuilder.newBuilder().mips(20).cores(6).price(7.0).cacheSize(6789)
                 .provisioningTime(new ConstantDistribution(0)).deprovisioningTime(new ConstantDistribution(10))
                 .build());
 

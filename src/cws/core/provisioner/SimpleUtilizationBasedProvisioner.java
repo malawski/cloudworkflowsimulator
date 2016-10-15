@@ -65,11 +65,8 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         for (VM vm : runningVMs) {
             double vmRuntime = vm.getRuntime();
 
-            // full billing units (rounded up)
-            double vmBillingUnits = Math.ceil(vmRuntime / environment.getBillingTimeInSeconds(getVmType()));
-
             // seconds till next full unit
-            double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds(getVmType()) - vmRuntime;
+            double secondsRemaining = environment.getPricingManager().getFullRuntime(vmRuntime) - vmRuntime;
 
             // we add delay estimate to include also the deprovisioning time
             if (secondsRemaining <= environment.getDeprovisioningDelayEstimation(getVmType()) + PROVISIONER_INTERVAL) {

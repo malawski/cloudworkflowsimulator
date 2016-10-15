@@ -76,13 +76,6 @@ public class Environment {
     }
 
     /**
-     * To be removed when new pricing models are introduced
-     */
-    public double getBillingTimeInSeconds(VMType vmType) {
-        return vmType.getBillingTimeInSeconds();
-    }
-
-    /**
      * Returns estimated provisioning delay of a VM.
      */
     public double getVMProvisioningOverallDelayEstimation(VMType vmType) {

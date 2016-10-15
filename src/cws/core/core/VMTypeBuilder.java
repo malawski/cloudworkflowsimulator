@@ -5,7 +5,6 @@ import org.cloudbus.cloudsim.distributions.ContinuousDistribution;
 import cws.core.provisioner.ConstantDistribution;
 
 public class VMTypeBuilder {
-    private static final double DEFAULT_BILLING_TIME = 3600;
     private static final long DEFAULT_CACHE_SIZE = 100000000;
 
     private static final ContinuousDistribution DEFAULT_PROVISIONING_DELAY = new ConstantDistribution(0.0);
@@ -28,8 +27,6 @@ public class VMTypeBuilder {
     }
 
     public interface OptionalsStep {
-        OptionalsStep billingTimeInSeconds(double billingTimeInSeconds);
-
         OptionalsStep provisioningTime(ContinuousDistribution provisioningTime);
 
         OptionalsStep deprovisioningTime(ContinuousDistribution deprovisioningTime);
@@ -44,7 +41,6 @@ public class VMTypeBuilder {
         private int cores;
         private double price;
 
-        private double billingTimeInSeconds = DEFAULT_BILLING_TIME;
         private ContinuousDistribution provisioningTime = DEFAULT_PROVISIONING_DELAY;
         private ContinuousDistribution deprovisioningTime = DEFAULT_DEPROVISIONING_DELAY;
         private long cacheSize = DEFAULT_CACHE_SIZE;
@@ -64,12 +60,6 @@ public class VMTypeBuilder {
         @Override
         public OptionalsStep price(double price) {
             this.price = price;
-            return this;
-        }
-
-        @Override
-        public OptionalsStep billingTimeInSeconds(double billingTimeInSeconds) {
-            this.billingTimeInSeconds = billingTimeInSeconds;
             return this;
         }
 
@@ -94,7 +84,7 @@ public class VMTypeBuilder {
 
         @Override
         public VMType build() {
-            return new VMType(mips, cores, price, billingTimeInSeconds, provisioningTime, deprovisioningTime, cacheSize);
+            return new VMType(mips, cores, price, provisioningTime, deprovisioningTime, cacheSize);
         }
     }
 }
