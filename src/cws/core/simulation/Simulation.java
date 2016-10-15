@@ -15,7 +15,6 @@ import cws.core.vmtypeselection.SyntheticVmTypeSelection;
 import cws.core.vmtypeselection.ViableVmTypeSelection;
 import cws.core.vmtypeselection.VmTypeSelectionStrategy;
 import cws.core.pricing.PricingConfigLoader;
-import cws.core.pricing.PricingManager;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
@@ -448,7 +447,7 @@ public class Simulation {
                     algorithm.simulate();
 
                     AlgorithmStatistics algorithmStatistics = algorithm.getAlgorithmStatistics();
-                    double planningTime = algorithm.getPlanningnWallTime() / 1.0e9;
+                    double planningTime = algorithm.getPlanningWallTime() / 1.0e9;
                     double simulationTime = cloudsim.getSimulationWallTime() / 1.0e9;
 
                     fileOut.printf("%s,%s,%d,%d,", application, distribution, seed, ensembleSize);

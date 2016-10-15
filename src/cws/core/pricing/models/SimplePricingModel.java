@@ -47,6 +47,21 @@ public class SimplePricingModel extends PricingModel {
     }
 
     @Override
+    public double getRuntimeBasedOnBillingTime(double runtime) {
+        int runtimeUnits = (int) Math.ceil(runtime / billingTimeInSeconds);
+        return (runtimeUnits * billingTimeInSeconds);
+    }
+
+    @Override
+    public double getFullRuntime(double start, double end) {
+        double seconds = end - start;
+        double units = seconds / billingTimeInSeconds;
+        int rounded = (int) Math.ceil(units);
+        return Math.max(1, rounded) * billingTimeInSeconds;
+    }
+
+
+    @Override
     public String toString() {
         return "SimplePricingModel billingTime:" + billingTimeInSeconds;
     }

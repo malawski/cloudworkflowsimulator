@@ -58,7 +58,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
     }
 
     @Override
-    public long getPlanningnWallTime() {
+    public long getPlanningWallTime() {
         return planningFinishWallTime - planningStartWallTime;
     }
 
@@ -449,16 +449,16 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
             return last + lastSlot.duration + environment.getDeprovisioningDelayEstimation(getVmType());
         }
 
-        public int getFullBillingUnits() {
-            return getFullBillingUnitsWith(getStart(), getEnd());
-        }
+//        public int getFullBillingUnits() {
+//            return getFullBillingUnitsWith(getStart(), getEnd());
+//        }
 
-        public int getFullBillingUnitsWith(double start, double end) {
-            double seconds = end - start;
-            double units = seconds / environment.getBillingTimeInSeconds(getVmType());
-            int rounded = (int) Math.ceil(units);
-            return Math.max(1, rounded);
-        }
+//        public int getFullBillingUnitsWith(double start, double end) {
+//            double seconds = end - start;
+//            double units = seconds / environment.getBillingTimeInSeconds(getVmType());
+//            int rounded = (int) Math.ceil(units);
+//            return Math.max(1, rounded);
+//        }
 
         public double getCostWith(double start, double end) {
             return environment.getPricingManager().getVMCostFor(getVmType(), end - start);
@@ -468,13 +468,13 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
             return getCostWith(getStart(), getEnd());
         }
 
-        public double getUtilization() {
-            double runtime = 0.0;
-            for (Slot sl : schedule.values()) {
-                runtime += sl.duration;
-            }
-            return runtime / (getFullBillingUnits() * environment.getBillingTimeInSeconds(getVmType()));
-        }
+//        public double getUtilization() {
+//            double runtime = 0.0;
+//            for (Slot sl : schedule.values()) {
+//                runtime += sl.duration;
+//            }
+//            return runtime / (getFullBillingUnits() * environment.getBillingTimeInSeconds(getVmType()));
+//        }
     }
 
     class Solution {
