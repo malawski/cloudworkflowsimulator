@@ -20,7 +20,6 @@ import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
@@ -348,7 +347,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
         provisioner.setCloud(cloud);
 
         WorkflowEngine engine = new WorkflowEngine(provisioner, this,
-                getBudget(), getDeadline(), getCloudsim());
+                getBudget(), getDeadline(), getCloudsim(), getEnvironment());
         EnsembleManager manager = new EnsembleManager(engine, getCloudsim());
 
         setCloud(cloud);
@@ -462,7 +461,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
         }
 
         public double getCostWith(double start, double end) {
-            return environment.getVMCostFor(getVmType(), end - start);
+            return environment.getPricingManager().getVMCostFor(getVmType(), end - start);
         }
 
         public double getCost() {

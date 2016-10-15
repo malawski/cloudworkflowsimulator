@@ -12,6 +12,7 @@ import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
+import cws.core.pricing.PricingManager;
 
 /**
  * WorkflowAdmissioner that decides on workflow admission based on its runtime predictions.
@@ -93,9 +94,9 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
         vms.addAll(engine.getFreeVMs());
         vms.addAll(engine.getBusyVMs());
 
+        PricingManager pricingManager = environment.getPricingManager();
         for (VM vm : vms) {
-            rc += vm.getCost()
-                    - vm.getRuntime() * vm.getVmType().getPriceForBillingUnit() / environment.getBillingTimeInSeconds(vm.getVmType());
+            rc += pricingManager.getRuntimeVMCost(vm) - pricingManager.getAlreadyPaidCost(vm);
         }
 
         // compute remaining runtime of admitted workflows

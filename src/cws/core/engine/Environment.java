@@ -5,6 +5,7 @@ import cws.core.VM;
 import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
+import cws.core.pricing.PricingManager;
 import cws.core.storage.StorageManager;
 import cws.core.storage.StorageManagerStatistics;
 
@@ -19,10 +20,13 @@ public class Environment {
     private final Set<VMType> vmTypes;
     private final StorageManager storageManager;
 
-    public Environment(Set<VMType> vmTypes, StorageManager storageManager) {
+    private final PricingManager pricingManager;
+
+    public Environment(Set<VMType> vmTypes, StorageManager storageManager, PricingManager pricingManager) {
         Preconditions.checkArgument(!vmTypes.isEmpty(), "Expected vmTypes set not to be empty.");
         this.vmTypes = vmTypes;
         this.storageManager = storageManager;
+        this.pricingManager = pricingManager;
     }
 
     /**
@@ -63,14 +67,6 @@ public class Environment {
         return storageManager.getStorageManagerStatistics();
     }
 
-    /**
-     * Calculates cost or running a VM for given number of seconds
-     *
-     * @return cost as double
-     */
-    public double getVMCostFor(VMType vmType, double runtimeInSeconds) {
-        return vmType.getVMCostFor(runtimeInSeconds);
-    }
 
     /**
      * To be removed when heterogeneous cloud is introduced
@@ -148,6 +144,10 @@ public class Environment {
      */
     public double getTotalTransferTimeEstimation(DAG dag) {
         return this.storageManager.getTotalTransferTimeEstimation(dag);
+    }
+
+    public PricingManager getPricingManager() {
+        return pricingManager;
     }
 
     public boolean isHomogeneous() {

@@ -1,5 +1,9 @@
 package cws.core.pricing.models;
 
+import cws.core.VM;
+
+import java.util.List;
+
 /**
  * Created by Marcin Ziaber on 2016-10-09.
  * <p>
@@ -21,5 +25,25 @@ public class GooglePricingModel extends PricingModel {
     @Override
     public String toString() {
         return "GooglePricingModel billingTime: " + billingTimeInSeconds + ", firstBillingTime: " + firstBillingTimeInSeconds;
+    }
+
+    @Override
+    public double getVmCostFor(double priceForBillingUnit, double runtimeInSeconds) {
+        return 0;
+    }
+
+    @Override
+    public double getRuntimeVmCost(double priceForBillingUnit, double runtimeInSeconds) {
+        return 0;
+    }
+
+    @Override
+    public double getAlreadyPaidCost(double priceForBillingUnit, double runtimeInSeconds) {
+        return 0;
+    }
+
+    @Override
+    public double getAllVMsCost(List<VM> vms) {
+        return 0;
     }
 }

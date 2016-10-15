@@ -3,11 +3,11 @@ package cws.core.scheduler;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
+import cws.core.pricing.PricingConfigLoader;
+import cws.core.pricing.PricingManager;
+import cws.core.pricing.PricingModelFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,13 +45,18 @@ public class DAGDynamicSchedulerTest {
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
 
+        Map<String, Object> pricingParams = new HashMap<>();
+        pricingParams.put(PricingConfigLoader.MODEL_ENTRY, "simple");
+        pricingParams.put(PricingConfigLoader.BILLING_TIME_ENTRY, 60);
+        PricingManager pricingManager = new PricingManager(PricingModelFactory.getPricingModel(pricingParams));
+
         storageManager = new VoidStorageManager(cloudsim);
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        environment = new Environment(Collections.singleton(vmType), storageManager);
+        environment = new Environment(Collections.singleton(vmType), storageManager, pricingManager);
 
         provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
-        engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
+        engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim, environment);
         cloud = new Cloud(cloudsim);
         provisioner.setCloud(cloud);
         cloud.addVMListener(engine);

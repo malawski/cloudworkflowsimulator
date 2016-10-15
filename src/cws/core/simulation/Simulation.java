@@ -287,8 +287,10 @@ public class Simulation {
             throw new IllegalCWSArgumentException("Wrong storage-manager:" + storageCacheType);
         }
 
-        PricingManager pricingManager = new PricingManager();
-        pricingManager.loadPricingModel(args);
+
+        PricingConfigLoader pricingConfigLoader = new PricingConfigLoader();
+        Map<String, Object> pricingConfig = pricingConfigLoader.loadPricingModel(args);
+
         // Echo the simulation parameters
         System.out.printf("application = %s\n", application);
         System.out.printf("inputdir = %s\n", inputdir);
@@ -305,10 +307,11 @@ public class Simulation {
         System.out.printf("ndeadlines = %d\n", ndeadlines);
         System.out.printf("alpha = %f\n", alpha);
         System.out.printf("maxScaling = %f\n", maxScaling);
-        System.out.println(pricingManager);
+
 
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, pricingConfig, vmTypes);
+        System.out.println(environment.getPricingManager());
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -331,7 +334,7 @@ public class Simulation {
 
             //TODO vmType should be selected somehow, important!!
             VMType vmTypeForDagStats = environment.getVmTypes().iterator().next();
-            DAGStats dagStats = new DAGStats(dag, vmTypeForDagStats);
+            DAGStats dagStats = new DAGStats(dag, vmTypeForDagStats, environment);
 
             minTime = Math.min(minTime, dagStats.getCriticalPathLength())
                     + environment.getVMProvisioningOverallDelayEstimation(vmTypeForDagStats);
@@ -409,7 +412,7 @@ public class Simulation {
                     cloudsim.log("deadline = " + deadline);
                     logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, pricingConfig, vmTypes);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
                             deadline, environment);
@@ -479,7 +482,7 @@ public class Simulation {
         System.out.printf("VM mips = %f\n", vmType.getMips());
         System.out.printf("VM cores = %d\n", vmType.getCores());
         System.out.printf("VM price = %f\n", vmType.getPriceForBillingUnit());
-        System.out.printf("VM unit = %f\n", vmType.getBillingTimeInSeconds());
+        //System.out.printf("VM unit = %f\n", vmType.getBillingTimeInSeconds());
         System.out.printf("VM cache = %d\n", vmType.getCacheSize());
         System.out.printf("VM provisioningDelay = %s\n", vmType.getProvisioningDelay());
         System.out.printf("VM deprovisioningDelay = %s\n", vmType.getDeprovisioningDelay());
@@ -501,7 +504,7 @@ public class Simulation {
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
                                         CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
-        AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim);
+        AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim, environment);
 
         if ("SPSS".equals(algorithmName)) {
             return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
