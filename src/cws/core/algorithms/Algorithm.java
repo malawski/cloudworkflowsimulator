@@ -47,7 +47,7 @@ public abstract class Algorithm extends CWSSimEntity {
     abstract protected void simulateInternal();
 
     /** Should return the number of wall time nanos spent for planning */
-    abstract public long getPlanningnWallTime();
+    abstract public long getPlanningWallTime();
 
     public final void simulate() {
         simulateInternal();

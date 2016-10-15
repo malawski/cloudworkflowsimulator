@@ -3,10 +3,8 @@ package cws.core.pricing;
 import cws.core.VM;
 import cws.core.core.VMType;
 import cws.core.pricing.models.PricingModel;
-import org.apache.commons.cli.CommandLine;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Marcin Ziaber on 2016-10-09.
@@ -47,5 +45,14 @@ public class PricingManager {
         return "PricingManager{" +
                 "pricingModel=" + pricingModel +
                 '}';
+    }
+    public double getFullRuntime(double runtime) {
+        return pricingModel.getRuntimeBasedOnBillingTime(runtime);
+    }
+    public double getFullRuntime(double start, double end){
+        return pricingModel.getFullRuntime(start, end);
+    }
+    public double getBillingTimeInSeconds() {
+        return pricingModel.getBillingTimeInSeconds();
     }
 }

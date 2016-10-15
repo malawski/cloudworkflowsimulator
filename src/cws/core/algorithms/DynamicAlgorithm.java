@@ -74,7 +74,7 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
     }
 
     private double getMaxSpendingSpeedWeCanAfford() {
-        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getBillingTimeInSeconds(getVmType())));
+        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getPricingManager().getBillingTimeInSeconds()));//getBillingTimeInSeconds(getVmType())));
     }
 
     private boolean canAffordAtLeastOneVM() {
@@ -95,7 +95,7 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
     }
 
     @Override
-    public long getPlanningnWallTime() {
+    public long getPlanningWallTime() {
         // planning is always 0 for dynamic algorithms
         return 0;
     }

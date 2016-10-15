@@ -9,6 +9,7 @@ import java.util.List;
  * Created by Marcin Ziaber on 2016-10-11.
  */
 public abstract class PricingModel {
+
     /**
      * For how long we pay in advance
      */
@@ -39,5 +40,13 @@ public abstract class PricingModel {
      * @return cost as double
      */
     abstract public double getAllVMsCost(List<VM> vms);
+
+    abstract public double getRuntimeBasedOnBillingTime(double runtime);
+
+    abstract public double getFullRuntime(double start, double end);
+
+    public double getBillingTimeInSeconds() {
+        return billingTimeInSeconds;
+    }
 
 }
