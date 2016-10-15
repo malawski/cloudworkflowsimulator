@@ -136,17 +136,6 @@ public class VM extends CWSSimEntity {
             return terminateTime - launchTime;
     }
 
-    /**
-     * Compute the total cost of this VM. This is computed by taking the
-     * runtime, rounding it up to the nearest whole billing unit, and multiplying
-     * by the billing unit price.
-     */
-    public double getCost() {
-        double billingUnits = getRuntime() / vmType.getBillingTimeInSeconds();
-        double fullBillingUnits = Math.ceil(billingUnits);
-        return fullBillingUnits * vmType.getPriceForBillingUnit();
-    }
-
     @Override
     public void processEvent(CWSSimEvent ev) {
         if (!isTerminated) {

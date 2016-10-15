@@ -43,7 +43,7 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
 
         this.tempProvisionerStorage.setCloud(cloud);
 
-        setWorkflowEngine(new WorkflowEngine(tempProvisionerStorage, scheduler, getBudget(), getDeadline(), getCloudsim()));
+        setWorkflowEngine(new WorkflowEngine(tempProvisionerStorage, scheduler, getBudget(), getDeadline(), getCloudsim(), getEnvironment()));
 
         // WorkflowEngine "owns" the provisioner now, so don't use this
         // reference (otherwise we risk it becoming outdated if the

@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.*;
 
 import cws.core.*;
+import cws.core.pricing.PricingModelFactory;
 import cws.core.provisioner.HomogeneousProvisioner;
 import cws.core.provisioner.SimpleUtilizationBasedProvisioner;
 import cws.core.scheduler.*;
@@ -311,8 +312,10 @@ public class Simulation {
             vmTypeSelectionStrategy = new SyntheticVmTypeSelection();
         }
 
-        PricingManager pricingManager = new PricingManager();
-        pricingManager.loadPricingModel(args);
+        PricingConfigLoader pricingConfigLoader = new PricingConfigLoader();
+        Map<String, Object> pricingConfig = pricingConfigLoader.loadPricingModel(args);
+        PricingManager pricingManager = new PricingManager(PricingModelFactory.getPricingModel(pricingConfig));
+
         // Echo the simulation parameters
         System.out.printf("application = %s\n", application);
         System.out.printf("inputdir = %s\n", inputdir);
@@ -332,8 +335,10 @@ public class Simulation {
         System.out.printf("vm-type-selection = %s\n", vmTypeSelectionStrategy.toString());
         System.out.println(pricingManager);
 
+
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, pricingConfig, vmTypes);
+        System.out.println(environment.getPricingManager());
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -355,7 +360,8 @@ public class Simulation {
             }
 
             VMType representativeVmType = vmTypeSelectionStrategy.selectVmType(vmTypes);
-            DAGStats dagStats = new DAGStats(dag, representativeVmType);
+
+            DAGStats dagStats = new DAGStats(dag, representativeVmType, environment);
 
             minTime = Math.min(minTime, dagStats.getCriticalPathLength())
                     + environment.getVMProvisioningOverallDelayEstimation(representativeVmType);
@@ -433,7 +439,7 @@ public class Simulation {
                     cloudsim.log("deadline = " + deadline);
                     logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, pricingConfig, vmTypes);
                     VMType selectedVmType = vmTypeSelectionStrategy.selectVmType(vmTypes);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
@@ -504,7 +510,7 @@ public class Simulation {
         System.out.printf("VM mips = %f\n", vmType.getMips());
         System.out.printf("VM cores = %d\n", vmType.getCores());
         System.out.printf("VM price = %f\n", vmType.getPriceForBillingUnit());
-        System.out.printf("VM unit = %f\n", vmType.getBillingTimeInSeconds());
+        //System.out.printf("VM unit = %f\n", vmType.getBillingTimeInSeconds());
         System.out.printf("VM cache = %d\n", vmType.getCacheSize());
         System.out.printf("VM provisioningDelay = %s\n", vmType.getProvisioningDelay());
         System.out.printf("VM deprovisioningDelay = %s\n", vmType.getDeprovisioningDelay());
@@ -525,17 +531,15 @@ public class Simulation {
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
-<<<<<<< HEAD
                                         CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline,
                                         Environment environment, VMType vmType) {
-=======
-                                        CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
->>>>>>> PricingModelFactory for loaded config
-        AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim);
+
+
         HomogeneousProvisioner provisioner = new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim, environment);
         RuntimePredictioner predictioner;
         WorkflowAdmissioner admissioner;
         Scheduler scheduler;
+        AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim, environment);
 
         if ("SPSS".equals(algorithmName)) {
             return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);

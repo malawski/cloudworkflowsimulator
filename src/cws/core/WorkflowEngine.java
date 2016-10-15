@@ -11,6 +11,7 @@ import cws.core.cloudsim.CWSSimEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 import cws.core.jobs.JobListener;
 
@@ -21,6 +22,9 @@ import cws.core.jobs.JobListener;
  * @author Gideon Juve <juve@usc.edu>
  */
 public class WorkflowEngine extends CWSSimEntity implements VMListener {
+
+    private final Environment environment;
+
     public static int next_id = 0;
 
     /** The list of current {@link DAGJob}s. */
@@ -46,12 +50,13 @@ public class WorkflowEngine extends CWSSimEntity implements VMListener {
     private boolean provisioningRequestSend = false;
 
     public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, double budget, double deadline,
-            CloudSimWrapper cloudsim) {
+                          CloudSimWrapper cloudsim, Environment environment) {
         super("WorkflowEngine" + (next_id++), cloudsim);
         this.provisioner = provisioner;
         this.scheduler = scheduler;
         this.budget = budget;
         this.deadline = deadline;
+        this.environment = environment;
     }
 
     @Override
@@ -82,9 +87,7 @@ public class WorkflowEngine extends CWSSimEntity implements VMListener {
 
     public double getCost() {
         double ret = cost;
-        for (VM vm : getAvailableVMs()) {
-            ret += vm.getCost();
-        }
+        ret += environment.getPricingManager().getAllVMsCost(getAvailableVMs());
         return ret;
     }
 
@@ -102,7 +105,7 @@ public class WorkflowEngine extends CWSSimEntity implements VMListener {
 
     @Override
     public void vmTerminated(VM vm) {
-        cost += vm.getCost();
+        cost += environment.getPricingManager().getRuntimeVMCost(vm);
     }
 
     private void dagSubmit(DAGJob dj) {

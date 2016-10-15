@@ -1,8 +1,11 @@
 package cws.core.pricing;
 
+import cws.core.VM;
+import cws.core.core.VMType;
 import cws.core.pricing.models.PricingModel;
 import org.apache.commons.cli.CommandLine;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,13 +15,33 @@ public class PricingManager {
 
     private PricingModel pricingModel;
 
-    public void loadPricingModel(CommandLine args) {
-        PricingConfigLoader pricingConfigLoader = new PricingConfigLoader();
-        Map<String, Object> pricingConfig = pricingConfigLoader.loadPricingModel(args);
-        final PricingModelFactory pricingModelFactory = new PricingModelFactory();
-        this.pricingModel = pricingModelFactory.getPricingModel(pricingConfig);
+    public PricingManager(PricingModel pricingModel) {
+        this.pricingModel = pricingModel;
     }
 
+    public double getVMCostFor(VMType vmType, double runtimeInSeconds) {
+        final double priceForBillingUnit = vmType.getPriceForBillingUnit();
+        return this.pricingModel.getVmCostFor(priceForBillingUnit, runtimeInSeconds);
+    }
+
+    /**
+     * Compute the total cost of VM. This is computed by taking the
+     * runtime, rounding it up to the nearest whole billing unit, and multiplying
+     * by the billing unit price.
+     */
+    public double getRuntimeVMCost(VM vm){
+        final double priceForBillingUnit = vm.getVmType().getPriceForBillingUnit();
+        return this.pricingModel.getRuntimeVmCost(priceForBillingUnit, vm.getRuntime());
+    }
+
+    public double getAllVMsCost(List<VM> vms){
+        return this.pricingModel.getAllVMsCost(vms);
+    }
+
+    public double getAlreadyPaidCost(VM vm){
+        final double priceForBillingUnit = vm.getVmType().getPriceForBillingUnit();
+        return this.pricingModel.getAlreadyPaidCost(priceForBillingUnit, vm.getRuntime());
+    }
     @Override
     public String toString() {
         return "PricingManager{" +

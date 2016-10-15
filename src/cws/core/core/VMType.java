@@ -75,12 +75,6 @@ public class VMType implements Cloneable {
         return task.getSize() / getMips();
     }
 
-    public double getVMCostFor(double runtimeInSeconds) {
-        double billingUnits = runtimeInSeconds / getBillingTimeInSeconds();
-        int fullBillingUnits = (int) Math.ceil(billingUnits);
-        return Math.max(1, fullBillingUnits) * getPriceForBillingUnit();
-    }
-
     public double getProvisioningOverallDelayEstimation() {
         return getProvisioningDelay().sample() + getDeprovisioningDelay().sample();
     }
