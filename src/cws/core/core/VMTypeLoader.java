@@ -45,8 +45,6 @@ public class VMTypeLoader {
 
     static final String VM_BILLING_PRICE_CONFIG_ENTRY = "unitPrice";
 
-    static final String VM_BILLING_TIME_CONFIG_ENTRY = "unitTime";
-
     static final String VM_PROVISIONING_DELAY_DISTRIBUTION_SHORT_OPTION_NAME = "vpd";
     static final String VM_PROVISIONING_DELAY_DISTRIBUTION_OPTION_NAME = "vm-provisioning-distribution";
 
@@ -71,8 +69,6 @@ public class VMTypeLoader {
             throw new IllegalCWSArgumentException("cache size configuration is missing in VM config file");
         } else if (!config.containsKey("billing")) {
             throw new IllegalCWSArgumentException("billing configuration is missing in VM config file");
-        } else if (!getBillingSection(config).containsKey(VM_BILLING_TIME_CONFIG_ENTRY)) {
-            throw new IllegalCWSArgumentException("billing:unitTime configuration is missing in VM config file");
         } else if (!getBillingSection(config).containsKey(VM_BILLING_PRICE_CONFIG_ENTRY)) {
             throw new IllegalCWSArgumentException("billing:unitPrice configuration is missing in VM config file");
         } else if (!config.containsKey("provisioningDelay")) {
@@ -83,7 +79,6 @@ public class VMTypeLoader {
 
         Map<String, Object> billingConfig = getBillingSection(config);
         double unitPrice = ((Number) billingConfig.get(VM_BILLING_PRICE_CONFIG_ENTRY)).doubleValue();
-        double unitTime = ((Number) billingConfig.get(VM_BILLING_TIME_CONFIG_ENTRY)).doubleValue();
 
         double mips = ((Number) config.get(VM_MIPS_CONFIG_ENTRY)).intValue();
         int cores = ((Number) config.get(VM_CORES_CONFIG_ENTRY)).intValue();
@@ -98,7 +93,7 @@ public class VMTypeLoader {
         ContinuousDistribution deprovisioningDelay = loadDistribution(factory, deprovisioningConfig);
 
         return VMTypeBuilder.newBuilder().mips(mips).cores(cores).price(unitPrice).cacheSize(cacheSize)
-                .billingTimeInSeconds(unitTime).provisioningTime(provisioningDelay)
+                .provisioningTime(provisioningDelay)
                 .deprovisioningTime(deprovisioningDelay).build();
     }
 
