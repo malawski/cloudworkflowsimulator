@@ -1,9 +1,7 @@
 package cws.core.pricing.models;
 
-import junit.framework.TestCase;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**

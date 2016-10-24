@@ -5,9 +5,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static cws.core.pricing.PricingConfigLoader.BILLING_TIME_ENTRY;
-import static cws.core.pricing.PricingConfigLoader.FIRST_BILLING_TIME_ENTRY;
-import static cws.core.pricing.PricingConfigLoader.MODEL_ENTRY;
+import static cws.core.pricing.PricingConfigLoader.*;
 import static org.junit.Assert.assertTrue;
 
 /**

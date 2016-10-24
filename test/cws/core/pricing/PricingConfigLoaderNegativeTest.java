@@ -1,6 +1,5 @@
 package cws.core.pricing;
 
-import com.google.common.base.Optional;
 import cws.core.exception.IllegalCWSArgumentException;
 import org.apache.commons.cli.*;
 import org.junit.Rule;
@@ -9,7 +8,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -54,7 +52,7 @@ public class PricingConfigLoaderNegativeTest {
         CommandLineParser parser = new PosixParser();
         CommandLine cmd = parser.parse(options, args);
         exception.expect(IllegalCWSArgumentException.class);
-        if(expectedExceptionMessage != null){
+        if (expectedExceptionMessage != null) {
             exception.expectMessage(expectedExceptionMessage);
         }
         pricingConfigLoader.loadPricingModel(cmd);
