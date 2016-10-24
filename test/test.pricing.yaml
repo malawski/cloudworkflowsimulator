@@ -1,0 +1,3 @@
+model: google
+firstBillingTimeInSeconds: 600
+billingTimeInSeconds: 120
