@@ -51,7 +51,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
         params.setReadSpeed(2000000.0);
         params.setWriteSpeed(1000000.0);
 
-        Map<String, Object> pricingParams = new HashMap<>();
+        Map<String, Object> pricingParams = new HashMap<String, Object>();
         pricingParams.put(PricingConfigLoader.MODEL_ENTRY, "simple");
         pricingParams.put(PricingConfigLoader.BILLING_TIME_ENTRY, 60);
         PricingManager pricingManager = new PricingManager(PricingModelFactory.getPricingModel(pricingParams));

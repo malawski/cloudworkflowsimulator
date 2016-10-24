@@ -39,7 +39,13 @@ public abstract class PricingModel {
      *
      * @return cost as double
      */
-    abstract public double getAllVMsCost(List<VM> vms);
+    public double getAllVMsCost(List<VM> vms) {
+        double cost = 0;
+        for (VM vm : vms) {
+            cost += this.getRuntimeVmCost(vm.getVmType().getPriceForBillingUnit(), vm.getRuntime());
+        }
+        return cost;
+    }
 
     abstract public double getRuntimeBasedOnBillingTime(double runtime);
 
@@ -49,4 +55,20 @@ public abstract class PricingModel {
         return billingTimeInSeconds;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PricingModel that = (PricingModel) o;
+
+        return Double.compare(that.billingTimeInSeconds, billingTimeInSeconds) == 0;
+
+    }
+
+    @Override
+    public int hashCode() {
+        long temp = Double.doubleToLongBits(billingTimeInSeconds);
+        return (int) (temp ^ (temp >>> 32));
+    }
 }
