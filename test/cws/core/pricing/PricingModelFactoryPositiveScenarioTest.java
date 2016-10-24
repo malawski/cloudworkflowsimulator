@@ -7,11 +7,12 @@ import cws.core.pricing.models.SimplePricingModel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Marcin Ziaber on 2016-10-24.
@@ -29,9 +30,9 @@ public class PricingModelFactoryPositiveScenarioTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                {ImmutableMap.of(PricingConfigLoader.MODEL_ENTRY,"simple", PricingConfigLoader.BILLING_TIME_ENTRY, 60),  new SimplePricingModel(60)},
-                {ImmutableMap.of(PricingConfigLoader.MODEL_ENTRY,"google", PricingConfigLoader.BILLING_TIME_ENTRY, 60, PricingConfigLoader.FIRST_BILLING_TIME_ENTRY, 600), new GooglePricingModel(60,600)}
+        return Arrays.asList(new Object[][]{
+                {ImmutableMap.of(PricingConfigLoader.MODEL_ENTRY, "simple", PricingConfigLoader.BILLING_TIME_ENTRY, 60), new SimplePricingModel(60)},
+                {ImmutableMap.of(PricingConfigLoader.MODEL_ENTRY, "google", PricingConfigLoader.BILLING_TIME_ENTRY, 60, PricingConfigLoader.FIRST_BILLING_TIME_ENTRY, 600), new GooglePricingModel(60, 600)}
         });
     }
 
