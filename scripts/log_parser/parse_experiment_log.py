@@ -16,7 +16,6 @@ from execution_log import TaskLog, TransferLog, VMLog, Workflow, ExecutionLog, E
 from execution_log import StorageState
 from validation.common import ExperimentSettingsWithId, ExperimentSettings
 
-
 PATTERNS = [
     log_parser.Pattern(
         regex=r'\((?P<started>\d+.\d+)\)\s+Starting computational part of job (?P<id>\d+) \(task_id = (?P<task_id>\w+), workflow = (?P<workflow>\w+)\) on VM (?P<vm>\d+)',
@@ -69,11 +68,28 @@ PATTERNS = [
     log_parser.Pattern(
         regex=r'budget = (?P<budget>.*$)',
         type=ExperimentSettingsWithId,
-        set_values={'id': 0, 'deadline': None, 'vm_cost_per_hour': 1}),
+        set_values={'id': 0, 'deadline': None, 'vm_cost_per_hour': 1, 'pricing_model': None,
+                    'billing_time_in_seconds': None, 'first_billing_time_in_seconds': None}),
     log_parser.Pattern(
         regex=r'deadline = (?P<deadline>.*$)',
         type=ExperimentSettingsWithId,
-        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None}),
+        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None, 'pricingModel': None,
+                    'billing_time_in_seconds': None, 'first_billing_time_in_seconds': None}),
+    log_parser.Pattern(
+        regex=r'pricing_model = (?P<pricing_model>.*$)',
+        type=ExperimentSettingsWithId,
+        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None, 'deadline': None,
+                    'billing_time_in_seconds': None, 'first_billing_time_in_seconds': None}),
+    log_parser.Pattern(
+        regex=r'billing_time_in_seconds = (?P<billing_time_in_seconds>.*$)',
+        type=ExperimentSettingsWithId,
+        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None, 'deadline': None,
+                    'pricing_model': None, 'first_billing_time_in_seconds': None}),
+    log_parser.Pattern(
+        regex=r'first_billing_time_in_seconds = (?P<firstBillingTimeInSeconds>.*$)',
+        type=ExperimentSettingsWithId,
+        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None, 'deadline': None,
+                    'pricing_model': None, 'billing_time_in_seconds': None}),
     log_parser.Pattern(
         regex=r'\((?P<time>\d+.\d+)\)\s+GS state has changed: readers = (?P<readers_number>\d+), writers = (?P<writers_number>\d+), read_speed = (?P<read_speed>\d+.\d+), write_speed = (?P<write_speed>\d+.\d+)',
         type=StorageState,
@@ -142,7 +158,9 @@ def create_execution_log_from_events(events):
     settings_logs = glue_fissured_events(settings_logs)
     settings = settings_logs[0]
     settings = ExperimentSettings(budget=settings.budget, deadline=settings.deadline,
-        vm_cost_per_hour=settings.vm_cost_per_hour)
+                                  vm_cost_per_hour=settings.vm_cost_per_hour, pricing_model=settings.pricing_model,
+                                  billing_time_in_seconds=settings.billing_time_in_seconds,
+                                  first_billing_time_in_seconds=settings.first_billing_time_in_seconds)
     log.settings = settings
     workflows = [event for event in events if isinstance(event, Workflow)]
     for workflow in workflows:
