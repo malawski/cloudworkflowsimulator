@@ -1,11 +1,17 @@
 package cws.core.simulation;
 
 import static com.google.common.math.DoubleMath.fuzzyEquals;
+import static cws.core.pricing.PricingConfigLoader.BILLING_TIME_ENTRY;
+import static cws.core.pricing.PricingConfigLoader.FIRST_BILLING_TIME_ENTRY;
+import static cws.core.pricing.PricingConfigLoader.MODEL_ENTRY;
+import static cws.core.pricing.PricingModelFactory.GOOGLE_MODEL;
+import static cws.core.pricing.PricingModelFactory.SIMPLE_MODEL;
 
 import java.io.*;
 import java.util.*;
 
 import cws.core.pricing.PricingConfigLoader;
+import cws.core.pricing.PricingModelFactory;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
@@ -409,6 +415,12 @@ public class Simulation {
                     cloudsim.setLogsEnabled(enableLogging);
                     cloudsim.log("budget = " + budget);
                     cloudsim.log("deadline = " + deadline);
+                    String model = (String) pricingConfig.get(MODEL_ENTRY);
+                    cloudsim.log("pricing_model = " + model);
+                    cloudsim.log("billing_time_in_seconds = " + pricingConfig.get(BILLING_TIME_ENTRY));
+                    if(GOOGLE_MODEL.equals(model)){
+                        cloudsim.log("first_billing_time_in_seconds = " + pricingConfig.get(FIRST_BILLING_TIME_ENTRY));
+                    }
                     logWorkflowsDescription(dags, names, cloudsim);
 
                     environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, pricingConfig, vmTypes);
