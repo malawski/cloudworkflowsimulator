@@ -14,10 +14,11 @@ def read_log(file_content):
     lines = file_content.splitlines()
     current_line = 0
 
-    deadline, budget, vm_cost_per_hour = map(float, lines[current_line].split())
+    deadline, budget, vm_cost_per_hour, pricing_model, billing_time_in_seconds, first_billing_time_in_seconds = map(float, lines[current_line].split())
     current_line += 1
 
-    settings = ExperimentSettings(deadline, budget, vm_cost_per_hour)
+    settings = ExperimentSettings(deadline, budget, vm_cost_per_hour,
+                    pricing_model, billing_time_in_seconds, first_billing_time_in_seconds)
 
     vm_number = int(lines[current_line])
     current_line += 1
