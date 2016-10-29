@@ -50,10 +50,6 @@ public class VMType implements Cloneable {
         return billingUnitPrice;
     }
 
-//    public double getBillingTimeInSeconds() {
-//        return billingTimeInSeconds;
-//    }
-
     public ContinuousDistribution getProvisioningDelay() {
         return provisioningDelay;
     }
@@ -78,8 +74,8 @@ public class VMType implements Cloneable {
         return getDeprovisioningDelay().sample();
     }
 
-    public VMType(double mips, int cores, double billingUnitPrice,
-            ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
+    public VMType(double mips, int cores, double billingUnitPrice, ContinuousDistribution provisioningTime,
+            ContinuousDistribution deprovisioningTime, long cacheSize) {
         this.mips = mips;
         this.cores = cores;
         this.billingUnitPrice = billingUnitPrice;
@@ -96,14 +92,13 @@ public class VMType implements Cloneable {
             return false;
         final VMType vmType = (VMType) o;
         return Double.compare(vmType.mips, mips) == 0 && cores == vmType.cores
-                && Double.compare(vmType.billingUnitPrice, billingUnitPrice) == 0
-                && cacheSize == vmType.cacheSize && Objects.equal(provisioningDelay, vmType.provisioningDelay)
+                && Double.compare(vmType.billingUnitPrice, billingUnitPrice) == 0 && cacheSize == vmType.cacheSize
+                && Objects.equal(provisioningDelay, vmType.provisioningDelay)
                 && Objects.equal(deprovisioningDelay, vmType.deprovisioningDelay);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mips, cores, billingUnitPrice, provisioningDelay,
-                deprovisioningDelay, cacheSize);
+        return Objects.hashCode(mips, cores, billingUnitPrice, provisioningDelay, deprovisioningDelay, cacheSize);
     }
 }

@@ -32,14 +32,16 @@ public class PricingConfigLoaderNegativeTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {new String[]{"--pricing-file", "badfile", "--pricing-directory", "test/"}, null},
-                {new String[]{"--pricing-file", "test.pricing.yaml", "--pricing-directory", "test/", "--billing-time-in-seconds", "test"}, BILLING_TIME_ENTRY
-                        + " was overrode with a non-number value"},
-                {new String[]{"--pricing-file", "test.pricing.yaml", "--pricing-directory", "test/", "--first-billing-time-in-seconds", "test"}, FIRST_BILLING_TIME_ENTRY
-                        + " was overrode with a non-number value"}
+        return Arrays.asList(
+                new Object[][] { { new String[] { "--pricing-file", "badfile", "--pricing-directory", "test/" }, null },
+                        { new String[] { "--pricing-file", "test.pricing.yaml", "--pricing-directory", "test/",
+                                "--billing-time-in-seconds", "test" },
+                                BILLING_TIME_ENTRY + " was overrode with a non-number value" },
+                        { new String[] { "--pricing-file", "test.pricing.yaml", "--pricing-directory", "test/",
+                                "--first-billing-time-in-seconds", "test" },
+                                FIRST_BILLING_TIME_ENTRY + " was overrode with a non-number value" }
 
-        });
+                });
     }
 
     @Rule

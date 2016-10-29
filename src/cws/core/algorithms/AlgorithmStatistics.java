@@ -24,7 +24,8 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
     private final double deadline;
     private final Environment environment;
 
-    public AlgorithmStatistics(List<DAG> allDags, double budget, double deadline, CloudSimWrapper cloudsim, Environment environment) {
+    public AlgorithmStatistics(List<DAG> allDags, double budget, double deadline, CloudSimWrapper cloudsim,
+            Environment environment) {
         super("AlgorithmStatistics", cloudsim);
         this.allDags = allDags;
         this.budget = budget;
@@ -187,7 +188,7 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
         }
         return time;
     }
-    
+
     /**
      * Returns total time of all VMs spent on computations. The assumption is that VMs are 1-core.
      */

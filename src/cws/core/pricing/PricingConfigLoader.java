@@ -37,16 +37,16 @@ public class PricingConfigLoader {
 
     private static final boolean HAS_ARG = true;
 
-
     public static void buildCliOptions(Options options) {
-        Option pricingFilename = new Option(PRICING_CONFIG_FILE_SHORT_OPTION_NAME, PRICING_CONFIG_FILE_OPTION_NAME, HAS_ARG,
-                String.format("Pricing config filename, defaults to %s", DEFAULT_PRICING_CONFIG_FILE_NAME));
+        Option pricingFilename = new Option(PRICING_CONFIG_FILE_SHORT_OPTION_NAME, PRICING_CONFIG_FILE_OPTION_NAME,
+                HAS_ARG, String.format("Pricing config filename, defaults to %s", DEFAULT_PRICING_CONFIG_FILE_NAME));
         pricingFilename.setArgName("FILENAME");
         options.addOption(pricingFilename);
 
         Option pricingFilenameDirectory = new Option(PRICING_CONFIG_DIRECTORY_SHORT_OPTION_NAME,
                 PRICING_CONFIG_DIRECTORY_OPTION_NAME, HAS_ARG,
-                String.format("Pricing config directory, config files are loaded relatively to its path, defaults to %s",
+                String.format(
+                        "Pricing config directory, config files are loaded relatively to its path, defaults to %s",
                         DEFAULT_PRICING_CONFIG_FILE_DIRECTORY));
         pricingFilenameDirectory.setArgName("DIRPATH");
         options.addOption(pricingFilenameDirectory);
@@ -61,8 +61,8 @@ public class PricingConfigLoader {
         billingTimeInSeconds.setArgName("BILLING_TIME_IN_SECONDS");
         options.addOption(billingTimeInSeconds);
 
-        Option firstBillingTimeInSeconds = new Option(FIRST_BILLING_TIME_SHORT_OPTION_NAME, FIRST_BILLING_TIME_OPTION_NAME, HAS_ARG,
-                "Overrides pricing billingTimeInSeconds");
+        Option firstBillingTimeInSeconds = new Option(FIRST_BILLING_TIME_SHORT_OPTION_NAME,
+                FIRST_BILLING_TIME_OPTION_NAME, HAS_ARG, "Overrides pricing billingTimeInSeconds");
         firstBillingTimeInSeconds.setArgName("FIRST_BILLING_TIME_IN_SECONDS");
         options.addOption(firstBillingTimeInSeconds);
 
@@ -84,8 +84,10 @@ public class PricingConfigLoader {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> loadConfigFromFile(CommandLine args) throws FileNotFoundException {
-        String pricingConfigFilename = args.getOptionValue(PRICING_CONFIG_FILE_OPTION_NAME, DEFAULT_PRICING_CONFIG_FILE_NAME);
-        String pricingConfigDirectory = args.getOptionValue(PRICING_CONFIG_DIRECTORY_OPTION_NAME, DEFAULT_PRICING_CONFIG_FILE_DIRECTORY);
+        String pricingConfigFilename = args.getOptionValue(PRICING_CONFIG_FILE_OPTION_NAME,
+                DEFAULT_PRICING_CONFIG_FILE_NAME);
+        String pricingConfigDirectory = args.getOptionValue(PRICING_CONFIG_DIRECTORY_OPTION_NAME,
+                DEFAULT_PRICING_CONFIG_FILE_DIRECTORY);
 
         InputStream input = new FileInputStream(new File(pricingConfigDirectory, pricingConfigFilename));
         Yaml yaml = new Yaml();
@@ -110,8 +112,7 @@ public class PricingConfigLoader {
                 Double billingTimeInSeconds = Double.parseDouble(args.getOptionValue(BILLING_TIME_OPTION_NAME));
                 pricingConfig.put(BILLING_TIME_ENTRY, billingTimeInSeconds);
             } catch (NumberFormatException e) {
-                throw new IllegalCWSArgumentException(BILLING_TIME_ENTRY
-                        + " was overrode with a non-number value");
+                throw new IllegalCWSArgumentException(BILLING_TIME_ENTRY + " was overrode with a non-number value");
             }
         }
     }
@@ -119,11 +120,12 @@ public class PricingConfigLoader {
     private void overrideFirstBillingTimeInSeconds(Map<String, Object> pricingConfig, CommandLine args) {
         if (args.hasOption(FIRST_BILLING_TIME_OPTION_NAME)) {
             try {
-                Double firstBillingTimeInSeconds = Double.parseDouble(args.getOptionValue(FIRST_BILLING_TIME_OPTION_NAME));
+                Double firstBillingTimeInSeconds = Double
+                        .parseDouble(args.getOptionValue(FIRST_BILLING_TIME_OPTION_NAME));
                 pricingConfig.put(FIRST_BILLING_TIME_ENTRY, firstBillingTimeInSeconds);
             } catch (NumberFormatException e) {
-                throw new IllegalCWSArgumentException(FIRST_BILLING_TIME_ENTRY
-                        + " was overrode with a non-number value");
+                throw new IllegalCWSArgumentException(
+                        FIRST_BILLING_TIME_ENTRY + " was overrode with a non-number value");
             }
         }
     }

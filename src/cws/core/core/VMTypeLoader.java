@@ -93,8 +93,7 @@ public class VMTypeLoader {
         ContinuousDistribution deprovisioningDelay = loadDistribution(factory, deprovisioningConfig);
 
         return VMTypeBuilder.newBuilder().mips(mips).cores(cores).price(unitPrice).cacheSize(cacheSize)
-                .provisioningTime(provisioningDelay)
-                .deprovisioningTime(deprovisioningDelay).build();
+                .provisioningTime(provisioningDelay).deprovisioningTime(deprovisioningDelay).build();
     }
 
     private ContinuousDistribution loadDistribution(ContinuousDistributionFactory factory,
