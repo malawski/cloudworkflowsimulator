@@ -46,4 +46,10 @@ public class SimplePricingModelTest {
         assertEquals(120., simplePricingModel.getFullRuntime(0, 110), delta);
         assertEquals(billingTimeInSeconds, simplePricingModel.getFullRuntime(0, 50), delta);
     }
+
+    @Test
+    public void testPriceForFirstBillingUnit() {
+        assertEquals(priceForBillingUnit, simplePricingModel.getPriceForFirstBillingUnit(priceForBillingUnit), delta);
+    }
+
 }

@@ -1,9 +1,8 @@
 package cws.core.pricing.models;
 
-import cws.core.VM;
-import cws.core.core.VMType;
-
 import java.util.List;
+
+import cws.core.VM;
 
 /**
  * Created by Marcin Ziaber on 2016-10-11.
@@ -51,6 +50,8 @@ public abstract class PricingModel {
     abstract public double getRuntimeBasedOnBillingTime(double runtime);
 
     abstract public double getFullRuntime(double start, double end);
+
+    abstract public double getPriceForFirstBillingUnit(double priceForBillingUnit);
 
     public double getBillingTimeInSeconds() {
         return billingTimeInSeconds;

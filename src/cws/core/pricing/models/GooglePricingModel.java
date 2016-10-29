@@ -1,11 +1,5 @@
 package cws.core.pricing.models;
 
-import cws.core.VM;
-
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
-
 /**
  * Created by Marcin Ziaber on 2016-10-09.
  * <p>
@@ -71,7 +65,7 @@ public class GooglePricingModel extends PricingModel {
             runtimeBasedOnBillingTime += firstBillingTimeInSeconds;
         }
         if (runtime > firstBillingTimeInSeconds) {
-            runtime-=firstBillingTimeInSeconds;
+            runtime -= firstBillingTimeInSeconds;
             int runtimeUnits = (int) Math.ceil(runtime / billingTimeInSeconds);
             runtimeBasedOnBillingTime += (runtimeUnits * billingTimeInSeconds);
         }
@@ -88,6 +82,11 @@ public class GooglePricingModel extends PricingModel {
             int rounded = (int) Math.ceil(units);
             return Math.max(1, rounded) * billingTimeInSeconds + firstBillingTimeInSeconds;
         }
+    }
+
+    @Override
+    public double getPriceForFirstBillingUnit(double priceForBillingUnit) {
+        return firstBillingTimeInSeconds * priceForBillingUnit / billingTimeInSeconds;
     }
 
     @Override

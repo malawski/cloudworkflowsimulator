@@ -1,11 +1,8 @@
 package cws.core.pricing.models;
 
-import cws.core.VM;
-import cws.core.core.VMType;
-
 import java.util.List;
 
-import static java.lang.Runtime.getRuntime;
+import cws.core.VM;
 
 /**
  * Created by Marcin Ziaber on 2016-10-09.
@@ -58,6 +55,11 @@ public class SimplePricingModel extends PricingModel {
         double units = seconds / billingTimeInSeconds;
         int rounded = (int) Math.ceil(units);
         return Math.max(1, rounded) * billingTimeInSeconds;
+    }
+
+    @Override
+    public double getPriceForFirstBillingUnit(double priceForBillingUnit) {
+        return priceForBillingUnit;
     }
 
     @Override
