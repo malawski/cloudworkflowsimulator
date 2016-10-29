@@ -1,10 +1,10 @@
 package cws.core.pricing;
 
+import java.util.List;
+
 import cws.core.VM;
 import cws.core.core.VMType;
 import cws.core.pricing.models.PricingModel;
-
-import java.util.List;
 
 /**
  * Created by Marcin Ziaber on 2016-10-09.
@@ -72,6 +72,10 @@ public class PricingManager {
 
     public double getBillingTimeInSeconds() {
         return pricingModel.getBillingTimeInSeconds();
+    }
+
+    public double getPriceForFirstBillingUnit(double vmPrice) {
+        return pricingModel.getPriceForFirstBillingUnit(vmPrice);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         double budget = engine.getBudget();
         double deadline = engine.getDeadline();
         double time = getCloudsim().clock();
-        double cost = engine.getCost();
+        double cost = engine.getCost(); // cost of all VMs rounded up to full billing unit
 
         // assuming all VMs are homogeneous
         double vmPrice = environment.getVMTypePrice(getVmType());
@@ -176,7 +176,8 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         // then: deploy new instance
         double provisioning_interval = PROVISIONER_INTERVAL;
         if (!finishing_phase && utilization > UPPER_THRESHOLD
-                && engine.getAvailableVMs().size() < maxScaling * initialNumVMs && budget - cost >= vmPrice) {
+                && engine.getAvailableVMs().size() < maxScaling * initialNumVMs
+                && budget - cost >= environment.getPricingManager().getPriceForFirstBillingUnit(vmPrice)) {
 
             VM vm = VMFactory.createVM(getVmType(), getCloudsim());
 
