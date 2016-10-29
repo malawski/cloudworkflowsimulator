@@ -50,17 +50,17 @@ PATTERNS = [
         type=TransferLog,
         set_values={'started': None, 'vm': None, 'direction': None, 'job_id': None, 'file_id': None}),
     log_parser.Pattern(
-        regex=r'\((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) with (?P<cores>\w+) cores started',
+        regex=r'\((?P<started>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) with (?P<cores>\w+) cores started, and with price (?P<price_for_billing_unit>\d+.\d+)',
         type=VMLog,
         set_values={'finished': None}),
     log_parser.Pattern(
-        regex=r'\AVM (?P<id>(\w|\.)+) with (?P<cores>\w+) cores started',
+        regex=r'\AVM (?P<id>(\w|\.)+) with (?P<cores>\w+) cores started, and with price (?P<price_for_billing_unit>\d+.\d+)',
         type=VMLog,
         set_values={'started': 0, 'finished': None}),
     log_parser.Pattern(
         regex=r'\((?P<finished>\d+.\d+)\)\s+VM (?P<id>(\w|\.)+) terminated',
         type=VMLog,
-        set_values={'started': None, 'cores': None}),
+        set_values={'started': None, 'cores': None, 'price_for_billing_unit': None}),
     log_parser.Pattern(
         regex=r'Workflow (?P<id>\w+), priority = (?P<priority>\d+), filename = (?P<filename>.*)',
         type=Workflow,
@@ -68,27 +68,27 @@ PATTERNS = [
     log_parser.Pattern(
         regex=r'budget = (?P<budget>.*$)',
         type=ExperimentSettingsWithId,
-        set_values={'id': 0, 'deadline': None, 'vm_cost_per_hour': 1, 'pricing_model': None,
+        set_values={'id': 0, 'deadline': None, 'pricing_model': None,
                     'billing_time_in_seconds': None, 'first_billing_time_in_seconds': None}),
     log_parser.Pattern(
         regex=r'deadline = (?P<deadline>.*$)',
         type=ExperimentSettingsWithId,
-        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None, 'pricingModel': None,
+        set_values={'id': 0, 'budget': None, 'pricing_model': None,
                     'billing_time_in_seconds': None, 'first_billing_time_in_seconds': None}),
     log_parser.Pattern(
         regex=r'pricing_model = (?P<pricing_model>.*$)',
         type=ExperimentSettingsWithId,
-        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None, 'deadline': None,
+        set_values={'id': 0, 'budget': None, 'deadline': None,
                     'billing_time_in_seconds': None, 'first_billing_time_in_seconds': None}),
     log_parser.Pattern(
         regex=r'billing_time_in_seconds = (?P<billing_time_in_seconds>.*$)',
         type=ExperimentSettingsWithId,
-        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None, 'deadline': None,
+        set_values={'id': 0, 'budget': None, 'deadline': None,
                     'pricing_model': None, 'first_billing_time_in_seconds': None}),
     log_parser.Pattern(
-        regex=r'first_billing_time_in_seconds = (?P<firstBillingTimeInSeconds>.*$)',
+        regex=r'first_billing_time_in_seconds = (?P<first_billing_time_in_seconds>.*$)',
         type=ExperimentSettingsWithId,
-        set_values={'id': 0, 'budget': None, 'vm_cost_per_hour': None, 'deadline': None,
+        set_values={'id': 0, 'budget': None, 'deadline': None,
                     'pricing_model': None, 'billing_time_in_seconds': None}),
     log_parser.Pattern(
         regex=r'\((?P<time>\d+.\d+)\)\s+GS state has changed: readers = (?P<readers_number>\d+), writers = (?P<writers_number>\d+), read_speed = (?P<read_speed>\d+.\d+), write_speed = (?P<write_speed>\d+.\d+)',
@@ -158,7 +158,7 @@ def create_execution_log_from_events(events):
     settings_logs = glue_fissured_events(settings_logs)
     settings = settings_logs[0]
     settings = ExperimentSettings(budget=settings.budget, deadline=settings.deadline,
-                                  vm_cost_per_hour=settings.vm_cost_per_hour, pricing_model=settings.pricing_model,
+                                  pricing_model=settings.pricing_model,
                                   billing_time_in_seconds=settings.billing_time_in_seconds,
                                   first_billing_time_in_seconds=settings.first_billing_time_in_seconds)
     log.settings = settings

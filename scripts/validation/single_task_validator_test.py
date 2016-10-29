@@ -4,7 +4,6 @@ from validation.parsed_log_loader import TaskLog
 from validation.parsed_log_loader import TransferLog
 from validation.parsed_log_loader import VMLog
 
-
 IRRELEVANT_TASK_ATTRIBUTES = {
     'id': 'some_id',
     'workflow': 'some_workflow',
@@ -23,6 +22,7 @@ IRRELEVANT_TRANSFER_ATTRIBUTES = {
 
 IRRELEVANT_VM_ATTRIBUTES = {
     'id': 'some_id',
+    'price_for_billing_unit': 1.,
     'cores': 1
 }
 
@@ -139,5 +139,3 @@ class SingleTaskValidatorTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-

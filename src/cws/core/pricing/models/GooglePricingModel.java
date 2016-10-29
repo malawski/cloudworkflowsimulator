@@ -70,6 +70,7 @@ public class GooglePricingModel extends PricingModel {
             runtimeBasedOnBillingTime += firstBillingTimeInSeconds;
         }
         if (runtime > firstBillingTimeInSeconds) {
+            runtime-=firstBillingTimeInSeconds;
             int runtimeUnits = (int) Math.ceil(runtime / billingTimeInSeconds);
             runtimeBasedOnBillingTime += (runtimeUnits * billingTimeInSeconds);
         }
