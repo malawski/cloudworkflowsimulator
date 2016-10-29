@@ -18,7 +18,6 @@ public class GooglePricingModel extends PricingModel {
      */
     private final double firstBillingTimeInSeconds;
 
-
     public GooglePricingModel(double billingTimeInSeconds, double firstBillingTimeInSeconds) {
         super(billingTimeInSeconds);
         this.firstBillingTimeInSeconds = firstBillingTimeInSeconds;
@@ -26,12 +25,14 @@ public class GooglePricingModel extends PricingModel {
 
     @Override
     public String toString() {
-        return "GooglePricingModel billingTime: " + billingTimeInSeconds + ", firstBillingTime: " + firstBillingTimeInSeconds;
+        return "GooglePricingModel billingTime: " + billingTimeInSeconds + ", firstBillingTime: "
+                + firstBillingTimeInSeconds;
     }
 
     @Override
     public double getVmCostFor(double priceForBillingUnit, double runtimeInSeconds) {
-        double totalVMCost = firstBillingTimeInSeconds * priceForBillingUnit / billingTimeInSeconds; //assuming that firstBillingTimeInSeconds is multiply of billingTimeInSeconds
+        double totalVMCost = firstBillingTimeInSeconds * priceForBillingUnit / billingTimeInSeconds; // assuming that
+        // firstBillingTimeInSeconds is multiply of billingTimeInSeconds
         if (runtimeInSeconds > firstBillingTimeInSeconds) {
             runtimeInSeconds -= firstBillingTimeInSeconds;
             double billingUnits = runtimeInSeconds / billingTimeInSeconds;
@@ -70,6 +71,7 @@ public class GooglePricingModel extends PricingModel {
             runtimeBasedOnBillingTime += firstBillingTimeInSeconds;
         }
         if (runtime > firstBillingTimeInSeconds) {
+            runtime-=firstBillingTimeInSeconds;
             int runtimeUnits = (int) Math.ceil(runtime / billingTimeInSeconds);
             runtimeBasedOnBillingTime += (runtimeUnits * billingTimeInSeconds);
         }
@@ -79,7 +81,8 @@ public class GooglePricingModel extends PricingModel {
     @Override
     public double getFullRuntime(double start, double end) {
         double runtime = (end - start) - firstBillingTimeInSeconds;
-        if (runtime <= 0) return firstBillingTimeInSeconds;
+        if (runtime <= 0)
+            return firstBillingTimeInSeconds;
         else {
             double units = runtime / billingTimeInSeconds;
             int rounded = (int) Math.ceil(units);
@@ -89,13 +92,15 @@ public class GooglePricingModel extends PricingModel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         GooglePricingModel that = (GooglePricingModel) o;
 
-        return Double.compare(that.firstBillingTimeInSeconds, firstBillingTimeInSeconds) == 0 &&
-                Double.compare(that.billingTimeInSeconds, billingTimeInSeconds) == 0;
+        return Double.compare(that.firstBillingTimeInSeconds, firstBillingTimeInSeconds) == 0
+                && Double.compare(that.billingTimeInSeconds, billingTimeInSeconds) == 0;
 
     }
 

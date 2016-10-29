@@ -1,4 +1,4 @@
- package cws.core.algorithms;
+package cws.core.algorithms;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -127,7 +127,7 @@ public class SPSS extends StaticAlgorithm {
 
                     // Option 2: Leave a big gap
                     biggap: {
-                        double ast = r.getStart() -  getEnvironment().getPricingManager().getFullRuntime(runtime);
+                        double ast = r.getStart() - getEnvironment().getPricingManager().getFullRuntime(runtime);
                         if (ast < earliestStart) {
                             ast = earliestStart;
                         }
@@ -244,8 +244,8 @@ public class SPSS extends StaticAlgorithm {
             }
 
             if (newResource.cost < best.cost) {
-                getCloudsim().log(
-                        String.format("%s best: %f %s\n", task.getId(), best.cost, newResource.betterThan(best)));
+                getCloudsim()
+                        .log(String.format("%s best: %f %s\n", task.getId(), best.cost, newResource.betterThan(best)));
             }
 
             // Schedule task on resource of best solution

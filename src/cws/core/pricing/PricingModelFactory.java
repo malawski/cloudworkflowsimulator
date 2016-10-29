@@ -37,7 +37,8 @@ public class PricingModelFactory {
             assertIsGreaterThanZero(firstBillingTime, PricingConfigLoader.FIRST_BILLING_TIME_ENTRY);
             pricingModel = new GooglePricingModel(billingTime, firstBillingTime);
         } else {
-            throw new IllegalCWSArgumentException(PricingConfigLoader.MODEL_ENTRY + " configuration is not a valid model name.");
+            throw new IllegalCWSArgumentException(
+                    PricingConfigLoader.MODEL_ENTRY + " configuration is not a valid model name.");
         }
 
         return pricingModel;

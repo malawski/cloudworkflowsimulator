@@ -52,7 +52,6 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         environment = mock(Environment.class);
 
         when(environment.getVMTypePrice(any(VMType.class))).thenReturn(1.0);
-        //when(environment.getBillingTimeInSeconds(any(VMType.class))).thenReturn(3600.0);
 
         scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment, new RuntimeWorkflowAdmissioner(cloudsim,
                 new ComputationOnlyRuntimePredictioner(environment), environment));
@@ -88,7 +87,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         VM vm = createVMMock();
         freeVMs.add(vm);
 
-        when(environment.getComputationPredictedRuntimeForDAG(vm.getVmType(), job.getDAGJob().getDAG())).thenReturn(10.0);
+        when(environment.getComputationPredictedRuntimeForDAG(vm.getVmType(), job.getDAGJob().getDAG()))
+                .thenReturn(10.0);
         when(environment.getPricingManager()).thenReturn(pricingManager);
         when(pricingManager.getRuntimeVMCost(any(VM.class))).thenReturn(0.0);
         when(pricingManager.getAlreadyPaidCost(any(VM.class))).thenReturn(0.0);

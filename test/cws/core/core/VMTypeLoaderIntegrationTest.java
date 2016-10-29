@@ -33,12 +33,12 @@ public class VMTypeLoaderIntegrationTest {
         CommandLine cmd = parseArgs(new String[] {});
 
         final Set<VMType> expected = new HashSet<VMType>();
-        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0)
-                .cacheSize(53687091200L).provisioningTime(new ConstantDistribution(120))
-                .deprovisioningTime(new ConstantDistribution(60)).build());
-        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(2).price(2.0)
-                .cacheSize(53687091200L).provisioningTime(new ConstantDistribution(120))
-                .deprovisioningTime(new ConstantDistribution(60)).build());
+        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).cacheSize(53687091200L)
+                .provisioningTime(new ConstantDistribution(120)).deprovisioningTime(new ConstantDistribution(60))
+                .build());
+        expected.add(VMTypeBuilder.newBuilder().mips(1).cores(2).price(2.0).cacheSize(53687091200L)
+                .provisioningTime(new ConstantDistribution(120)).deprovisioningTime(new ConstantDistribution(60))
+                .build());
 
         final Set<VMType> actual = loader.determineVMTypes(cmd);
 

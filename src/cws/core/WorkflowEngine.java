@@ -16,8 +16,7 @@ import cws.core.jobs.Job;
 import cws.core.jobs.JobListener;
 
 /**
- * The workflow engine is an entity that executes workflows by scheduling their
- * tasks on VMs.
+ * The workflow engine is an entity that executes workflows by scheduling their tasks on VMs.
  *
  * @author Gideon Juve <juve@usc.edu>
  */
@@ -50,7 +49,7 @@ public class WorkflowEngine extends CWSSimEntity implements VMListener {
     private boolean provisioningRequestSend = false;
 
     public WorkflowEngine(Provisioner provisioner, Scheduler scheduler, double budget, double deadline,
-                          CloudSimWrapper cloudsim, Environment environment) {
+            CloudSimWrapper cloudsim, Environment environment) {
         super("WorkflowEngine" + (next_id++), cloudsim);
         this.provisioner = provisioner;
         this.scheduler = scheduler;
@@ -156,7 +155,7 @@ public class WorkflowEngine extends CWSSimEntity implements VMListener {
         Task t = job.getTask();
 
         // If the job succeeded
-        if (job.getResult() == Job.Result.SUCCESS /* && getCloudsim().clock() <= deadline */) {
+        if (job.getResult() == Job.Result.SUCCESS /* && getCloudsim().clock() <= deadline */ ) {
 
             // FIXME: temporary hack - when data transfer job
             if (dagJob != null) {

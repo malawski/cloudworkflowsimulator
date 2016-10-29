@@ -5,18 +5,10 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.util.*;
 
-import cws.core.pricing.PricingConfigLoader;
-import cws.core.pricing.PricingManager;
-import cws.core.pricing.PricingModelFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import cws.core.Cloud;
-import cws.core.EnsembleManager;
-import cws.core.Provisioner;
-import cws.core.VM;
-import cws.core.VMFactory;
-import cws.core.WorkflowEngine;
+import cws.core.*;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.core.VMTypeBuilder;
@@ -25,6 +17,9 @@ import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.log.WorkflowLog;
+import cws.core.pricing.PricingConfigLoader;
+import cws.core.pricing.PricingManager;
+import cws.core.pricing.PricingModelFactory;
 import cws.core.provisioner.ConstantDistribution;
 import cws.core.provisioner.NullProvisioner;
 import cws.core.storage.StorageManager;
@@ -32,13 +27,21 @@ import cws.core.storage.VoidStorageManager;
 
 public class EnsembleDynamicSchedulerTest {
     private CloudSimWrapper cloudsim;
+
     private Provisioner provisioner;
+
     private EnsembleDynamicScheduler scheduler;
+
     private WorkflowEngine engine;
+
     private Cloud cloud;
+
     private WorkflowLog jobLog;
+
     private StorageManager storageManager;
+
     private Environment environment;
+
     private VMType vmType;
 
     @Before
@@ -66,7 +69,7 @@ public class EnsembleDynamicSchedulerTest {
         engine.addJobListener(jobLog);
     }
 
-    //??ds this is part of provisioner really
+    // ??ds this is part of provisioner really
     @Test
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();

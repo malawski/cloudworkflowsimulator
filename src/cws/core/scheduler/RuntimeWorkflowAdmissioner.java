@@ -138,6 +138,6 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
     private double costForRuntimeSum(final double runtime, VM vm) {
         final double cost = environment.getPricingManager().getVMCostFor(vm.getVmType(), runtime);
         final int cores = vm.getVmType().getCores();
-        return  cost / cores;
+        return cost / cores;
     }
 }

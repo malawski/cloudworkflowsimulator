@@ -2,6 +2,7 @@ package cws.core.pricing.models;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -11,37 +12,38 @@ public class SimplePricingModelTest {
 
     private final static double billingTimeInSeconds = 60;
     private final static double priceForBillingUnit = 1;
+    private final static double delta = 0.0001;
 
     private final SimplePricingModel simplePricingModel = new SimplePricingModel(billingTimeInSeconds);
 
-
     @Test
     public void testGetVMCost() {
-        assertTrue(priceForBillingUnit == simplePricingModel.getVmCostFor(priceForBillingUnit, 0));
-        assertTrue(priceForBillingUnit * 2 == simplePricingModel.getVmCostFor(priceForBillingUnit, 120));
+        assertEquals(priceForBillingUnit, simplePricingModel.getVmCostFor(priceForBillingUnit, 0), delta);
+        assertEquals(priceForBillingUnit * 2, simplePricingModel.getVmCostFor(priceForBillingUnit, 120), delta);
     }
 
     @Test
     public void testGetRuntimeVMCost() {
-        assertTrue(0. == simplePricingModel.getRuntimeVmCost(priceForBillingUnit, 0));
-        assertTrue(priceForBillingUnit * 2 == simplePricingModel.getRuntimeVmCost(priceForBillingUnit, 120));
+        assertEquals(0., simplePricingModel.getRuntimeVmCost(priceForBillingUnit, 0), delta);
+        assertEquals(priceForBillingUnit * 2, simplePricingModel.getRuntimeVmCost(priceForBillingUnit, 120), delta);
     }
 
     @Test
     public void testGetAlreadyPaidCost() {
-        assertTrue(2. == simplePricingModel.getAlreadyPaidCost(priceForBillingUnit, 120));
-        assertTrue(110 * priceForBillingUnit / billingTimeInSeconds == simplePricingModel.getAlreadyPaidCost(priceForBillingUnit, 110));
-        assertTrue(0. == simplePricingModel.getAlreadyPaidCost(priceForBillingUnit, 0));
+        assertEquals(2., simplePricingModel.getAlreadyPaidCost(priceForBillingUnit, 120), delta);
+        assertEquals(110 * priceForBillingUnit / billingTimeInSeconds,
+                simplePricingModel.getAlreadyPaidCost(priceForBillingUnit, 110), delta);
+        assertEquals(0., simplePricingModel.getAlreadyPaidCost(priceForBillingUnit, 0), delta);
     }
 
     @Test
     public void testGetRuntimeBasedOnBillingTime() {
-        assertTrue(120. == simplePricingModel.getRuntimeBasedOnBillingTime(110));
+        assertEquals(120., simplePricingModel.getRuntimeBasedOnBillingTime(110), delta);
     }
 
     @Test
     public void testGetFullRuntime() {
-        assertTrue(120. == simplePricingModel.getFullRuntime(0, 110));
-        assertTrue(billingTimeInSeconds == simplePricingModel.getFullRuntime(0, 50));
+        assertEquals(120., simplePricingModel.getFullRuntime(0, 110), delta);
+        assertEquals(billingTimeInSeconds, simplePricingModel.getFullRuntime(0, 50), delta);
     }
 }
