@@ -24,7 +24,7 @@ public class EnvironmentFactory {
      * @return Newly created {@link Environment} instance.
      */
     public static Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams,
-                                                Map<String, Object> pricingConfig, Set<VMType> vmTypes) {
+            Map<String, Object> pricingConfig, Set<VMType> vmTypes) {
         StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
         PricingManager pricingManager = new PricingManager(PricingModelFactory.getPricingModel(pricingConfig));
         return new Environment(vmTypes, storageManager, pricingManager);

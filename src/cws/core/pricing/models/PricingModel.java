@@ -27,6 +27,7 @@ public abstract class PricingModel {
     abstract public double getVmCostFor(double priceForBillingUnit, double runtimeInSeconds);
 
     abstract public double getRuntimeVmCost(double priceForBillingUnit, double runtimeInSeconds);
+
     /**
      * Calculates already paid part of a cost of running a VM for given number of seconds
      *
@@ -57,8 +58,10 @@ public abstract class PricingModel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         PricingModel that = (PricingModel) o;
 

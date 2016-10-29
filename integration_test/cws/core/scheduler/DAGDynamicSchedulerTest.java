@@ -22,6 +22,9 @@ import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.log.WorkflowLog;
+import cws.core.pricing.PricingConfigLoader;
+import cws.core.pricing.PricingManager;
+import cws.core.pricing.PricingModelFactory;
 import cws.core.provisioner.NullProvisioner;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
@@ -29,13 +32,21 @@ import org.mockito.Mockito;
 
 public class DAGDynamicSchedulerTest {
     private CloudSimWrapper cloudsim;
+
     private Provisioner provisioner;
+
     private DAGDynamicScheduler scheduler;
+
     private WorkflowEngine engine;
+
     private Cloud cloud;
+
     private WorkflowLog jobLog;
+
     private StorageManager storageManager;
+
     private Environment environment;
+
     private VMType vmType;
 
     @Before

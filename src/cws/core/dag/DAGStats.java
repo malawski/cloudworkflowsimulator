@@ -24,8 +24,7 @@ public class DAGStats {
         criticalPathLength = path.getCriticalPathLength();
     }
 
-    private HashMap<Task, Double> computeMinimumCostOfRunningTheWorkflow
-        (TopologicalOrder order, VMType vmType) {
+    private HashMap<Task, Double> computeMinimumCostOfRunningTheWorkflow(TopologicalOrder order, VMType vmType) {
         totalRuntime = 0.0;
         HashMap<Task, Double> runTimes = new HashMap<Task, Double>();
         for (Task task : order) {
@@ -34,7 +33,7 @@ public class DAGStats {
             totalRuntime += runtime;
         }
 
-        minCost =  environment.getPricingManager().getVMCostFor(vmType, totalRuntime);
+        minCost = environment.getPricingManager().getVMCostFor(vmType, totalRuntime);
         return runTimes;
     }
 

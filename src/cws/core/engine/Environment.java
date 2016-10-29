@@ -67,7 +67,6 @@ public class Environment {
         return storageManager.getStorageManagerStatistics();
     }
 
-
     /**
      * To be removed when heterogeneous cloud is introduced
      */

@@ -60,7 +60,6 @@ public class SimplePricingModel extends PricingModel {
         return Math.max(1, rounded) * billingTimeInSeconds;
     }
 
-
     @Override
     public String toString() {
         return "SimplePricingModel billingTime:" + billingTimeInSeconds;
