@@ -14,11 +14,19 @@ def read_log(file_content):
     lines = file_content.splitlines()
     current_line = 0
 
-    deadline, budget, vm_cost_per_hour, pricing_model, billing_time_in_seconds, first_billing_time_in_seconds = map(float, lines[current_line].split())
-    current_line += 1
+    deadline, budget = map(float, lines[current_line].split()[:2])
+    pricing_model = lines[current_line].split()[2]
+    settings = None
+    if pricing_model == "google":
+        billing_time_in_seconds, first_billing_time_in_seconds = map(float, lines[current_line].split()[3:])
+        settings = ExperimentSettings(deadline, budget,
+                                      pricing_model, billing_time_in_seconds, first_billing_time_in_seconds)
+    elif pricing_model == "simple":
+        billing_time_in_seconds = float(lines[current_line].split()[3])
+        settings = ExperimentSettings(deadline, budget,
+                                      pricing_model, billing_time_in_seconds, None)
 
-    settings = ExperimentSettings(deadline, budget, vm_cost_per_hour,
-                    pricing_model, billing_time_in_seconds, first_billing_time_in_seconds)
+    current_line += 1
 
     vm_number = int(lines[current_line])
     current_line += 1
@@ -28,7 +36,8 @@ def read_log(file_content):
     for i in xrange(0, vm_number):
         vm_info = lines[current_line].split()
 
-        vm = VMLog(id=vm_info[0], started=float_or_none(vm_info[1]), finished=float_or_none(vm_info[2]), cores=vm_info[3])
+        vm = VMLog(id=vm_info[0], started=float_or_none(vm_info[1]), finished=float_or_none(vm_info[2]),
+                   cores=vm_info[3], price_for_billing_unit=float_or_none(vm_info[4]))
         vms[vm.id] = vm
 
         current_line += 1

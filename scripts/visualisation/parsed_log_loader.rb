@@ -27,10 +27,12 @@ class TransferLog
 end
 
 class VMLog
-  def initialize(id, started, finished)
+  def initialize(id, started, finished, cores, price_for_billing_unit)
     @id = id
     @started = started
     @finished = finished
+    @cores = cores
+    @price_for_billing_unit = price_for_billing_unit
   end
 
   attr_reader :id, :started, :finished
@@ -71,7 +73,7 @@ def read_log(file_content)
   for i in 0...vm_number
     vm_info = lines[current_line].split
 
-    vm = VMLog.new(vm_info[0], vm_info[1].to_f, vm_info[2].to_f)
+    vm = VMLog.new(vm_info[0], vm_info[1].to_f, vm_info[2].to_f, vm_info[3].to_f, vm_info[4].to_f)
     vms[vm.id] = vm
 
     current_line += 1

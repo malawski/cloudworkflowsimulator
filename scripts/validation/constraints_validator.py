@@ -11,7 +11,6 @@ from log_parser.execution_log import EventType
 from validation.common import ValidationResult
 
 
-
 def validate(vms, settings):
     vms_after_deadline = [vm for vm in vms if vm.finished > settings.deadline]
 
@@ -20,13 +19,13 @@ def validate(vms, settings):
 
     budget_errors = []
     total_cost = 0
-    if settings.model=="simple":
+    if settings.pricing_model == "simple":
         model = SimplePricingModel(settings.billing_time_in_seconds)
-        total_cost = sum([model.get_vm_cost_for(settings.vm_cost_per_hour, vm.finished - vm.started) for vm in vms])
-    elif settings.model=="google":
+        total_cost = sum([model.get_vm_cost_for(vm.price_for_billing_unit, vm.finished - vm.started) for vm in vms])
+    elif settings.pricing_model == "google":
         model = GooglePricingModel(settings.billing_time_in_seconds,
-                        settings.first_billing_time_in_seconds)
-        total_cost = sum([model.get_vm_cost_for(settings.vm_cost_per_hour, vm.finished - vm.started) for vm in vms])
+                                   settings.first_billing_time_in_seconds)
+        total_cost = sum([model.get_vm_cost_for(vm.price_for_billing_unit, vm.finished - vm.started) for vm in vms])
     if total_cost > settings.budget:
         budget_errors.append('Total VMs cost ({}) exceeded budget ({})'.format(total_cost, settings.budget))
 

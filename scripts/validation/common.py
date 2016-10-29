@@ -26,7 +26,7 @@ class SimplePricingModel(PricingModel):
     def get_vm_cost_for(self, price_for_billing_unit, runtime_in_seconds):
         billing_units = runtime_in_seconds / self.billing_time_in_seconds
         full_billing_units = math.ceil(billing_units)
-        return full_billing_units * price_for_billing_unit
+        return full_billing_units * float(price_for_billing_unit)
 
 
 class GooglePricingModel(PricingModel):
@@ -37,7 +37,7 @@ class GooglePricingModel(PricingModel):
     def get_vm_cost_for(self, price_for_billing_unit, runtime_in_seconds):
         total_vm_cost = 0
         if runtime_in_seconds > 0:
-            total_vm_cost += self.first_billing_time_in_seconds * price_for_billing_unit / self.first_billing_time_in_seconds
+            total_vm_cost += self.first_billing_time_in_seconds * price_for_billing_unit / self.billing_time_in_seconds
         if runtime_in_seconds > self.first_billing_time_in_seconds:
             runtime_in_seconds -= self.first_billing_time_in_seconds
             billing_units = runtime_in_seconds / self.billing_time_in_seconds
@@ -46,5 +46,7 @@ class GooglePricingModel(PricingModel):
         return total_vm_cost
 
 
-ExperimentSettings = namedtuple('ExperimentSettings', 'deadline budget vm_cost_per_hour pricing_model billing_time_in_seconds first_billing_time_in_seconds')
-ExperimentSettingsWithId = namedtuple('ExperimentSettingsWithId', 'id deadline budget vm_cost_per_hour pricing_model billing_time_in_seconds first_billing_time_in_seconds')
+ExperimentSettings = namedtuple('ExperimentSettings',
+                                'deadline budget pricing_model billing_time_in_seconds first_billing_time_in_seconds')
+ExperimentSettingsWithId = namedtuple('ExperimentSettingsWithId',
+                                      'id deadline budget pricing_model billing_time_in_seconds first_billing_time_in_seconds')
