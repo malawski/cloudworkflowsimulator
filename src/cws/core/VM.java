@@ -14,7 +14,6 @@ import cws.core.jobs.Job;
 import cws.core.jobs.RuntimeDistribution;
 
 /**
-<<<<<<< Updated upstream
  * A VM is a virtual machine that executes Jobs.
  *
  * It has a number of cores, and each core has a certain power measured
@@ -34,15 +33,6 @@ import cws.core.jobs.RuntimeDistribution;
  * Each VM has a provisioning delay between when it is launched and when it
  * is ready, and a deprovisioning delay between when it is terminated and
  * when the provider stops charging for it.
-=======
- * A VM is a virtual machine that executes Jobs. It has a number of cores, and each core has a certain power measured in
- * MIPS (millions of instructions per second). It has an input Port that is used to transfer data to the VM, and an
- * output Port that is used to transfer data from the VM. Both ports have the same bandwidth. Jobs can be queued and are
- * executed in FIFO order. The scheduling is space shared. It has a price per billing unit. The cost of a VM is computed
- * by multiplying the runtime in billing units by the billing unit price. The runtime is rounded up to the nearest
- * billing unit for this calculation. Each VM has a provisioning delay between when it is launched and when it is ready,
- * and a deprovisioning delay between when it is terminated and when the provider stops charging for it.
->>>>>>> Stashed changes
  *
  * @author Gideon Juve <juve@usc.edu>
  */
