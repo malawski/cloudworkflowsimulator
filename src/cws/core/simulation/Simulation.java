@@ -297,8 +297,8 @@ public class Simulation {
             vmTypeSelectionStrategy = new FastestVmTypeSelection();
         } else if("viable".equals(vmTypeSelection)) {
             vmTypeSelectionStrategy = new ViableVmTypeSelection();
-        } else if("syntetic".equals(vmTypeSelection)) {
-            vmTypeSelectionStrategy = new SynteticVmTypeSelection();
+        } else if("synthetic".equals(vmTypeSelection)) {
+            vmTypeSelectionStrategy = new SyntheticVmTypeSelection();
         }
 
         // Echo the simulation parameters
@@ -320,7 +320,7 @@ public class Simulation {
         System.out.printf("vm-type-selection = %s\n", vmTypeSelectionStrategy.toString());
 
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes, vmTypeSelectionStrategy);
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes, vmTypeSelectionStrategy.selectVmType(vmTypes));
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -420,7 +420,7 @@ public class Simulation {
                     cloudsim.log("deadline = " + deadline);
                     logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes, vmTypeSelectionStrategy);
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes, vmTypeSelectionStrategy.selectVmType(vmTypes));
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
                             deadline, environment);

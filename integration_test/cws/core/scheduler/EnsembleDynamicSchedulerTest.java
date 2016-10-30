@@ -44,7 +44,7 @@ public class EnsembleDynamicSchedulerTest {
         Set<VMType> vmTypes = Collections.singleton(vmType);
         VmTypeSelectionStrategy strategy = Mockito.mock(FastestVmTypeSelection.class);
         Mockito.when(strategy.selectVmType(vmTypes)).thenReturn(vmType);
-        environment = new Environment(vmTypes, storageManager, strategy);
+        environment = new Environment(vmTypes, storageManager, vmType);
 
         provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);

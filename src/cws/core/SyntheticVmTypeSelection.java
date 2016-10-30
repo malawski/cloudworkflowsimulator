@@ -5,7 +5,7 @@ import cws.core.core.VMType;
 
 import java.util.Set;
 
-public class SynteticVmTypeSelection implements VmTypeSelectionStrategy {
+public class SyntheticVmTypeSelection implements VmTypeSelectionStrategy {
     @Override
     public VMType selectVmType(Set<VMType> vmTypes) {
         Preconditions.checkArgument(!vmTypes.isEmpty());
@@ -14,6 +14,6 @@ public class SynteticVmTypeSelection implements VmTypeSelectionStrategy {
 
     @Override
     public String toString() {
-        return "SynteticVmTypeSelection";
+        return "SyntheticVmTypeSelection";
     }
 }
