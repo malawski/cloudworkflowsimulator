@@ -128,7 +128,7 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
             if (!admittedDJ.isComplete(task)) {
-                runtimeSum += runtimePredictioner.getPredictedRuntime(task, null);
+                runtimeSum += runtimePredictioner.getPredictedRuntime(task, null, environment.getRepresentativeVMType());
             }
         }
         return costForRuntimeSum(runtimeSum, vm);
