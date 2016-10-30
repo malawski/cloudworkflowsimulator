@@ -33,8 +33,7 @@ import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
 import org.mockito.Mockito;
 
-public class DAGDynamicSchedulerStorageAwareTest
-{
+public class DAGDynamicSchedulerStorageAwareTest {
     private VMType vmType;
 
     private CloudSimWrapper cloudsim;
@@ -56,14 +55,13 @@ public class DAGDynamicSchedulerStorageAwareTest
     private Environment environment;
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
 
         GlobalStorageParams params = new GlobalStorageParams();
-        params.setReadSpeed( 2000000.0 );
-        params.setWriteSpeed( 1000000.0 );
+        params.setReadSpeed(2000000.0);
+        params.setWriteSpeed(1000000.0);
 
         Map<String, Object> pricingParams = new HashMap<String, Object>();
 
@@ -80,7 +78,6 @@ public class DAGDynamicSchedulerStorageAwareTest
         Mockito.when(strategy.selectVmType(vmTypes)).thenReturn(vmType);
         environment = new Environment(vmTypes, storageManager, pricingManager);
 
-
         provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
         engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim, environment);
@@ -93,16 +90,15 @@ public class DAGDynamicSchedulerStorageAwareTest
     }
 
     @Test
-    public void shouldTakeIntoConsiderationTransferMakespans()
-    {
+    public void shouldTakeIntoConsiderationTransferMakespans() {
         /**
          * input DAG: .....| in.txt 100B = 50s read .....| ...ID000 2s .....| .....| mid.txt 1000B = 500s read, 1000s
          * write .....| ...ID001 40s .....| .....| out.txt 200B = 200s write
          */
 
         launchVM();
-        List<DAG> dags = loadTestDAG( "dags/storage_integration_tests/simpleSequence.dag" );
-        startSimulation( dags );
+        List<DAG> dags = loadTestDAG("dags/storage_integration_tests/simpleSequence.dag");
+        startSimulation(dags);
 
         /**
          * expected: ... 50.0 Read in.txt .... 2.0 Run job ID000 . 1000.0 Write mid.txt .. 500.0 Read mid.txt ... 40.0
@@ -110,27 +106,24 @@ public class DAGDynamicSchedulerStorageAwareTest
          */
     }
 
-    protected void startSimulation( List<DAG> dags )
-    {
-        new EnsembleManager( dags, engine, cloudsim );
+    protected void startSimulation(List<DAG> dags) {
+        new EnsembleManager(dags, engine, cloudsim);
 
         cloudsim.startSimulation();
     }
 
-    protected List<DAG> loadTestDAG( String file )
-    {
-        DAG dag = DAGParser.parseDAG( new File( file ) );
+    protected List<DAG> loadTestDAG(String file) {
+        DAG dag = DAGParser.parseDAG(new File(file));
 
         List<DAG> dags = new ArrayList<DAG>();
-        dags.add( dag );
+        dags.add(dag);
         return dags;
     }
 
-    protected void launchVM()
-    {
-        VMType vmType = VMTypeBuilder.newBuilder().mips( 1 ).cores( 1 ).price( 1.0 ).build();
+    protected void launchVM() {
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
-        VM vm = VMFactory.createVM( vmType, cloudsim );
-        provisioner.launchVM( vm );
+        VM vm = VMFactory.createVM(vmType, cloudsim);
+        provisioner.launchVM(vm);
     }
 }
