@@ -415,7 +415,7 @@ public class Simulation {
                     String model = (String) pricingConfig.get(MODEL_ENTRY);
                     cloudsim.log("pricing_model = " + model);
                     cloudsim.log("billing_time_in_seconds = " + pricingConfig.get(BILLING_TIME_ENTRY));
-                    if(GOOGLE_MODEL.equals(model)){
+                    if (GOOGLE_MODEL.equals(model)) {
                         cloudsim.log("first_billing_time_in_seconds = " + pricingConfig.get(FIRST_BILLING_TIME_ENTRY));
                     }
                     logWorkflowsDescription(dags, names, cloudsim);
