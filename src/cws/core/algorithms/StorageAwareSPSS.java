@@ -18,20 +18,20 @@ import cws.core.engine.Environment;
  * Storage awareness here means that during task runtime estimations, file transfer estimation is taken into account.
  */
 public class StorageAwareSPSS extends SPSS {
-    public StorageAwareSPSS(double budget, double deadline, List<DAG> dags, double alpha,
-                            AlgorithmStatistics ensembleStatistics, Environment environment, CloudSimWrapper cloudsim, VMType representativeVmType) {
-        super(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, representativeVmType);
+    public StorageAwareSPSS(double budget, double deadline, List<DAG> dags, double alpha, AlgorithmStatistics ensembleStatistics,
+                            Environment environment, CloudSimWrapper cloudsim, VMType vmType) {
+        super(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, vmType);
     }
 
     @Override
     protected CriticalPath newCriticalPath(TopologicalOrder order, HashMap<Task, Double> runtimes) {
         final Environment environment = getEnvironment();
-        return new StorageAwareCriticalPath(order, runtimes, getRepresentativeVmType(), environment);
+        return new StorageAwareCriticalPath(order, runtimes, getVmType(), environment);
     }
 
     @Override
     protected double getPredictedTaskRuntime(Task task) {
         final Environment environment = getEnvironment();
-        return environment.getComputationPredictedRuntimeForSingleTask(getRepresentativeVmType(), task) + environment.getTotalTransferTimeEstimation(task);
+        return environment.getComputationPredictedRuntimeForSingleTask(getVmType(), task) + environment.getTotalTransferTimeEstimation(task);
     }
 }

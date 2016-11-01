@@ -22,8 +22,8 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
     private final WorkflowAdmissioner workflowAdmissioner;
 
     public WorkflowAndLocalityAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment,
-            RuntimePredictioner runtimePredictioner, WorkflowAdmissioner workflowAdmissioner, VMType representativeVMType) {
-        super(cloudsim, environment, representativeVMType);
+            RuntimePredictioner runtimePredictioner, WorkflowAdmissioner workflowAdmissioner, VMType vmType) {
+        super(cloudsim, environment, vmType);
         this.runtimePredictioner = runtimePredictioner;
         this.workflowAdmissioner = workflowAdmissioner;
     }
@@ -69,7 +69,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
                         }
                     }
                 }
-                double speedup = runtimePredictioner.getPredictedRuntime(job.getTask(), null, representativeVMType) - bestFinishTime;
+                double speedup = runtimePredictioner.getPredictedRuntime(job.getTask(), null, vmType) - bestFinishTime;
                 if (bestSpeedup == null || speedup > bestSpeedup) {
                     bestSpeedup = speedup;
                     bestJob = job;

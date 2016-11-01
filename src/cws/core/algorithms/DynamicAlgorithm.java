@@ -22,10 +22,9 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
     // remove this.
     private HomogeneousProvisioner tempProvisionerStorage;
 
-    public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, Scheduler scheduler,
-            HomogeneousProvisioner provisioner, AlgorithmStatistics ensembleStatistics, Environment environment,
-            CloudSimWrapper cloudsim, VMType representativeVmType) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, representativeVmType);
+    public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics, Environment environment,
+            CloudSimWrapper cloudsim, VMType vmType, Scheduler scheduler, HomogeneousProvisioner provisioner) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType);
         this.tempProvisionerStorage = provisioner;
         this.scheduler = scheduler;
     }
@@ -68,22 +67,22 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
             return 0;
         }
 
-        VMType vmType = getRepresentativeVmType();
+        VMType vmType = getVmType();
         return (int) Math.ceil(getMaxSpendingSpeedWeCanAfford() / getEnvironment().getVMTypePrice(vmType));
     }
 
     private double getMaxSpendingSpeedWeCanAfford() {
-        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getBillingTimeInSeconds(getRepresentativeVmType())));
+        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getBillingTimeInSeconds(getVmType())));
     }
 
     private boolean canAffordAtLeastOneVM() {
-        return getEnvironment().getVMTypePrice(getRepresentativeVmType()) <= getBudget();
+        return getEnvironment().getVMTypePrice(getVmType()) <= getBudget();
     }
 
     private void launchInitialVMs(int numEstimatedVMs) {
         for (int i = 0; i < numEstimatedVMs; i++) {
             // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
-            VM vm = VMFactory.createVM(getRepresentativeVmType(), getCloudsim());
+            VM vm = VMFactory.createVM(getVmType(), getCloudsim());
             getProvisioner().launchVM(vm);
         }
     }

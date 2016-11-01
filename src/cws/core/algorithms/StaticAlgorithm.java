@@ -54,8 +54,8 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
     private long planningFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-            Environment environment, CloudSimWrapper cloudsim, VMType representativeVmType) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, representativeVmType);
+            Environment environment, CloudSimWrapper cloudsim, VMType vmType) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType);
     }
 
     @Override
@@ -86,7 +86,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
 
         for (Resource r : plan.resources) {
             // create VM
-            VM vm = VMFactory.createVM(getRepresentativeVmType(), getCloudsim());
+            VM vm = VMFactory.createVM(getVmType(), getCloudsim());
 
             // Build task<->vm mappings
             LinkedList<Task> vmQueue = new LinkedList<Task>();
@@ -179,7 +179,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
         double criticalPathLength = path.getCriticalPathLength();
         double spare = getDeadline() - criticalPathLength;
         // subtract estimates for provisioning and deprovisioning delays
-        spare = spare - getEnvironment().getVMProvisioningOverallDelayEstimation(getRepresentativeVmType());
+        spare = spare - getEnvironment().getVMProvisioningOverallDelayEstimation(getVmType());
         for (int i = 0; i < numlevels; i++) {
 
             double taskPart = alpha * (totalTasksByLevel[i] / totalTasks);
@@ -375,7 +375,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = newCriticalPath(order, runtimes);
-        double minimalTime = path.getCriticalPathLength() + getEnvironment().getVMProvisioningOverallDelayEstimation(getRepresentativeVmType());
+        double minimalTime = path.getCriticalPathLength() + getEnvironment().getVMProvisioningOverallDelayEstimation(getVmType());
         if (minimalTime > getDeadline()) {
             throw new NoFeasiblePlan("Best critical path + provisioning estimates (" + minimalTime + ") "
                     + "> deadline (" + getDeadline() + ")");
@@ -388,7 +388,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
      * implementations.
      */
     protected CriticalPath newCriticalPath(TopologicalOrder order, HashMap<Task, Double> runtimes) {
-        return new CriticalPath(order, runtimes, getRepresentativeVmType());
+        return new CriticalPath(order, runtimes, getVmType());
     }
 
     /**
@@ -396,7 +396,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
      * criteria.
      */
     protected double getPredictedTaskRuntime(Task task) {
-        return getEnvironment().getComputationPredictedRuntimeForSingleTask(getRepresentativeVmType(), task);
+        return getEnvironment().getComputationPredictedRuntimeForSingleTask(getVmType(), task);
     }
 
     class Slot {
@@ -447,7 +447,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
             }
             double last = schedule.lastKey();
             Slot lastSlot = schedule.get(last);
-            return last + lastSlot.duration + environment.getDeprovisioningDelayEstimation(getRepresentativeVmType());
+            return last + lastSlot.duration + environment.getDeprovisioningDelayEstimation(getVmType());
         }
 
         public int getFullBillingUnits() {
@@ -456,13 +456,13 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
 
         public int getFullBillingUnitsWith(double start, double end) {
             double seconds = end - start;
-            double units = seconds / environment.getBillingTimeInSeconds(getRepresentativeVmType());
+            double units = seconds / environment.getBillingTimeInSeconds(getVmType());
             int rounded = (int) Math.ceil(units);
             return Math.max(1, rounded);
         }
 
         public double getCostWith(double start, double end) {
-            return environment.getVMCostFor(getRepresentativeVmType(), end - start);
+            return environment.getVMCostFor(getVmType(), end - start);
         }
 
         public double getCost() {
@@ -474,7 +474,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
             for (Slot sl : schedule.values()) {
                 runtime += sl.duration;
             }
-            return runtime / (getFullBillingUnits() * environment.getBillingTimeInSeconds(getRepresentativeVmType()));
+            return runtime / (getFullBillingUnits() * environment.getBillingTimeInSeconds(getVmType()));
         }
     }
 

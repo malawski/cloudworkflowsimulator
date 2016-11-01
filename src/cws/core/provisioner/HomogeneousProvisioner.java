@@ -12,18 +12,18 @@ import cws.core.engine.Environment;
 public abstract class HomogeneousProvisioner extends Provisioner {
 
     protected Environment environment;
-    private VMType representativeVmType;
+    private VMType vmType;
 
-    public HomogeneousProvisioner (CloudSimWrapper cloudsim, VMType representativeVmType) {
+    public HomogeneousProvisioner (CloudSimWrapper cloudsim, VMType vmType) {
         super(cloudsim);
-        this.representativeVmType = representativeVmType;
+        this.vmType = vmType;
     }
 
     public void setEnvironment(Environment environment) {
         this.environment = environment;
     }
 
-    public VMType getRepresentativeVmType() {
-        return representativeVmType;
+    public VMType getVmType() {
+        return vmType;
     }
 }

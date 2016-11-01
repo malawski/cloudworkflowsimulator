@@ -22,13 +22,13 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
     private final RuntimePredictioner runtimePredictioner;
     private final Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
     private final Set<DAGJob> rejectedDAGs = new HashSet<DAGJob>();
-    private final VMType representativeVMType;
+    private final VMType vmType;
 
     public RuntimeWorkflowAdmissioner(CloudSimWrapper cloudsim, RuntimePredictioner runtimePredictioner,
-                                      Environment environment, VMType representativeVmType) {
+                                      Environment environment, VMType vmType) {
         super("WorkflowAdmissioner", cloudsim);
         this.environment = environment;
-        this.representativeVMType = representativeVmType;
+        this.vmType = vmType;
         this.runtimePredictioner = runtimePredictioner;
     }
 
@@ -131,7 +131,7 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
             if (!admittedDJ.isComplete(task)) {
-                runtimeSum += runtimePredictioner.getPredictedRuntime(task, null, getRepresentativeVMType());
+                runtimeSum += runtimePredictioner.getPredictedRuntime(task, null, getVmType());
             }
         }
         return costForRuntimeSum(runtimeSum, vm);
@@ -144,7 +144,7 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
         return (runtime * vmPrice) / (billingTimeInSeconds * cores);
     }
 
-    public VMType getRepresentativeVMType() {
-        return representativeVMType;
+    public VMType getVmType() {
+        return vmType;
     }
 }

@@ -8,6 +8,7 @@ import java.util.Queue;
 
 import cws.core.VM;
 import cws.core.VMFactory;
+import cws.core.VmTypeSelectionStrategy;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
@@ -24,8 +25,8 @@ import cws.core.jobs.Job;
 public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
     private final PriorityQueue<Job> prioritizedJobs = new PriorityQueue<Job>(64, new JobPriorityComparator());
 
-    public EnsembleDynamicScheduler(CloudSimWrapper cloudsim, Environment environment, VMType representativeVmType) {
-        super(cloudsim, environment, representativeVmType);
+    public EnsembleDynamicScheduler(CloudSimWrapper cloudsim, Environment environment, VMType vmType) {
+        super(cloudsim, environment, vmType);
     }
 
     @Override

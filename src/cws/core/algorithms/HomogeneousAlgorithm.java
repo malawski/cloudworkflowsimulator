@@ -19,8 +19,8 @@ public abstract class HomogeneousAlgorithm extends Algorithm  {
 
     public HomogeneousAlgorithm (double budget, double deadline, List<DAG> dags,
                                  AlgorithmStatistics algorithmStatistics,
-                                 Environment environment, CloudSimWrapper cloudsim, VMType representativeVmType) {
-        super(budget, deadline, dags, algorithmStatistics, cloudsim, representativeVmType);
+                                 Environment environment, CloudSimWrapper cloudsim, VMType vmType) {
+        super(budget, deadline, dags, algorithmStatistics, cloudsim, vmType);
         this.environment = environment;
     }
 

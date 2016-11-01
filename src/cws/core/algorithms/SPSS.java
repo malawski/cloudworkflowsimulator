@@ -22,8 +22,8 @@ public class SPSS extends StaticAlgorithm {
     private double alpha;
 
     public SPSS(double budget, double deadline, List<DAG> dags, double alpha, AlgorithmStatistics ensembleStatistics,
-                Environment environment, CloudSimWrapper cloudsim, VMType representativeVmType) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, representativeVmType);
+                Environment environment, CloudSimWrapper cloudsim, VMType vmType) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType);
         this.alpha = alpha;
     }
 
@@ -128,9 +128,9 @@ public class SPSS extends StaticAlgorithm {
 
                     // Option 2: Leave a big gap
                     biggap: {
-                        int runtimeUnits = (int) Math.ceil(runtime / getEnvironment().getBillingTimeInSeconds(getRepresentativeVmType()));
+                        int runtimeUnits = (int) Math.ceil(runtime / getEnvironment().getBillingTimeInSeconds(getVmType()));
 
-                        double ast = r.getStart() - (runtimeUnits * getEnvironment().getBillingTimeInSeconds(getRepresentativeVmType()));
+                        double ast = r.getStart() - (runtimeUnits * getEnvironment().getBillingTimeInSeconds(getVmType()));
                         if (ast < earliestStart) {
                             ast = earliestStart;
                         }
@@ -150,7 +150,7 @@ public class SPSS extends StaticAlgorithm {
 
                     // Option 3: Use some slack time (medium gap)
                     slack: {
-                        double slack = (r.getFullBillingUnits() * getEnvironment().getBillingTimeInSeconds(getRepresentativeVmType()))
+                        double slack = (r.getFullBillingUnits() * getEnvironment().getBillingTimeInSeconds(getVmType()))
                                 - (r.getEnd() - r.getStart());
 
                         double ast = r.getStart() - slack;

@@ -22,8 +22,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
     private final WorkflowAdmissioner workflowAdmissioner;
 
     public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment,
-                                          WorkflowAdmissioner workflowAdmissioner, VMType representativeVmType) {
-        super(cloudsim, environment, representativeVmType);
+                                          WorkflowAdmissioner workflowAdmissioner, VMType vmType) {
+        super(cloudsim, environment, vmType);
         this.workflowAdmissioner = workflowAdmissioner;
     }
 

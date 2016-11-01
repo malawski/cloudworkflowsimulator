@@ -2,10 +2,12 @@ package cws.core.algorithms;
 
 import java.util.List;
 
+import cws.core.Scheduler;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.engine.Environment;
+import cws.core.provisioner.HomogeneousProvisioner;
 import cws.core.provisioner.SimpleUtilizationBasedProvisioner;
 import cws.core.scheduler.ComputationAndTransfersRuntimePredictioner;
 import cws.core.scheduler.RuntimeWorkflowAdmissioner;
@@ -19,11 +21,9 @@ import cws.core.scheduler.WorkflowAndLocalityAwareEnsembleScheduler;
  * File locality means that the scheduler tries to minimize the number of file transfers between tasks.
  */
 public class StorageAndLocalityAwareWADPDS extends DynamicAlgorithm {
-    public StorageAndLocalityAwareWADPDS(double budget, double deadline, List<DAG> dags, double maxScaling,
-                                         AlgorithmStatistics ensembleStatistics, Environment environment, CloudSimWrapper cloudsim, VMType representativeVmType) {
-        super(budget, deadline, dags, new WorkflowAndLocalityAwareEnsembleScheduler(cloudsim, environment,
-                new ComputationAndTransfersRuntimePredictioner(environment), new RuntimeWorkflowAdmissioner(cloudsim,
-                        new ComputationAndTransfersRuntimePredictioner(environment), environment, representativeVmType), representativeVmType),
-                new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim, representativeVmType), ensembleStatistics, environment, cloudsim, representativeVmType);
+    public StorageAndLocalityAwareWADPDS(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
+                                         Environment environment, CloudSimWrapper cloudsim, VMType vmType,
+                                         Scheduler scheduler, HomogeneousProvisioner provisioner) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType, scheduler, provisioner);
     }
 }

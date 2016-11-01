@@ -5,7 +5,11 @@ import static com.google.common.math.DoubleMath.fuzzyEquals;
 import java.io.*;
 import java.util.*;
 
+import com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
 import cws.core.*;
+import cws.core.provisioner.HomogeneousProvisioner;
+import cws.core.provisioner.SimpleUtilizationBasedProvisioner;
+import cws.core.scheduler.*;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.cloudbus.cloudsim.Log;
@@ -21,6 +25,8 @@ import cws.core.engine.EnvironmentFactory;
 import cws.core.exception.IllegalCWSArgumentException;
 import cws.core.storage.StorageManagerStatistics;
 import cws.core.storage.global.GlobalStorageParams;
+
+import javax.swing.plaf.synth.SynthCheckBoxUI;
 
 public class Simulation {
 
@@ -421,9 +427,10 @@ public class Simulation {
                     logWorkflowsDescription(dags, names, cloudsim);
 
                     environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
+                    VMType selectedVmType = vmTypeSelectionStrategy.selectVmType(vmTypes);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
-                            deadline, environment, vmTypeSelectionStrategy.selectVmType(vmTypes));
+                            deadline, environment, selectedVmType);
 
                     algorithm.simulate();
 
@@ -512,24 +519,40 @@ public class Simulation {
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
                                         CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline,
-                                        Environment environment, VMType representativeVmType) {
+                                        Environment environment, VMType vmType) {
         AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim);
+        HomogeneousProvisioner provisioner = new SimpleUtilizationBasedProvisioner(maxScaling, cloudsim, vmType);
+        RuntimePredictioner predictioner;
+        WorkflowAdmissioner admissioner;
+        Scheduler scheduler;
 
         if ("SPSS".equals(algorithmName)) {
-            return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, representativeVmType);
+            return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, vmType);
         } else if ("DPDS".equals(algorithmName)) {
-            return new DPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim, representativeVmType);
+            scheduler = new EnsembleDynamicScheduler(cloudsim, environment, vmType);
+            return new DPDS(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType, scheduler, provisioner);
         } else if ("L-DPDS".equals(algorithmName)) {
-            return new LocalityAwareDPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim, representativeVmType);
+            predictioner = new ComputationAndTransfersRuntimePredictioner(environment);
+            admissioner = new VoidWorkflowAdmissioner();
+            scheduler = new WorkflowAndLocalityAwareEnsembleScheduler(cloudsim, environment, predictioner, admissioner, vmType);
+            return new LocalityAwareDPDS(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType, scheduler, provisioner);
         } else if ("WADPDS".equals(algorithmName)) {
-            return new WADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim, representativeVmType);
+            predictioner = new ComputationOnlyRuntimePredictioner(environment);
+            admissioner = new RuntimeWorkflowAdmissioner(cloudsim, predictioner, environment, vmType);
+            scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment, admissioner, vmType);
+            return new WADPDS(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType, scheduler, provisioner);
         } else if ("SA-SPSS".equals(algorithmName)) {
-            return new StorageAwareSPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, representativeVmType);
+            return new StorageAwareSPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, vmType);
         } else if ("SA-WADPDS".equals(algorithmName)) {
-            return new StorageAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim, representativeVmType);
+            predictioner = new ComputationAndTransfersRuntimePredictioner(environment);
+            admissioner = new RuntimeWorkflowAdmissioner(cloudsim, predictioner, environment, vmType);
+            scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment, admissioner, vmType);
+            return new StorageAwareWADPDS(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType, scheduler, provisioner);
         } else if ("L-SA-WADPDS".equals(algorithmName)) {
-            return new StorageAndLocalityAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics,
-                    environment, cloudsim, representativeVmType);
+            predictioner = new ComputationAndTransfersRuntimePredictioner(environment);
+            admissioner = new RuntimeWorkflowAdmissioner(cloudsim, predictioner, environment, vmType);
+            scheduler =  new WorkflowAndLocalityAwareEnsembleScheduler(cloudsim, environment, predictioner, admissioner, vmType);
+            return new StorageAndLocalityAwareWADPDS(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType, scheduler, provisioner);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }
