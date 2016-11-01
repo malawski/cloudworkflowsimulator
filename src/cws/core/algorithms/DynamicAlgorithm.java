@@ -24,8 +24,8 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, Scheduler scheduler,
             HomogeneousProvisioner provisioner, AlgorithmStatistics ensembleStatistics, Environment environment,
-            CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
+            CloudSimWrapper cloudsim, VMType representativeVmType) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, representativeVmType);
         this.tempProvisionerStorage = provisioner;
         this.scheduler = scheduler;
     }
@@ -68,22 +68,22 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
             return 0;
         }
 
-        VMType vmType = getEnvironment().getRepresentativeVMType();
+        VMType vmType = getRepresentativeVmType();
         return (int) Math.ceil(getMaxSpendingSpeedWeCanAfford() / getEnvironment().getVMTypePrice(vmType));
     }
 
     private double getMaxSpendingSpeedWeCanAfford() {
-        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getBillingTimeInSeconds(getVmType())));
+        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getBillingTimeInSeconds(getRepresentativeVmType())));
     }
 
     private boolean canAffordAtLeastOneVM() {
-        return getEnvironment().getVMTypePrice(getVmType()) <= getBudget();
+        return getEnvironment().getVMTypePrice(getRepresentativeVmType()) <= getBudget();
     }
 
     private void launchInitialVMs(int numEstimatedVMs) {
         for (int i = 0; i < numEstimatedVMs; i++) {
             // TODO(mequrel): should be extracted, the best would be to have an interface createVM available
-            VM vm = VMFactory.createVM(getVmType(), getCloudsim());
+            VM vm = VMFactory.createVM(getRepresentativeVmType(), getCloudsim());
             getProvisioner().launchVM(vm);
         }
     }

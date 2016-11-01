@@ -7,6 +7,7 @@ import java.util.Queue;
 import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 
@@ -21,8 +22,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
     private final WorkflowAdmissioner workflowAdmissioner;
 
     public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment,
-            WorkflowAdmissioner workflowAdmissioner) {
-        super(cloudsim, environment);
+                                          WorkflowAdmissioner workflowAdmissioner, VMType representativeVmType) {
+        super(cloudsim, environment, representativeVmType);
         this.workflowAdmissioner = workflowAdmissioner;
     }
 

@@ -51,7 +51,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         when(environment.getBillingTimeInSeconds(any(VMType.class))).thenReturn(3600.0);
 
         scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment, new RuntimeWorkflowAdmissioner(cloudsim,
-                new ComputationOnlyRuntimePredictioner(environment), environment));
+                new ComputationOnlyRuntimePredictioner(environment), environment, createVMType()), createVMType());
 
         engine = mock(WorkflowEngine.class);
         when(engine.getDeadline()).thenReturn(10.0);
@@ -66,7 +66,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
     @Test
     public void shouldDoNothingWithEmptyQueue() {
-        freeVMs.add(createVMMock());
+        freeVMs.add(createVMMock(createVMType()));
         // empty queues
 
         List<Job> expected = jobs;
@@ -79,7 +79,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
     public void shouldScheduleFirstJobIfOneVMAvailable() {
         Job job = createSimpleJobMock();
         jobs.add(job);
-        VM vm = createVMMock();
+        VM vm = createVMMock(createVMType());
         freeVMs.add(vm);
 
         when(environment.getComputationPredictedRuntimeForDAG(vm.getVmType(), job.getDAGJob().getDAG())).thenReturn(10.0);
@@ -136,11 +136,13 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         return createSimpleJobMock(ImmutableList.<DAGFile> of(), ImmutableList.<DAGFile> of());
     }
 
-    private VM createVMMock() {
+    private VM createVMMock(VMType vmType) {
         VM vm = mock(VM.class);
-        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
         when(vm.getVmType()).thenReturn(vmType);
-        when(environment.getRepresentativeVMType()).thenReturn(vmType);
         return vm;
+    }
+
+    private VMType createVMType() {
+        return VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
     }
 }

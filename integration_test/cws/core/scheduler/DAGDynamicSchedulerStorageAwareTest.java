@@ -52,10 +52,10 @@ public class DAGDynamicSchedulerStorageAwareTest {
         Set<VMType> vmTypes = Collections.singleton(vmType);
         VmTypeSelectionStrategy strategy = Mockito.mock(FastestVmTypeSelection.class);
         Mockito.when(strategy.selectVmType(vmTypes)).thenReturn(vmType);
-        environment = new Environment(vmTypes, storageManager, vmType);
+        environment = new Environment(vmTypes, storageManager);
 
         provisioner = new NullProvisioner(cloudsim);
-        scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
+        scheduler = new EnsembleDynamicScheduler(cloudsim, environment, vmType);
         engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
         cloud = new Cloud(cloudsim);
         provisioner.setCloud(cloud);

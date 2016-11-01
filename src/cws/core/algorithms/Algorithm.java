@@ -8,6 +8,7 @@ import cws.core.WorkflowEngine;
 import cws.core.Provisioner;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.log.WorkflowLog;
 
@@ -34,13 +35,16 @@ public abstract class Algorithm extends CWSSimEntity {
     /** All simulation's DAGs */
     private List<DAG> dags;
 
+    private VMType representativeVmType;
+
     public Algorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics algorithmStatistics,
-            CloudSimWrapper cloudsim) {
+                     CloudSimWrapper cloudsim, VMType representativeVmType) {
         super("Algorithm", cloudsim);
         this.budget = budget;
         this.deadline = deadline;
         this.dags = dags;
         this.algorithmStatistics = algorithmStatistics;
+        this.representativeVmType = representativeVmType;
     }
 
     /** Should run actual simulation */
@@ -130,5 +134,9 @@ public abstract class Algorithm extends CWSSimEntity {
     @Override
     public final String getName() {
         return this.getClass().getSimpleName();
+    }
+
+    public VMType getRepresentativeVmType() {
+        return representativeVmType;
     }
 }

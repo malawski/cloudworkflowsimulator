@@ -293,11 +293,11 @@ public class Simulation {
         }
 
         VmTypeSelectionStrategy vmTypeSelectionStrategy = DEFAULT_VMTYPE_SELECTION_STRATEGY;
-        if("fastest".equals(vmTypeSelection)) {
+        if ("fastest".equals(vmTypeSelection)) {
             vmTypeSelectionStrategy = new FastestVmTypeSelection();
-        } else if("viable".equals(vmTypeSelection)) {
+        } else if ("viable".equals(vmTypeSelection)) {
             vmTypeSelectionStrategy = new ViableVmTypeSelection();
-        } else if("synthetic".equals(vmTypeSelection)) {
+        } else if ("synthetic".equals(vmTypeSelection)) {
             vmTypeSelectionStrategy = new SyntheticVmTypeSelection();
         }
 
@@ -320,7 +320,7 @@ public class Simulation {
         System.out.printf("vm-type-selection = %s\n", vmTypeSelectionStrategy.toString());
 
         List<DAG> dags = new ArrayList<DAG>();
-        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes, vmTypeSelectionStrategy.selectVmType(vmTypes));
+        Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
@@ -341,7 +341,7 @@ public class Simulation {
                 }
             }
 
-            VMType representativeVmType = environment.getRepresentativeVMType();
+            VMType representativeVmType = vmTypeSelectionStrategy.selectVmType(vmTypes);
             DAGStats dagStats = new DAGStats(dag, representativeVmType);
 
             minTime = Math.min(minTime, dagStats.getCriticalPathLength())
@@ -420,10 +420,10 @@ public class Simulation {
                     cloudsim.log("deadline = " + deadline);
                     logWorkflowsDescription(dags, names, cloudsim);
 
-                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes, vmTypeSelectionStrategy.selectVmType(vmTypes));
+                    environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, vmTypes);
 
                     Algorithm algorithm = createAlgorithm(alpha, maxScaling, algorithmName, cloudsim, dags, budget,
-                            deadline, environment);
+                            deadline, environment, vmTypeSelectionStrategy.selectVmType(vmTypes));
 
                     algorithm.simulate();
 
@@ -511,24 +511,25 @@ public class Simulation {
      * @return The newly created algorithm instance.
      */
     protected Algorithm createAlgorithm(double alpha, double maxScaling, String algorithmName,
-                                        CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline, Environment environment) {
+                                        CloudSimWrapper cloudsim, List<DAG> dags, double budget, double deadline,
+                                        Environment environment, VMType representativeVmType) {
         AlgorithmStatistics ensembleStatistics = new AlgorithmStatistics(dags, budget, deadline, cloudsim);
 
         if ("SPSS".equals(algorithmName)) {
-            return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
+            return new SPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, representativeVmType);
         } else if ("DPDS".equals(algorithmName)) {
-            return new DPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
+            return new DPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim, representativeVmType);
         } else if ("L-DPDS".equals(algorithmName)) {
-            return new LocalityAwareDPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
+            return new LocalityAwareDPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim, representativeVmType);
         } else if ("WADPDS".equals(algorithmName)) {
-            return new WADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
+            return new WADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim, representativeVmType);
         } else if ("SA-SPSS".equals(algorithmName)) {
-            return new StorageAwareSPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
+            return new StorageAwareSPSS(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, representativeVmType);
         } else if ("SA-WADPDS".equals(algorithmName)) {
-            return new StorageAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim);
+            return new StorageAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics, environment, cloudsim, representativeVmType);
         } else if ("L-SA-WADPDS".equals(algorithmName)) {
             return new StorageAndLocalityAwareWADPDS(budget, deadline, dags, maxScaling, ensembleStatistics,
-                    environment, cloudsim);
+                    environment, cloudsim, representativeVmType);
         } else {
             throw new IllegalCWSArgumentException("Unknown algorithm: " + algorithmName);
         }

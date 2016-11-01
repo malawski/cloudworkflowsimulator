@@ -16,19 +16,15 @@ public abstract class HomogeneousAlgorithm extends Algorithm  {
 
     /** Environment of simulation (VMs, storage info) */
     private final Environment environment;
-    private final VMType vmType;
 
     public HomogeneousAlgorithm (double budget, double deadline, List<DAG> dags,
                                  AlgorithmStatistics algorithmStatistics,
-                                 Environment environment, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, algorithmStatistics, cloudsim);
-        this.vmType = environment.getRepresentativeVMType();
+                                 Environment environment, CloudSimWrapper cloudsim, VMType representativeVmType) {
+        super(budget, deadline, dags, algorithmStatistics, cloudsim, representativeVmType);
         this.environment = environment;
     }
 
     public final Environment getEnvironment() {
         return this.environment;
     }
-
-    public final VMType getVmType() { return this.vmType; }
 }

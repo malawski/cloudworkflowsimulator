@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -18,19 +19,19 @@ import cws.core.engine.Environment;
  */
 public class StorageAwareSPSS extends SPSS {
     public StorageAwareSPSS(double budget, double deadline, List<DAG> dags, double alpha,
-            AlgorithmStatistics ensembleStatistics, Environment environment, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
+                            AlgorithmStatistics ensembleStatistics, Environment environment, CloudSimWrapper cloudsim, VMType representativeVmType) {
+        super(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, representativeVmType);
     }
 
     @Override
     protected CriticalPath newCriticalPath(TopologicalOrder order, HashMap<Task, Double> runtimes) {
         final Environment environment = getEnvironment();
-        return new StorageAwareCriticalPath(order, runtimes, getVmType(), environment);
+        return new StorageAwareCriticalPath(order, runtimes, getRepresentativeVmType(), environment);
     }
 
     @Override
     protected double getPredictedTaskRuntime(Task task) {
         final Environment environment = getEnvironment();
-        return environment.getComputationPredictedRuntimeForSingleTask(getVmType(), task) + environment.getTotalTransferTimeEstimation(task);
+        return environment.getComputationPredictedRuntimeForSingleTask(getRepresentativeVmType(), task) + environment.getTotalTransferTimeEstimation(task);
     }
 }

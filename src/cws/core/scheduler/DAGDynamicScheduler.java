@@ -16,16 +16,18 @@ import cws.core.engine.Environment;
  */
 abstract class DAGDynamicScheduler extends CWSSimEntity implements Scheduler {
     protected final Environment environment;
+    protected final VMType representativeVMType;
 
-    public DAGDynamicScheduler(CloudSimWrapper cloudsim, Environment environment) {
+    public DAGDynamicScheduler(CloudSimWrapper cloudsim, Environment environment, VMType representativeVMType) {
         super("DAGDynamicScheduler", cloudsim);
         this.environment = environment;
+        this.representativeVMType = representativeVMType;
     }
 
     @Override
     public abstract void scheduleJobs(WorkflowEngine engine);
 
     protected VM selectBestVM() {
-        return VMFactory.createVM(environment.getRepresentativeVMType(), getCloudsim());
+        return VMFactory.createVM(representativeVMType, getCloudsim());
     }
 }

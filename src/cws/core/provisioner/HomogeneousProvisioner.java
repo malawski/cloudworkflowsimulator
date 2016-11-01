@@ -1,8 +1,6 @@
 package cws.core.provisioner;
 
-import com.google.common.base.Preconditions;
 import cws.core.Provisioner;
-import cws.core.VM;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.engine.Environment;
@@ -14,18 +12,18 @@ import cws.core.engine.Environment;
 public abstract class HomogeneousProvisioner extends Provisioner {
 
     protected Environment environment;
-    private VMType vmType;
+    private VMType representativeVmType;
 
-    public HomogeneousProvisioner (CloudSimWrapper cloudsim) {
+    public HomogeneousProvisioner (CloudSimWrapper cloudsim, VMType representativeVmType) {
         super(cloudsim);
+        this.representativeVmType = representativeVmType;
     }
 
     public void setEnvironment(Environment environment) {
         this.environment = environment;
-        this.vmType = this.environment.getRepresentativeVMType();
     }
 
-    public VMType getVmType() {
-        return this.vmType;
+    public VMType getRepresentativeVmType() {
+        return representativeVmType;
     }
 }

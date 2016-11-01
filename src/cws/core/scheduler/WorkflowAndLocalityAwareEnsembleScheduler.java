@@ -20,14 +20,12 @@ import cws.core.jobs.Job;
 public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicScheduler {
     private final RuntimePredictioner runtimePredictioner;
     private final WorkflowAdmissioner workflowAdmissioner;
-    private final VMType representativeVMType;
 
     public WorkflowAndLocalityAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment,
-            RuntimePredictioner runtimePredictioner, WorkflowAdmissioner workflowAdmissioner) {
-        super(cloudsim, environment);
+            RuntimePredictioner runtimePredictioner, WorkflowAdmissioner workflowAdmissioner, VMType representativeVMType) {
+        super(cloudsim, environment, representativeVMType);
         this.runtimePredictioner = runtimePredictioner;
         this.workflowAdmissioner = workflowAdmissioner;
-        this.representativeVMType = environment.getRepresentativeVMType();
     }
 
     /**

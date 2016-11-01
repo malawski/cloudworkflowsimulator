@@ -19,13 +19,11 @@ import java.util.Set;
 public class Environment {
     private final Set<VMType> vmTypes;
     private final StorageManager storageManager;
-    private final VMType representativeVmType;
 
-    public Environment(Set<VMType> vmTypes, StorageManager storageManager, VMType representativeVmType) {
+    public Environment(Set<VMType> vmTypes, StorageManager storageManager) {
         Preconditions.checkArgument(!vmTypes.isEmpty(), "Expected vmTypes set not to be empty.");
         this.vmTypes = vmTypes;
         this.storageManager = storageManager;
-        this.representativeVmType = representativeVmType;
     }
 
     /**
@@ -33,13 +31,6 @@ public class Environment {
      */
     public Set<VMType> getVmTypes() {
         return new HashSet<VMType>(this.vmTypes);
-    }
-
-    /**
-     * Returns selected VMType based on environments strategy
-     */
-    public VMType getRepresentativeVMType() {
-        return this.representativeVmType;
     }
 
     /**

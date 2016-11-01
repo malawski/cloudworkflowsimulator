@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
@@ -21,8 +22,8 @@ public class SPSS extends StaticAlgorithm {
     private double alpha;
 
     public SPSS(double budget, double deadline, List<DAG> dags, double alpha, AlgorithmStatistics ensembleStatistics,
-            Environment environment, CloudSimWrapper cloudsim) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
+                Environment environment, CloudSimWrapper cloudsim, VMType representativeVmType) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, representativeVmType);
         this.alpha = alpha;
     }
 
@@ -127,9 +128,9 @@ public class SPSS extends StaticAlgorithm {
 
                     // Option 2: Leave a big gap
                     biggap: {
-                        int runtimeUnits = (int) Math.ceil(runtime / getEnvironment().getBillingTimeInSeconds(getVmType()));
+                        int runtimeUnits = (int) Math.ceil(runtime / getEnvironment().getBillingTimeInSeconds(getRepresentativeVmType()));
 
-                        double ast = r.getStart() - (runtimeUnits * getEnvironment().getBillingTimeInSeconds(getVmType()));
+                        double ast = r.getStart() - (runtimeUnits * getEnvironment().getBillingTimeInSeconds(getRepresentativeVmType()));
                         if (ast < earliestStart) {
                             ast = earliestStart;
                         }
@@ -149,7 +150,7 @@ public class SPSS extends StaticAlgorithm {
 
                     // Option 3: Use some slack time (medium gap)
                     slack: {
-                        double slack = (r.getFullBillingUnits() * getEnvironment().getBillingTimeInSeconds(getVmType()))
+                        double slack = (r.getFullBillingUnits() * getEnvironment().getBillingTimeInSeconds(getRepresentativeVmType()))
                                 - (r.getEnd() - r.getStart());
 
                         double ast = r.getStart() - slack;
