@@ -55,7 +55,7 @@ public class DAGDynamicSchedulerStorageAwareTest {
         environment = new Environment(vmTypes, storageManager);
 
         provisioner = new NullProvisioner(cloudsim);
-        scheduler = new EnsembleDynamicScheduler(cloudsim, environment, vmType);
+        scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
         engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
         cloud = new Cloud(cloudsim);
         provisioner.setCloud(cloud);

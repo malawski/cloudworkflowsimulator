@@ -23,8 +23,8 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
     private HomogeneousProvisioner tempProvisionerStorage;
 
     public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics, Environment environment,
-            CloudSimWrapper cloudsim, VMType vmType, Scheduler scheduler, HomogeneousProvisioner provisioner) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType);
+            CloudSimWrapper cloudsim, Scheduler scheduler, HomogeneousProvisioner provisioner) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
         this.tempProvisionerStorage = provisioner;
         this.scheduler = scheduler;
     }
@@ -41,7 +41,6 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
 
         Cloud cloud = new Cloud(getCloudsim());
 
-        this.tempProvisionerStorage.setEnvironment(getEnvironment());
         this.tempProvisionerStorage.setCloud(cloud);
 
         setWorkflowEngine(new WorkflowEngine(tempProvisionerStorage, scheduler, getBudget(), getDeadline(), getCloudsim()));

@@ -19,12 +19,17 @@ public abstract class HomogeneousAlgorithm extends Algorithm  {
 
     public HomogeneousAlgorithm (double budget, double deadline, List<DAG> dags,
                                  AlgorithmStatistics algorithmStatistics,
-                                 Environment environment, CloudSimWrapper cloudsim, VMType vmType) {
-        super(budget, deadline, dags, algorithmStatistics, cloudsim, vmType);
+                                 Environment environment, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, algorithmStatistics, cloudsim);
+        Preconditions.checkArgument(environment.isHomogeneous(), "Expected environment to be homogeneous.");
         this.environment = environment;
     }
 
-    public final Environment getEnvironment() {
-        return this.environment;
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    public VMType getVmType() {
+        return this.environment.getVmTypes().iterator().next();
     }
 }

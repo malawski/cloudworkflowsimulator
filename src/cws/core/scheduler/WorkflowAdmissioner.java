@@ -2,6 +2,7 @@ package cws.core.scheduler;
 
 import cws.core.VM;
 import cws.core.WorkflowEngine;
+import cws.core.core.VMType;
 import cws.core.jobs.Job;
 
 /**
@@ -9,4 +10,5 @@ import cws.core.jobs.Job;
  */
 public interface WorkflowAdmissioner {
     boolean isJobDagAdmitted(Job job, WorkflowEngine engine, VM vm);
+    VMType getVmType();
 }

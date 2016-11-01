@@ -1,5 +1,6 @@
 package cws.core.provisioner;
 
+import com.google.common.base.Preconditions;
 import cws.core.Provisioner;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
@@ -12,18 +13,14 @@ import cws.core.engine.Environment;
 public abstract class HomogeneousProvisioner extends Provisioner {
 
     protected Environment environment;
-    private VMType vmType;
 
-    public HomogeneousProvisioner (CloudSimWrapper cloudsim, VMType vmType) {
+    public HomogeneousProvisioner (CloudSimWrapper cloudsim, Environment environment) {
         super(cloudsim);
-        this.vmType = vmType;
-    }
-
-    public void setEnvironment(Environment environment) {
+        Preconditions.checkArgument(environment.isHomogeneous(), "Expected environment to be homogeneous.");
         this.environment = environment;
     }
 
     public VMType getVmType() {
-        return vmType;
+        return this.environment.getVmTypes().iterator().next();
     }
 }

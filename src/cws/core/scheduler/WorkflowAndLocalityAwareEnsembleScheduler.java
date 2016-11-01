@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import cws.core.VM;
+import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
@@ -22,8 +23,8 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
     private final WorkflowAdmissioner workflowAdmissioner;
 
     public WorkflowAndLocalityAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment,
-            RuntimePredictioner runtimePredictioner, WorkflowAdmissioner workflowAdmissioner, VMType vmType) {
-        super(cloudsim, environment, vmType);
+            RuntimePredictioner runtimePredictioner, WorkflowAdmissioner workflowAdmissioner) {
+        super(cloudsim, environment);
         this.runtimePredictioner = runtimePredictioner;
         this.workflowAdmissioner = workflowAdmissioner;
     }
@@ -40,7 +41,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
 
             Iterator<Job> it = jobs.iterator();
             while (it.hasNext()) {
-                if (!workflowAdmissioner.isJobDagAdmitted(it.next(), engine, selectBestVM())) {
+                if (!workflowAdmissioner.isJobDagAdmitted(it.next(), engine, VMFactory.createVM(workflowAdmissioner.getVmType(), getCloudsim()))) {
                     it.remove();
                 }
             }
@@ -69,6 +70,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
                         }
                     }
                 }
+                VMType vmType = workflowAdmissioner.getVmType();
                 double speedup = runtimePredictioner.getPredictedRuntime(job.getTask(), null, vmType) - bestFinishTime;
                 if (bestSpeedup == null || speedup > bestSpeedup) {
                     bestSpeedup = speedup;

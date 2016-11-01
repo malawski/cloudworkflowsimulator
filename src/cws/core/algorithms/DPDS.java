@@ -14,7 +14,7 @@ import cws.core.scheduler.EnsembleDynamicScheduler;
 
 public class DPDS extends DynamicAlgorithm {
     public DPDS(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics, Environment environment,
-                CloudSimWrapper cloudsim, VMType vmType, Scheduler scheduler, HomogeneousProvisioner provisioner) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType, scheduler, provisioner);
+                CloudSimWrapper cloudsim, Scheduler scheduler, HomogeneousProvisioner provisioner) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, scheduler, provisioner);
     }
 }

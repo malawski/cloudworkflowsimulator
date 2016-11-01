@@ -51,7 +51,7 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         when(environment.getBillingTimeInSeconds(any(VMType.class))).thenReturn(3600.0);
 
         scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment, new RuntimeWorkflowAdmissioner(cloudsim,
-                new ComputationOnlyRuntimePredictioner(environment), environment, createVMType()), createVMType());
+                new ComputationOnlyRuntimePredictioner(environment), environment, createVMType()));
 
         engine = mock(WorkflowEngine.class);
         when(engine.getDeadline()).thenReturn(10.0);

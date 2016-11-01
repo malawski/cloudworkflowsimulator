@@ -35,16 +35,13 @@ public abstract class Algorithm extends CWSSimEntity {
     /** All simulation's DAGs */
     private List<DAG> dags;
 
-    private VMType vmType;
-
     public Algorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics algorithmStatistics,
-                     CloudSimWrapper cloudsim, VMType vmType) {
+                     CloudSimWrapper cloudsim) {
         super("Algorithm", cloudsim);
         this.budget = budget;
         this.deadline = deadline;
         this.dags = dags;
         this.algorithmStatistics = algorithmStatistics;
-        this.vmType = vmType;
     }
 
     /** Should run actual simulation */
@@ -134,9 +131,5 @@ public abstract class Algorithm extends CWSSimEntity {
     @Override
     public final String getName() {
         return this.getClass().getSimpleName();
-    }
-
-    public VMType getVmType() {
-        return vmType;
     }
 }

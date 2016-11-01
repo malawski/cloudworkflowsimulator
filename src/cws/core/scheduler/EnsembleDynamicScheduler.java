@@ -25,8 +25,8 @@ import cws.core.jobs.Job;
 public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
     private final PriorityQueue<Job> prioritizedJobs = new PriorityQueue<Job>(64, new JobPriorityComparator());
 
-    public EnsembleDynamicScheduler(CloudSimWrapper cloudsim, Environment environment, VMType vmType) {
-        super(cloudsim, environment, vmType);
+    public EnsembleDynamicScheduler(CloudSimWrapper cloudsim, Environment environment) {
+        super(cloudsim, environment);
     }
 
     @Override

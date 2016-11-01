@@ -19,8 +19,8 @@ import cws.core.engine.Environment;
  */
 public class StorageAwareSPSS extends SPSS {
     public StorageAwareSPSS(double budget, double deadline, List<DAG> dags, double alpha, AlgorithmStatistics ensembleStatistics,
-                            Environment environment, CloudSimWrapper cloudsim, VMType vmType) {
-        super(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim, vmType);
+                            Environment environment, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
     }
 
     @Override

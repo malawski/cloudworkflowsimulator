@@ -22,8 +22,8 @@ import cws.core.scheduler.WorkflowAndLocalityAwareEnsembleScheduler;
  */
 public class StorageAndLocalityAwareWADPDS extends DynamicAlgorithm {
     public StorageAndLocalityAwareWADPDS(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-                                         Environment environment, CloudSimWrapper cloudsim, VMType vmType,
-                                         Scheduler scheduler, HomogeneousProvisioner provisioner) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType, scheduler, provisioner);
+                                         Environment environment, CloudSimWrapper cloudsim, Scheduler scheduler,
+                                         HomogeneousProvisioner provisioner) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, scheduler, provisioner);
     }
 }

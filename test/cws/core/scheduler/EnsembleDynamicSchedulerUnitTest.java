@@ -44,7 +44,7 @@ public class EnsembleDynamicSchedulerUnitTest {
 
         VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
-        scheduler = new EnsembleDynamicScheduler(cloudsim, environment, vmType);
+        scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
         engine = mock(WorkflowEngine.class);
         when(engine.getDeadline()).thenReturn(1.0);
 

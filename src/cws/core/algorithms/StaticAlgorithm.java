@@ -54,8 +54,8 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
     private long planningFinishWallTime;
 
     public StaticAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics,
-            Environment environment, CloudSimWrapper cloudsim, VMType vmType) {
-        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim, vmType);
+            Environment environment, CloudSimWrapper cloudsim) {
+        super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
     }
 
     @Override

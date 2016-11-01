@@ -10,6 +10,7 @@ import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
+import cws.core.engine.Environment;
 
 
 public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
@@ -25,8 +26,8 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
     private static final double LOWER_THRESHOLD = 0.70;
     private int initialNumVMs = 0;
 
-    public SimpleUtilizationBasedProvisioner(double maxScaling, CloudSimWrapper cloudsim, VMType vmType) {
-        super(cloudsim, vmType);
+    public SimpleUtilizationBasedProvisioner(double maxScaling, CloudSimWrapper cloudsim, Environment environment) {
+        super(cloudsim, environment);
         this.maxScaling = maxScaling;
     }
 
