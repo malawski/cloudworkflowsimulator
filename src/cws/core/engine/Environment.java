@@ -2,7 +2,6 @@ package cws.core.engine;
 
 import com.google.common.base.Preconditions;
 import cws.core.VM;
-import cws.core.VmTypeSelectionStrategy;
 import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;

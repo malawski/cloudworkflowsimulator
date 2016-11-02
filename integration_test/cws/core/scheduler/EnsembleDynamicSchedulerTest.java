@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.*;
 
 import cws.core.*;
+import cws.core.vmtypeselection.FastestVmTypeSelection;
+import cws.core.vmtypeselection.VmTypeSelectionStrategy;
 import org.junit.Before;
 import org.junit.Test;
 

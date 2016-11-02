@@ -1,6 +1,5 @@
 package cws.core.engine;
 
-import cws.core.VmTypeSelectionStrategy;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.simulation.StorageSimulationParams;

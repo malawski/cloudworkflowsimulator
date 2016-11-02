@@ -15,8 +15,7 @@ public final class VoidWorkflowAdmissioner implements WorkflowAdmissioner {
         return true;
     }
 
-    @Override
-    public VMType getVmType() {
+    public VMType getSelectedVmType() {
         return null;
     }
 }
