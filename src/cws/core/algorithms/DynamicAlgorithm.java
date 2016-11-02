@@ -22,9 +22,8 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
     // remove this.
     private HomogeneousProvisioner tempProvisionerStorage;
 
-    public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, Scheduler scheduler,
-            HomogeneousProvisioner provisioner, AlgorithmStatistics ensembleStatistics, Environment environment,
-            CloudSimWrapper cloudsim) {
+    public DynamicAlgorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics ensembleStatistics, Environment environment,
+            CloudSimWrapper cloudsim, Scheduler scheduler, HomogeneousProvisioner provisioner) {
         super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
         this.tempProvisionerStorage = provisioner;
         this.scheduler = scheduler;
@@ -42,7 +41,6 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
 
         Cloud cloud = new Cloud(getCloudsim());
 
-        this.tempProvisionerStorage.setEnvironment(getEnvironment());
         this.tempProvisionerStorage.setCloud(cloud);
 
         setWorkflowEngine(new WorkflowEngine(tempProvisionerStorage, scheduler, getBudget(), getDeadline(), getCloudsim()));
@@ -68,8 +66,7 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
             return 0;
         }
 
-        //TODO vmType should be selected somehow, important!!
-        VMType vmType = getEnvironment().getVmTypes().iterator().next();
+        VMType vmType = getVmType();
         return (int) Math.ceil(getMaxSpendingSpeedWeCanAfford() / getEnvironment().getVMTypePrice(vmType));
     }
 

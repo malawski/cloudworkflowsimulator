@@ -3,20 +3,12 @@ package cws.core.scheduler;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
+import cws.core.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import cws.core.Cloud;
-import cws.core.EnsembleManager;
-import cws.core.Provisioner;
-import cws.core.VM;
-import cws.core.VMFactory;
-import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.core.VMTypeBuilder;
@@ -28,6 +20,7 @@ import cws.core.log.WorkflowLog;
 import cws.core.provisioner.NullProvisioner;
 import cws.core.storage.StorageManager;
 import cws.core.storage.VoidStorageManager;
+import org.mockito.Mockito;
 
 public class DAGDynamicSchedulerTest {
     private CloudSimWrapper cloudsim;
@@ -47,7 +40,10 @@ public class DAGDynamicSchedulerTest {
 
         storageManager = new VoidStorageManager(cloudsim);
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
-        environment = new Environment(Collections.singleton(vmType), storageManager);
+        Set<VMType> vmTypes = Collections.singleton(vmType);
+        VmTypeSelectionStrategy strategy = Mockito.mock(FastestVmTypeSelection.class);
+        Mockito.when(strategy.selectVmType(vmTypes)).thenReturn(vmType);
+        environment = new Environment(vmTypes, storageManager);
 
         provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);

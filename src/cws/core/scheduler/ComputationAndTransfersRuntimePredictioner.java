@@ -1,6 +1,7 @@
 package cws.core.scheduler;
 
 import cws.core.VM;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
@@ -16,8 +17,8 @@ public final class ComputationAndTransfersRuntimePredictioner implements Runtime
     }
 
     @Override
-    public double getPredictedRuntime(Task task, VM vm) {
-        return environment.getComputationPredictedRuntimeForSingleTask(vm.getVmType(), task) + environment.getTotalTransferTimeEstimation(task, vm);
+    public double getPredictedRuntime(Task task, VM vm, VMType vmType) {
+        return environment.getComputationPredictedRuntimeForSingleTask(vmType, task) + environment.getTotalTransferTimeEstimation(task, vm);
     }
 
     @Override

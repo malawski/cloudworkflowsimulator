@@ -1,5 +1,6 @@
 package cws.core.engine;
 
+import cws.core.VmTypeSelectionStrategy;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.simulation.StorageSimulationParams;
@@ -21,7 +22,7 @@ public class EnvironmentFactory {
      * @return Newly created {@link Environment} instance.
      */
     public static Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams,
-            Set<VMType> vmTypes) {
+                                                Set<VMType> vmTypes) {
         StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
         return new Environment(vmTypes, storageManager);
     }

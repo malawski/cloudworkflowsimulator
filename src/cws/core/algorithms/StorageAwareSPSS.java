@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.CriticalPath;
@@ -17,8 +18,8 @@ import cws.core.engine.Environment;
  * Storage awareness here means that during task runtime estimations, file transfer estimation is taken into account.
  */
 public class StorageAwareSPSS extends SPSS {
-    public StorageAwareSPSS(double budget, double deadline, List<DAG> dags, double alpha,
-            AlgorithmStatistics ensembleStatistics, Environment environment, CloudSimWrapper cloudsim) {
+    public StorageAwareSPSS(double budget, double deadline, List<DAG> dags, double alpha, AlgorithmStatistics ensembleStatistics,
+                            Environment environment, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, alpha, ensembleStatistics, environment, cloudsim);
     }
 

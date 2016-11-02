@@ -7,6 +7,7 @@ import cws.core.VM;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
@@ -21,11 +22,13 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
     private final RuntimePredictioner runtimePredictioner;
     private final Set<DAGJob> admittedDAGs = new HashSet<DAGJob>();
     private final Set<DAGJob> rejectedDAGs = new HashSet<DAGJob>();
+    private final VMType vmType;
 
     public RuntimeWorkflowAdmissioner(CloudSimWrapper cloudsim, RuntimePredictioner runtimePredictioner,
-            Environment environment) {
+                                      Environment environment, VMType vmType) {
         super("WorkflowAdmissioner", cloudsim);
         this.environment = environment;
+        this.vmType = vmType;
         this.runtimePredictioner = runtimePredictioner;
     }
 
@@ -128,7 +131,7 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
         for (String taskName : dag.getTasks()) {
             Task task = dag.getTaskById(taskName);
             if (!admittedDJ.isComplete(task)) {
-                runtimeSum += runtimePredictioner.getPredictedRuntime(task, null);
+                runtimeSum += runtimePredictioner.getPredictedRuntime(task, null, getVmType());
             }
         }
         return costForRuntimeSum(runtimeSum, vm);
@@ -139,5 +142,9 @@ public final class RuntimeWorkflowAdmissioner extends CWSSimEntity implements Wo
         final double billingTimeInSeconds = environment.getBillingTimeInSeconds(vm.getVmType());
         final int cores = vm.getVmType().getCores();
         return (runtime * vmPrice) / (billingTimeInSeconds * cores);
+    }
+
+    public VMType getVmType() {
+        return vmType;
     }
 }

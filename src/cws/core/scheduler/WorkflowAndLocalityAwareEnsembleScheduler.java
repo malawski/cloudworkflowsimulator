@@ -7,8 +7,10 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import cws.core.VM;
+import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 
@@ -39,7 +41,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
 
             Iterator<Job> it = jobs.iterator();
             while (it.hasNext()) {
-                if (!workflowAdmissioner.isJobDagAdmitted(it.next(), engine, selectBestVM())) {
+                if (!workflowAdmissioner.isJobDagAdmitted(it.next(), engine, VMFactory.createVM(workflowAdmissioner.getVmType(), getCloudsim()))) {
                     it.remove();
                 }
             }
@@ -49,9 +51,9 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
             Double bestSpeedup = null;
             for (Job job : jobs) {
                 VM bestLocalVM = freeVms.get(0);
-                double bestFinishTime = runtimePredictioner.getPredictedRuntime(job.getTask(), bestLocalVM);
+                double bestFinishTime = runtimePredictioner.getPredictedRuntime(job.getTask(), bestLocalVM, bestLocalVM.getVmType());
                 for (VM vm : freeVms) {
-                    double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm);
+                    double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm, vm.getVmType());
                     if (estimatedJobFinish <= bestFinishTime) {
                         bestLocalVM = vm;
                         bestFinishTime = estimatedJobFinish;
@@ -61,14 +63,15 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
                 for (VM vm : allVms) {
                     if (!vm.isTerminated() && !vm.isFree()) {
                         double t = vm.getPredictedReleaseTime(environment);
-                        double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm) + t;
+                        double estimatedJobFinish = runtimePredictioner.getPredictedRuntime(job.getTask(), vm, vm.getVmType()) + t;
                         if (estimatedJobFinish < bestFinishTime) {
                             bestLocalVM = vm;
                             bestFinishTime = estimatedJobFinish;
                         }
                     }
                 }
-                double speedup = runtimePredictioner.getPredictedRuntime(job.getTask(), null) - bestFinishTime;
+                VMType vmType = workflowAdmissioner.getVmType();
+                double speedup = runtimePredictioner.getPredictedRuntime(job.getTask(), null, vmType) - bestFinishTime;
                 if (bestSpeedup == null || speedup > bestSpeedup) {
                     bestSpeedup = speedup;
                     bestJob = job;

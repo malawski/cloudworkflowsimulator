@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.Task;
 import cws.core.dag.algorithms.TopologicalOrder;
@@ -21,7 +22,7 @@ public class SPSS extends StaticAlgorithm {
     private double alpha;
 
     public SPSS(double budget, double deadline, List<DAG> dags, double alpha, AlgorithmStatistics ensembleStatistics,
-            Environment environment, CloudSimWrapper cloudsim) {
+                Environment environment, CloudSimWrapper cloudsim) {
         super(budget, deadline, dags, ensembleStatistics, environment, cloudsim);
         this.alpha = alpha;
     }

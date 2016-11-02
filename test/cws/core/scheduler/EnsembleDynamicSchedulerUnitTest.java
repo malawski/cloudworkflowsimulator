@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import cws.core.core.VMType;
+import cws.core.core.VMTypeBuilder;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +41,8 @@ public class EnsembleDynamicSchedulerUnitTest {
         CloudSim.init(0, null, false);
         cloudsim = mock(CloudSimWrapper.class);
         environment = mock(Environment.class);
+
+        VMType vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
 
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
         engine = mock(WorkflowEngine.class);

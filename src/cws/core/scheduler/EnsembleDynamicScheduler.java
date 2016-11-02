@@ -8,6 +8,7 @@ import java.util.Queue;
 
 import cws.core.VM;
 import cws.core.VMFactory;
+import cws.core.VmTypeSelectionStrategy;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;

@@ -8,6 +8,7 @@ import cws.core.WorkflowEngine;
 import cws.core.Provisioner;
 import cws.core.cloudsim.CWSSimEntity;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.log.WorkflowLog;
 
@@ -35,7 +36,7 @@ public abstract class Algorithm extends CWSSimEntity {
     private List<DAG> dags;
 
     public Algorithm(double budget, double deadline, List<DAG> dags, AlgorithmStatistics algorithmStatistics,
-            CloudSimWrapper cloudsim) {
+                     CloudSimWrapper cloudsim) {
         super("Algorithm", cloudsim);
         this.budget = budget;
         this.deadline = deadline;

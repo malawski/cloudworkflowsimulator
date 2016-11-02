@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Queue;
 
 import cws.core.VM;
+import cws.core.VMFactory;
 import cws.core.WorkflowEngine;
 import cws.core.cloudsim.CloudSimWrapper;
+import cws.core.core.VMType;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 
@@ -21,7 +23,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
     private final WorkflowAdmissioner workflowAdmissioner;
 
     public WorkflowAwareEnsembleScheduler(CloudSimWrapper cloudsim, Environment environment,
-            WorkflowAdmissioner workflowAdmissioner) {
+                                          WorkflowAdmissioner workflowAdmissioner) {
         super(cloudsim, environment);
         this.workflowAdmissioner = workflowAdmissioner;
     }
@@ -38,7 +40,8 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         while (!jobs.isEmpty() && !freeVMs.isEmpty()) {
             Job job = jobs.poll();
 
-            if (workflowAdmissioner.isJobDagAdmitted(job, engine, selectBestVM())) {
+            VMType vmType = workflowAdmissioner.getVmType();
+            if (workflowAdmissioner.isJobDagAdmitted(job, engine, VMFactory.createVM(vmType, getCloudsim()))) {
                 VM vm = freeVMs.remove(freeVMs.size() - 1);
                 vm.jobSubmit(job);
             }
