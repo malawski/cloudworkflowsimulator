@@ -1,4 +1,4 @@
-package cws.core;
+package cws.core.vmtypeselection;
 
 import com.google.common.base.Preconditions;
 import cws.core.core.VMType;
@@ -10,9 +10,12 @@ public class FastestVmTypeSelection implements VmTypeSelectionStrategy {
     public VMType selectVmType(Set<VMType> vmTypes) {
         Preconditions.checkArgument(!vmTypes.isEmpty());
         VMType fastestYet = vmTypes.iterator().next();
+        double scoreYet = fastestYet.getCores()*fastestYet.getMips();
         for(VMType currentVmType : vmTypes) {
-            if(currentVmType.getMips() > fastestYet.getMips()) {
+            double currentScore = currentVmType.getCores()*currentVmType.getMips();
+            if(currentScore > scoreYet) {
                 fastestYet = currentVmType;
+                scoreYet = currentScore;
             }
         }
         return fastestYet;

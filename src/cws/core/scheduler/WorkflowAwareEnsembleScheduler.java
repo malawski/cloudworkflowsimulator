@@ -40,7 +40,7 @@ public class WorkflowAwareEnsembleScheduler extends EnsembleDynamicScheduler {
         while (!jobs.isEmpty() && !freeVMs.isEmpty()) {
             Job job = jobs.poll();
 
-            VMType vmType = workflowAdmissioner.getVmType();
+            VMType vmType = workflowAdmissioner.getSelectedVmType();
             if (workflowAdmissioner.isJobDagAdmitted(job, engine, VMFactory.createVM(vmType, getCloudsim()))) {
                 VM vm = freeVMs.remove(freeVMs.size() - 1);
                 vm.jobSubmit(job);

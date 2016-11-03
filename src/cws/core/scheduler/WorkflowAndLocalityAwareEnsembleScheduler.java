@@ -41,7 +41,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
 
             Iterator<Job> it = jobs.iterator();
             while (it.hasNext()) {
-                if (!workflowAdmissioner.isJobDagAdmitted(it.next(), engine, VMFactory.createVM(workflowAdmissioner.getVmType(), getCloudsim()))) {
+                if (!workflowAdmissioner.isJobDagAdmitted(it.next(), engine, VMFactory.createVM(workflowAdmissioner.getSelectedVmType(), getCloudsim()))) {
                     it.remove();
                 }
             }
@@ -70,7 +70,7 @@ public class WorkflowAndLocalityAwareEnsembleScheduler extends DAGDynamicSchedul
                         }
                     }
                 }
-                VMType vmType = workflowAdmissioner.getVmType();
+                VMType vmType = workflowAdmissioner.getSelectedVmType();
                 double speedup = runtimePredictioner.getPredictedRuntime(job.getTask(), null, vmType) - bestFinishTime;
                 if (bestSpeedup == null || speedup > bestSpeedup) {
                     bestSpeedup = speedup;
