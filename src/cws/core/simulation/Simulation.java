@@ -344,7 +344,6 @@ public class Simulation {
         List<DAG> dags = new ArrayList<DAG>();
         Environment environment = EnvironmentFactory.createEnvironment(cloudsim, simulationParams, pricingConfig,
                 vmTypes);
-        System.out.println(environment.getPricingManager());
         double minTime = Double.MAX_VALUE;
         double minCost = Double.MAX_VALUE;
         double maxCost = 0.0;
