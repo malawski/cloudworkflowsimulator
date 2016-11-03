@@ -13,6 +13,7 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.DAGJobListener;
+import cws.core.engine.Environment;
 import cws.core.jobs.Job;
 import cws.core.jobs.Job.Result;
 import cws.core.jobs.JobListener;
@@ -21,12 +22,15 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
     private final List<DAG> allDags;
     private final double budget;
     private final double deadline;
+    private final Environment environment;
 
-    public AlgorithmStatistics(List<DAG> allDags, double budget, double deadline, CloudSimWrapper cloudsim) {
+    public AlgorithmStatistics(List<DAG> allDags, double budget, double deadline, CloudSimWrapper cloudsim,
+            Environment environment) {
         super("AlgorithmStatistics", cloudsim);
         this.allDags = allDags;
         this.budget = budget;
         this.deadline = deadline;
+        this.environment = environment;
     }
 
     private double lastJobFinishTime = 0.0;
@@ -119,11 +123,7 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
      * Returns the cost of all VMs that were ever created till now.
      */
     public double getCost() {
-        double cost = 0;
-        for (VM vm : allVMs) {
-            cost += vm.getCost();
-        }
-        return cost;
+        return environment.getPricingManager().getAllVMsCost(allVMs);
     };
 
     public double getLastDagFinishTime() {
@@ -188,7 +188,7 @@ public class AlgorithmStatistics extends CWSSimEntity implements DAGJobListener,
         }
         return time;
     }
-    
+
     /**
      * Returns total time of all VMs spent on computations. The assumption is that VMs are 1-core.
      */

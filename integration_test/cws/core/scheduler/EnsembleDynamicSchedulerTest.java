@@ -8,6 +8,9 @@ import java.util.*;
 import cws.core.*;
 import cws.core.vmtypeselection.FastestVmTypeSelection;
 import cws.core.vmtypeselection.VmTypeSelectionStrategy;
+import cws.core.pricing.PricingConfigLoader;
+import cws.core.pricing.PricingManager;
+import cws.core.pricing.PricingModelFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,6 +22,9 @@ import cws.core.dag.DAGParser;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.log.WorkflowLog;
+import cws.core.pricing.PricingConfigLoader;
+import cws.core.pricing.PricingManager;
+import cws.core.pricing.PricingModelFactory;
 import cws.core.provisioner.ConstantDistribution;
 import cws.core.provisioner.NullProvisioner;
 import cws.core.storage.StorageManager;
@@ -27,13 +33,21 @@ import org.mockito.Mockito;
 
 public class EnsembleDynamicSchedulerTest {
     private CloudSimWrapper cloudsim;
+
     private Provisioner provisioner;
+
     private EnsembleDynamicScheduler scheduler;
+
     private WorkflowEngine engine;
+
     private Cloud cloud;
+
     private WorkflowLog jobLog;
+
     private StorageManager storageManager;
+
     private Environment environment;
+
     private VMType vmType;
 
     @Before
@@ -41,16 +55,23 @@ public class EnsembleDynamicSchedulerTest {
         cloudsim = new CloudSimWrapper();
         cloudsim.init();
 
+        Map<String, Object> pricingParams = new HashMap<String, Object>();
+        pricingParams.put(PricingConfigLoader.MODEL_ENTRY, "simple");
+        pricingParams.put(PricingConfigLoader.BILLING_TIME_ENTRY, 60);
+        PricingManager pricingManager = new PricingManager(PricingModelFactory.getPricingModel(pricingParams));
+
         storageManager = new VoidStorageManager(cloudsim);
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+
         Set<VMType> vmTypes = Collections.singleton(vmType);
         VmTypeSelectionStrategy strategy = Mockito.mock(FastestVmTypeSelection.class);
         Mockito.when(strategy.selectVmType(vmTypes)).thenReturn(vmType);
-        environment = new Environment(vmTypes, storageManager);
+        environment = new Environment(vmTypes, storageManager, pricingManager);
+
 
         provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
-        engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
+        engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim, environment);
         cloud = new Cloud(cloudsim);
         provisioner.setCloud(cloud);
         cloud.addVMListener(engine);
@@ -59,7 +80,7 @@ public class EnsembleDynamicSchedulerTest {
         engine.addJobListener(jobLog);
     }
 
-    //??ds this is part of provisioner really
+    // ??ds this is part of provisioner really
     @Test
     public void testScheduleVMS() {
         HashSet<VM> vms = new HashSet<VM>();

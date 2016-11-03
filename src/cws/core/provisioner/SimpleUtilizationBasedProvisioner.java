@@ -12,7 +12,6 @@ import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
 import cws.core.engine.Environment;
 
-
 public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
 
     protected static final double PROVISIONER_INTERVAL = 10.0;
@@ -49,7 +48,7 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         double budget = engine.getBudget();
         double deadline = engine.getDeadline();
         double time = getCloudsim().clock();
-        double cost = engine.getCost();
+        double cost = engine.getCost(); // cost of all VMs rounded up to full billing unit
 
         // assuming all VMs are homogeneous
         double vmPrice = environment.getVMTypePrice(getVmType());
@@ -67,11 +66,8 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         for (VM vm : runningVMs) {
             double vmRuntime = vm.getRuntime();
 
-            // full billing units (rounded up)
-            double vmBillingUnits = Math.ceil(vmRuntime / environment.getBillingTimeInSeconds(getVmType()));
-
             // seconds till next full unit
-            double secondsRemaining = vmBillingUnits * environment.getBillingTimeInSeconds(getVmType()) - vmRuntime;
+            double secondsRemaining = environment.getPricingManager().getFullRuntime(vmRuntime) - vmRuntime;
 
             // we add delay estimate to include also the deprovisioning time
             if (secondsRemaining <= environment.getDeprovisioningDelayEstimation(getVmType()) + PROVISIONER_INTERVAL) {
@@ -82,8 +78,8 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         int numVMsCompleting = completingVMs.size();
 
         // if we are close to the budget
-        if (budget - cost < vmPrice * numVMsCompleting
-                || time + environment.getDeprovisioningDelayEstimation(getVmType()) + PROVISIONER_INTERVAL >= deadline) {
+        if (budget - cost < vmPrice * numVMsCompleting || time
+                + environment.getDeprovisioningDelayEstimation(getVmType()) + PROVISIONER_INTERVAL >= deadline) {
 
             // compute number of vms to terminate
             // it is the number that would overrun the budget if not terminated
@@ -97,9 +93,8 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
                 numToTerminate = numVMsRunning;
             }
 
-            getCloudsim().log(
-                    "Provisioner: number of instances to terminate: " + numToTerminate + ", numVMsCompleting: "
-                            + numVMsCompleting + ", numVMsRunning: " + numVMsRunning);
+            getCloudsim().log("Provisioner: number of instances to terminate: " + numToTerminate
+                    + ", numVMsCompleting: " + numVMsCompleting + ", numVMsRunning: " + numVMsRunning);
 
             // set of vms scheduled for termination
             Set<VM> toTerminate = new HashSet<VM>();
@@ -163,10 +158,9 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         double utilization = ((double) busyVMsCount) / (availableVMsCount + launchingVMsCount);
 
         if (!(utilization >= 0.0)) {
-            getCloudsim().log(
-                    "Provisioner: utilization: " + utilization + ", budget consumed: " + cost
-                            + ", number of instances: " + numVMsRunning + ", number of instances completing: "
-                            + numVMsCompleting + ", cost: " + cost + ", budget:" + budget);
+            getCloudsim().log("Provisioner: utilization: " + utilization + ", budget consumed: " + cost
+                    + ", number of instances: " + numVMsRunning + ", number of instances completing: "
+                    + numVMsCompleting + ", cost: " + cost + ", budget:" + budget);
             throw new RuntimeException("Utilization is not >= 0.0");
         }
 
@@ -182,7 +176,8 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         // then: deploy new instance
         double provisioning_interval = PROVISIONER_INTERVAL;
         if (!finishing_phase && utilization > UPPER_THRESHOLD
-                && engine.getAvailableVMs().size() < maxScaling * initialNumVMs && budget - cost >= vmPrice) {
+                && engine.getAvailableVMs().size() < maxScaling * initialNumVMs
+                && budget - cost >= environment.getPricingManager().getPriceForFirstBillingUnit(vmPrice)) {
 
             VM vm = VMFactory.createVM(getVmType(), getCloudsim());
 
@@ -198,7 +193,8 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
             int numToTerminate = (int) Math.ceil(numVMsCompleting / 2.0);
             // Do not terminate too many machines. I.e. so that we will get over upper threshold.
             while (engine.getAvailableVMs().size() - numToTerminate != 0
-                    && (engine.getBusyVMs().size() / (engine.getAvailableVMs().size() - numToTerminate)) > UPPER_THRESHOLD
+                    && (engine.getBusyVMs().size()
+                            / (engine.getAvailableVMs().size() - numToTerminate)) > UPPER_THRESHOLD
                     && numToTerminate > 0) {
                 numToTerminate--;
             }

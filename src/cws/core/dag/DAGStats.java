@@ -5,13 +5,16 @@ import java.util.HashMap;
 import cws.core.core.VMType;
 import cws.core.dag.algorithms.CriticalPath;
 import cws.core.dag.algorithms.TopologicalOrder;
+import cws.core.engine.Environment;
 
 public class DAGStats {
     private double minCost;
     private double criticalPathLength;
     private double totalRuntime;
+    private Environment environment;
 
-    public DAGStats(DAG dag, VMType vmType) {
+    public DAGStats(DAG dag, VMType vmType, Environment environment) {
+        this.environment = environment;
         TopologicalOrder order = new TopologicalOrder(dag);
 
         HashMap<Task, Double> runTimes = computeMinimumCostOfRunningTheWorkflow(order, vmType);
@@ -21,8 +24,7 @@ public class DAGStats {
         criticalPathLength = path.getCriticalPathLength();
     }
 
-    private HashMap<Task, Double> computeMinimumCostOfRunningTheWorkflow
-        (TopologicalOrder order, VMType vmType) {
+    private HashMap<Task, Double> computeMinimumCostOfRunningTheWorkflow(TopologicalOrder order, VMType vmType) {
         totalRuntime = 0.0;
         HashMap<Task, Double> runTimes = new HashMap<Task, Double>();
         for (Task task : order) {
@@ -31,7 +33,7 @@ public class DAGStats {
             totalRuntime += runtime;
         }
 
-        minCost = vmType.getVMCostFor(totalRuntime);
+        minCost = environment.getPricingManager().getVMCostFor(vmType, totalRuntime);
         return runTimes;
     }
 

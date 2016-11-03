@@ -20,7 +20,6 @@ import cws.core.VMListener;
 import cws.core.WorkflowEngine;
 import cws.core.WorkflowEvent;
 import cws.core.cloudsim.CloudSimWrapper;
-import cws.core.core.VMType;
 import cws.core.dag.DAG;
 import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
@@ -59,7 +58,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
     }
 
     @Override
-    public long getPlanningnWallTime() {
+    public long getPlanningWallTime() {
         return planningFinishWallTime - planningStartWallTime;
     }
 
@@ -320,7 +319,7 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
         // Submit the job to the VM
         job.setVM(vm);
         vm.jobSubmit(job);
-        if(!vm.isFree()){
+        if (!vm.isFree()) {
             idleVms.remove(vm);
         }
     }
@@ -347,8 +346,8 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
         Provisioner provisioner = new NullProvisioner(getCloudsim());
         provisioner.setCloud(cloud);
 
-        WorkflowEngine engine = new WorkflowEngine(provisioner, this,
-                getBudget(), getDeadline(), getCloudsim());
+        WorkflowEngine engine = new WorkflowEngine(provisioner, this, getBudget(), getDeadline(), getCloudsim(),
+                getEnvironment());
         EnsembleManager manager = new EnsembleManager(engine, getCloudsim());
 
         setCloud(cloud);
@@ -375,7 +374,8 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
         // Make sure a plan is feasible given the deadline and available VMs
         // FIXME Later we will assign each task to its fastest VM type before this
         CriticalPath path = newCriticalPath(order, runtimes);
-        double minimalTime = path.getCriticalPathLength() + getEnvironment().getVMProvisioningOverallDelayEstimation(getVmType());
+        double minimalTime = path.getCriticalPathLength()
+                + getEnvironment().getVMProvisioningOverallDelayEstimation(getVmType());
         if (minimalTime > getDeadline()) {
             throw new NoFeasiblePlan("Best critical path + provisioning estimates (" + minimalTime + ") "
                     + "> deadline (" + getDeadline() + ")");
@@ -450,31 +450,12 @@ public abstract class StaticAlgorithm extends HomogeneousAlgorithm implements Sc
             return last + lastSlot.duration + environment.getDeprovisioningDelayEstimation(getVmType());
         }
 
-        public int getFullBillingUnits() {
-            return getFullBillingUnitsWith(getStart(), getEnd());
-        }
-
-        public int getFullBillingUnitsWith(double start, double end) {
-            double seconds = end - start;
-            double units = seconds / environment.getBillingTimeInSeconds(getVmType());
-            int rounded = (int) Math.ceil(units);
-            return Math.max(1, rounded);
-        }
-
         public double getCostWith(double start, double end) {
-            return environment.getVMCostFor(getVmType(), end - start);
+            return environment.getPricingManager().getVMCostFor(getVmType(), end - start);
         }
 
         public double getCost() {
             return getCostWith(getStart(), getEnd());
-        }
-
-        public double getUtilization() {
-            double runtime = 0.0;
-            for (Slot sl : schedule.values()) {
-                runtime += sl.duration;
-            }
-            return runtime / (getFullBillingUnits() * environment.getBillingTimeInSeconds(getVmType()));
         }
     }
 

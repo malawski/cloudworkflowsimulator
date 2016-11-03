@@ -43,7 +43,8 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
 
         this.tempProvisionerStorage.setCloud(cloud);
 
-        setWorkflowEngine(new WorkflowEngine(tempProvisionerStorage, scheduler, getBudget(), getDeadline(), getCloudsim()));
+        setWorkflowEngine(new WorkflowEngine(tempProvisionerStorage, scheduler, getBudget(), getDeadline(),
+                getCloudsim(), getEnvironment()));
 
         // WorkflowEngine "owns" the provisioner now, so don't use this
         // reference (otherwise we risk it becoming outdated if the
@@ -71,7 +72,8 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
     }
 
     private double getMaxSpendingSpeedWeCanAfford() {
-        return Math.floor(getBudget()) / Math.ceil((getDeadline() / getEnvironment().getBillingTimeInSeconds(getVmType())));
+        return Math.floor(getBudget())
+                / Math.ceil((getDeadline() / getEnvironment().getPricingManager().getBillingTimeInSeconds()));// getBillingTimeInSeconds(getVmType())));
     }
 
     private boolean canAffordAtLeastOneVM() {
@@ -92,7 +94,7 @@ public class DynamicAlgorithm extends HomogeneousAlgorithm {
     }
 
     @Override
-    public long getPlanningnWallTime() {
+    public long getPlanningWallTime() {
         // planning is always 0 for dynamic algorithms
         return 0;
     }

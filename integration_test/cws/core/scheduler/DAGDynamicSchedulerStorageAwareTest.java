@@ -9,8 +9,11 @@ import java.util.Set;
 import cws.core.*;
 import cws.core.vmtypeselection.FastestVmTypeSelection;
 import cws.core.vmtypeselection.VmTypeSelectionStrategy;
+import java.util.*;
+
 import org.junit.Before;
 import org.junit.Test;
+
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
@@ -19,6 +22,9 @@ import cws.core.dag.DAG;
 import cws.core.dag.DAGParser;
 import cws.core.engine.Environment;
 import cws.core.log.WorkflowLog;
+import cws.core.pricing.PricingConfigLoader;
+import cws.core.pricing.PricingManager;
+import cws.core.pricing.PricingModelFactory;
 import cws.core.provisioner.NullProvisioner;
 import cws.core.storage.StorageManager;
 import cws.core.storage.cache.FIFOCacheManager;
@@ -27,16 +33,25 @@ import cws.core.storage.global.GlobalStorageManager;
 import cws.core.storage.global.GlobalStorageParams;
 import org.mockito.Mockito;
 
-
 public class DAGDynamicSchedulerStorageAwareTest {
     private VMType vmType;
+
     private CloudSimWrapper cloudsim;
+
     private Provisioner provisioner;
+
     private DAGDynamicScheduler scheduler;
+
     private WorkflowEngine engine;
+
     private Cloud cloud;
+
     private WorkflowLog jobLog;
+
     private StorageManager storageManager;
+
+    private PricingManager pricingManager;
+
     private Environment environment;
 
     @Before
@@ -48,17 +63,24 @@ public class DAGDynamicSchedulerStorageAwareTest {
         params.setReadSpeed(2000000.0);
         params.setWriteSpeed(1000000.0);
 
+        Map<String, Object> pricingParams = new HashMap<String, Object>();
+
+        pricingParams.put(PricingConfigLoader.MODEL_ENTRY, "simple");
+        pricingParams.put(PricingConfigLoader.BILLING_TIME_ENTRY, 60);
+        PricingManager pricingManager = new PricingManager(PricingModelFactory.getPricingModel(pricingParams));
+
         VMCacheManager cacheManager = new FIFOCacheManager(cloudsim);
         storageManager = new GlobalStorageManager(params, cacheManager, cloudsim);
         vmType = VMTypeBuilder.newBuilder().mips(1).cores(1).price(1.0).build();
+
         Set<VMType> vmTypes = Collections.singleton(vmType);
         VmTypeSelectionStrategy strategy = Mockito.mock(FastestVmTypeSelection.class);
         Mockito.when(strategy.selectVmType(vmTypes)).thenReturn(vmType);
-        environment = new Environment(vmTypes, storageManager);
+        environment = new Environment(vmTypes, storageManager, pricingManager);
 
         provisioner = new NullProvisioner(cloudsim);
         scheduler = new EnsembleDynamicScheduler(cloudsim, environment);
-        engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim);
+        engine = new WorkflowEngine(provisioner, scheduler, Double.MAX_VALUE, Double.MAX_VALUE, cloudsim, environment);
         cloud = new Cloud(cloudsim);
         provisioner.setCloud(cloud);
         cloud.addVMListener(engine);
@@ -70,18 +92,8 @@ public class DAGDynamicSchedulerStorageAwareTest {
     @Test
     public void shouldTakeIntoConsiderationTransferMakespans() {
         /**
-         * input DAG:
-         *
-         * .....| in.txt 100B = 50s read
-         * .....|
-         * ...ID000 2s
-         * .....|
-         * .....| mid.txt 1000B = 500s read, 1000s write
-         * .....|
-         * ...ID001 40s
-         * .....|
-         * .....| out.txt 200B = 200s write
-         *
+         * input DAG: .....| in.txt 100B = 50s read .....| ...ID000 2s .....| .....| mid.txt 1000B = 500s read, 1000s
+         * write .....| ...ID001 40s .....| .....| out.txt 200B = 200s write
          */
 
         launchVM();
@@ -89,14 +101,8 @@ public class DAGDynamicSchedulerStorageAwareTest {
         startSimulation(dags);
 
         /**
-         * expected:
-         *
-         * ... 50.0 Read in.txt
-         * .... 2.0 Run job ID000
-         * . 1000.0 Write mid.txt
-         * .. 500.0 Read mid.txt
-         * ... 40.0 Run job ID001
-         * .. 200.0 Write out.txt
+         * expected: ... 50.0 Read in.txt .... 2.0 Run job ID000 . 1000.0 Write mid.txt .. 500.0 Read mid.txt ... 40.0
+         * Run job ID001 .. 200.0 Write out.txt
          */
     }
 

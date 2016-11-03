@@ -23,11 +23,6 @@ public class VMType implements Cloneable {
     private final double billingUnitPrice;
 
     /**
-     * For how long we pay in advance
-     */
-    private final double billingTimeInSeconds;
-
-    /**
      * Delay from when the VM is launched until it is ready
      */
     private final ContinuousDistribution provisioningDelay;
@@ -55,10 +50,6 @@ public class VMType implements Cloneable {
         return billingUnitPrice;
     }
 
-    public double getBillingTimeInSeconds() {
-        return billingTimeInSeconds;
-    }
-
     public ContinuousDistribution getProvisioningDelay() {
         return provisioningDelay;
     }
@@ -75,12 +66,6 @@ public class VMType implements Cloneable {
         return task.getSize() / getMips();
     }
 
-    public double getVMCostFor(double runtimeInSeconds) {
-        double billingUnits = runtimeInSeconds / getBillingTimeInSeconds();
-        int fullBillingUnits = (int) Math.ceil(billingUnits);
-        return Math.max(1, fullBillingUnits) * getPriceForBillingUnit();
-    }
-
     public double getProvisioningOverallDelayEstimation() {
         return getProvisioningDelay().sample() + getDeprovisioningDelay().sample();
     }
@@ -89,12 +74,11 @@ public class VMType implements Cloneable {
         return getDeprovisioningDelay().sample();
     }
 
-    public VMType(double mips, int cores, double billingUnitPrice, double billingTimeInSeconds,
-            ContinuousDistribution provisioningTime, ContinuousDistribution deprovisioningTime, long cacheSize) {
+    public VMType(double mips, int cores, double billingUnitPrice, ContinuousDistribution provisioningTime,
+            ContinuousDistribution deprovisioningTime, long cacheSize) {
         this.mips = mips;
         this.cores = cores;
         this.billingUnitPrice = billingUnitPrice;
-        this.billingTimeInSeconds = billingTimeInSeconds;
         this.provisioningDelay = provisioningTime;
         this.deprovisioningDelay = deprovisioningTime;
         this.cacheSize = cacheSize;
@@ -108,15 +92,13 @@ public class VMType implements Cloneable {
             return false;
         final VMType vmType = (VMType) o;
         return Double.compare(vmType.mips, mips) == 0 && cores == vmType.cores
-                && Double.compare(vmType.billingUnitPrice, billingUnitPrice) == 0
-                && Double.compare(vmType.billingTimeInSeconds, billingTimeInSeconds) == 0
-                && cacheSize == vmType.cacheSize && Objects.equal(provisioningDelay, vmType.provisioningDelay)
+                && Double.compare(vmType.billingUnitPrice, billingUnitPrice) == 0 && cacheSize == vmType.cacheSize
+                && Objects.equal(provisioningDelay, vmType.provisioningDelay)
                 && Objects.equal(deprovisioningDelay, vmType.deprovisioningDelay);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mips, cores, billingUnitPrice, billingTimeInSeconds, provisioningDelay,
-                deprovisioningDelay, cacheSize);
+        return Objects.hashCode(mips, cores, billingUnitPrice, provisioningDelay, deprovisioningDelay, cacheSize);
     }
 }

@@ -2,10 +2,13 @@ package cws.core.engine;
 
 import cws.core.cloudsim.CloudSimWrapper;
 import cws.core.core.VMType;
+import cws.core.pricing.PricingManager;
+import cws.core.pricing.PricingModelFactory;
 import cws.core.simulation.StorageSimulationParams;
 import cws.core.storage.StorageManager;
 import cws.core.storage.StorageManagerFactory;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -21,8 +24,9 @@ public class EnvironmentFactory {
      * @return Newly created {@link Environment} instance.
      */
     public static Environment createEnvironment(CloudSimWrapper cloudsim, StorageSimulationParams simulationParams,
-                                                Set<VMType> vmTypes) {
+            Map<String, Object> pricingConfig, Set<VMType> vmTypes) {
         StorageManager storageManager = StorageManagerFactory.createStorage(simulationParams, cloudsim);
-        return new Environment(vmTypes, storageManager);
+        PricingManager pricingManager = new PricingManager(PricingModelFactory.getPricingModel(pricingConfig));
+        return new Environment(vmTypes, storageManager, pricingManager);
     }
 }

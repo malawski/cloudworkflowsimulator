@@ -15,21 +15,21 @@ import cws.core.jobs.RuntimeDistribution;
 
 /**
  * A VM is a virtual machine that executes Jobs.
- *
+ * <p>
  * It has a number of cores, and each core has a certain power measured
  * in MIPS (millions of instructions per second).
- *
+ * <p>
  * It has an input Port that is used to transfer data to the VM, and an output
  * Port that is used to transfer data from the VM. Both ports have the same
  * bandwidth.
- *
+ * <p>
  * Jobs can be queued and are executed in FIFO order. The scheduling is
  * space shared.
- *
+ * <p>
  * It has a price per billing unit. The cost of a VM is computed by multiplying the
  * runtime in billing units by the billing unit price. The runtime is rounded up to the
  * nearest billing unit for this calculation.
- *
+ * <p>
  * Each VM has a provisioning delay between when it is launched and when it
  * is ready, and a deprovisioning delay between when it is terminated and
  * when the provider stops charging for it.
@@ -40,49 +40,79 @@ public class VM extends CWSSimEntity {
 
     private static int nextId = 0;
 
-    /** Contains VM parameters like cores number, price for billing unit **/
+    /**
+     * Contains VM parameters like cores number, price for billing unit
+     **/
     private final VMType vmType;
 
-    /** The SimEntity that owns this VM */
+    /**
+     * The SimEntity that owns this VM
+     */
     private int owner = -1;
 
-    /** The Cloud that runs this VM */
+    /**
+     * The Cloud that runs this VM
+     */
     private int cloud = -1;
 
-    /** Current idle cores */
+    /**
+     * Current idle cores
+     */
     private int idleCores;
 
-    /** Queue of jobs submitted to this VM */
+    /**
+     * Queue of jobs submitted to this VM
+     */
     private final LinkedList<Job> jobs;
 
-    /** Set of jobs currently running */
+    /**
+     * Set of jobs currently running
+     */
     private final Set<Job> runningJobs;
 
-    /** Time that the VM was launched */
+    /**
+     * Time that the VM was launched
+     */
     private double launchTime;
 
-    /** Time that the VM was terminated */
+    /**
+     * Time that the VM was terminated
+     */
     private double terminateTime;
 
-    /** Has this VM been terminated? */
+    /**
+     * Has this VM been terminated?
+     */
     private boolean isTerminated;
 
-    /** Has this VM been started? */
+    /**
+     * Has this VM been started?
+     */
     private boolean isLaunched;
 
-    /** Varies the actual runtime of tasks according to the specified distribution */
+    /**
+     * Varies the actual runtime of tasks according to the specified distribution
+     */
     private final RuntimeDistribution runtimeDistribution;
 
-    /** Varies the failure rate of tasks according to a specified distribution */
+    /**
+     * Varies the failure rate of tasks according to a specified distribution
+     */
     private final FailureModel failureModel;
 
-    /** Read intervals of all jobs. */
+    /**
+     * Read intervals of all jobs.
+     */
     private final Map<Job, Interval> readIntervals = new HashMap<Job, VM.Interval>();
 
-    /** Write intervals of all jobs. */
+    /**
+     * Write intervals of all jobs.
+     */
     private final Map<Job, Interval> writeIntervals = new HashMap<Job, VM.Interval>();
 
-    /** Computation intervals of all jobs. */
+    /**
+     * Computation intervals of all jobs.
+     */
     private final Map<Job, Interval> computationIntervals = new HashMap<Job, VM.Interval>();
 
     VM(VMType vmType, CloudSimWrapper cloudsim, FailureModel failureModel, RuntimeDistribution runtimeDistribution) {
@@ -122,10 +152,9 @@ public class VM extends CWSSimEntity {
     }
 
     /**
-     * Runtime of the VM in seconds. If the VM has not been launched, then
-     * the result is 0. If the VM is not terminated, then we use the current
-     * simulation time as the termination time. After the VM is terminated
-     * the runtime does not change.
+     * Runtime of the VM in seconds. If the VM has not been launched, then the result is 0. If the VM is not terminated,
+     * then we use the current simulation time as the termination time. After the VM is terminated the runtime does not
+     * change.
      */
     public double getRuntime() {
         if (launchTime < 0)
@@ -136,41 +165,30 @@ public class VM extends CWSSimEntity {
             return terminateTime - launchTime;
     }
 
-    /**
-     * Compute the total cost of this VM. This is computed by taking the
-     * runtime, rounding it up to the nearest whole billing unit, and multiplying
-     * by the billing unit price.
-     */
-    public double getCost() {
-        double billingUnits = getRuntime() / vmType.getBillingTimeInSeconds();
-        double fullBillingUnits = Math.ceil(billingUnits);
-        return fullBillingUnits * vmType.getPriceForBillingUnit();
-    }
-
     @Override
     public void processEvent(CWSSimEvent ev) {
         if (!isTerminated) {
             switch (ev.getTag()) {
-            case WorkflowEvent.VM_LAUNCH:
-                launch();
-                break;
-            case WorkflowEvent.VM_TERMINATE:
-                terminate();
-                break;
-            case WorkflowEvent.JOB_SUBMIT:
-                jobSubmit((Job) ev.getData());
-                break;
-            case WorkflowEvent.JOB_FINISHED:
-                jobFinish((Job) ev.getData());
-                break;
-            case WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED:
-                allInputsTransferred((Job) ev.getData());
-                break;
-            case WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED:
-                allOutputsTransferred((Job) ev.getData());
-                break;
-            default:
-                throw new UnknownWorkflowEventException("Unknown event: " + ev);
+                case WorkflowEvent.VM_LAUNCH:
+                    launch();
+                    break;
+                case WorkflowEvent.VM_TERMINATE:
+                    terminate();
+                    break;
+                case WorkflowEvent.JOB_SUBMIT:
+                    jobSubmit((Job) ev.getData());
+                    break;
+                case WorkflowEvent.JOB_FINISHED:
+                    jobFinish((Job) ev.getData());
+                    break;
+                case WorkflowEvent.STORAGE_ALL_BEFORE_TRANSFERS_COMPLETED:
+                    allInputsTransferred((Job) ev.getData());
+                    break;
+                case WorkflowEvent.STORAGE_ALL_AFTER_TRANSFERS_COMPLETED:
+                    allOutputsTransferred((Job) ev.getData());
+                    break;
+                default:
+                    throw new UnknownWorkflowEventException("Unknown event: " + ev);
             }
         } else {
             if (ev.getTag() == WorkflowEvent.VM_LAUNCH || ev.getTag() == WorkflowEvent.JOB_SUBMIT) {
@@ -186,7 +204,7 @@ public class VM extends CWSSimEntity {
     void launch() {
         Preconditions.checkState(!isLaunched, "Attempted to launch already launched VM:" + this.getId());
         isLaunched = true;
-        getCloudsim().log(String.format("VM %d with %d cores started", getId(), this.vmType.getCores()));
+        getCloudsim().log(String.format(Locale.US, "VM %d with %d cores started, and with price %f", getId(), this.vmType.getCores(), this.vmType.getPriceForBillingUnit()));
     }
 
     /**
@@ -459,6 +477,7 @@ public class VM extends CWSSimEntity {
      */
     private final class Interval {
         private final double startTime = getCloudsim().clock();
+
         private Double endTime;
 
         /**

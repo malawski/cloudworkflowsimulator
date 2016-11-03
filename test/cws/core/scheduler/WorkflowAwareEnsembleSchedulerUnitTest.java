@@ -3,6 +3,7 @@ package cws.core.scheduler;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import cws.core.pricing.PricingManager;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,12 +31,14 @@ import cws.core.dag.DAGJob;
 import cws.core.dag.Task;
 import cws.core.engine.Environment;
 import cws.core.jobs.Job;
+import org.mockito.internal.matchers.Any;
 
 public class WorkflowAwareEnsembleSchedulerUnitTest {
     WorkflowAwareEnsembleScheduler scheduler;
     WorkflowEngine engine;
     CloudSimWrapper cloudsim;
     Environment environment;
+    PricingManager pricingManager;
 
     List<Job> jobs;
     List<VM> freeVMs;
@@ -48,7 +52,6 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         environment = mock(Environment.class);
 
         when(environment.getVMTypePrice(any(VMType.class))).thenReturn(1.0);
-        when(environment.getBillingTimeInSeconds(any(VMType.class))).thenReturn(3600.0);
 
         scheduler = new WorkflowAwareEnsembleScheduler(cloudsim, environment, new RuntimeWorkflowAdmissioner(cloudsim,
                 new ComputationOnlyRuntimePredictioner(environment), environment, createVMType()));
@@ -62,6 +65,8 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
 
         when(engine.getAndClearReleasedJobs()).thenReturn(jobs);
         when(engine.getFreeVMs()).thenReturn(freeVMs);
+
+        pricingManager = mock(PricingManager.class);
     }
 
     @Test
@@ -82,7 +87,11 @@ public class WorkflowAwareEnsembleSchedulerUnitTest {
         VM vm = createVMMock(createVMType());
         freeVMs.add(vm);
 
-        when(environment.getComputationPredictedRuntimeForDAG(vm.getVmType(), job.getDAGJob().getDAG())).thenReturn(10.0);
+        when(environment.getComputationPredictedRuntimeForDAG(vm.getVmType(), job.getDAGJob().getDAG()))
+                .thenReturn(10.0);
+        when(environment.getPricingManager()).thenReturn(pricingManager);
+        when(pricingManager.getRuntimeVMCost(any(VM.class))).thenReturn(0.0);
+        when(pricingManager.getAlreadyPaidCost(any(VM.class))).thenReturn(0.0);
 
         scheduler.scheduleJobs(engine);
 

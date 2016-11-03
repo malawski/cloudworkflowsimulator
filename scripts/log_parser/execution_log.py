@@ -3,7 +3,7 @@ import StringIO
 
 TaskLog = namedtuple('TaskLog', 'id workflow task_id vm started finished result')
 TransferLog = namedtuple('TransferLog', 'id vm started finished direction job_id file_id')
-VMLog = namedtuple('VMLog', 'id started finished cores')
+VMLog = namedtuple('VMLog', 'id started finished cores price_for_billing_unit')
 Workflow = namedtuple('Workflow', 'id priority filename')
 StorageState = namedtuple('StorageState', 'time readers_number writers_number read_speed write_speed')
 
@@ -22,7 +22,7 @@ class ExecutionLog(object):
 
     def add_event(self, type, event):
         if not (type == EventType.TASK and event.started is None):
-          self.events[type].append(event)
+            self.events[type].append(event)
 
     def add_workflow(self, workflow):
         self.workflows.append(workflow)
@@ -35,11 +35,14 @@ class ExecutionLog(object):
     def dumps(self):
         output = StringIO.StringIO()
 
-        output.write('{} {} {}\n'.format(self.settings.deadline, self.settings.budget, self.settings.vm_cost_per_hour))
+        output.write('{} {} {} {} {}\n'.format(self.settings.deadline, self.settings.budget,
+                                               self.settings.pricing_model, self.settings.billing_time_in_seconds,
+                                               self.settings.first_billing_time_in_seconds))
 
         output.write('{}\n'.format(len(self.events[EventType.VM])))
         for vm_event in self.events[EventType.VM]:
-            output.write('{} {} {} {}\n'.format(vm_event.id, vm_event.started, vm_event.finished, vm_event.cores))
+            output.write('{} {} {} {} {}\n'.format(vm_event.id, vm_event.started, vm_event.finished, vm_event.cores,
+                                                   vm_event.price_for_billing_unit))
 
         output.write('{}\n'.format(len(self.workflows)))
         for workflow in self.workflows:
@@ -49,19 +52,19 @@ class ExecutionLog(object):
         for task_event in self.events[EventType.TASK]:
             output.write(
                 '{} {} {} {} {} {} {}\n'.format(task_event.id, task_event.workflow, task_event.task_id, task_event.vm,
-                    task_event.started, task_event.finished, task_event.result))
+                                                task_event.started, task_event.finished, task_event.result))
 
         output.write('{}\n'.format(len(self.events[EventType.TRANSFER])))
         for transfer_event in self.events[EventType.TRANSFER]:
             output.write('{} {} {} {} {} {} {}\n'.format(transfer_event.id, transfer_event.vm, transfer_event.started,
-                transfer_event.finished, transfer_event.direction,
-                transfer_event.job_id, transfer_event.file_id))
+                                                         transfer_event.finished, transfer_event.direction,
+                                                         transfer_event.job_id, transfer_event.file_id))
 
         output.write('{}\n'.format(len(self.events[EventType.STORAGE_STATE])))
         for storage_state in self.events[EventType.STORAGE_STATE]:
             output.write('{} {} {} {} {}\n'.format(storage_state.time, storage_state.readers_number,
-                storage_state.writers_number, storage_state.read_speed,
-                storage_state.write_speed))
+                                                   storage_state.writers_number, storage_state.read_speed,
+                                                   storage_state.write_speed))
 
         contents = output.getvalue()
         output.close()

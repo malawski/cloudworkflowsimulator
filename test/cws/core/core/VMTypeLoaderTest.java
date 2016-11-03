@@ -81,12 +81,10 @@ public class VMTypeLoaderTest {
 
     @Test
     public void shouldLoadPricing() {
-        billingConfig.put("unitTime", 60.0);
         billingConfig.put("unitPrice", 2.4);
 
         VMType vmType = vmLoader.loadVM(config);
 
-        Assert.assertEquals(60.0, vmType.getBillingTimeInSeconds());
         Assert.assertEquals(2.4, vmType.getPriceForBillingUnit());
     }
 
@@ -136,13 +134,6 @@ public class VMTypeLoaderTest {
     @Test(expected = IllegalCWSArgumentException.class)
     public void shouldFailIfBillingSectionIsMissing() {
         config.remove("billing");
-
-        vmLoader.loadVM(config);
-    }
-
-    @Test(expected = IllegalCWSArgumentException.class)
-    public void shouldFailIfPricingUnitIsMissing() {
-        billingConfig.remove("unitTime");
 
         vmLoader.loadVM(config);
     }
