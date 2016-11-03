@@ -9,6 +9,11 @@ import cws.core.jobs.Job;
  * Workflow admissioner that always admissions workflows.
  */
 public final class VoidWorkflowAdmissioner implements WorkflowAdmissioner {
+    private final VMType selectedVmType;
+
+    public VoidWorkflowAdmissioner(VMType selectedVmType) {
+        this.selectedVmType = selectedVmType;
+    }
 
     @Override
     public boolean isJobDagAdmitted(Job job, WorkflowEngine engine, VM vm) {
@@ -16,6 +21,6 @@ public final class VoidWorkflowAdmissioner implements WorkflowAdmissioner {
     }
 
     public VMType getSelectedVmType() {
-        return null;
+        return this.selectedVmType;
     }
 }

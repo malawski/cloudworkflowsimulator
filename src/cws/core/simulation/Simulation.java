@@ -555,7 +555,7 @@ public class Simulation {
             return new DPDS(budget, deadline, dags, ensembleStatistics, environment, cloudsim, scheduler, provisioner);
         } else if ("L-DPDS".equals(algorithmName)) {
             predictioner = new ComputationAndTransfersRuntimePredictioner(environment);
-            admissioner = new VoidWorkflowAdmissioner();
+            admissioner = new VoidWorkflowAdmissioner(vmType);
             scheduler = new WorkflowAndLocalityAwareEnsembleScheduler(cloudsim, environment, predictioner, admissioner);
             return new LocalityAwareDPDS(budget, deadline, dags, ensembleStatistics, environment, cloudsim, scheduler, provisioner);
         } else if ("WADPDS".equals(algorithmName)) {
