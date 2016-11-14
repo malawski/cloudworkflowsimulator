@@ -39,3 +39,4 @@ junitvmwatcher*.properties
 
 test_bin
 testSimulationTest
+/MANIFEST.MF

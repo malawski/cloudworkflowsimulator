@@ -9,6 +9,7 @@
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
   <property name="build" location="bin"/>
+    <property name="lib" location="lib"/>
   <property name="test.dir" location="test"/>
   <property name="testbuild" location="test_bin"/>
   <property name="script.dir" location="scripts"/>
@@ -17,7 +18,11 @@
   <property name="test.data.dir" location="test_results"/>
   <property name="test.reports.dir" location="${test.data.dir}/reports"/>
 
-
+    <manifest file="MANIFEST.MF">
+        <!--default class of the jar to be loaded-->
+        <attribute name="Main-Class"
+                   value="cws.core.simulation.Simulation"/>
+    </manifest>
 
   <path id="build.classpath">
     <fileset dir="lib" includes="*.jar"/>
@@ -62,7 +67,7 @@
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}" classpathref="build.classpath"
-           includeantruntime="false"/>
+           includeantruntime="false" source="6" target="6"/>
   </target>
 
 
@@ -75,6 +80,16 @@
     <jar jarfile="${dist}/cloudworkflowsimulator.jar" basedir="${build}"/>
   </target>
 
+    <target name="dist-fat-jar" depends="compile"
+            description="generate the distribution">
+        <!-- Create the distribution directory -->
+        <mkdir dir="${dist}"/>
+
+        <!-- Put everything in ${build} into the jar file and include every library from ${lib} as well -->
+        <jar jarfile="${dist}/cloudworkflowsimulator-fat.jar" basedir="${build}" manifest="MANIFEST.MF">
+            <zipgroupfileset dir="${lib}" includes="**/*.jar"/>
+        </jar>
+    </target>
 
   <target name="test-build" depends="compile"
           description="build the java unit and integration tests" >
