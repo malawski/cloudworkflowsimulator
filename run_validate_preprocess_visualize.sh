@@ -4,8 +4,8 @@ set -e
 trap "exit" INT
 
 #script parameters
-PREPROCCESSED_LOGS_DIR="preprocessed_logs"
-VISUALISATION_DIR="visualised_results"
+SIM_DIR=`date +%Y-%m-%d:%H:%M:%S`
+PREPROCCESSED_LOGS_DIR="preprocessed"
 VISUALISATION_RUBY_SCRIPT=visualize_exp_score.rb
 
 #simulation parameters
@@ -19,7 +19,7 @@ STORAGE_MNG=void
 ENSEMBLE_SIZE=10
 SCALING_FACTOR=1.0
 STORAGE_CACHE=void
-SEED=123123
+SEED=123124
 ENABLE_LOGGING=true
 LOG_TO_STDOUT=false
 RUNS=1
@@ -45,7 +45,9 @@ for preprocessed_logfile in ${PREPROCCESSED_LOGS_DIR}/*_preprocessed.log; do
     PATH_TO_PREPROCESSED_LOGFILE="./../"${preprocessed_logfile}
     echo "Validating "${preprocessed_logfile}
     cd scripts
+    set +e
     python -m validation.experiment_validator $PATH_TO_PREPROCESSED_LOGFILE
+    set -e
     cd ..
 done
 
@@ -54,6 +56,7 @@ for preprocessed_logfile in ${PREPROCCESSED_LOGS_DIR}/*_preprocessed.log; do
     TMP="../../"${preprocessed_logfile}
     cd scripts/visualisation
     echo `pwd`
+    TMP2="../"$TMP
     echo "Drawing results graph for "${TMP}
     ruby plot_gantt.rb results $TMP ${TMP}_results_graph
     echo "Drawing workflow graph for "${TMP}
@@ -66,3 +69,13 @@ done
 #visualising score for every budget
 echo "Rendering graphs with exp. score and normalized deadline"
 ruby $VISUALISATION_RUBY_SCRIPT $LOGFILE $BUDGETS
+
+#moving created files to sorted directories for cleaner view
+mkdir -p $SIM_DIR/logs
+mkdir -p $SIM_DIR/csv
+mkdir -p $SIM_DIR/scores
+
+mv $PREPROCCESSED_LOGS_DIR/ $SIM_DIR/logs
+mv *csv $SIM_DIR/csv
+mv *log $SIM_DIR/logs
+mv *png $SIM_DIR/scores
