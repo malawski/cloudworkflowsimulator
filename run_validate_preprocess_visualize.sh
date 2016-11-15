@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 trap "exit" INT
 
 #script parameters
