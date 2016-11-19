@@ -146,7 +146,7 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         }
 
         // compute utilization
-        if (engine.getAvailableVMs().size() == 0) {
+        if (engine.getAvailableVMs().size() == 0 && engine.getLaunchingVMs().size() == 0) {
             // No machines - finish.
             return;
         }
@@ -173,11 +173,13 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
         // and utilization is high
         // and we are below max limit
         // and we have money left for one instance more
+        // and we have enough time to provision new VM
         // then: deploy new instance
         double provisioning_interval = PROVISIONER_INTERVAL;
         if (!finishing_phase && utilization > UPPER_THRESHOLD
                 && engine.getAvailableVMs().size() < maxScaling * initialNumVMs
-                && budget - cost >= environment.getPricingManager().getPriceForFirstBillingUnit(vmPrice)) {
+                && budget - cost >= environment.getPricingManager().getPriceForFirstBillingUnit(vmPrice)
+                && time + getVmType().getProvisioningDelay().sample() + PROVISIONER_INTERVAL < deadline) {
 
             VM vm = VMFactory.createVM(getVmType(), getCloudsim());
 
@@ -201,7 +203,8 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
             if (numToTerminate > 0) {
                 Iterator<VM> vmIt = completingVMs.iterator();
                 for (int i = 0; i < numToTerminate && vmIt.hasNext(); i++) {
-                    toTerminate.add(vmIt.next());
+                    VM toAdd = vmIt.next();
+                    toTerminate.add(toAdd);
                 }
 
                 terminateInstances(engine, toTerminate);
