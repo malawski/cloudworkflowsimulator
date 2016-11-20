@@ -138,7 +138,7 @@ public class SimpleUtilizationBasedProvisioner extends HomogeneousProvisioner {
 
             // some instances may be still running so we want to be invoked again to stop them before they reach full
             // billing unit
-            if (engine.getAvailableVMs().size() > 0)
+            if (engine.getAvailableVMs().size() > 0 || engine.getLaunchingVMs().size() > 0)
                 getCloudsim().send(engine.getId(), engine.getId(), PROVISIONER_INTERVAL,
                         WorkflowEvent.PROVISIONING_REQUEST, null);
             // return without further provisioning
