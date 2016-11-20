@@ -1,10 +1,6 @@
 package cws.core.scheduler;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 
 import cws.core.VM;
 import cws.core.WorkflowEngine;
@@ -58,7 +54,9 @@ public class EnsembleDynamicScheduler extends DAGDynamicScheduler {
     private static final class JobPriorityComparator implements Comparator<Job> {
         @Override
         public int compare(Job job1, Job job2) {
-            return Integer.compare(job1.getDAGJob().getPriority(), job2.getDAGJob().getPriority());
+            final int p1 = job1.getDAGJob().getPriority();
+            final int p2 = job2.getDAGJob().getPriority();
+            return (p1 < p2) ? -1 : ((p1 == p2) ? 0 : 1);
         }
     }
 }
