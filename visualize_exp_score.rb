@@ -3,13 +3,12 @@ require 'roo'
 
 SIM_CSV = ARGV[0]
 N_BUDGETS = ARGV[1].to_i
+MIN_DEADLINE_ROW = ARGV[2].to_i
+DEADLINE_COL = ARGV[3].to_i
+BUDGETS_COL = ARGV[4].to_i
+EXP_SCORE_COL = ARGV[5].to_i
 
 SIM_OUT_CSV = Roo::CSV.new(SIM_CSV)
-
-MIN_DEADLINE_ROW = 2
-DEADLINE_COL = 7
-BUDGETS_COLUMN_NO = 6
-EXP_SCORE_COL_NO = 10
 
 def extract_available_budgets(budgets_column)
   budgets = []
@@ -62,7 +61,7 @@ def normalize_deadlines(deadlines)
   normalized
 end
 
-budgets = extract_available_budgets(SIM_OUT_CSV.column(BUDGETS_COLUMN_NO))
+budgets = extract_available_budgets(SIM_OUT_CSV.column(BUDGETS_COL))
 normalized_deadlines = normalize_deadlines(extract_available_deadlines)
 
 budgets.each_index do |i|
@@ -72,11 +71,11 @@ budgets.each_index do |i|
   last_exp_score_row = first_exp_score_row + N_BUDGETS - 1
 
   (first_exp_score_row...last_exp_score_row).each do |exp_row|
-    scores_for_budget.push(SIM_OUT_CSV.cell(exp_row+1, EXP_SCORE_COL_NO).to_f)
+    scores_for_budget.push(SIM_OUT_CSV.cell(exp_row+1, EXP_SCORE_COL).to_f)
   end
 
   Gnuplot.open do |gp|
-    Gnuplot::Plot.new( gp ) do |plot|
+    Gnuplot::Plot.new(gp) do |plot|
       plot.terminal 'png'
       plot.output File.expand_path('../Exponential_score_'+budget+'.png', __FILE__)
 
@@ -85,7 +84,7 @@ budgets.each_index do |i|
       plot.ylabel 'Exponential score'
       plot.xrange '[0:1]'
 
-      plot.data << Gnuplot::DataSet.new( [normalized_deadlines, scores_for_budget] ) do |ds|
+      plot.data << Gnuplot::DataSet.new([normalized_deadlines, scores_for_budget]) do |ds|
         ds.with = 'linespoints'
         ds.linewidth = 4
         ds.notitle
