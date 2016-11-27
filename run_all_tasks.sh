@@ -6,7 +6,7 @@ trap "exit" INT
 #simulation parameters
 APPLICATION=GENOME
 INDIR=SyntheticWorkflows/$APPLICATION
-ALGORITHM=DPDS
+ALGORITHM=SPSS
 DEADLINES=5
 BUDGETS=5
 DISTR=pareto_unsorted
@@ -24,7 +24,7 @@ LOGFILE_BASE=sim_out_log
 SIM_DIR=`date +%Y-%m-%d:%H:%M:%S`
 RUNS=3
 EXP_SCORES=()
-PREPROCCESSED_LOGS_DIR="preprocessed"
+PREPROCESSED_LOGS_DIR="preprocessed"
 VISUALISATION_RUBY_SCRIPT=visualize_exp_score.rb
 AVG_SCORE_EXTRACTOR=avg_score_multiple_runs.rb
 AVG_CSV=avg_for_$ALGORITHM.csv
@@ -42,10 +42,10 @@ do
     ant run-sim-locally -Dalgo=$ALGORITHM -Dapp=$APPLICATION -Dindir=$INDIR -Dout=$LOGFILE -Ddistr=$DISTR -Dstoragemng=$STORAGE_MNG -Densemblesize=$ENSEMBLE_SIZE -Dscalingfactor=$SCALING_FACTOR -Dseed=$SEED -Dstoragecache=$STORAGE_CACHE -Denablelog=$ENABLE_LOGGING -Dstdoutlog=$LOG_TO_STDOUT -Dbudgets=$BUDGETS -Ddeadlines=$DEADLINES -Dvmtypeselection=$VM_TYPE_SELECTION
 
     #preprocessing logs
-    mkdir -p $PREPROCCESSED_LOGS_DIR
+    mkdir -p $PREPROCESSED_LOGS_DIR
     for logfile in *.log; do
         PATH_TO_LOGFILE="./../"${logfile}
-        PATH_TO_PREPROCESSED_LOG_FILE="./../"${PREPROCCESSED_LOGS_DIR}"/"${logfile::${#logfile}-4}"_preprocessed.log"
+        PATH_TO_PREPROCESSED_LOG_FILE="./../"${PREPROCESSED_LOGS_DIR}"/"${logfile::${#logfile}-4}"_preprocessed.log"
         echo "Preprocessing "${logfile}
         cd scripts
         python -m log_parser.parse_experiment_log $PATH_TO_LOGFILE $PATH_TO_PREPROCESSED_LOG_FILE
@@ -53,7 +53,7 @@ do
     done
 
     #validating parsed logs
-    for preprocessed_logfile in ${PREPROCCESSED_LOGS_DIR}/*_preprocessed.log; do
+    for preprocessed_logfile in ${PREPROCESSED_LOGS_DIR}/*_preprocessed.log; do
         PATH_TO_PREPROCESSED_LOGFILE="./../"${preprocessed_logfile}
         echo "Validating "${preprocessed_logfile}
         cd scripts
@@ -64,7 +64,7 @@ do
     done
 
     #visualising scheduling process
-    for preprocessed_logfile in ${PREPROCCESSED_LOGS_DIR}/*_preprocessed.log; do
+    for preprocessed_logfile in ${PREPROCESSED_LOGS_DIR}/*_preprocessed.log; do
         TMP="../../"${preprocessed_logfile}
         cd scripts/visualisation
         echo `pwd`
@@ -80,14 +80,14 @@ do
 
     #visualising score for every budget
     echo "Rendering graphs with exp. score and normalized deadline"
-    ruby $VISUALISATION_RUBY_SCRIPT $LOGFILE $BUDGETS $MIN_DEADLINE_ROW $DEADLINE_COL $BUDGETS_COL $SCORE_COL
+    ruby $VISUALISATION_RUBY_SCRIPT -c $LOGFILE -n $BUDGETS -r $MIN_DEADLINE_ROW -d $DEADLINE_COL -b $BUDGETS_COL -s $SCORE_COL
 
     #moving created files to sorted directories for cleaner view
     mkdir -p $SIM_DIR/$i/logs
     mkdir -p $SIM_DIR/$i/csv
     mkdir -p $SIM_DIR/$i/scores
 
-    mv $PREPROCCESSED_LOGS_DIR/ $SIM_DIR/$i/logs
+    mv $PREPROCESSED_LOGS_DIR/ $SIM_DIR/$i/logs
     mv *csv $SIM_DIR/$i/csv
     mv *log $SIM_DIR/$i/logs
     mv *png $SIM_DIR/$i/scores
@@ -95,13 +95,13 @@ do
 done
 
 #preparing avg data for visualizing
-ruby $AVG_SCORE_EXTRACTOR $SIM_DIR $LOGFILE_BASE $RUNS $BUDGETS $DEADLINE_COL $BUDGETS_COL $SCORE_COL $AVG_CSV
+ruby $AVG_SCORE_EXTRACTOR -i $SIM_DIR -l $LOGFILE_BASE -r $RUNS -n $BUDGETS -d $DEADLINE_COL -b $BUDGETS_COL -s $SCORE_COL -o $AVG_CSV
 
 #visualizing avg score for every budget
-DEADLINE_COL=1
-BUDGETS_COL=2
+DEADLINE_COL=2
+BUDGETS_COL=1
 SCORE_COL=3
-ruby $VISUALISATION_RUBY_SCRIPT $AVG_CSV $BUDGETS $MIN_DEADLINE_ROW $DEADLINE_COL $BUDGETS_COL $SCORE_COL
+ruby $VISUALISATION_RUBY_SCRIPT -c $AVG_CSV -n $BUDGETS -r $MIN_DEADLINE_ROW -d $DEADLINE_COL -b $BUDGETS_COL -s $SCORE_COL
 AVG_SCORES_DIR=$SIM_DIR/avg/scores
 mkdir -p $AVG_SCORES_DIR
 mv *png $AVG_SCORES_DIR
