@@ -1,0 +1,25 @@
+[{
+  "csv":"2016-11-27:13:59:24/avg/scores/avg_for_WADPDS.csv",
+  "algo":"WADPDS",
+  "budgets":5,
+  "min_deadline_row":2,
+  "deadline_col":2,
+  "budgets_col":1,
+  "exp_score_col":3
+},{
+  "csv":"2016-11-27:14:00:49/avg/scores/avg_for_DPDS.csv",
+  "algo":"DPDS",
+  "budgets":5,
+  "min_deadline_row":2,
+  "deadline_col":2,
+  "budgets_col":1,
+  "exp_score_col":3
+},{
+  "csv":"2016-11-27:14:02:13/avg/scores/avg_for_SPSS.csv",
+  "algo":"DPSS",
+  "budgets":5,
+  "min_deadline_row":2,
+  "deadline_col":2,
+  "budgets_col":1,
+  "exp_score_col":3
+}]
