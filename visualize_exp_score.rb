@@ -1,14 +1,10 @@
+#!/usr/bin/env ruby
+
 require 'gnuplot'
 require 'roo'
+require 'optparse'
+require 'json'
 
-SIM_CSV = ARGV[0]
-N_BUDGETS = ARGV[1].to_i
-MIN_DEADLINE_ROW = ARGV[2].to_i
-DEADLINE_COL = ARGV[3].to_i
-BUDGETS_COL = ARGV[4].to_i
-EXP_SCORE_COL = ARGV[5].to_i
-
-SIM_OUT_CSV = Roo::CSV.new(SIM_CSV)
 
 def extract_available_budgets(budgets_column)
   budgets = []
@@ -22,12 +18,12 @@ def extract_available_budgets(budgets_column)
   budgets
 end
 
-def extract_available_deadlines
-  SIM_OUT_CSV.column(DEADLINE_COL).drop(1).uniq
+def extract_available_deadlines(csv, options)
+  csv.column(options['deadline_col']).drop(1).uniq
 end
 
-def extract_max_deadline_value
-  deadlines = extract_available_deadlines
+def extract_max_deadline_value(csv, options)
+  deadlines = extract_available_deadlines(csv, options)
   max_deadline = 0
 
   deadlines.each do |deadline|
@@ -40,55 +36,146 @@ def extract_max_deadline_value
   max_deadline
 end
 
-def extract_min_deadline_value
-  SIM_OUT_CSV.cell(MIN_DEADLINE_ROW, DEADLINE_COL)
+def extract_min_deadline_value(csv, options)
+  csv.cell(options['min_deadline_row'], options['deadline_col'])
 end
 
 def normalize(min, max, current)
   (current.to_f - min.to_f) / (max.to_f - min.to_f)
 end
 
-MIN_DEADLINE = extract_min_deadline_value
-MAX_DEADLINE = extract_max_deadline_value
-
-def normalize_deadlines(deadlines)
+def normalize_deadlines(csv, deadlines, options)
+  min_deadline = extract_min_deadline_value(csv, options)
+  max_deadline = extract_max_deadline_value(csv, options)
   normalized = []
 
   deadlines.each do |deadline|
-    normalized.push(normalize(MIN_DEADLINE, MAX_DEADLINE, deadline))
+    normalized.push(normalize(min_deadline, max_deadline, deadline))
   end
 
   normalized
 end
 
-budgets = extract_available_budgets(SIM_OUT_CSV.column(BUDGETS_COL))
-normalized_deadlines = normalize_deadlines(extract_available_deadlines)
+#todo draw and draw_multiple should be one function, refactor
+def draw(options)
+  csv = Roo::CSV.new(options['csv'])
+  budgets = extract_available_budgets(csv.column(options['budgets_col']))
+  normalized_deadlines = normalize_deadlines(csv, extract_available_deadlines(csv, options), options)
 
-budgets.each_index do |i|
-  budget = budgets[i]
-  scores_for_budget = []
-  first_exp_score_row = i*N_BUDGETS+1
-  last_exp_score_row = first_exp_score_row + N_BUDGETS - 1
+  budgets.each_index do |i|
+    budget = budgets[i]
+    scores_for_budget = []
+    first_exp_score_row = i*options['budgets']+1
+    last_exp_score_row = first_exp_score_row + options['budgets'] - 1
 
-  (first_exp_score_row...last_exp_score_row).each do |exp_row|
-    scores_for_budget.push(SIM_OUT_CSV.cell(exp_row+1, EXP_SCORE_COL).to_f)
-  end
+    (first_exp_score_row...last_exp_score_row).each do |exp_row|
+      scores_for_budget.push(csv.cell(exp_row+1, options['exp_score_col']).to_f)
+    end
 
-  Gnuplot.open do |gp|
-    Gnuplot::Plot.new(gp) do |plot|
-      plot.terminal 'png'
-      plot.output File.expand_path('../Exponential_score_'+budget+'.png', __FILE__)
+    Gnuplot.open do |gp|
+      Gnuplot::Plot.new(gp) do |plot|
+        plot.terminal 'png'
+        plot.output File.expand_path("../Exponential_score_#{budget}.png", __FILE__)
 
-      plot.title budget
-      plot.xlabel 'Normalized deadline'
-      plot.ylabel 'Exponential score'
-      plot.xrange '[0:1]'
+        plot.title "Score for budget = #{budget}"
+        plot.xlabel 'Normalized deadline'
+        plot.ylabel 'Exponential score'
+        plot.xrange '[0:1]'
 
-      plot.data << Gnuplot::DataSet.new([normalized_deadlines, scores_for_budget]) do |ds|
-        ds.with = 'linespoints'
-        ds.linewidth = 4
-        ds.notitle
+        plot.data << Gnuplot::DataSet.new([normalized_deadlines, scores_for_budget]) do |ds|
+          ds.with = 'linespoints'
+          ds.linewidth = 4
+          ds.notitle
+        end
       end
     end
   end
+end
+
+def draw_multiple(options)
+  csv = Roo::CSV.new(options[0]['csv'])
+  budgets = extract_available_budgets(csv.column(options[0]['budgets_col']))
+  normalized_deadlines = normalize_deadlines(csv, extract_available_deadlines(csv, options[0]), options[0])
+
+  budgets.each_index do |i|
+    budget = budgets[i]
+    scores_for_algo = {}
+
+    options.each do |opt|
+      current_csv = Roo::CSV.new(opt['csv'])
+      scores_for_budget = []
+      first_exp_score_row = i*opt['budgets']+1
+      last_exp_score_row = first_exp_score_row + opt['budgets'] - 1
+
+      (first_exp_score_row...last_exp_score_row).each do |exp_row|
+        scores_for_budget.push(current_csv.cell(exp_row+1, opt['exp_score_col']).to_f)
+      end
+
+      scores_for_algo[opt['algo']] = scores_for_budget
+    end
+
+    current_plot_data = scores_for_algo.keys.map do |algo|
+      Gnuplot::DataSet.new([normalized_deadlines, scores_for_algo[algo]]) do |ds|
+        ds.with = 'linespoints'
+        ds.title = algo
+      end
+    end
+
+    Gnuplot.open do |gp|
+      Gnuplot::Plot.new(gp) do |plot|
+        plot.terminal 'png'
+        plot.output File.expand_path("../Exponential_score_#{budget}.png", __FILE__)
+
+        plot.title "Score for budget = #{budget}"
+        plot.xlabel 'Normalized deadline'
+        plot.ylabel 'Exponential score'
+        plot.xrange '[0:1]'
+        plot.key 'right bottom'
+
+        plot.data = current_plot_data
+      end
+    end
+  end
+end
+
+multiple_mode = false
+
+REQUIRED_OPTIONS=['csv', 'budgets', 'min_deadline_row', 'deadline_col', 'budgets_col', 'exp_score_col']
+options = {}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: visualize_exp_score.rb [options]'
+
+  opts.on('-c', '--csv SIM_CSV', 'Mandatory csv filepath') do |v|
+    options['csv'] = v
+  end
+  opts.on('-n', '--budgets N_BUDGETS', 'Mandatory budgets amount') do |v|
+    options['budgets'] = v.to_i
+  end
+  opts.on('-r', '--min_deadline_row MIN_DEADLINE_ROW', 'Mandatory minimum deadline row number') do |v|
+    options['min_deadline_row'] = v.to_i
+  end
+  opts.on('-d', '--deadline_col DEADLINE_COL', 'Mandatory deadlines column number') do |v|
+    options['deadline_col'] = v.to_i
+  end
+  opts.on('-b', '--budgets_col BUDGETS_COL', 'Mandatory budgets column number') do |v|
+    options['budgets_col'] = v.to_i
+  end
+  opts.on('-s', '--exp_score_col EXP_SCORE_COL', 'Mandatory score column number') do |v|
+    options['exp_score_col'] = v.to_i
+  end
+  opts.on('-m', '--multiple PATH_TO_CONFIG_JSON', 'Optional param, if set then you must provide
+                          path to json config file for drawing scores for multiple algorithms on one graph') do |v|
+    options['json_config'] = v
+    multiple_mode = true
+  end
+end.parse!
+
+if multiple_mode
+  json_file = File.open(options['json_config'])
+  config = JSON.parse(json_file.read)
+  json_file.close
+  draw_multiple(config)
+else
+  raise OptionParser::MissingArgument if (REQUIRED_OPTIONS - options.keys).length != 0
+  draw(options)
 end
