@@ -44,13 +44,13 @@ end
 
 each_csv_scores = []
 csvs.each do |csv|
-  bla = Roo::CSV.new(csv)
-  ble = []
-  bla.column(options['exp_score_col']).each do |score|
+  current_csv_file = Roo::CSV.new(csv)
+  scores = []
+  current_csv_file.column(options['exp_score_col']).each do |score|
     next if score=="exponential"
-    ble.push(score.to_f)
+    scores.push(score.to_f)
   end
-  each_csv_scores.push(ble)
+  each_csv_scores.push(scores)
 end
 
 each_csv_scores_summed = each_csv_scores.transpose.map { |x| x.reduce(:+) }
