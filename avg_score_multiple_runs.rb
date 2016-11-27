@@ -58,7 +58,7 @@ each_csv_scores_summed = each_csv_scores.transpose.map { |x| x.reduce(:+) }
 each_csv_scores_summed_mean = []
 each_csv_scores_summed.each do |a|
   if a > 0
-    each_csv_scores_summed_mean.push(a/options['budgets'])
+    each_csv_scores_summed_mean.push(a/options['runs'])
   else
     each_csv_scores_summed_mean.push(a)
   end
